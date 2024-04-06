@@ -1,0 +1,28 @@
+<ion-list>
+  <app-user-info *ngIf="user" [user]="user"></app-user-info>
+  <ion-item [button]="true" (click)="signInWithGoogle()" *ngIf="!user">
+    <ion-icon aria-hidden="true" name="logo-google" slot="end"></ion-icon>
+    <ion-label>{{ "AUTH.LOGIN" | translate }}</ion-label>
+  </ion-item>
+  <ion-item [button]="true" (click)="changeLanguage()">
+    <ion-icon aria-hidden="true" name="language" slot="start"></ion-icon>
+    <ion-label>{{ "LANG.CHANGE_LANG" | translate }}</ion-label>
+    <ion-button
+      >{{ (language === "ar" ? "LANG.ENG" : "LANG.AR") | translate }}
+    </ion-button>
+  </ion-item>
+  <ion-item [button]="true">
+    <ion-icon aria-hidden="true" name="moon" slot="start"></ion-icon>
+    <ion-toggle>
+      <ion-label>{{ "SETTINGS.UI" | translate }}</ion-label>
+      <ion-note color="medium" (ionChange)="toggleTheme()"
+        >{{ "DARK" | translate }} {{ "OR" | translate }}
+        {{ "LIGHT" | translate }} {{ "SETTINGS.UI" | translate }}</ion-note
+      >
+    </ion-toggle>
+  </ion-item>
+  <ion-item *ngIf="user" class="logout-btn" button="true" (click)="logOut()">
+    <ion-icon aria-hidden="true" name="log-out" slot="start"></ion-icon>
+    <ion-label>{{ "AUTH.LOGOUT" | translate }}</ion-label>
+  </ion-item>
+</ion-list>

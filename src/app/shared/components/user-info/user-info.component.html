@@ -1,0 +1,11 @@
+<ion-item [button]="true">
+  <ion-avatar aria-hidden="true" slot="start">
+    <img
+      alt="user_image"
+      [src]="
+        user?.photoURL || 'https://ionicframework.com/docs/img/demos/avatar.svg'
+      "
+    />
+  </ion-avatar>
+  <ion-label>{{ user?.displayName }}</ion-label>
+</ion-item>

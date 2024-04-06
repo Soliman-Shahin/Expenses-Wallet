@@ -10,6 +10,11 @@ import { IonicModule } from '@ionic/angular';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 
+import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
+import { getAuth, provideAuth } from '@angular/fire/auth';
+import { environment } from '../environments/environment';
+import { SharedModule } from './shared/shared.module';
+
 export function HttpLoaderFactory(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
 }
@@ -21,6 +26,8 @@ export function HttpLoaderFactory(http: HttpClient) {
     IonicModule.forRoot(),
     AppRoutingModule,
     HttpClientModule,
+    provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
+    provideAuth(() => getAuth()),
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,
@@ -28,6 +35,7 @@ export function HttpLoaderFactory(http: HttpClient) {
         deps: [HttpClient],
       },
     }),
+    SharedModule,
   ],
   providers: [],
   bootstrap: [AppComponent],
