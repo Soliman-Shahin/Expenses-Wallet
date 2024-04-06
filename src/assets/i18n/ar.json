@@ -1,0 +1,77 @@
+{
+  "APP_TITLE": "محفظة المصروفات",
+  "HELLO": "مرحبا! {{user}}",
+  "WELCOME": "اهلا بك في محفظة المصروفات!",
+  "LANG": {
+    "CHANGE_LANG": "تغير اللغة",
+    "ENG": "English",
+    "AR": "Arabic"
+  },
+  "OR": "أو",
+  "DARK": "داكن",
+  "LIGHT": "فاتح",
+  "SIDEBAR": {
+    "HOME": "الرئيسية",
+    "CATEGORIES": "الأقسام",
+    "EXPENSES": "المصروفات",
+    "REPORTS": "التقارير",
+    "SETTINGS": "إعدادات"
+  },
+  "CATEGORY": {
+    "NAME": "اسم القسم",
+    "COLOR": "لون القسم",
+    "CREATE": "إنشاء",
+    "UPDATE": "تحديث",
+    "DELETE": "حذف",
+    "DESCRIPTION": "تفاصيل",
+    "CONFIRM_DELETE": "هل أنت متأكد من حذف هذا القسم؟",
+    "SUCCESSFULLY_ADDED": "تم إضافة القسم بنجاح.",
+    "SUCCESSFULLY_UPDATED": "تم تحديث القسم بنجاح."
+  },
+  "EXPENSE": {
+    "CREATE": "إضافة مصروفات جديدة",
+    "UPDATE": "تحديث المصروفات",
+    "DATE": "التاريخ",
+    "AMOUNT": "المبلغ",
+    "CATEGORY": "القسم",
+    "NOTES": "ملاحظات",
+    "CONFIRM_DELETE": "هل أنت متأكد من حذف هذا المصروف؟",
+    "SUCCESSFULLY_ADDED": "تم إضافة المصروفات بنجاح.",
+    "SUCCESSFULLY_UPDATED": "تم تحديث المصروفات  بنجاح.",
+    "SUCCESSFULLY_DELETED": "تم حذف المصروفات  بنجاح."
+  },
+  "SETTINGS": {
+    "GENERAL": "عام",
+    "PROFILE": "ملفي الشخصي",
+    "LANGUAGE": "اللغة",
+    "CURRENCY": "العملة",
+    "UI": "المظهر"
+  },
+  "CATEGORIES": {
+    "INCOME": "الدخل",
+    "EXPENSES": "المصروفات",
+    "MISCELLANEOUS": "متفردة",
+    "FOOD_AND_DRINK": "طعام و المشروبات",
+    "TRANSPORTATION": "نقل"
+  },
+  "AUTH": {
+    "SIGNUP": "تسجيل",
+    "LOGIN": "دخول",
+    "EMAIL": "البريد الإلكتروني",
+    "PASSWORD": "كلمة المرور",
+    "CHANGE_PASSWORD": "تغيير كلمة المرور",
+    "OLD_PASSWORD": "كلمة المرور القديمة",
+    "NEW_PASSWORD": "كلمة المرور الجديدة",
+    "CONFIRM_PASSWORD": "تأكيد كلمة المرور الجديدة",
+    "FORGOT_PASSWORD": "نسيت كلمة المرور؟",
+    "RESET_PASSWORD": "إعادة ضبط  كلمة المرور",
+    "USERNAME": "اسم المستخدم",
+    "VERIFICATION_CODE": "رمز التحقق",
+    "SAVE": "حفظ",
+    "LOGOUT": "خروج",
+    "signupSuccessfully": "تم تسجيلك بنجاح.",
+    "loginFailed": "خطأ في اسم المستخدم أو كلمة المرور.",
+    "logoutSuccessfully": "تم خروجك بنجاح.",
+    "changePasswordSuccessfully": "تم تغيير كلمة المرور بنجاح."
+  }
+}

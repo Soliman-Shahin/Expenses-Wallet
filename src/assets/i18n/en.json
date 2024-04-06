@@ -1,0 +1,92 @@
+{
+  "APP_TITLE": "Expenses Wallet",
+  "HELLO": "Hello! {{user}}",
+  "WELCOME": "Welcome to Expenses Wallet!",
+  "LANG": {
+    "CHANGE_LANG": "Change Language",
+    "ENG": "English",
+    "AR": "العربية"
+  },
+  "OR": "or",
+  "DARK": "Dark",
+  "LIGHT": "Light",
+  "SIDEBAR": {
+    "HOME": "Home",
+    "CATEGORIES": "Categories",
+    "EXPENSES": "Expenses",
+    "REPORTS": "Reports",
+    "SETTINGS": "Settings"
+  },
+  "CATEGORY": {
+    "NAME": "Name",
+    "COLOR": "Color",
+    "CREATE": "Add New Category",
+    "UPDATE": "Update Category",
+    "DELETE": "Delete",
+    "DESCRIPTION": "Description",
+    "CONFIRM_DELETE": "Are you sure you want to delete this category? This action cannot be undone.",
+    "SUCCESSFULLY_ADDED": "Category successfully added!",
+    "SUCCESSFULLY_UPDATED": "Category successfully updated!"
+  },
+  "EXPENSE": {
+    "CREATE": "Add New Expense",
+    "UPDATE": "Update Expense",
+    "DATE": "Date",
+    "AMOUNT": "Amount",
+    "CATEGORY": "Category",
+    "NOTES": "Notes",
+    "CONFIRM_DELETE": "Delete this expense? This action cannot be undone.",
+    "SUCCESSFULLY_ADDED": "Expense successfully added!",
+    "SUCCESSFULLY_UPDATED": "Expense successfully updated!",
+    "SUCCESSFULLY_DELETED": "Expense deleted!"
+  },
+  "SETTINGS": {
+    "GENERAL": "General Settings",
+    "PROFILE": "Account Settings",
+    "LANGUAGE": "Language",
+    "CURRENCY": "Currency",
+    "UI": "Mode"
+  },
+  "CATEGORIES": {
+    "INCOME": "Income",
+    "EXPENSES": "Expenses",
+    "MISCELLANEOUS": "Miscellaneous",
+    "FOOD_AND_DRINK": "Food & Drink",
+    "TRANSPORTATION": "Transportation",
+    "HEALTH_AND_BEAUTY": "Health & Beauty",
+    "ENTertaiment": "Entertainment",
+    "HOME_AND_DECOR": "Home & Decor",
+    "CLOTHES_AND_ACCESSORIES": "Clothes & Accessories",
+    "EDUCATION": "Education",
+    "SERVICES": "Services",
+    "TRAVEL": "Travel",
+    "WORK": "Work",
+    "BILLS_PAYMENTS": "Bills/Payments",
+    "CONTROLLED": "Controlled Expenses",
+    "CREATE_CATEGORY": "Add New Category",
+    "ADD_SUBCATEGORY": "Add Subcategory",
+    "UPDATE_CATEGORY": "UPDATE Category",
+    "COLOR": "Color",
+    "UNCATEGORIZED": "Uncategorized"
+  },
+  "AUTH": {
+    "SIGNUP": "Sign Up",
+    "LOGIN": "Login",
+    "EMAIL": "Email Address",
+    "PASSWORD": "Password",
+    "CHANGE_PASSWORD": "Change Password",
+    "OLD_PASSWORD": "Old Password",
+    "NEW_PASSWORD": "New Password",
+    "CONFIRM_PASSWORD:": "Confirm Password",
+    "FORGOT_PASSWORD": "Forgot password?",
+    "RESET_PASSWORD": "Reset Password",
+    "USERNAME": "Username",
+    "VERIFICATION_CODE": "Verification Code",
+    "SAVE": "Save",
+    "LOGOUT": "Logout",
+    "signupSuccessfully": "Account created successfully! Please login to continue.",
+    "loginFailed": "Invalid username or password. Try again.",
+    "logoutSuccessfully": "You have been logged out successfully.",
+    "changePasswordSuccessfully": "Your password has been changed successfully."
+  }
+}
