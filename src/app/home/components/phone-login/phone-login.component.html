@@ -1,0 +1,21 @@
+<ion-content>
+  <div #recaptchaContainer></div>
+
+  <ion-item>
+    <ion-label position="floating">Phone Number</ion-label>
+    <ion-input [(ngModel)]="phoneNumber" type="tel"></ion-input>
+  </ion-item>
+
+  <ion-button (click)="onSignInWithPhoneNumber()"
+    >Send Verification Code</ion-button
+  >
+
+  <ion-item *ngIf="confirmationResult">
+    <ion-label position="floating">Verification Code</ion-label>
+    <ion-input [(ngModel)]="verificationCode" type="number"></ion-input>
+  </ion-item>
+
+  <ion-button *ngIf="confirmationResult" (click)="onVerifyPhoneNumber()"
+    >Verify Code</ion-button
+  >
+</ion-content>
