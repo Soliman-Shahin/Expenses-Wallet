@@ -7,13 +7,19 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   tabs: any[] = [
-    { title: 'HOME', path: '/home', icon: 'home', show: true, disabled: false },
+    {
+      title: 'HOME',
+      path: '/home/app',
+      icon: 'home',
+      show: true,
+      disabled: false,
+    },
     {
       title: 'CATEGORIES',
-      path: '/categories',
+      path: '/home/categories',
       icon: 'list',
       show: true,
-      disabled: true,
+      disabled: false,
     },
     {
       title: 'EXPENSES',

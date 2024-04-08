@@ -6,7 +6,11 @@ import { FormsModule } from '@angular/forms';
 
 import { HomePageRoutingModule } from './home-routing.module';
 import { TranslateModule } from '@ngx-translate/core';
-import { HomePageComponent, PhoneLoginComponent } from './components';
+import {
+  CategoriesComponent,
+  HomePageComponent,
+  PhoneLoginComponent,
+} from './components';
 
 @NgModule({
   imports: [
@@ -17,6 +21,6 @@ import { HomePageComponent, PhoneLoginComponent } from './components';
     TranslateModule.forChild(),
     SharedModule,
   ],
-  declarations: [HomePageComponent, PhoneLoginComponent],
+  declarations: [HomePageComponent, PhoneLoginComponent, CategoriesComponent],
 })
 export class HomePageModule {}
