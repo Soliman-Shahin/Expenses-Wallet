@@ -1,0 +1,83 @@
+<ion-content class="ion-padding">
+  <form [formGroup]="categoryForm">
+    <ion-grid>
+      <ion-row>
+        <ion-col size="10">
+          <ion-item>
+            <ion-input
+              formControlName="title"
+              color="primary"
+              [label]="'TITLE' | translate"
+              [placeholder]="'ENTER_TITLE' | translate"
+            ></ion-input>
+          </ion-item>
+        </ion-col>
+        <ion-col size="auto">
+          <span
+            class="category-icon"
+            [style.background]="categoryForm.get('color')?.value"
+          >
+            <ion-icon
+              size="large"
+              [name]="categoryForm.get('icon')?.value"
+            ></ion-icon>
+          </span>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>{{ "COLOR" | translate }}</ion-card-title>
+            </ion-card-header>
+
+            <ion-card-content class="card-content">
+              <span
+                *ngFor="let color of colors"
+                class="color-button"
+                [style.background-color]="color.colorCode"
+                (click)="selectColor(color)"
+              ></span>
+              <input
+                class="color-input"
+                type="color"
+                (change)="selectColors($event)"
+              />
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col>
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>{{ "ICON" | translate }}</ion-card-title>
+            </ion-card-header>
+
+            <ion-card-content class="card-content">
+              <ion-content class="icons ion-padding">
+                <ion-icon
+                  *ngFor="let icon of icons; let i = index"
+                  [name]="icon"
+                  size="large"
+                  aria-hidden="true"
+                  (click)="selectIcon(icon)"
+                ></ion-icon
+              ></ion-content>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+
+      <ion-row>
+        <ion-col class="ion-padding">
+          <ion-button shape="rounded" (click)="addCategory()">
+            <ion-icon name="save-outline"></ion-icon>
+          </ion-button>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </form>
+</ion-content>

@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import {
+  AddCategoryComponent,
   CategoriesComponent,
   HomePageComponent,
   PhoneLoginComponent,
@@ -19,6 +20,10 @@ const routes: Routes = [
   {
     path: 'categories',
     component: CategoriesComponent,
+  },
+  {
+    path: 'add',
+    component: AddCategoryComponent,
   },
 ];
 

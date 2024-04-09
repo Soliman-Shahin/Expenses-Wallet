@@ -3,6 +3,7 @@ import {
   InfiniteScrollCustomEvent,
   ItemReorderEventDetail,
 } from '@ionic/angular';
+import { CategoryService } from 'src/app/shared/services';
 
 @Component({
   selector: 'app-categories',
@@ -15,10 +16,43 @@ export class CategoriesComponent implements OnInit {
   currentPage = 0;
   totalItems = 0;
 
-  constructor() {}
+  isActionSheetOpen = false;
+  public actionSheetButtons = [
+    {
+      text: 'Delete',
+      role: 'destructive',
+      data: {
+        action: 'delete',
+      },
+    },
+    {
+      text: 'Edit',
+      data: {
+        action: 'edit',
+      },
+    },
+    {
+      text: 'Cancel',
+      role: 'cancel',
+      data: {
+        action: 'cancel',
+      },
+    },
+  ];
+
+  constructor(private categoryService: CategoryService) {}
 
   ngOnInit() {
-    this.generateItems();
+    // this.generateItems();
+    this.fetchAllCategories();
+  }
+
+  fetchAllCategories() {
+    this.categoryService.getCategories().subscribe((data) => {
+      console.log('Data received from server', data);
+      this.categories = data;
+      this.totalItems = data.length;
+    });
   }
 
   private generateItems() {
@@ -51,5 +85,9 @@ export class CategoriesComponent implements OnInit {
     this.categories = this.categories.filter(
       (d: any) => d.toLowerCase().indexOf(query) > -1
     );
+  }
+
+  setOpen(isOpen: boolean) {
+    this.isActionSheetOpen = isOpen;
   }
 }

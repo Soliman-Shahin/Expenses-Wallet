@@ -3,8 +3,8 @@
     <ion-searchbar
       search-icon="search-circle"
       animated="true"
-      placeholder="Search..."
-      [debounce]="1000"
+      [placeholder]="'SEARCH' | translate"
+      [debounce]="500"
       (ionInput)="handleInput($event)"
     >
     </ion-searchbar>
@@ -15,14 +15,14 @@
       [disabled]="false"
       (ionItemReorder)="handleReorder($any($event))"
     >
-      <ion-item *ngFor="let item of categories; let index">
-        <ion-avatar slot="start">
-          <img
-            [src]="'https://picsum.photos/80/80?random=' + index"
-            alt="avatar"
-          />
-        </ion-avatar>
-        <ion-label>{{ item }}</ion-label>
+      <ion-item
+        (click)="setOpen(true)"
+        *ngFor="let item of categories; let index"
+      >
+        <span class="category-icon" [style.background]="item.color">
+          <ion-icon size="large" [name]="item.icon"></ion-icon>
+        </span>
+        <ion-label>{{ item.title }}</ion-label>
         <ion-reorder slot="end"></ion-reorder>
       </ion-item>
     </ion-reorder-group>
@@ -32,6 +32,13 @@
   </ion-infinite-scroll>
 </ion-content>
 
-<ion-button fill="clear">
+<ion-button routerLink="/home/add" fill="clear" shape="round">
   <ion-icon slot="icon-only" name="add"></ion-icon>
 </ion-button>
+
+<ion-action-sheet
+  [isOpen]="isActionSheetOpen"
+  header="Actions"
+  [buttons]="actionSheetButtons"
+  (didDismiss)="setOpen(false)"
+></ion-action-sheet>

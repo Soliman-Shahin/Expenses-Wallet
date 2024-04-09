@@ -10,6 +10,11 @@
   "OR": "أو",
   "DARK": "داكن",
   "LIGHT": "فاتح",
+  "SEARCH": "البحث...",
+  "TITLE": "عنوان",
+  "ENTER_TITLE": "أدخل عنوان القسم",
+  "COLOR": "لون",
+  "ICON": "رمز",
   "SIDEBAR": {
     "HOME": "الرئيسية",
     "CATEGORIES": "الأقسام",

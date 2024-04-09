@@ -10,6 +10,11 @@
   "OR": "or",
   "DARK": "Dark",
   "LIGHT": "Light",
+  "SEARCH": "Search...",
+  "TITLE": "Title",
+  "ENTER_TITLE": "Enter the title of your category.",
+  "COLOR": "Color",
+  "ICON": "Icon",
   "SIDEBAR": {
     "HOME": "Home",
     "CATEGORIES": "Categories",

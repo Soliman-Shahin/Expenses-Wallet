@@ -2,11 +2,12 @@ import { SharedModule } from './../shared/shared.module';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { HomePageRoutingModule } from './home-routing.module';
 import { TranslateModule } from '@ngx-translate/core';
 import {
+  AddCategoryComponent,
   CategoriesComponent,
   HomePageComponent,
   PhoneLoginComponent,
@@ -16,11 +17,17 @@ import {
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
     IonicModule,
     HomePageRoutingModule,
     TranslateModule.forChild(),
     SharedModule,
   ],
-  declarations: [HomePageComponent, PhoneLoginComponent, CategoriesComponent],
+  declarations: [
+    HomePageComponent,
+    PhoneLoginComponent,
+    CategoriesComponent,
+    AddCategoryComponent,
+  ],
 })
 export class HomePageModule {}

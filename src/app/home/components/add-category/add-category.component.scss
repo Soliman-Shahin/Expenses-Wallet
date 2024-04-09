@@ -1,0 +1,32 @@
+ion-item {
+  padding: 0.6rem;
+}
+
+.category-icon {
+  height: 47px !important;
+    width: 47px !important;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 0.7rem;
+}
+
+.card-content {
+  padding-top: 0;
+  gap: 1rem;
+  display: flex;
+  .color-button {
+    display: inline-flex !important;
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: 50%;
+  }
+  .color-input {
+    height: 30px !important;
+    border-radius: 30%;
+  }
+}
+.icons{
+  height: 300px;
+}
