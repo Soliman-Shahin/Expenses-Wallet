@@ -4,7 +4,9 @@ import {
   AddCategoryComponent,
   CategoriesComponent,
   HomePageComponent,
+  LoginComponent,
   PhoneLoginComponent,
+  SignupComponent,
 } from './components';
 
 const routes: Routes = [
@@ -15,6 +17,14 @@ const routes: Routes = [
   },
   {
     path: 'login',
+    component: LoginComponent,
+  },
+  {
+    path: 'signup',
+    component: SignupComponent,
+  },
+  {
+    path: 'login-phone',
     component: PhoneLoginComponent,
   },
   {
@@ -22,7 +32,7 @@ const routes: Routes = [
     component: CategoriesComponent,
   },
   {
-    path: 'add',
+    path: 'add-category',
     component: AddCategoryComponent,
   },
 ];

@@ -4,6 +4,7 @@ import {
   TranslationService,
   ThemeToggleService,
   AuthService,
+  TokenService,
 } from '../../services';
 import { User } from '../../models';
 
@@ -14,13 +15,14 @@ import { User } from '../../models';
 })
 export class MenuComponent implements OnInit {
   language: string = '';
-  user: User | null = null;
+  user: string | null = null;
 
   constructor(
     private translationService: TranslationService,
     private translate: TranslateService,
     private themeToggleService: ThemeToggleService,
-    private authService: AuthService
+    private authService: AuthService,
+    private tokenService: TokenService
   ) {}
 
   ngOnInit(): void {
@@ -29,12 +31,12 @@ export class MenuComponent implements OnInit {
     });
 
     // Subscribe to changes in user data
-    this.authService.userChanges.subscribe((user: User | null) => {
-      this.user = user;
-    });
+    // this.authService.userChanges.subscribe((user: User | null) => {
+    //   this.user = user;
+    // });
 
     // Fetch initial user data
-    this.user = this.authService.currentUser;
+    this.user = this.tokenService.getUsername();
   }
 
   changeLanguage() {
@@ -48,18 +50,7 @@ export class MenuComponent implements OnInit {
     document.body.classList.toggle('dark-theme');
   }
 
-  async signInWithGoogle() {
-    try {
-      await this.authService.signInWithGoogle();
-      // No need to reload the window
-    } catch (error) {
-      console.log('Error signing in with Google:', error);
-    }
-  }
-
   logOut() {
-    this.authService.logout().catch((err) => {
-      console.log(`Log out failed: ${err}`);
-    });
+    this.authService.logout();
   }
 }

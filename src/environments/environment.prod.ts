@@ -1,5 +1,6 @@
 export const environment = {
   production: true,
+  apiUrl: 'http://localhost:3000/v1',
   firebaseConfig: {
     apiKey: 'AIzaSyCDYxCgXtwfaQkbD1Rrl3VyzwW3E0FVdlQ',
     authDomain: 'expenses-wallet.firebaseapp.com',

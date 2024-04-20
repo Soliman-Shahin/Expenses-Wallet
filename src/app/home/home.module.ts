@@ -10,7 +10,9 @@ import {
   AddCategoryComponent,
   CategoriesComponent,
   HomePageComponent,
+  LoginComponent,
   PhoneLoginComponent,
+  SignupComponent,
 } from './components';
 
 @NgModule({
@@ -28,6 +30,8 @@ import {
     PhoneLoginComponent,
     CategoriesComponent,
     AddCategoryComponent,
+    LoginComponent,
+    SignupComponent,
   ],
 })
 export class HomePageModule {}

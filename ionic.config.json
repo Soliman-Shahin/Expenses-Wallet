@@ -1,5 +1,5 @@
 {
-  "name": "expensesWallet",
+  "name": "Expenses Wallet",
   "integrations": {
     "capacitor": {}
   },

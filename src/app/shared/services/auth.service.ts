@@ -1,8 +1,6 @@
 import { Injectable } from '@angular/core';
 import {
   Auth,
-  signInWithPopup,
-  GoogleAuthProvider,
   UserCredential,
   User as FirebaseUser,
   RecaptchaVerifier,
@@ -10,18 +8,27 @@ import {
 } from '@angular/fire/auth';
 import { User } from '../models';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { tap } from 'rxjs/operators';
+import { Router } from '@angular/router';
+import { TokenService } from './token.service';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private user: User | null = null;
-  private userSubject: BehaviorSubject<User | null>;
-
+  private userSubject: BehaviorSubject<User | null> =
+    new BehaviorSubject<User | null>(null);
   private recaptchaVerifier!: RecaptchaVerifier;
 
-  constructor(private auth: Auth) {
-    this.userSubject = new BehaviorSubject<User | null>(null);
+  constructor(
+    private auth: Auth,
+    private http: HttpClient,
+    private router: Router,
+    private tokenService: TokenService
+  ) {
     this.initializeUser();
   }
 
@@ -37,19 +44,80 @@ export class AuthService {
     return this.userSubject.asObservable();
   }
 
+  async login(email: string, password: string): Promise<any> {
+    return this.authenticate(
+      `${environment.apiUrl}/user/login`,
+      email,
+      password
+    );
+  }
+
+  async signup(email: string, password: string): Promise<any> {
+    return this.authenticate(
+      `${environment.apiUrl}/user/signup`,
+      email,
+      password
+    );
+  }
+
+  private async authenticate(
+    url: string,
+    email: string,
+    password: string
+  ): Promise<any> {
+    const body = { email, password };
+    try {
+      const res = await this.http
+        .post(url, body, { observe: 'response' })
+        .toPromise();
+      this.setSession(res);
+      return res;
+    } catch (error) {
+      console.error(error);
+      return error;
+    }
+  }
+
+  logout(): void {
+    this.tokenService.removeTokens();
+    this.router.navigate(['/auth/login']);
+  }
+
+  getNewAccessToken(): Observable<any> {
+    return this.http
+      .get(`${environment.apiUrl}/user/access-token`, {
+        headers: new HttpHeaders({
+          'refresh-token': this.tokenService.getRefreshToken(),
+          _id: this.tokenService.getUserId(),
+        }),
+        observe: 'response',
+      })
+      .pipe(
+        tap((res: any) => {
+          this.tokenService.setAccessToken(res.headers.get('access-token'));
+        })
+      );
+  }
+
+  private setSession(res: any): void {
+    this.tokenService.setSession(
+      res.body._id,
+      res.headers.get('access-token'),
+      res.headers.get('refresh-token')
+    );
+  }
+
   private initializeUser(): void {
     const idToken = localStorage.getItem('id_token');
     this.user = idToken ? this.decodeToken(idToken) : null;
     this.userSubject.next(this.user);
   }
 
-  // Call this method to initialize the recaptcha before sign-in
   initializeRecaptcha(container: HTMLElement): void {
     this.recaptchaVerifier = new RecaptchaVerifier(this.auth, container, {});
     this.recaptchaVerifier.render();
   }
 
-  // Method to sign in with phone number
   async signInWithPhoneNumber(phoneNumber: string): Promise<void> {
     try {
       const confirmationResult = await signInWithPhoneNumber(
@@ -57,7 +125,6 @@ export class AuthService {
         phoneNumber,
         this.recaptchaVerifier
       );
-      // Store the confirmation result so that you can use it to verify the code
       localStorage.setItem(
         'confirmationResult',
         JSON.stringify(confirmationResult)
@@ -67,7 +134,6 @@ export class AuthService {
     }
   }
 
-  // Method to verify the code sent to the phone
   async verifyPhoneNumber(code: string): Promise<void> {
     try {
       const confirmationResult = JSON.parse(
@@ -91,14 +157,13 @@ export class AuthService {
     try {
       const payload = JSON.parse(atob(idToken.split('.')[1]));
       if (payload) {
-        const user: User = {
+        return {
           uid: payload.sub,
           email: payload.email || null,
           emailVerified: payload.email_verified || false,
           displayName: payload.name || null,
           photoURL: payload.picture || null,
         };
-        return user;
       } else {
         return null;
       }
@@ -108,24 +173,11 @@ export class AuthService {
     }
   }
 
-  async signInWithGoogle(): Promise<void> {
-    try {
-      const provider = new GoogleAuthProvider();
-      const result: UserCredential = await signInWithPopup(this.auth, provider);
-      this.user = result.user ? this.mapFirebaseUser(result.user) : null;
-      if (this.user) {
-        const idToken = await this.auth.currentUser?.getIdToken();
-        if (idToken) {
-          localStorage.setItem('id_token', idToken);
-        }
-        this.userSubject.next(this.user);
-      }
-    } catch (error) {
-      console.error('Error signing in with Google:', error);
-    }
+  signInWithGoogle(): Observable<any> {
+    return this.http.get('http://localhost:3000/v1/user/auth/google');
   }
 
-  async logout(): Promise<void> {
+  async fireLogout(): Promise<void> {
     try {
       await this.auth.signOut();
       localStorage.removeItem('id_token');

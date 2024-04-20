@@ -15,6 +15,7 @@
   "ENTER_TITLE": "Enter the title of your category.",
   "COLOR": "Color",
   "ICON": "Icon",
+  "VERSION": "vs 1.1.0",
   "SIDEBAR": {
     "HOME": "Home",
     "CATEGORIES": "Categories",
@@ -75,6 +76,11 @@
     "UNCATEGORIZED": "Uncategorized"
   },
   "AUTH": {
+    "SIGN_IN": "Sign In",
+    "SIGN_UP": "New User Sign Up",
+    "SIGN_OUT": "Sign Out",
+    "GOOGLE": "Google Sign in",
+    "FB": "Facebook Signin",
     "SIGNUP": "Sign Up",
     "LOGIN": "Login",
     "EMAIL": "Email Address",
@@ -92,6 +98,9 @@
     "signupSuccessfully": "Account created successfully! Please login to continue.",
     "loginFailed": "Invalid username or password. Try again.",
     "logoutSuccessfully": "You have been logged out successfully.",
-    "changePasswordSuccessfully": "Your password has been changed successfully."
+    "changePasswordSuccessfully": "Your password has been changed successfully.",
+    "NO_ACCOUNT": "I don't have an account yet.",
+    "HAVE_ACCOUNT": "I already have an account.",
+    "WELCOME_BACK": "Welcome Back!"
   }
 }
