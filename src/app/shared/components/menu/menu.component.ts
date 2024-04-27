@@ -1,26 +1,28 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import {
   TranslationService,
-  ThemeToggleService,
+  ThemeService,
   AuthService,
   TokenService,
 } from '../../services';
 import { User } from '../../models';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-menu',
   templateUrl: './menu.component.html',
   styleUrls: ['./menu.component.scss'],
 })
-export class MenuComponent implements OnInit {
+export class MenuComponent implements OnInit, OnDestroy {
   language: string = '';
-  user: string | null = null;
+  user!: User;
+  private $userSub!: Subscription;
 
   constructor(
     private translationService: TranslationService,
     private translate: TranslateService,
-    private themeToggleService: ThemeToggleService,
+    private themeService: ThemeService,
     private authService: AuthService,
     private tokenService: TokenService
   ) {}
@@ -30,13 +32,15 @@ export class MenuComponent implements OnInit {
       this.language = event.lang;
     });
 
-    // Subscribe to changes in user data
-    // this.authService.userChanges.subscribe((user: User | null) => {
-    //   this.user = user;
-    // });
+    // this.user = JSON.parse(this.tokenService.getUser());
 
-    // Fetch initial user data
-    this.user = this.tokenService.getUsername();
+    this.$userSub = this.tokenService.userChanged.subscribe((user: User) => {
+      this.user = user;
+    });
+  }
+
+  ngOnDestroy() {
+    this.$userSub.unsubscribe();
   }
 
   changeLanguage() {
@@ -45,9 +49,11 @@ export class MenuComponent implements OnInit {
   }
 
   toggleTheme() {
-    const isDark = document.body.classList.contains('dark-theme');
-    this.themeToggleService.toggleDarkMode(!isDark);
-    document.body.classList.toggle('dark-theme');
+    this.themeService.toggleTheme();
+  }
+
+  getCurrentTheme() {
+    return this.themeService.getCurrentTheme();
   }
 
   logOut() {

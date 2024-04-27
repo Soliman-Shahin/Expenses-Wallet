@@ -53,3 +53,10 @@
     </ion-item>
   </div>
 </ion-content>
+
+
+<ion-content class="ion-padding">
+  <ion-button id="open-toast" expand="block" (click)="openToast()">Open</ion-button>
+
+  <ion-toast message="This toast will disappear after 5 seconds" [duration]="5000"></ion-toast>
+</ion-content>

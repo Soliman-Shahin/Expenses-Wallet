@@ -1,8 +1,6 @@
 import { Injectable } from '@angular/core';
 import {
   Auth,
-  UserCredential,
-  User as FirebaseUser,
   RecaptchaVerifier,
   signInWithPhoneNumber,
 } from '@angular/fire/auth';
@@ -13,6 +11,7 @@ import { tap } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { TokenService } from './token.service';
 import { environment } from 'src/environments/environment';
+import { CookieService } from 'ngx-cookie-service';
 
 @Injectable({
   providedIn: 'root',
@@ -27,7 +26,8 @@ export class AuthService {
     private auth: Auth,
     private http: HttpClient,
     private router: Router,
-    private tokenService: TokenService
+    private tokenService: TokenService,
+    private cookieService: CookieService
   ) {
     this.initializeUser();
   }
@@ -108,7 +108,7 @@ export class AuthService {
   }
 
   private initializeUser(): void {
-    const idToken = localStorage.getItem('id_token');
+    const idToken = this.tokenService.getAccessToken();
     this.user = idToken ? this.decodeToken(idToken) : null;
     this.userSubject.next(this.user);
   }
@@ -125,7 +125,7 @@ export class AuthService {
         phoneNumber,
         this.recaptchaVerifier
       );
-      localStorage.setItem(
+      this.cookieService.set(
         'confirmationResult',
         JSON.stringify(confirmationResult)
       );
@@ -137,14 +137,14 @@ export class AuthService {
   async verifyPhoneNumber(code: string): Promise<void> {
     try {
       const confirmationResult = JSON.parse(
-        localStorage.getItem('confirmationResult') || '{}'
+        this.cookieService.get('confirmationResult') || '{}'
       );
       const result = await confirmationResult.confirm(code);
       this.user = result.user ? this.mapFirebaseUser(result.user) : null;
       if (this.user) {
         const idToken = await this.auth.currentUser?.getIdToken();
         if (idToken) {
-          localStorage.setItem('id_token', idToken);
+          this.tokenService.setAccessToken(idToken);
         }
         this.userSubject.next(this.user);
       }
@@ -180,7 +180,7 @@ export class AuthService {
   async fireLogout(): Promise<void> {
     try {
       await this.auth.signOut();
-      localStorage.removeItem('id_token');
+      this.tokenService.removeTokens();
       this.user = null;
       this.userSubject.next(null);
     } catch (error) {
@@ -188,7 +188,7 @@ export class AuthService {
     }
   }
 
-  private mapFirebaseUser(firebaseUser: FirebaseUser): User {
+  private mapFirebaseUser(firebaseUser: User): User {
     return {
       uid: firebaseUser.uid,
       email: firebaseUser.email || null,

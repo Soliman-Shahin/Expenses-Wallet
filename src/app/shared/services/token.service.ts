@@ -1,11 +1,14 @@
 import { Injectable } from '@angular/core';
 import { CookieService } from 'ngx-cookie-service';
-import { Observable, of } from 'rxjs';
+import { User } from '../models';
+import { Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TokenService {
+  userChanged = new Subject<any>();
+
   constructor(private cookieService: CookieService) {}
 
   getAccessToken() {
@@ -20,8 +23,8 @@ export class TokenService {
     return this.cookieService.get('user-id');
   }
 
-  getUsername(): string {
-    return this.cookieService.get('user-name');
+  getUser() {
+    return this.cookieService.get('user');
   }
 
   getUserLang() {
@@ -40,8 +43,9 @@ export class TokenService {
     this.cookieService.set('user-id', userId);
   }
 
-  setUsername(username: string) {
-    this.cookieService.set('user-name', username);
+  setUser(user: User) {
+    this.cookieService.set('user', JSON.stringify(user));
+    this.userChanged.next(user);
   }
 
   setUserLang(userLang: string) {
@@ -58,8 +62,8 @@ export class TokenService {
     this.cookieService.delete('access-token');
     this.cookieService.delete('refresh-token');
     this.cookieService.delete('user-id');
-    this.cookieService.delete('user-name');
-    this.cookieService.delete('user-lang');
+    this.cookieService.delete('user');
+    this.userChanged.next(null);
   }
 
   getPayload() {

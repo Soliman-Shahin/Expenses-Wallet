@@ -5,9 +5,12 @@ import {
   Validators,
 } from '@angular/forms';
 import { Component } from '@angular/core';
-import { AuthService, TokenService } from 'src/app/shared/services';
+import {
+  AuthService,
+  TokenService,
+  TranslationService,
+} from 'src/app/shared/services';
 import { Router } from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
 import { ToastController } from '@ionic/angular';
 
 @Component({
@@ -25,7 +28,7 @@ export class LoginComponent {
     private toastController: ToastController,
     private authService: AuthService,
     private tokenService: TokenService,
-    private translateService: TranslateService,
+    private translate: TranslationService,
     private routerService: Router
   ) {
     this.initForm();
@@ -57,8 +60,8 @@ export class LoginComponent {
   login(data: any): void {
     this.authService.login(data.email, data.password).then((res) => {
       if (res?.status === 200) {
-        this.tokenService.setUsername(res?.body?.email);
-        this.tokenService.setUserLang(this.translateService.instant('LANG.AR'));
+        this.tokenService.setUser(res?.body);
+        this.tokenService.setUserLang(this.translate.getCurrentLanguage());
         this.routerService.navigate(['/']);
       } else {
         this.presentToast('bottom', res.message);
@@ -74,5 +77,13 @@ export class LoginComponent {
     });
 
     await toast.present();
+  }
+
+  async openToast() {
+    const toast = await this.toastController.create({
+      message: 'This toast will disappear after 5 seconds',
+      duration: 2000,
+    });
+    toast.present();
   }
 }

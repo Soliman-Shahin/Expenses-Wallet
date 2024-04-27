@@ -1,7 +1,19 @@
 <ion-list>
-  <app-user-info *ngIf="user" [user]="user"></app-user-info>
+  <ion-item *ngIf="user" [button]="true">
+    <ion-avatar aria-hidden="true" slot="start">
+      <img
+        alt="user_image"
+        [src]="
+          user.photoURL ||
+          'https://ionicframework.com/docs/img/demos/avatar.svg'
+        "
+      />
+    </ion-avatar>
+    <ion-label>{{ user.email }}</ion-label>
+  </ion-item>
+
   <ion-item
-  *ngIf="!user"
+    *ngIf="!user"
     [routerLink]="['/home/login']"
     routerLinkActive="router-link-active"
   >
@@ -15,11 +27,11 @@
       >{{ (language === "ar" ? "LANG.ENG" : "LANG.AR") | translate }}
     </ion-button>
   </ion-item>
-  <ion-item [button]="true">
+  <ion-item [button]="true" (click)="toggleTheme()">
     <ion-icon aria-hidden="true" name="moon" slot="start"></ion-icon>
     <ion-toggle>
       <ion-label>{{ "SETTINGS.UI" | translate }}</ion-label>
-      <ion-note color="medium" (ionChange)="toggleTheme()"
+      <ion-note color="medium"
         >{{ "DARK" | translate }} {{ "OR" | translate }}
         {{ "LIGHT" | translate }} {{ "SETTINGS.UI" | translate }}</ion-note
       >
@@ -30,7 +42,7 @@
     <ion-label>{{ "AUTH.LOGOUT" | translate }}</ion-label>
   </ion-item>
   <ion-item>
-    <ion-icon aria-hidden="true" name="version" slot="start"></ion-icon>
+    <ion-icon aria-hidden="true" name=" help" slot="start"></ion-icon>
     <ion-label>{{ "VERSION" | translate }}</ion-label>
   </ion-item>
 </ion-list>
