@@ -3,6 +3,6 @@ export interface Tab {
   show_label?: boolean;
   path?: string;
   icon?: string;
-  show?: boolean;
+  show_tab?: boolean;
   disabled?: boolean;
 }

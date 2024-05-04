@@ -4,7 +4,7 @@
     "show_label": false,
     "path": "/home/app",
     "icon": "home",
-    "show": true,
+    "show_tab": true,
     "disabled": false
   },
   {
@@ -12,7 +12,7 @@
     "show_label": false,
     "path": "/home/categories",
     "icon": "list",
-    "show": true,
+    "show_tab": true,
     "disabled": false
   },
   {
@@ -20,7 +20,7 @@
     "show_label": false,
     "path": "/expenses",
     "icon": "receipt",
-    "show": true,
+    "show_tab": true,
     "disabled": true
   },
   {
@@ -28,7 +28,7 @@
     "show_label": false,
     "path": "/settings",
     "icon": "settings",
-    "show": true,
+    "show_tab": true,
     "disabled": true
   }
 ]

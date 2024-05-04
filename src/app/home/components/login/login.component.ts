@@ -25,7 +25,7 @@ export class LoginComponent {
 
   constructor(
     private fb: FormBuilder,
-    private toastController: ToastController,
+    public toastController: ToastController,
     private authService: AuthService,
     private tokenService: TokenService,
     private translate: TranslationService,
@@ -77,13 +77,5 @@ export class LoginComponent {
     });
 
     await toast.present();
-  }
-
-  async openToast() {
-    const toast = await this.toastController.create({
-      message: 'This toast will disappear after 5 seconds',
-      duration: 2000,
-    });
-    toast.present();
   }
 }
