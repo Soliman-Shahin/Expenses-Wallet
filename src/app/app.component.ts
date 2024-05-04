@@ -7,6 +7,8 @@ import { ThemeService } from './shared/services';
   styleUrls: ['app.component.scss'],
 })
 export class AppComponent implements OnInit {
+  private htmlElement: HTMLElement = document.getElementsByTagName('html')[0];
+
   tabs: any[] = [
     {
       title: 'HOME',
@@ -42,6 +44,6 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     const currentTheme = this.themeService.getCurrentTheme();
-    document.body.classList.add(currentTheme);
+    this.htmlElement.classList.add(currentTheme);
   }
 }

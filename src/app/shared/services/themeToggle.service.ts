@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { EventEmitter } from '@angular/core';
 
 @Injectable({
   providedIn: 'root',
@@ -6,36 +7,43 @@ import { Injectable } from '@angular/core';
 export class ThemeService {
   private DARK_THEME = 'dark-theme';
   private LIGHT_THEME = 'light-theme';
+  private htmlElement: HTMLElement = document.getElementsByTagName('html')[0];
 
-  constructor() {}
+  themeChange: EventEmitter<string> = new EventEmitter<string>();
+
+  constructor() {
+    this.initializeTheme();
+  }
+
+  // Initialize theme on startup
+  private initializeTheme() {
+    const theme = this.getCurrentTheme();
+    this.setTheme(theme);
+  }
 
   // Toggle between dark and light themes
   toggleTheme() {
-    const body = document.getElementsByTagName('body')[0];
-    if (body.classList.contains(this.DARK_THEME)) {
-      body.classList.remove(this.DARK_THEME);
-      body.classList.add(this.LIGHT_THEME);
-      this.setCssVariables('--ion-color-primary', '#3880ff');
-      this.setCssVariables('--ion-color-secondary', '#3dc2ff');
-      // Add other CSS variables for light theme
-      localStorage.setItem('theme', this.LIGHT_THEME);
-    } else {
-      body.classList.remove(this.LIGHT_THEME);
-      body.classList.add(this.DARK_THEME);
-      this.setCssVariables('--ion-color-primary', '#428cff');
-      this.setCssVariables('--ion-color-secondary', '#50c8ff');
-      // Add other CSS variables for dark theme
-      localStorage.setItem('theme', this.DARK_THEME);
+    const newTheme =
+      this.getCurrentTheme() === this.DARK_THEME
+        ? this.LIGHT_THEME
+        : this.DARK_THEME;
+    this.setTheme(newTheme);
+  }
+
+  // Set the theme
+  private setTheme(theme: string) {
+    this.htmlElement.classList.remove(this.DARK_THEME, this.LIGHT_THEME, 'md');
+    this.htmlElement.classList.add(theme);
+    if (theme === this.DARK_THEME) {
+      this.htmlElement.classList.add('md');
     }
+    localStorage.setItem('theme', theme);
+    // Emit theme change event
+    this.themeChange.emit(theme);
   }
 
   // Check the current theme
-  getCurrentTheme() {
-    return localStorage.getItem('theme') || this.LIGHT_THEME;
-  }
-
-  // Helper function to set CSS variables
-  private setCssVariables(name: string, value: string) {
-    document.documentElement.style.setProperty(name, value);
-  }
+  getCurrentTheme(): string {
+     return localStorage.getItem('theme') || this.LIGHT_THEME;
+   }
 }

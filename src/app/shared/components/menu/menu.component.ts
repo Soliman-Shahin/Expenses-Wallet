@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import {
   TranslationService,
@@ -24,15 +24,14 @@ export class MenuComponent implements OnInit, OnDestroy {
     private translate: TranslateService,
     private themeService: ThemeService,
     private authService: AuthService,
-    private tokenService: TokenService
+    private tokenService: TokenService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.translate.onLangChange.subscribe((event: any) => {
       this.language = event.lang;
     });
-
-    // this.user = JSON.parse(this.tokenService.getUser());
 
     this.$userSub = this.tokenService.userChanged.subscribe((user: User) => {
       this.user = user;
@@ -50,6 +49,7 @@ export class MenuComponent implements OnInit, OnDestroy {
 
   toggleTheme() {
     this.themeService.toggleTheme();
+    this.cdr.detectChanges();
   }
 
   getCurrentTheme() {

@@ -29,7 +29,7 @@
   </ion-item>
   <ion-item [button]="true" (click)="toggleTheme()">
     <ion-icon aria-hidden="true" name="moon" slot="start"></ion-icon>
-    <ion-toggle>
+    <ion-toggle [checked]="getCurrentTheme() === 'dark-theme' ? true : false">
       <ion-label>{{ "SETTINGS.UI" | translate }}</ion-label>
       <ion-note color="medium"
         >{{ "DARK" | translate }} {{ "OR" | translate }}
