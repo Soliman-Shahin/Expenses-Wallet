@@ -1,0 +1,34 @@
+[
+  {
+    "label": "HOME",
+    "show_label": false,
+    "path": "/home/app",
+    "icon": "home",
+    "show": true,
+    "disabled": false
+  },
+  {
+    "label": "CATEGORIES",
+    "show_label": false,
+    "path": "/home/categories",
+    "icon": "list",
+    "show": true,
+    "disabled": false
+  },
+  {
+    "label": "EXPENSES",
+    "show_label": false,
+    "path": "/expenses",
+    "icon": "receipt",
+    "show": true,
+    "disabled": true
+  },
+  {
+    "label": "SETTINGS",
+    "show_label": false,
+    "path": "/settings",
+    "icon": "settings",
+    "show": true,
+    "disabled": true
+  }
+]

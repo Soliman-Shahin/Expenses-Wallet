@@ -25,10 +25,10 @@
             [routerLink]="tab.path"
             routerLinkActive="router-link-active"
             [disabled]="tab.disabled"
-            [tab]="tab.title"
+            [tab]="tab.label"
           >
             <ion-icon [name]="tab.icon"></ion-icon>
-            <ion-label>{{ "SIDEBAR." + tab.title | translate }}</ion-label>
+            <ion-label *ngIf="tab.show_label">{{ "SIDEBAR." + tab.label | translate }}</ion-label>
           </ion-tab-button>
         </ng-container>
       </ion-tab-bar>
