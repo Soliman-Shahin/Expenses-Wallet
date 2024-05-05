@@ -12,6 +12,7 @@ import {
 } from 'src/app/shared/services';
 import { Router } from '@angular/router';
 import { ToastController } from '@ionic/angular';
+import { User } from 'src/app/shared/models';
 
 @Component({
   selector: 'app-login',
@@ -47,11 +48,9 @@ export class LoginComponent {
 
   async signInWithGoogle() {
     try {
-      await this.authService.signInWithGoogle().subscribe((data: any) => {
-        console.log('Signed In With Google');
-        console.log(data);
+      await this.authService.signInWithGoogle().then(() => {
+        this.routerService.navigate(['/']);
       });
-      // No need to reload the window
     } catch (error) {
       console.log('Error signing in with Google:', error);
     }

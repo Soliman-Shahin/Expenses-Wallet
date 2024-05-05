@@ -27,12 +27,5 @@
 }
 
 .router-link-active {
-  color: var(--ion-color-primary-contrast);
-  background-color: var(--ion-color-primary);
-  &:hover {
-    ion-icon,
-    ion-label {
-      color: var(--ion-color-primary-contrast) !important;
-    }
-  }
+  color: var(--ion-color-primary);
 }

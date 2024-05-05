@@ -47,9 +47,22 @@
 
     <p class="ion-margin-vertical">{{ "OR" | translate }}</p>
 
-    <ion-item [button]="true" (click)="signInWithGoogle()">
+    <ion-item
+      class="ion-margin-vertical"
+      [button]="true"
+      (click)="signInWithGoogle()"
+    >
       <ion-icon aria-hidden="true" name="logo-google" slot="start"></ion-icon>
       <ion-label>{{ "AUTH.GOOGLE" | translate }}</ion-label>
+    </ion-item>
+
+    <ion-item
+      class="ion-margin-vertical"
+      [button]="true"
+      [routerLink]="['/home/login-phone']"
+    >
+      <ion-icon aria-hidden="true" name="call" slot="start"></ion-icon>
+      <ion-label>{{ "AUTH.PHONE" | translate }}</ion-label>
     </ion-item>
   </div>
 </ion-content>

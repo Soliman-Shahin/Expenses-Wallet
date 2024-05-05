@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import {
   TranslationService,
@@ -14,49 +14,50 @@ import { Subscription } from 'rxjs';
   templateUrl: './menu.component.html',
   styleUrls: ['./menu.component.scss'],
 })
-export class MenuComponent implements OnInit, OnDestroy {
+export class MenuComponent implements OnInit {
   language: string = '';
-  user!: User;
-  private $userSub!: Subscription;
+  user: User | null = null;
 
   constructor(
     private translationService: TranslationService,
     private translate: TranslateService,
     private themeService: ThemeService,
-    private authService: AuthService,
-    private tokenService: TokenService,
-    private cdr: ChangeDetectorRef
+    public authService: AuthService,
+    private tokenService: TokenService
   ) {}
 
   ngOnInit(): void {
+    this.user = this.tokenService.getUser();
+    this.initializeLanguage();
+    this.subscribeToUserChanges();
+  }
+
+  initializeLanguage(): void {
     this.translate.onLangChange.subscribe((event: any) => {
       this.language = event.lang;
     });
+  }
 
-    this.$userSub = this.tokenService.userChanged.subscribe((user: User) => {
-      this.user = user;
+  subscribeToUserChanges(): void {
+    this.tokenService.userSubject.subscribe((user: User | null) => {
+      this.user = user || null;
     });
   }
 
-  ngOnDestroy() {
-    this.$userSub.unsubscribe();
-  }
-
-  changeLanguage() {
+  changeLanguage(): void {
     const lang = this.language === 'ar' ? 'en' : 'ar';
     this.translationService.setLanguage(lang);
   }
 
-  toggleTheme() {
+  toggleTheme(): void {
     this.themeService.toggleTheme();
-    this.cdr.detectChanges();
   }
 
-  getCurrentTheme() {
+  getCurrentTheme(): string {
     return this.themeService.getCurrentTheme();
   }
 
-  logOut() {
+  logOut(): void {
     this.authService.logout();
   }
 }

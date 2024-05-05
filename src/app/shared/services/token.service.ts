@@ -1,78 +1,120 @@
 import { Injectable } from '@angular/core';
-import { CookieService } from 'ngx-cookie-service';
 import { User } from '../models';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
+
+interface LocalStorageKeys {
+  accessToken: string;
+  refreshToken: string;
+  userId: string;
+  user: string;
+  userLang: string;
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class TokenService {
-  userChanged = new Subject<any>();
+  private readonly localStorageKeys: LocalStorageKeys = {
+    accessToken: 'access-token',
+    refreshToken: 'refresh-token',
+    userId: 'user-id',
+    user: 'user',
+    userLang: 'user-lang',
+  };
 
-  constructor(private cookieService: CookieService) {}
+  userSubject = new Subject<User | null>();
 
-  getAccessToken() {
-    return this.cookieService.get('access-token');
-  }
+  constructor() {}
 
-  getRefreshToken() {
-    return this.cookieService.get('refresh-token');
-  }
-
-  getUserId() {
-    return this.cookieService.get('user-id');
-  }
-
-  getUser() {
-    return this.cookieService.get('user');
-  }
-
-  getUserLang() {
-    return this.cookieService.get('user-lang');
-  }
-
-  setAccessToken(accessToken: string) {
-    this.cookieService.set('access-token', accessToken);
-  }
-
-  setRefreshToken(refreshToken: string) {
-    this.cookieService.set('refresh-token', refreshToken);
-  }
-
-  setUserId(userId: string) {
-    this.cookieService.set('user-id', userId);
-  }
-
-  setUser(user: User) {
-    this.cookieService.set('user', JSON.stringify(user));
-    this.userChanged.next(user);
-  }
-
-  setUserLang(userLang: string) {
-    this.cookieService.set('user-lang', userLang);
-  }
-
-  setSession(userId: string, accessToken: string, refreshToken: string) {
-    this.cookieService.set('user-id', userId);
-    this.cookieService.set('access-token', accessToken);
-    this.cookieService.set('refresh-token', refreshToken);
-  }
-
-  removeTokens() {
-    this.cookieService.delete('access-token');
-    this.cookieService.delete('refresh-token');
-    this.cookieService.delete('user-id');
-    this.cookieService.delete('user');
-    this.userChanged.next(null);
-  }
-
-  getPayload() {
-    const token = this.getAccessToken();
-    let payload;
-    if (token) {
-      payload = token.split('.')[1];
-      payload = JSON.parse(atob(payload));
+  private getItem(key: string): string | null {
+    try {
+      return localStorage.getItem(key);
+    } catch (error) {
+      console.error('Error getting item from localStorage:', error);
+      return null;
     }
-    return payload.data;
+  }
+
+  private setItem(key: string, value: string): void {
+    try {
+      localStorage.setItem(key, value);
+    } catch (error) {
+      console.error('Error setting item in localStorage:', error);
+    }
+  }
+
+  private removeItem(key: string): void {
+    try {
+      localStorage.removeItem(key);
+    } catch (error) {
+      console.error('Error removing item from localStorage:', error);
+    }
+  }
+
+  getAccessToken(): string | null {
+    return this.getItem(this.localStorageKeys.accessToken);
+  }
+
+  getRefreshToken(): string | null {
+    return this.getItem(this.localStorageKeys.refreshToken);
+  }
+
+  getUserId(): string | null {
+    return this.getItem(this.localStorageKeys.userId);
+  }
+
+  getUser(): User | null {
+    const userJson = this.getItem(this.localStorageKeys.user);
+    return userJson ? JSON.parse(userJson) : null;
+  }
+
+  getUserLang(): string | null {
+    return this.getItem(this.localStorageKeys.userLang);
+  }
+
+  setAccessToken(accessToken: string): void {
+    this.setItem(this.localStorageKeys.accessToken, accessToken);
+  }
+
+  setRefreshToken(refreshToken: string): void {
+    this.setItem(this.localStorageKeys.refreshToken, refreshToken);
+  }
+
+  setUserId(userId: string): void {
+    this.setItem(this.localStorageKeys.userId, userId);
+  }
+
+  setUser(user: User): void {
+    this.setItem(this.localStorageKeys.user, JSON.stringify(user));
+    this.userSubject.next(user);
+  }
+
+  setUserLang(userLang: string): void {
+    this.setItem(this.localStorageKeys.userLang, userLang);
+  }
+
+  setSession(userId: string, accessToken: string, refreshToken: string): void {
+    this.setUserId(userId);
+    this.setAccessToken(accessToken);
+    this.setRefreshToken(refreshToken);
+  }
+
+  removeSession(): void {
+    Object.values(this.localStorageKeys).forEach((key) => this.removeItem(key));
+    this.userSubject.next(null);
+  }
+
+  getPayload(): any {
+    const token = this.getAccessToken();
+    if (token) {
+      try {
+        const payload = token.split('.')[1];
+        return JSON.parse(atob(payload)).data ?? null;
+      } catch (error) {
+        console.error('Error parsing payload:', error);
+        return null;
+      }
+    }
+    return null;
   }
 }

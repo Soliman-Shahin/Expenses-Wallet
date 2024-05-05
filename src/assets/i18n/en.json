@@ -81,6 +81,7 @@
     "SIGN_OUT": "Sign Out",
     "GOOGLE": "Google Sign in",
     "FB": "Facebook Signin",
+    "PHONE": "Login by phone number",
     "SIGNUP": "Sign Up",
     "LOGIN": "Login",
     "EMAIL": "Email Address",

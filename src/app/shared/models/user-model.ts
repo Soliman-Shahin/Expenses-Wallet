@@ -1,7 +1,10 @@
 export interface User {
-  uid: string;
-  email?: string | null;
-  displayName?: string | null;
-  photoURL?: string | null;
-  emailVerified: boolean;
+  userId?: string;
+  socialId?: string;
+  signupType?: 'normal' | 'facebook' | 'google';
+  email?: string;
+  username?: string;
+  image?: string;
+  emailVerified?: boolean;
+  sessions?: [token: string, expiresAt: number];
 }

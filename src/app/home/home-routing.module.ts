@@ -8,6 +8,7 @@ import {
   PhoneLoginComponent,
   SignupComponent,
 } from './components';
+import { UserInfoComponent } from '../shared/components';
 
 const routes: Routes = [
   { path: '', redirectTo: 'app', pathMatch: 'full' },
@@ -22,6 +23,10 @@ const routes: Routes = [
   {
     path: 'signup',
     component: SignupComponent,
+  },
+  {
+    path: 'profile',
+    component: UserInfoComponent,
   },
   {
     path: 'login-phone',

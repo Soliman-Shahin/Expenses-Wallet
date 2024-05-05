@@ -1,7 +1,7 @@
 [
   {
     "label": "HOME",
-    "show_label": false,
+    "show_label": true,
     "path": "/home/app",
     "icon": "home",
     "show_tab": true,
@@ -9,7 +9,7 @@
   },
   {
     "label": "CATEGORIES",
-    "show_label": false,
+    "show_label": true,
     "path": "/home/categories",
     "icon": "list",
     "show_tab": true,
@@ -17,7 +17,7 @@
   },
   {
     "label": "EXPENSES",
-    "show_label": false,
+    "show_label": true,
     "path": "/expenses",
     "icon": "receipt",
     "show_tab": true,
@@ -25,7 +25,7 @@
   },
   {
     "label": "SETTINGS",
-    "show_label": false,
+    "show_label": true,
     "path": "/settings",
     "icon": "settings",
     "show_tab": true,

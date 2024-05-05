@@ -44,10 +44,11 @@ export class SignupComponent {
 
   async signInWithGoogle() {
     try {
-      await this.authService.signInWithGoogle().subscribe((data: any) => {
-        console.log('Signed In With Google');
-        console.log(data);
-      });
+      await this.authService.signInWithGoogle();
+      // .subscribe((data: any) => {
+      //   console.log('Signed In With Google');
+      //   console.log(data);
+      // });
       // No need to reload the window
     } catch (error) {
       console.log('Error signing in with Google:', error);
