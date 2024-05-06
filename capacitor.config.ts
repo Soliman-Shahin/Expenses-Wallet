@@ -7,6 +7,14 @@ const config: CapacitorConfig = {
   server: {
     androidScheme: 'https',
   },
+  plugins: {
+    SplashScreen: {
+      launchShowDuration: 0,
+    },
+    App: {
+      icon: './src/assets/icon/favicon.png', // Specify the path to your icon
+    },
+  },
 };
 
 export default config;

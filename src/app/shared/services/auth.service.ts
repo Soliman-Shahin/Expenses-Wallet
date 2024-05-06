@@ -81,7 +81,7 @@ export class AuthService {
 
   async logout(): Promise<void> {
     await this.fireLogout();
-    this.router.navigate(['/auth/login']);
+    this.router.navigate(['/home']);
   }
 
   getNewAccessToken(): Observable<any> {
