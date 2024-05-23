@@ -1,18 +1,31 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.ionic.starter',
+  appId: 'sh.expenses.wallet',
   appName: 'Expenses Wallet',
+  bundledWebRuntime: false,
   webDir: 'www',
   server: {
     androidScheme: 'https',
   },
   plugins: {
     SplashScreen: {
-      launchShowDuration: 0,
+      launchShowDuration: 3000,
     },
     App: {
-      icon: './src/assets/icon/favicon.png', // Specify the path to your icon
+      icon: './src/assets/icon/favicon.png',
+    },
+  },
+  cordova: {
+    preferences: {
+      ScrollEnabled: 'false',
+      'android-minSdkVersion': '19',
+      BackupWebStorage: 'none',
+      SplashMaintainAspectRatio: 'true',
+      FadeSplashScreenDuration: '300',
+      SplashShowOnlyFirstTime: 'false',
+      SplashScreen: 'screen',
+      SplashScreenDelay: '3000',
     },
   },
 };

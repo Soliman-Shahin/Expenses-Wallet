@@ -26,6 +26,23 @@
   text-decoration: none;
 }
 
-.router-link-active {
+.animated-tab-button.router-link-active {
   color: var(--ion-color-primary);
+  transform: scale(1.1);
+}
+
+.animated-tab-button {
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.animated-tab-button:hover {
+  transform: scale(1.1);
+}
+
+.animated-tab-button ion-icon {
+  transition: transform 0.3s ease;
+}
+
+.animated-tab-button:hover ion-icon {
+  transform: scale(1.1);
 }
