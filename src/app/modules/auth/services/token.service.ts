@@ -1,14 +1,6 @@
 import { Injectable } from '@angular/core';
-import { User } from '../models';
-import { BehaviorSubject, Subject } from 'rxjs';
-
-interface LocalStorageKeys {
-  accessToken: string;
-  refreshToken: string;
-  userId: string;
-  user: string;
-  userLang: string;
-}
+import { Subject } from 'rxjs';
+import { LocalStorageKeys, User } from 'src/app/modules/auth/models';
 
 @Injectable({
   providedIn: 'root',

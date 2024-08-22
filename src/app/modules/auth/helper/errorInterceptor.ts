@@ -1,15 +1,13 @@
-import { HttpInterceptor, HttpHandler } from '@angular/common/http';
+import { HttpHandler, HttpInterceptor } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, catchError, switchMap, throwError } from 'rxjs';
-import { TokenService } from './token.service';
-import { AuthService } from './auth.service';
+import { BaseService } from '../../../shared/services';
 
 @Injectable()
-export class ErrorInterceptor implements HttpInterceptor {
-  constructor(
-    private tokenService: TokenService,
-    private authService: AuthService
-  ) {}
+export class ErrorInterceptor extends BaseService implements HttpInterceptor {
+  constructor() {
+    super();
+  }
 
   intercept(req: any, next: HttpHandler): Observable<any> {
     // pass the request to the next handler and catch any errors

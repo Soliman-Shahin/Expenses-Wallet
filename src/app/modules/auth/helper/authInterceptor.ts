@@ -1,11 +1,13 @@
-import { HttpInterceptor, HttpHandler } from '@angular/common/http';
+import { HttpHandler, HttpInterceptor } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { TokenService } from './token.service';
+import { BaseService } from '../../../shared/services';
 
 @Injectable()
-export class AuthInterceptor implements HttpInterceptor {
-  constructor(private tokenService: TokenService) {}
+export class AuthInterceptor extends BaseService implements HttpInterceptor {
+  constructor() {
+    super();
+  }
 
   intercept(req: any, next: HttpHandler): Observable<any> {
     // get the tokens from the token service

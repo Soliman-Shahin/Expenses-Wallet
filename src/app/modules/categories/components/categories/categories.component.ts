@@ -3,7 +3,7 @@ import {
   InfiniteScrollCustomEvent,
   ItemReorderEventDetail,
 } from '@ionic/angular';
-import { CategoryService } from 'src/app/shared/services';
+import { CategoriesService } from '../../services';
 
 @Component({
   selector: 'app-categories',
@@ -40,7 +40,7 @@ export class CategoriesComponent implements OnInit {
     },
   ];
 
-  constructor(private categoryService: CategoryService) {}
+  constructor(private categoryService: CategoriesService) {}
 
   ngOnInit() {
     // this.generateItems();
@@ -48,11 +48,11 @@ export class CategoriesComponent implements OnInit {
   }
 
   fetchAllCategories() {
-    this.categoryService.getCategories().subscribe((data) => {
-      console.log('Data received from server', data);
-      this.categories = data;
-      this.totalItems = data.length;
-    });
+    // this.categoryService.getCategories().subscribe((data) => {
+    //   console.log('Data received from server', data);
+    //   this.categories = data;
+    //   this.totalItems = data.length;
+    // });
   }
 
   private generateItems() {

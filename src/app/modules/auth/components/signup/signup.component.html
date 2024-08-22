@@ -1,7 +1,7 @@
 <ion-content class="ion-padding">
-  <form [formGroup]="loginForm" (ngSubmit)="login(loginForm.value)">
+  <form [formGroup]="signupForm" (ngSubmit)="signup()">
     <ion-title class="ion-text-center">{{
-      "AUTH.SIGN_IN" | translate
+      "AUTH.SIGN_UP" | translate
     }}</ion-title>
 
     <ion-item class="ion-margin-vertical">
@@ -13,6 +13,7 @@
         <ion-icon slot="start" name="person" aria-hidden="true"></ion-icon>
       </ion-input>
     </ion-item>
+
     <ion-item class="ion-margin-vertical">
       <ion-input
         [type]="hide ? 'password' : 'text'"
@@ -33,16 +34,17 @@
           ></ion-icon> </ion-button
       ></ion-input>
     </ion-item>
-    <ion-button type="submit" [disabled]="loginForm.invalid" expand="block">
+
+    <ion-button type="submit" expand="block" [disabled]="signupForm.invalid">
       <ion-icon slot="start" name="log-in"></ion-icon>
-      {{ "AUTH.LOGIN" | translate }}
+      {{ "AUTH.SIGNUP" | translate }}
     </ion-button>
   </form>
   <div>
-    <span class="no_account">{{ "AUTH.NO_ACCOUNT" | translate }}</span>
+    <span class="no_account">{{ "AUTH.HAVE_ACCOUNT" | translate }}</span>
 
-    <ion-button routerLink="/home/signup" fill="clear">{{
-      "AUTH.SIGNUP" | translate
+    <ion-button routerLink="/auth/login" fill="clear">{{
+      "AUTH.LOGIN" | translate
     }}</ion-button>
 
     <p class="ion-margin-vertical">{{ "OR" | translate }}</p>
@@ -59,7 +61,7 @@
     <ion-item
       class="ion-margin-vertical"
       [button]="true"
-      [routerLink]="['/home/login-phone']"
+      [routerLink]="['/auth/login-phone']"
     >
       <ion-icon aria-hidden="true" name="call" slot="start"></ion-icon>
       <ion-label>{{ "AUTH.PHONE" | translate }}</ion-label>

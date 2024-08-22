@@ -246,3 +246,13 @@ html {
 [dir="rtl"] body {
   --ion-font-family: "Cairo", sans-serif !important;
 }
+
+.toast-success {
+  --background: var(--ion-color-success);
+  --color: var(--ion-color-light);
+}
+
+.toast-error {
+  --background: var(--ion-color-danger);
+  --color: var(--ion-color-light);
+}

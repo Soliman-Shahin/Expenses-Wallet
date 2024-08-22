@@ -1,6 +1,6 @@
 <ion-list>
   <!-- User Info -->
-  <ion-item *ngIf="user; else loginLink" [button]="true" [routerLink]="['/home/profile']">
+  <ion-item *ngIf="user; else loginLink" [button]="true" [routerLink]="['/profile']">
     <ion-avatar aria-hidden="true" slot="start">
       <img
         alt="user_image"
@@ -27,7 +27,7 @@
   <!-- Login Link -->
   <ng-template #loginLink>
     <ion-item
-      [routerLink]="['/home/login']"
+      [routerLink]="['/auth/login']"
       routerLinkActive="router-link-active"
       button="true"
     >
@@ -48,7 +48,7 @@
   <!-- Theme Toggle -->
   <ion-item button="true" (click)="toggleTheme()">
     <ion-icon aria-hidden="true" name="moon" slot="start"></ion-icon>
-    <ion-toggle [checked]="getCurrentTheme() === 'dark-theme' ? true : false">
+    <ion-toggle [checked]="currentTheme === 'dark-theme' ? true : false">
       <ion-label>{{ "SETTINGS.UI" | translate }}</ion-label>
       <ion-note color="medium">
         {{ "DARK" | translate }} {{ "OR" | translate }}

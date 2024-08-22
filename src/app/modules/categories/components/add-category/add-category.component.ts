@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
-import { CategoryService } from 'src/app/shared/services';
+import { CategoriesService } from '../../services';
 
 @Component({
   selector: 'app-add-category',
@@ -82,7 +82,7 @@ export class AddCategoryComponent {
   ];
 
   constructor(
-    private categoryService: CategoryService,
+    private categoryService: CategoriesService,
     private router: Router
   ) {}
 
@@ -119,7 +119,7 @@ export class AddCategoryComponent {
 
   addCategory(): void {
     const category = this.categoryForm.value;
-    this.categoryService.addCategory(category);
-    this.router.navigate(['/home/categories']);
+    // this.categoryService.addCategory(category);
+    this.router.navigate(['/categories']);
   }
 }

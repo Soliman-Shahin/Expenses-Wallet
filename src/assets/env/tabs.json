@@ -2,7 +2,7 @@
   {
     "label": "HOME",
     "show_label": true,
-    "path": "/home/app",
+    "path": "/home",
     "icon": "home",
     "show_tab": true,
     "disabled": false
@@ -10,7 +10,7 @@
   {
     "label": "CATEGORIES",
     "show_label": true,
-    "path": "/home/categories",
+    "path": "/categories",
     "icon": "list",
     "show_tab": true,
     "disabled": false

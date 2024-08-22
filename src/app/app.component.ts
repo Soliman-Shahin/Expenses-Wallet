@@ -1,19 +1,20 @@
 import { Component, OnInit } from '@angular/core';
-import { ThemeService } from './shared/services';
+import { BaseComponent } from './shared/base';
 import { Tab } from './shared/models';
-import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss'],
 })
-export class AppComponent implements OnInit {
+export class AppComponent extends BaseComponent implements OnInit {
   private htmlElement: HTMLElement = document.getElementsByTagName('html')[0];
 
   tabs: Tab[] = [];
 
-  constructor(private themeService: ThemeService, private http: HttpClient) {}
+  constructor() {
+    super();
+  }
 
   ngOnInit() {
     this.loadTabsData();
@@ -32,7 +33,7 @@ export class AppComponent implements OnInit {
   }
 
   private setTheme() {
-    const currentTheme = this.themeService.getCurrentTheme();
+    const currentTheme = this.currentTheme;
     this.htmlElement.classList.add(currentTheme);
   }
 }
