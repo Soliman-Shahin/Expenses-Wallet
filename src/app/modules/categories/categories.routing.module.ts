@@ -1,20 +1,25 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { IonicModule } from '@ionic/angular';
+import { APP_ROUTES } from 'src/app/core/constants';
 import { AddCategoryComponent, CategoriesComponent } from './components';
 
 const routes: Routes = [
   {
-    path: '',
+    path: APP_ROUTES.CATEGORIES.LIST,
     component: CategoriesComponent,
   },
   {
-    path: 'add-category',
+    path: APP_ROUTES.CATEGORIES.CREATE,
     component: AddCategoryComponent,
   },
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
+  imports: [
+    IonicModule,
+    RouterModule.forChild(routes),
+  ],
   exports: [RouterModule],
 })
 export class CategoriesRoutingModule {}

@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { TABS_MENU_ITEMS } from './core/constants';
 import { BaseComponent } from './shared/base';
 import { Tab } from './shared/models';
 
@@ -10,26 +11,14 @@ import { Tab } from './shared/models';
 export class AppComponent extends BaseComponent implements OnInit {
   private htmlElement: HTMLElement = document.getElementsByTagName('html')[0];
 
-  tabs: Tab[] = [];
+  tabs: Tab[] = TABS_MENU_ITEMS;
 
   constructor() {
     super();
   }
 
   ngOnInit() {
-    this.loadTabsData();
     this.setTheme();
-  }
-
-  private loadTabsData() {
-    this.http.get<Tab[]>('./assets/env/tabs.json').subscribe(
-      (data) => {
-        this.tabs = data;
-      },
-      (error) => {
-        console.error('Error loading tabs data:', error);
-      }
-    );
   }
 
   private setTheme() {

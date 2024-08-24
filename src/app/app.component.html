@@ -21,9 +21,12 @@
       <ion-tab-bar slot="bottom">
         <ng-container *ngFor="let tab of tabs">
           <ion-tab-button
-            *ngIf="tab.show_tab"
-            [routerLink]="tab.path"
-            routerLinkActive="router-link-active"
+            *ngIf="tab.visible"
+            [routerLink]="tab.routerLink"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="
+              tab?.routerLinkActiveOptions ? tab?.routerLinkActiveOptions : {}
+            "
             [disabled]="tab.disabled"
             [tab]="tab.label"
             class="animated-tab-button"

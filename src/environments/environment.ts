@@ -6,6 +6,16 @@ export const environment = {
   production: false,
   apiUrl: 'http://localhost:3000/v1',
   // apiUrl: 'https://expenses-wallet.up.railway.app/v1',
+  features: {
+    expenses: {
+      active: true,
+      roles: [],
+    },
+    categories: {
+      active: true,
+      roles: [],
+    },
+  },
 };
 
 /*
