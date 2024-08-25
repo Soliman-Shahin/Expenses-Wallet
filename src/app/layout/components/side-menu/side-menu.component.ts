@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { User } from 'src/app/modules/auth/models';
-import { BaseComponent } from '../../base/base.component';
+import { BaseComponent } from 'src/app/shared/base';
 
 @Component({
-  selector: 'app-menu',
-  templateUrl: './menu.component.html',
-  styleUrls: ['./menu.component.scss'],
+  selector: 'app-side-menu',
+  templateUrl: './side-menu.component.html',
+  styleUrls: ['./side-menu.component.scss'],
 })
-export class MenuComponent extends BaseComponent implements OnInit {
+export class SideMenuComponent extends BaseComponent implements OnInit {
   user: User | null = null;
 
   constructor() {

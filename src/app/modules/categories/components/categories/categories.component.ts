@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import {
-  InfiniteScrollCustomEvent,
-  ItemReorderEventDetail,
+    InfiniteScrollCustomEvent,
+    ItemReorderEventDetail,
 } from '@ionic/angular';
 import { CategoriesService } from '../../services';
 

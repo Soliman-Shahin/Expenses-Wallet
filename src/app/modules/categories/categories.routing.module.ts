@@ -4,7 +4,7 @@ import { IonicModule } from '@ionic/angular';
 import { APP_ROUTES } from 'src/app/core/constants';
 import { AddCategoryComponent, CategoriesComponent } from './components';
 
-const routes: Routes = [
+const categoriesRoutes: Routes = [
   {
     path: APP_ROUTES.CATEGORIES.LIST,
     component: CategoriesComponent,
@@ -18,7 +18,12 @@ const routes: Routes = [
 @NgModule({
   imports: [
     IonicModule,
-    RouterModule.forChild(routes),
+    RouterModule.forChild([
+      {
+        path: '',
+        children: categoriesRoutes,
+      },
+    ]),
   ],
   exports: [RouterModule],
 })

@@ -1,0 +1,22 @@
+<ion-tabs>
+  <ion-tab-bar slot="bottom">
+    <ng-container *ngFor="let tab of tabs">
+      <ion-tab-button
+        *ngIf="tab.visible"
+        [routerLink]="tab.routerLink"
+        routerLinkActive="router-link-active"
+        [routerLinkActiveOptions]="
+          tab?.routerLinkActiveOptions ? tab?.routerLinkActiveOptions : {}
+        "
+        [disabled]="tab.disabled"
+        [tab]="tab.label"
+        class="animated-tab-button"
+      >
+        <ion-icon [name]="tab.icon"></ion-icon>
+        <ion-label *ngIf="tab.show_label">
+          {{ tab.label ?? "" | translate }}
+        </ion-label>
+      </ion-tab-button>
+    </ng-container>
+  </ion-tab-bar>
+</ion-tabs>

@@ -5,7 +5,7 @@ export const TABS_MENU_ITEMS: Tab[] = [
   {
     id: APP_ROUTES.HOME,
     order: 0,
-    label: 'HOME',
+    label: 'SIDEBAR.HOME',
     show_label: true,
     routerLink: APP_ROUTES.BASE + APP_ROUTES.HOME,
     routerLinkActiveOptions: { exact: true },
@@ -18,7 +18,7 @@ export const TABS_MENU_ITEMS: Tab[] = [
   {
     id: APP_ROUTES.CATEGORIES.INDEX,
     order: 1,
-    label: 'CATEGORIES',
+    label: 'SIDEBAR.CATEGORIES',
     show_label: true,
     routerLink:
       APP_ROUTES.BASE +
@@ -35,7 +35,7 @@ export const TABS_MENU_ITEMS: Tab[] = [
   {
     id: '',
     order: 2,
-    label: 'EXPENSES',
+    label: 'SIDEBAR.EXPENSES',
     show_label: true,
     routerLink: '/expenses',
     routerLinkActiveOptions: { exact: true },
@@ -47,7 +47,7 @@ export const TABS_MENU_ITEMS: Tab[] = [
   {
     id: '',
     order: 3,
-    label: 'SETTINGS',
+    label: 'SIDEBAR.SETTINGS',
     show_label: true,
     routerLink: '/settings',
     routerLinkActiveOptions: { exact: true },

@@ -25,17 +25,16 @@ const routes: Routes = [
     path: '',
     redirectTo: APP_ROUTES.HOME,
     pathMatch: 'full',
-  },
-  {
-    path: '**',
-    redirectTo: APP_ROUTES.HOME,
-  },
+  }
 ];
 
 @NgModule({
   imports: [
     IonicModule.forRoot(), // Initialize Ionic components and services
-    RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules }),
+    RouterModule.forRoot(routes, {
+      preloadingStrategy: PreloadAllModules,
+      enableTracing: false, // Enable tracing for debugging purposes
+    }),
   ],
   exports: [RouterModule],
 })

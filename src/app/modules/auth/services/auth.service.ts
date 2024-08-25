@@ -50,6 +50,7 @@ export class AuthService {
   }
 
   logout() {
+    this.tokenService.removeSession();
     this.router.navigate(['/home']);
   }
 

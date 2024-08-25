@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { TABS_MENU_ITEMS } from './core/constants';
 import { BaseComponent } from './shared/base';
-import { Tab } from './shared/models';
 
 @Component({
   selector: 'app-root',
@@ -10,8 +8,6 @@ import { Tab } from './shared/models';
 })
 export class AppComponent extends BaseComponent implements OnInit {
   private htmlElement: HTMLElement = document.getElementsByTagName('html')[0];
-
-  tabs: Tab[] = TABS_MENU_ITEMS;
 
   constructor() {
     super();

@@ -4,7 +4,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { TranslateModule } from '@ngx-translate/core';
-import { MenuComponent, UserInfoComponent } from './components';
+import { UserInfoComponent } from './components';
 
 @NgModule({
   imports: [
@@ -19,10 +19,10 @@ import { MenuComponent, UserInfoComponent } from './components';
     FormsModule,
     ReactiveFormsModule,
     IonicModule,
-    MenuComponent,
+    RouterModule,
     UserInfoComponent,
     TranslateModule,
   ],
-  declarations: [MenuComponent, UserInfoComponent],
+  declarations: [ UserInfoComponent],
 })
 export class SharedModule {}

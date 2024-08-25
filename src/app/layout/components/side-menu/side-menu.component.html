@@ -1,12 +1,15 @@
 <ion-list>
   <!-- User Info -->
-  <ion-item *ngIf="user; else loginLink" [button]="true" [routerLink]="['/profile']">
+  <ion-item
+    *ngIf="user; else loginLink"
+    [button]="true"
+    [routerLink]="['/profile']"
+  >
     <ion-avatar aria-hidden="true" slot="start">
       <img
         alt="user_image"
         [src]="
-          user.image ||
-          'https://ionicframework.com/docs/img/demos/avatar.svg'
+          user.image || 'https://ionicframework.com/docs/img/demos/avatar.svg'
         "
       />
     </ion-avatar>

@@ -1,4 +1,5 @@
 export const APP_ROUTES = {
+  INDEX: '',
   BASE: '/',
   HOME: 'home',
   AUTH: {
