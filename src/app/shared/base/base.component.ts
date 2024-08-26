@@ -4,12 +4,9 @@ import { FormBuilder } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
+import { HeaderService } from 'src/app/layout/services';
 import { AuthService, TokenService } from 'src/app/modules/auth/services';
-import {
-  ThemeService,
-  ToastService,
-  TranslationService,
-} from '../services';
+import { ThemeService, ToastService, TranslationService } from '../services';
 
 @Directive()
 export abstract class BaseComponent implements OnDestroy {
@@ -25,6 +22,7 @@ export abstract class BaseComponent implements OnDestroy {
   readonly translate = inject(TranslationService);
   readonly themeService = inject(ThemeService);
   readonly http = inject(HttpClient);
+  readonly headerService = inject(HeaderService);
 
   destroy$ = new Subject<void>();
 

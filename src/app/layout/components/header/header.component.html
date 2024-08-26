@@ -3,6 +3,11 @@
     <ion-buttons slot="start">
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
-    <ion-title>{{ "APP_TITLE" | translate }}</ion-title>
+    <ion-title>{{ title | translate }}</ion-title>
+    <ion-buttons slot="end" *ngIf="actionIcon">
+      <ion-button (click)="onActionButtonClick()">
+        <ion-icon [name]="actionIcon"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>

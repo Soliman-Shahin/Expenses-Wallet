@@ -1,0 +1,8 @@
+<ion-icon
+  class="icon"
+  *ngFor="let icon of icons; let i = index"
+  [name]="icon"
+  size="large"
+  aria-hidden="true"
+  (click)="selectIcon(icon)"
+></ion-icon>

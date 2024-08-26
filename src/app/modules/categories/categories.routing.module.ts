@@ -8,10 +8,16 @@ const categoriesRoutes: Routes = [
   {
     path: APP_ROUTES.CATEGORIES.LIST,
     component: CategoriesComponent,
+    data: {
+      title: 'SIDEBAR.CATEGORIES',
+      action: 'add',
+      icon: 'duplicate',
+    },
   },
   {
     path: APP_ROUTES.CATEGORIES.CREATE,
     component: AddCategoryComponent,
+    data: { title: 'CATEGORY.ADD', action: 'save', icon: 'save' },
   },
 ];
 

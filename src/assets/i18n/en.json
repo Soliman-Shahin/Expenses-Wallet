@@ -24,6 +24,7 @@
     "SETTINGS": "Settings"
   },
   "CATEGORY": {
+    "ADD": "Add New Category",
     "NAME": "Name",
     "COLOR": "Color",
     "CREATE": "Add New Category",

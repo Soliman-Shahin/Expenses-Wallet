@@ -7,6 +7,7 @@ const routes: Routes = [
   {
     path: APP_ROUTES.INDEX,
     component: HomePageComponent,
+    data: { title: 'APP_TITLE' },
   },
 ];
 

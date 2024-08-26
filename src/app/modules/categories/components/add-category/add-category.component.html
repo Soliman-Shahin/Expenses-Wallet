@@ -1,4 +1,10 @@
 <ion-content class="ion-padding">
+  <div class="d-flex gap-1">
+    <a [routerLink]="['../list']">
+      <ion-icon name="arrow-back"></ion-icon>
+    </a>
+  </div>
+
   <form [formGroup]="categoryForm">
     <ion-grid>
       <ion-row>
@@ -14,69 +20,28 @@
         </ion-col>
         <ion-col size="auto">
           <span
+            *ngIf="categoryForm.get('color') as color"
             class="category-icon"
-            [style.background]="categoryForm.get('color')?.value"
+            [style.background]="color?.value ? color?.value : '#28ba62'"
           >
             <ion-icon
+              *ngIf="categoryForm.get('icon') as icon"
               size="large"
-              [name]="categoryForm.get('icon')?.value"
+              [name]="icon?.value ? icon?.value : 'add'"
             ></ion-icon>
           </span>
         </ion-col>
       </ion-row>
 
-      <ion-row>
-        <ion-col>
-          <ion-card>
-            <ion-card-header>
-              <ion-card-title>{{ "COLOR" | translate }}</ion-card-title>
-            </ion-card-header>
-
-            <ion-card-content class="card-content">
-              <span
-                *ngFor="let color of colors"
-                class="color-button"
-                [style.background-color]="color.colorCode"
-                (click)="selectColor(color)"
-              ></span>
-              <input
-                class="color-input"
-                type="color"
-                (change)="selectColors($event)"
-              />
-            </ion-card-content>
-          </ion-card>
-        </ion-col>
+      <ion-row class="mt-4">
+        <app-color-selector
+          class="color-selector"
+          (color)="selectColor($event)"
+        />
       </ion-row>
 
-      <ion-row>
-        <ion-col>
-          <ion-card>
-            <ion-card-header>
-              <ion-card-title>{{ "ICON" | translate }}</ion-card-title>
-            </ion-card-header>
-
-            <ion-card-content class="card-content">
-              <ion-content class="icons ion-padding">
-                <ion-icon
-                  *ngFor="let icon of icons; let i = index"
-                  [name]="icon"
-                  size="large"
-                  aria-hidden="true"
-                  (click)="selectIcon(icon)"
-                ></ion-icon
-              ></ion-content>
-            </ion-card-content>
-          </ion-card>
-        </ion-col>
-      </ion-row>
-
-      <ion-row>
-        <ion-col class="ion-padding">
-          <ion-button shape="rounded" (click)="addCategory()">
-            <ion-icon name="save-outline"></ion-icon>
-          </ion-button>
-        </ion-col>
+      <ion-row class="mt-4">
+        <app-icon-selector class="icon-selector" (icon)="selectIcon($event)" />
       </ion-row>
     </ion-grid>
   </form>

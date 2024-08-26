@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import {
-    InfiniteScrollCustomEvent,
-    ItemReorderEventDetail,
+  InfiniteScrollCustomEvent,
+  ItemReorderEventDetail,
 } from '@ionic/angular';
+import { BaseComponent } from 'src/app/shared/base';
 import { CategoriesService } from '../../services';
 
 @Component({
@@ -10,7 +11,9 @@ import { CategoriesService } from '../../services';
   templateUrl: './categories.component.html',
   styleUrls: ['./categories.component.scss'],
 })
-export class CategoriesComponent implements OnInit {
+export class CategoriesComponent extends BaseComponent implements OnInit {
+  private categoryService = inject(CategoriesService);
+
   categories: any = [];
   pageSize = 10;
   currentPage = 0;
@@ -40,9 +43,19 @@ export class CategoriesComponent implements OnInit {
     },
   ];
 
-  constructor(private categoryService: CategoriesService) {}
+  constructor() {
+    super();
+  }
 
   ngOnInit() {
+    this.activatedRoute.data.subscribe((data) => {
+      this.headerService.updateButtonConfig({
+        title: data['title'],
+        action: data['action'],
+        icon: data['icon'],
+        route: '/categories/create',
+      });
+    });
     // this.generateItems();
     this.fetchAllCategories();
   }
