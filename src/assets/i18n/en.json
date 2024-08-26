@@ -16,6 +16,7 @@
   "COLOR": "Color",
   "ICON": "Icon",
   "VERSION": "vs 1.1.0",
+  "NO_DATA": "No data available",
   "SIDEBAR": {
     "HOME": "Home",
     "CATEGORIES": "Categories",

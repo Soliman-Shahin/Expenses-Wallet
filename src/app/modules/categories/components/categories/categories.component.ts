@@ -3,7 +3,9 @@ import {
   InfiniteScrollCustomEvent,
   ItemReorderEventDetail,
 } from '@ionic/angular';
+import { BehaviorSubject, map, takeUntil } from 'rxjs';
 import { BaseComponent } from 'src/app/shared/base';
+import { Category } from '../../models';
 import { CategoriesService } from '../../services';
 
 @Component({
@@ -14,10 +16,14 @@ import { CategoriesService } from '../../services';
 export class CategoriesComponent extends BaseComponent implements OnInit {
   private categoryService = inject(CategoriesService);
 
-  categories: any = [];
+  categories$ = new BehaviorSubject<Category[]>([]);
   pageSize = 10;
   currentPage = 0;
   totalItems = 0;
+
+  get categories() {
+    return this.categories$.value;
+  }
 
   isActionSheetOpen = false;
   public actionSheetButtons = [
@@ -56,47 +62,48 @@ export class CategoriesComponent extends BaseComponent implements OnInit {
         route: '/categories/create',
       });
     });
-    // this.generateItems();
     this.fetchAllCategories();
   }
 
   fetchAllCategories() {
-    // this.categoryService.getCategories().subscribe((data) => {
-    //   console.log('Data received from server', data);
-    //   this.categories = data;
-    //   this.totalItems = data.length;
-    // });
-  }
-
-  private generateItems() {
-    const count = this.categories.length + 1;
-    for (let i = 0; i < 50; i++) {
-      this.categories.push(`Item ${count + i}`);
-    }
+    this.categoryService
+      .getCategories()
+      .pipe(
+        takeUntil(this.destroy$),
+        map((response: any) => {
+          this.totalItems = response.total;
+          return response.data;
+        })
+      )
+      .subscribe((data: Category[]) => {
+        this.categories$.next(data);
+      });
   }
 
   onIonInfinite(ev: InfiniteScrollCustomEvent) {
-    this.generateItems();
-    setTimeout(() => {
-      ev.target.complete();
-    }, 500);
+    this.loadMoreCategories();
+    ev.target.complete();
+  }
+
+  loadMoreCategories() {
+    this.currentPage++;
+    this.categoryService
+      .getCategories({ page: this.currentPage, size: this.pageSize })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((data: Category[]) => {
+        this.categories$.next([...this.categories, ...data]);
+      });
   }
 
   handleReorder(ev: CustomEvent<ItemReorderEventDetail>) {
-    // The `from` and `to` properties contain the index of the item
-    // when the drag started and ended, respectively
     console.log('Dragged from index', ev.detail.from, 'to', ev.detail.to);
-
-    // Finish the reorder and position the item in the DOM based on
-    // where the gesture ended. This method can also be called directly
-    // by the reorder group
     ev.detail.complete();
   }
 
   handleInput(event: any) {
     const query = event.target.value.toLowerCase();
-    this.categories = this.categories.filter(
-      (d: any) => d.toLowerCase().indexOf(query) > -1
+    this.categories$.next(
+      this.categories.filter((d: any) => d.toLowerCase().indexOf(query) > -1)
     );
   }
 

@@ -1,4 +1,4 @@
-<ion-content>
+<ion-content *ngIf="categories$ | async as categories">
   <ion-toolbar>
     <ion-searchbar
       search-icon="search-circle"
@@ -10,7 +10,7 @@
     </ion-searchbar>
   </ion-toolbar>
 
-  <ion-list>
+  <ion-list *ngIf="totalItems > 0; else noData">
     <ion-reorder-group
       [disabled]="false"
       (ionItemReorder)="handleReorder($any($event))"
@@ -38,3 +38,10 @@
   [buttons]="actionSheetButtons"
   (didDismiss)="setOpen(false)"
 ></ion-action-sheet>
+
+<ng-template #noData>
+  <div class="no_data">
+    <ion-icon size="large" name="sad"></ion-icon>
+    <p>{{ "NO_DATA" | translate }}</p>
+  </div>
+</ng-template>
