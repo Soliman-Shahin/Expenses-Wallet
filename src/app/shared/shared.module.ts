@@ -4,7 +4,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { TranslateModule } from '@ngx-translate/core';
-import { UserInfoComponent } from './components';
+import { BalanceCardComponent, DateTimeComponent, MonthsScrollHeaderComponent, TotalSalaryComponent, UserInfoComponent } from './components';
 
 @NgModule({
   imports: [
@@ -22,7 +22,17 @@ import { UserInfoComponent } from './components';
     RouterModule,
     UserInfoComponent,
     TranslateModule,
+    DateTimeComponent,
+    MonthsScrollHeaderComponent,
+    BalanceCardComponent,
+    TotalSalaryComponent,
   ],
-  declarations: [ UserInfoComponent],
+  declarations: [
+    UserInfoComponent,
+    DateTimeComponent,
+    MonthsScrollHeaderComponent,
+    BalanceCardComponent,
+    TotalSalaryComponent,
+  ],
 })
 export class SharedModule {}

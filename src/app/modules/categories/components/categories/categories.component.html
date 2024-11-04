@@ -1,34 +1,34 @@
-<ion-content *ngIf="categories$ | async as categories">
+<ion-content *ngIf="response$ | async as categories">
   <ion-toolbar>
     <ion-searchbar
-      search-icon="search-circle"
       animated="true"
       [placeholder]="'SEARCH' | translate"
       [debounce]="500"
-      (ionInput)="handleInput($event)"
+      show-clear-button="always"
+      (ionInput)="filter($event)"
     >
     </ion-searchbar>
   </ion-toolbar>
 
-  <ion-list *ngIf="totalItems > 0; else noData">
-    <ion-reorder-group
-      [disabled]="false"
-      (ionItemReorder)="handleReorder($any($event))"
-    >
-      <ion-item
-        (click)="setOpen(true)"
-        *ngFor="let item of categories; let index"
-      >
-        <span class="category-icon" [style.background]="item.color">
-          <ion-icon size="large" [name]="item.icon"></ion-icon>
-        </span>
-        <ion-label>{{ item.title }}</ion-label>
-        <ion-reorder slot="end"></ion-reorder>
-      </ion-item>
-    </ion-reorder-group>
-  </ion-list>
   <ion-infinite-scroll (ionInfinite)="onIonInfinite($event)">
-    <ion-infinite-scroll-content></ion-infinite-scroll-content>
+    <ion-infinite-scroll-content>
+      <ion-spinner *ngIf="isLoadingResults" name="crescent"></ion-spinner>
+      <ion-list *ngIf="categories.total > 0; else noData">
+        <ion-reorder-group
+          [disabled]="false"
+          (ionItemReorder)="handleReorder($any($event))"
+        >
+          <ion-item *ngFor="let item of categories.data; let index">
+            <span class="category-icon" [style.background]="item.color">
+              <ion-icon size="large" [name]="item.icon"></ion-icon>
+            </span>
+            <ion-label>{{ item.title }}</ion-label>
+            <ion-button (click)="setOpen(true)">1111</ion-button>
+            <ion-reorder slot="end"></ion-reorder>
+          </ion-item>
+        </ion-reorder-group>
+      </ion-list>
+    </ion-infinite-scroll-content>
   </ion-infinite-scroll>
 </ion-content>
 
@@ -37,7 +37,8 @@
   header="Actions"
   [buttons]="actionSheetButtons"
   (didDismiss)="setOpen(false)"
-></ion-action-sheet>
+>
+</ion-action-sheet>
 
 <ng-template #noData>
   <div class="no_data">

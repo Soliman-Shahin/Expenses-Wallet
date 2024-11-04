@@ -1,5 +1,4 @@
-import { Component, OnInit } from '@angular/core';
-import { User } from 'src/app/modules/auth/models';
+import { Component } from '@angular/core';
 import { BaseComponent } from 'src/app/shared/base';
 
 @Component({
@@ -7,25 +6,9 @@ import { BaseComponent } from 'src/app/shared/base';
   templateUrl: './side-menu.component.html',
   styleUrls: ['./side-menu.component.scss'],
 })
-export class SideMenuComponent extends BaseComponent implements OnInit {
-  user: User | null = null;
-
+export class SideMenuComponent extends BaseComponent{
   constructor() {
     super();
   }
 
-  ngOnInit(): void {
-    this.initializeUser();
-    this.subscribeToUserChanges();
-  }
-
-  private initializeUser(): void {
-    this.user = this.tokenService.getUser();
-  }
-
-  subscribeToUserChanges(): void {
-    this.tokenService.userSubject.subscribe((user: User | null) => {
-      this.user = user;
-    });
-  }
 }

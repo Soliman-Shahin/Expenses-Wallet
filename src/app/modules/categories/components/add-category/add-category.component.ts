@@ -1,5 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
+import { map } from 'rxjs';
 import { BaseComponent } from 'src/app/shared/base';
 import { CategoriesService } from '../../services';
 
@@ -52,7 +53,14 @@ export class AddCategoryComponent extends BaseComponent implements OnInit {
   addCategory(): void {
     const category = this.categoryForm.value;
     console.log('category', category);
-    // this.categoryService.addCategory(category);
-    this.routerService.navigate(['/categories/list']);
+    this.categoryService.createCategory(category).pipe(
+      map((response) => {
+        console.log('category created', response);
+        return response
+      })
+    ).subscribe(data =>{
+      console.log('data', data);
+      this.routerService.navigate(['/categories/list']);
+    })
   }
 }

@@ -1,0 +1,14 @@
+<div class="month-scroll-container">
+  <ion-card
+    *ngFor="let month of months; let i = index; trackBy: trackByMonth"
+    [ngClass]="{ active: i === activeMonthIndex }"
+    (click)="selectMonth(i, month)"
+    #monthCard
+  >
+    <ion-card-header>
+      <ion-card-subtitle>{{ month.year }}</ion-card-subtitle>
+      <ion-card-title>{{ month.month }}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content></ion-card-content>
+  </ion-card>
+</div>

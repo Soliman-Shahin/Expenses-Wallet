@@ -1,7 +1,18 @@
 <ion-content class="ion-padding">
-  <ion-refresher class="ion-padding" slot="fixed" (ionRefresh)="handleRefresh($event)">
-    <p>{{ "WELCOME" | translate }}</p>
+  <p *ngIf="!user">{{ "WELCOME" | translate }}</p>
+  <app-months-scroll-header
+    *ngIf="user"
+    (month)="onMonthChange($event)"
+  ></app-months-scroll-header>
+  <app-balance-card></app-balance-card>
+  <app-total-salary></app-total-salary>
+  <ion-refresher
+    class="ion-padding"
+    slot="fixed"
+    (ionRefresh)="handleRefresh($event)"
+  >
     <ion-refresher-content>
+      <!-- {{selectedMonth | json}} -->
     </ion-refresher-content>
   </ion-refresher>
 </ion-content>

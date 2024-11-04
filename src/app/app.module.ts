@@ -11,6 +11,7 @@ import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 
+import { IonicModule } from '@ionic/angular';
 import { CoreModule } from './core/core.module';
 import { LayoutModule } from './layout/layout.module';
 import { SharedModule } from './shared/shared.module';
@@ -25,6 +26,7 @@ export function HttpLoaderFactory(http: HttpClient) {
   imports: [
     BrowserModule,
     AppRoutingModule,
+    IonicModule.forRoot(),
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,
@@ -34,7 +36,7 @@ export function HttpLoaderFactory(http: HttpClient) {
     }),
     SharedModule,
     CoreModule,
-    LayoutModule
+    LayoutModule,
   ],
   providers: [provideHttpClient(withInterceptorsFromDi())],
 })

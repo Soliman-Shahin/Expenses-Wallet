@@ -1,0 +1,29 @@
+.month-scroll-container {
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  ion-card {
+    flex: 0 0 auto;
+    width: 4rem;
+    height: 5rem;
+    text-align: center;
+    transition: transform 0.3s;
+
+    &.active {
+      transform: scale(1.1);
+      border: 2px solid var(--ion-color-primary);
+    }
+
+    ion-card-header {
+      padding: 0.5rem;
+    }
+  }
+}

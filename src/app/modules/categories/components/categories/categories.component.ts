@@ -3,8 +3,8 @@ import {
   InfiniteScrollCustomEvent,
   ItemReorderEventDetail,
 } from '@ionic/angular';
-import { BehaviorSubject, map, takeUntil } from 'rxjs';
-import { BaseComponent } from 'src/app/shared/base';
+import { BehaviorSubject, finalize, switchMap, takeUntil, tap } from 'rxjs';
+import { BaseListComponent } from 'src/app/shared/base';
 import { Category } from '../../models';
 import { CategoriesService } from '../../services';
 
@@ -13,16 +13,33 @@ import { CategoriesService } from '../../services';
   templateUrl: './categories.component.html',
   styleUrls: ['./categories.component.scss'],
 })
-export class CategoriesComponent extends BaseComponent implements OnInit {
+export class CategoriesComponent
+  extends BaseListComponent<Category>
+  implements OnInit
+{
   private categoryService = inject(CategoriesService);
 
-  categories$ = new BehaviorSubject<Category[]>([]);
-  pageSize = 10;
-  currentPage = 0;
-  totalItems = 0;
+  sizeOptions = {
+    pageSizeOptions: this.pageSizeOptions,
+    pageSize: this.pageSize,
+  };
 
-  get categories() {
-    return this.categories$.value;
+  sortOptions = {
+    sortBy: 'createdAt',
+  };
+
+  readonly #defaultParams = {
+    skip: 0,
+    limit: this.pageSize,
+    sort: `-${this.sortOptions?.sortBy}`,
+  };
+
+  readonly #paramsSub = new BehaviorSubject({
+    ...this.#defaultParams,
+  });
+
+  get activatedParams() {
+    return this.#paramsSub.getValue();
   }
 
   isActionSheetOpen = false;
@@ -62,21 +79,22 @@ export class CategoriesComponent extends BaseComponent implements OnInit {
         route: '/categories/create',
       });
     });
-    this.fetchAllCategories();
+    this.loadCategories();
   }
 
-  fetchAllCategories() {
-    this.categoryService
-      .getCategories()
+  private loadCategories() {
+    this.#paramsSub
       .pipe(
         takeUntil(this.destroy$),
-        map((response: any) => {
-          this.totalItems = response.total;
-          return response.data;
-        })
+        tap(() => (this.isLoadingResults = true)),
+        switchMap((params) =>
+          this.categoryService
+            .getCategories(params)
+            .pipe(finalize(() => (this.isLoadingResults = false)))
+        )
       )
-      .subscribe((data: Category[]) => {
-        this.categories$.next(data);
+      .subscribe((res) => {
+        this._responseSub.next(res);
       });
   }
 
@@ -86,12 +104,12 @@ export class CategoriesComponent extends BaseComponent implements OnInit {
   }
 
   loadMoreCategories() {
-    this.currentPage++;
+    this.selectedPage++;
     this.categoryService
-      .getCategories({ page: this.currentPage, size: this.pageSize })
+      .getCategories({ page: this.selectedPage, size: this.pageSize })
       .pipe(takeUntil(this.destroy$))
       .subscribe((data: Category[]) => {
-        this.categories$.next([...this.categories, ...data]);
+        console.log('data', data)
       });
   }
 
@@ -100,11 +118,8 @@ export class CategoriesComponent extends BaseComponent implements OnInit {
     ev.detail.complete();
   }
 
-  handleInput(event: any) {
+  filter(event: any) {
     const query = event.target.value.toLowerCase();
-    this.categories$.next(
-      this.categories.filter((d: any) => d.toLowerCase().indexOf(query) > -1)
-    );
   }
 
   setOpen(isOpen: boolean) {

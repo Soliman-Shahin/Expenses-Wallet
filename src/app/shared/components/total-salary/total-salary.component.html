@@ -1,0 +1,17 @@
+<ion-card #salaryCard>
+  <ion-card-header>
+    <ion-card-title>
+      <span>{{ "Total Salary" | translate }}</span>
+    </ion-card-title>
+  </ion-card-header>
+  <ion-card-content>
+    <div class="salary-from-to">
+      <span>{{ expense + currency }}</span>
+      <span>{{ totalSalary + currency }}</span>
+    </div>
+    <ion-progress-bar [value]="progress"></ion-progress-bar>
+    <div>
+      <span>{{ ("remaining" | translate) + remaining + currency }}</span>
+    </div>
+  </ion-card-content>
+</ion-card>

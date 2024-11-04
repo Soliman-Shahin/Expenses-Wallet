@@ -1,0 +1,28 @@
+<ion-card #balanceCard>
+  <ion-card-header>
+    <ion-card-subtitle class="sub-title">
+      <span>Total Balance</span>
+      <ion-icon
+        [name]="showBalance ? 'eye-outline' : 'eye-off-outline'"
+        (click)="toggleBalance()"
+      ></ion-icon>
+    </ion-card-subtitle>
+    <ion-card-title>{{ formattedBalance }}</ion-card-title>
+  </ion-card-header>
+  <ion-card-content class="card-content">
+    <div class="balance-item">
+      <ion-icon name="arrow-down-circle-outline"></ion-icon>
+      <span>Income</span>
+      <div>
+        <span>{{ formattedIncome }}</span>
+      </div>
+    </div>
+    <div class="balance-item">
+      <ion-icon name="arrow-up-circle-outline"></ion-icon>
+      <span>Outcome</span>
+      <div>
+        <span>{{ formattedOutcome }}</span>
+      </div>
+    </div>
+  </ion-card-content>
+</ion-card>

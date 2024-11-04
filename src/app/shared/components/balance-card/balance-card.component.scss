@@ -1,0 +1,18 @@
+.sub-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  span {
+    padding: 0;
+  }
+}
+
+ion-icon {
+  font-size: 20px;
+}
+
+.card-content {
+  display: flex;
+  justify-content: space-between;
+}

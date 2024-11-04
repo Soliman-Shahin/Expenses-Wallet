@@ -7,6 +7,7 @@ import { BaseComponent } from 'src/app/shared/base';
   styleUrls: ['./home-page.component.scss'],
 })
 export class HomePageComponent extends BaseComponent implements OnInit {
+  selectedMonth!: { month: number; year: number };
   constructor() {
     super();
   }
@@ -24,5 +25,9 @@ export class HomePageComponent extends BaseComponent implements OnInit {
       // Any calls to load data go here
       event.target.complete();
     }, 2000);
+  }
+
+  onMonthChange(value: { month: number; year: number }): void {
+    this.selectedMonth = value;
   }
 }

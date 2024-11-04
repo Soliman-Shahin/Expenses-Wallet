@@ -5,12 +5,14 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { HeaderService } from 'src/app/layout/services';
+import { User } from 'src/app/modules/auth/models';
 import { AuthService, TokenService } from 'src/app/modules/auth/services';
 import { ThemeService, ToastService, TranslationService } from '../services';
 
 @Directive()
 export abstract class BaseComponent implements OnDestroy {
   language: string = '';
+  user: User | null = null;
 
   readonly activatedRoute = inject(ActivatedRoute);
   readonly routerService = inject(Router);
@@ -28,6 +30,8 @@ export abstract class BaseComponent implements OnDestroy {
 
   constructor() {
     this.initializeLanguage();
+    this.initializeUser();
+    this.subscribeToUserChanges();
   }
 
   get currentLang() {
@@ -40,6 +44,16 @@ export abstract class BaseComponent implements OnDestroy {
 
   get currentTheme(): string {
     return this.themeService.getCurrentTheme();
+  }
+
+  initializeUser(): void {
+    this.user = this.tokenService.getUser();
+  }
+
+  subscribeToUserChanges(): void {
+    this.tokenService.userSubject.subscribe((user: User | null) => {
+      this.user = user;
+    });
   }
 
   initializeLanguage(): void {
