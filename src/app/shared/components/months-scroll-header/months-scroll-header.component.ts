@@ -1,14 +1,14 @@
 import {
+  AfterViewInit,
   ChangeDetectorRef,
   Component,
   ElementRef,
   EventEmitter,
-  OnInit,
   Output,
   QueryList,
   TrackByFunction,
   ViewChildren,
-  ViewEncapsulation,
+  ViewEncapsulation
 } from '@angular/core';
 
 @Component({
@@ -17,7 +17,7 @@ import {
   styleUrls: ['./months-scroll-header.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
-export class MonthsScrollHeaderComponent implements OnInit {
+export class MonthsScrollHeaderComponent implements AfterViewInit {
   @Output() month = new EventEmitter<{ month: number; year: number }>();
 
   months: { month: number; year: number }[] = [];
@@ -39,7 +39,7 @@ export class MonthsScrollHeaderComponent implements OnInit {
     }));
   }
 
-  ngOnInit() {
+  ngAfterViewInit() {
     this.scrollToActiveMonth();
   }
 
@@ -55,7 +55,7 @@ export class MonthsScrollHeaderComponent implements OnInit {
   private scrollToActiveMonth() {
     const activeMonth = this.months[this.activeMonthIndex];
     this.month.emit(activeMonth);
-    const activeCard = this.monthCards.toArray()[this.activeMonthIndex];
+    const activeCard = this.monthCards?.toArray()[this.activeMonthIndex];
     if (activeCard) {
       activeCard.nativeElement.scrollIntoView({
         behavior: 'smooth',

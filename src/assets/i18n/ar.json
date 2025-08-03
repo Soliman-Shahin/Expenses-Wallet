@@ -17,6 +17,12 @@
   "ICON": "رمز",
   "VERSION": "إصدار 1.1.0 ",
   "NO_DATA": "لا يوجد بيانات متوفرة",
+  "TOTAL_SALARY": "كل الراتب",
+  "TOTAL_EXPENSES": "كل المصروفات",
+  "TOTAL_BALANCE": "اجمالي الرصيد",
+  "INCOME": "الدخل",
+  "OUTCOME": "المصروف",
+  "REMAINING": "المتبقي",
   "SIDEBAR": {
     "HOME": "الرئيسية",
     "CATEGORIES": "الأقسام",

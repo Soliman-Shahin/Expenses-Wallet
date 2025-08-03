@@ -16,6 +16,11 @@
     height: 5rem;
     text-align: center;
     transition: transform 0.3s;
+    margin-inline-end: 0;
+
+    &:not(:last-child) {
+      margin-inline-end: 0.5rem;
+    }
 
     &.active {
       transform: scale(1.1);
