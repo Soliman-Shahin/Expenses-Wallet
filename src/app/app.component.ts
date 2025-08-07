@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
+import { ThemeService } from './shared/services/themeToggle.service';
 import { BaseComponent } from './shared/base';
 
 @Component({
@@ -6,19 +7,10 @@ import { BaseComponent } from './shared/base';
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss'],
 })
-export class AppComponent extends BaseComponent implements OnInit {
-  private htmlElement: HTMLElement = document.getElementsByTagName('html')[0];
-
-  constructor() {
-    super();
+export class AppComponent {
+    constructor(private themeService: ThemeService) {
+    this.themeService.initTheme();
   }
 
-  ngOnInit() {
-    this.setTheme();
-  }
 
-  private setTheme() {
-    const currentTheme = this.currentTheme;
-    this.htmlElement.classList.add(currentTheme);
-  }
 }

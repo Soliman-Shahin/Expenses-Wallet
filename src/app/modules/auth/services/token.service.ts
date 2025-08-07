@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { LocalStorageKeys, User } from 'src/app/modules/auth/models';
+import { StorageService } from './storage.service';
 
 @Injectable({
   providedIn: 'root',
@@ -14,75 +15,65 @@ export class TokenService {
     userLang: 'user-lang',
   };
 
-  userSubject = new Subject<User | null>();
+  user$ = new BehaviorSubject<User | null>(null);
 
-  constructor() {}
-
-  private getItem(key: string): string | null {
-    try {
-      return localStorage.getItem(key);
-    } catch (error) {
-      console.error('Error getting item from localStorage:', error);
-      return null;
-    }
+  constructor(private storage: StorageService) {
+    const user = this.getUser();
+    if (user) this.user$.next(user);
   }
 
-  private setItem(key: string, value: string): void {
-    try {
-      localStorage.setItem(key, value);
-    } catch (error) {
-      console.error('Error setting item in localStorage:', error);
-    }
+  // Use StorageService for all storage operations
+  private getItem<T = string>(key: string): T | null {
+    return this.storage.get<T>(key);
+  }
+
+  private setItem<T = string>(key: string, value: T): void {
+    this.storage.set<T>(key, value);
   }
 
   private removeItem(key: string): void {
-    try {
-      localStorage.removeItem(key);
-    } catch (error) {
-      console.error('Error removing item from localStorage:', error);
-    }
+    this.storage.remove(key);
   }
 
   getAccessToken(): string | null {
-    return this.getItem(this.localStorageKeys.accessToken);
+    return this.getItem<string>(this.localStorageKeys.accessToken);
   }
 
   getRefreshToken(): string | null {
-    return this.getItem(this.localStorageKeys.refreshToken);
+    return this.getItem<string>(this.localStorageKeys.refreshToken);
   }
 
   getUserId(): string | null {
-    return this.getItem(this.localStorageKeys.userId);
+    return this.getItem<string>(this.localStorageKeys.userId);
   }
 
   getUser(): User | null {
-    const userJson = this.getItem(this.localStorageKeys.user);
-    return userJson ? JSON.parse(userJson) : null;
+    return this.getItem<User>(this.localStorageKeys.user);
   }
 
   getUserLang(): string | null {
-    return this.getItem(this.localStorageKeys.userLang);
+    return this.getItem<string>(this.localStorageKeys.userLang);
   }
 
   setAccessToken(accessToken: string): void {
-    this.setItem(this.localStorageKeys.accessToken, accessToken);
+    this.setItem<string>(this.localStorageKeys.accessToken, accessToken);
   }
 
   setRefreshToken(refreshToken: string): void {
-    this.setItem(this.localStorageKeys.refreshToken, refreshToken);
+    this.setItem<string>(this.localStorageKeys.refreshToken, refreshToken);
   }
 
   setUserId(userId: string): void {
-    this.setItem(this.localStorageKeys.userId, userId);
+    this.setItem<string>(this.localStorageKeys.userId, userId);
   }
 
   setUser(user: User): void {
-    this.setItem(this.localStorageKeys.user, JSON.stringify(user));
-    this.userSubject.next(user);
+    this.setItem<User>(this.localStorageKeys.user, user);
+    this.user$.next(user);
   }
 
   setUserLang(userLang: string): void {
-    this.setItem(this.localStorageKeys.userLang, userLang);
+    this.setItem<string>(this.localStorageKeys.userLang, userLang);
   }
 
   setSession(userId: string, accessToken: string, refreshToken: string): void {
@@ -93,7 +84,7 @@ export class TokenService {
 
   removeSession(): void {
     Object.values(this.localStorageKeys).forEach((key) => this.removeItem(key));
-    this.userSubject.next(null);
+    this.user$.next(null);
   }
 
   getPayload(): any {
@@ -109,4 +100,26 @@ export class TokenService {
     }
     return null;
   }
+
+  // Token expiration helpers
+  isTokenExpired(token: string | null): boolean {
+    if (!token) return true;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const exp = payload.exp;
+      if (!exp) return false;
+      return Date.now() / 1000 > exp;
+    } catch (e) {
+      return true;
+    }
+  }
+
+  isAccessTokenExpired(): boolean {
+    return this.isTokenExpired(this.getAccessToken());
+  }
+
+  isRefreshTokenExpired(): boolean {
+    return this.isTokenExpired(this.getRefreshToken());
+  }
 }
+

@@ -4,7 +4,6 @@ import { SharedModule } from 'src/app/shared/shared.module';
 import { CategoriesRoutingModule } from './categories.routing.module';
 import { AddCategoryComponent, CategoriesComponent } from './components';
 import { ColorSelectorComponent, IconSelectorComponent } from './containers';
-import { CategoriesService } from './services';
 
 @NgModule({
   imports: [CommonModule, SharedModule, CategoriesRoutingModule],
@@ -14,6 +13,6 @@ import { CategoriesService } from './services';
     ColorSelectorComponent,
     IconSelectorComponent,
   ],
-  providers: [CategoriesService],
+  providers: [],
 })
 export class CategoriesModule {}

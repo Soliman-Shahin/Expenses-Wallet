@@ -1,0 +1,126 @@
+@import "src/theme/variables";
+
+:host {
+  // Form container
+  .form-container {
+    padding: var(--spacing-md);
+  }
+
+  // Form fields
+  ion-item {
+    --padding-start: 0;
+    --inner-padding-end: 0;
+    --background: transparent;
+    --border-color: var(--ion-color-light-shade);
+    --highlight-color-focused: var(--ion-color-primary);
+    --highlight-height: 2px;
+    margin-bottom: var(--spacing-md);
+
+    &.item-has-focus {
+      --highlight-background: var(--ion-color-primary);
+      --border-color: var(--ion-color-primary);
+    }
+
+    ion-label {
+      color: var(--text-secondary);
+      font-size: var(--text-sm);
+      font-weight: var(--font-weight-medium);
+      margin-bottom: var(--spacing-xxs);
+    }
+
+    ion-input,
+    ion-select,
+    ion-textarea {
+      --padding-start: 0;
+      --padding-end: 0;
+      --placeholder-color: var(--text-tertiary);
+      --placeholder-opacity: 0.8;
+      color: var(--text-primary);
+      font-size: var(--text-base);
+
+      &.sc-ion-input-md-h,
+      &.sc-ion-textarea-md-h {
+        --padding-top: var(--spacing-xxs);
+        --padding-bottom: var(--spacing-xxs);
+      }
+    }
+
+    ion-datetime-button {
+      width: 100%;
+      justify-content: flex-start;
+      padding: 0;
+      margin: 0;
+
+      .datetime-button {
+        min-height: 2.5rem;
+        padding: var(--spacing-xxs) 0;
+        color: var(--text-primary);
+        font-size: var(--text-base);
+      }
+    }
+  }
+
+  // Category selection
+  .category-selection {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    margin: var(--spacing-md) 0;
+
+    .category-option {
+      --border-radius: var(--border-radius-md);
+      --padding-start: var(--spacing-md);
+      --padding-end: var(--spacing-md);
+      --padding-top: var(--spacing-sm);
+      --padding-bottom: var(--spacing-sm);
+      font-size: var(--text-sm);
+      font-weight: var(--font-weight-medium);
+      text-transform: none;
+      --box-shadow: none;
+      --border-style: solid;
+      --border-width: 1px;
+      --border-color: var(--ion-color-light-shade);
+      transition: all 0.2s ease;
+
+      &[color="primary"] {
+        --background: var(--ion-color-primary-tint);
+        --color: var(--ion-color-primary-shade);
+        --border-color: var(--ion-color-primary);
+      }
+
+      ion-icon {
+        margin-right: var(--spacing-xxs);
+      }
+    }
+  }
+
+  // Form actions
+  .form-actions {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-xl);
+
+    ion-button {
+      --border-radius: var(--border-radius-md);
+      --padding-start: var(--spacing-lg);
+      --padding-end: var(--spacing-lg);
+      font-weight: var(--font-weight-medium);
+      flex: 1;
+
+      &[fill="outline"] {
+        --border-width: 1px;
+        --border-color: var(--ion-color-medium);
+        --color: var(--ion-color-medium);
+      }
+    }
+  }
+
+  // Validation messages
+  .validation-message {
+    color: var(--ion-color-danger);
+    font-size: var(--text-xs);
+    margin-top: calc(-1 * var(--spacing-sm));
+    margin-bottom: var(--spacing-sm);
+    padding: 0 var(--spacing-xs);
+  }
+}

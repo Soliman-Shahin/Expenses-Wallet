@@ -47,6 +47,19 @@
       <ion-row class="mt-4">
         <app-icon-selector class="icon-selector" (icon)="selectIcon($event)" />
       </ion-row>
+
+      <ion-row class="mt-4">
+        <ion-col>
+          <ion-button
+            (click)="editMode ? updateCategory() : addCategory()"
+            expand="block"
+            [disabled]="!categoryForm.valid || isLoading"
+          >
+            <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+            {{ (editMode ? 'UPDATE' : 'CREATE') | translate }}
+          </ion-button>
+        </ion-col>
+      </ion-row>
     </ion-grid>
   </form>
 </ion-content>

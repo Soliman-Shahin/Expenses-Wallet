@@ -1,3 +1,316 @@
-.no_account{
+.no_account {
   vertical-align: sub;
+}
+
+// Main container
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100%;
+  background: var(--ion-background-color, var(--ion-color-light));
+  padding: var(--spacing-lg);
+}
+
+// Login card
+.login-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--ion-background-color, var(--ion-color-light));
+  border-radius: var(--card-border-radius, 16px);
+  padding: var(--spacing-xxl) var(--spacing-lg);
+  box-shadow: var(--card-box-shadow, 0 4px 20px rgba(0, 0, 0, 0.1));
+  margin: var(--spacing-lg) 0;
+  position: relative;
+  overflow: hidden;
+}
+
+// App logo and name
+.logo-container {
+  text-align: center;
+  margin-bottom: var(--spacing-xxl);
+
+  .app-logo {
+    font-size: 4rem;
+    color: var(--ion-color-primary);
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .app-name {
+    margin: 0;
+    font-size: var(--text-3xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+  }
+}
+
+// Welcome text
+.welcome-text {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.subtitle {
+  color: var(--ion-color-medium);
+  margin-top: 0;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+
+// Form styles
+.login-form {
+  margin-top: 24px;
+}
+
+.form-item {
+  --background: var(--ion-color-light);
+  --border-radius: 12px;
+  --padding-start: 16px;
+  --padding-end: 8px;
+  --min-height: 56px;
+  margin-bottom: 16px;
+  border: 1px solid var(--ion-color-light-shade);
+  transition: border-color 0.3s ease;
+
+  &.ion-invalid {
+    border-color: var(--ion-color-danger);
+  }
+
+  &.ion-valid {
+    border-color: var(--ion-color-success);
+  }
+
+  ion-icon {
+    color: var(--ion-color-medium);
+    font-size: 20px;
+    margin-right: 12px;
+  }
+
+  ion-input {
+    --padding-top: 8px;
+    --padding-bottom: 8px;
+  }
+
+  ion-button {
+    --padding-start: 8px;
+    --padding-end: 8px;
+    --ripple-color: transparent;
+
+    ion-icon {
+      margin-right: 0;
+      color: var(--ion-color-medium);
+    }
+  }
+}
+
+// Form options
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px 0 24px;
+
+  .remember-me {
+    --min-height: auto;
+    --padding-start: 0;
+    --inner-padding-end: 0;
+    --inner-border-width: 0;
+    --background: transparent;
+
+    ion-checkbox {
+      --size: 18px;
+      --background-checked: var(--ion-color-primary);
+      --border-color: var(--ion-color-medium);
+      --border-color-checked: var(--ion-color-primary);
+      margin-right: 8px;
+    }
+
+    ion-label {
+      font-size: 14px;
+      color: var(--ion-color-medium);
+    }
+  }
+
+  .forgot-password {
+    --color: var(--ion-color-medium);
+    --color-activated: var(--ion-color-primary);
+    --color-focused: var(--ion-color-primary);
+    --color-hover: var(--ion-color-primary);
+    --background-hover: transparent;
+    --background-activated: transparent;
+    --background-focused: transparent;
+    --background: transparent;
+    --box-shadow: none;
+    font-size: 14px;
+    text-transform: none;
+    margin: 0;
+    --padding-start: 8px;
+    --padding-end: 8px;
+  }
+}
+
+// Login button
+.login-button {
+  --border-radius: 12px;
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+  --box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.2);
+  font-weight: 600;
+  text-transform: none;
+  height: 48px;
+  margin: 0;
+  transition: all 0.3s ease;
+
+  &:hover {
+    --box-shadow: 0 6px 16px rgba(var(--ion-color-primary-rgb), 0.3);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    --box-shadow: 0 2px 8px rgba(var(--ion-color-primary-rgb), 0.2);
+    transform: translateY(1px);
+  }
+
+  &.loading {
+    --box-shadow: none;
+    transform: none;
+  }
+
+  ion-spinner {
+    --color: var(--ion-color-light);
+  }
+}
+
+// Social login buttons
+.social-login-buttons {
+  margin: 24px 0;
+
+  ion-button {
+    --border-radius: 12px;
+    --border-style: solid;
+    --border-width: 1px;
+    --border-color: var(--ion-color-light-shade);
+    --padding-top: 16px;
+    --padding-bottom: 16px;
+    --background: var(--ion-color-light);
+    --color: var(--ion-color-dark);
+    --background-hover: var(--ion-color-light-shade);
+    --background-activated: var(--ion-color-light-shade);
+    font-weight: 500;
+    text-transform: none;
+    height: 48px;
+    margin: 0;
+    transition: all 0.3s ease;
+
+    ion-icon {
+      font-size: 20px;
+      margin-right: 12px;
+    }
+
+    &:hover {
+      transform: translateY(-1px);
+      --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    &:active {
+      transform: translateY(1px);
+      --box-shadow: none;
+    }
+  }
+
+  .google-btn {
+    --color: var(--ion-text-color);
+
+    ion-icon {
+      color: var(--ion-text-color);
+    }
+  }
+}
+
+// Divider
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 24px 0;
+  color: var(--ion-color-medium);
+  font-size: 14px;
+
+  .divider-line {
+    flex: 1;
+    height: 1px;
+    background-color: var(--ion-color-light-shade);
+  }
+
+  .divider-text {
+    padding: 0 12px;
+  }
+}
+
+// Error message
+.error-message {
+  display: flex;
+  align-items: center;
+  background: rgba(var(--ion-color-danger-rgb), 0.1);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: var(--ion-color-danger);
+
+  ion-icon {
+    margin-right: 8px;
+    font-size: 18px;
+  }
+}
+
+// Sign up link
+.signup-link {
+  margin-top: 24px;
+  font-size: 14px;
+  color: var(--ion-color-medium);
+
+  .signup-text {
+    color: var(--ion-color-primary);
+    font-weight: 500;
+    text-decoration: none;
+    margin-left: 4px;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 576px) {
+  .login-card {
+    padding: 24px 16px;
+    margin: 16px;
+  }
+
+  .logo-container {
+    .app-logo {
+      font-size: 56px;
+    }
+
+    .app-name {
+      font-size: 22px;
+    }
+  }
+
+  .welcome-text {
+    font-size: 22px;
+  }
+
+  .form-options {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+
+    .forgot-password {
+      align-self: flex-end;
+    }
+  }
 }

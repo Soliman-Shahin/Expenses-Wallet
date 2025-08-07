@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation } from '@angular/core';
+import { Component, Input, ViewEncapsulation } from '@angular/core';
 
 @Component({
   selector: 'app-balance-card',
@@ -7,22 +7,31 @@ import { Component, ViewEncapsulation } from '@angular/core';
   encapsulation: ViewEncapsulation.None,
 })
 export class BalanceCardComponent {
+    @Input() balance: number | null = null;
+    @Input() income: number | null = null;
+    @Input() expenses: number | null = null;
+    @Input() percentageChange: number | null = null;
+    @Input() isLoading = false;
+    @Input() currency: string = 'EGP';
+    
   showBalance: boolean = true;
-  totalBalance: number = 1000;
-  income: number = 4000;
-  outcome: number = 3000;
-  currency: string = 'EGP';
 
   get formattedBalance(): string {
-    return this.showBalance ? `${this.totalBalance} ${this.currency}` : '*****';
+    if (!this.showBalance) return '*****';
+    if (this.balance === null || this.balance === undefined) return '-';
+    return `${this.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${this.currency}`;
   }
 
   get formattedIncome(): string {
-    return this.showBalance ? `${this.income} ${this.currency}` : '*****';
+    if (!this.showBalance) return '*****';
+    if (this.income === null || this.income === undefined) return '-';
+    return `${this.income.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${this.currency}`;
   }
 
-  get formattedOutcome(): string {
-    return this.showBalance ? `${this.outcome} ${this.currency}` : '*****';
+  get formattedExpenses(): string {
+    if (!this.showBalance) return '*****';
+    if (this.expenses === null || this.expenses === undefined) return '-';
+    return `${this.expenses.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${this.currency}`;
   }
 
   toggleBalance(): void {

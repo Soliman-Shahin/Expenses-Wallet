@@ -1,0 +1,51 @@
+// Layout Variables
+:root {
+  // Spacing Scale
+  --spacing-xxs: 4px;
+  --spacing-xs: 8px;
+  --spacing-sm: 12px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-xxl: 48px;
+
+  // Container
+  --container-padding: var(--spacing-md);
+  --container-max-width: 1200px;
+
+  // Card
+  --card-padding: var(--spacing-lg);
+  --card-border-radius: 12px;
+  --card-box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  // Section
+  --section-padding: var(--spacing-xl) var(--spacing-md);
+
+  // Header
+  --header-height: 56px;
+  --header-padding: 0 var(--spacing-md);
+
+  // Footer
+  --footer-height: 64px;
+  --footer-padding: var(--spacing-md);
+}
+
+// Responsive Breakpoints
+:root {
+  --breakpoint-xs: 0;
+  --breakpoint-sm: 576px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 992px;
+  --breakpoint-xl: 1200px;
+}
+
+// Z-index Scale
+:root {
+  --z-index-dropdown: 1000;
+  --z-index-sticky: 1020;
+  --z-index-fixed: 1030;
+  --z-index-modal-backdrop: 1040;
+  --z-index-modal: 1050;
+  --z-index-popover: 1060;
+  --z-index-tooltip: 1070;
+}

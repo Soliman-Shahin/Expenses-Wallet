@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { takeUntil } from 'rxjs';
-import { BaseComponent } from 'src/app/shared/base';
+import { finalize, takeUntil } from 'rxjs';
+
+import { BaseComponent } from 'src/app/shared/base/base.component';
 
 @Component({
   selector: 'app-login',
@@ -10,48 +11,126 @@ import { BaseComponent } from 'src/app/shared/base';
 })
 export class LoginComponent extends BaseComponent {
   loginForm!: FormGroup;
+  hide = true;
+  errorMessage = '';
 
-  hide: boolean = true;
+  // Form control names for template access
+  readonly formFields = {
+    email: 'email',
+    password: 'password',
+    rememberMe: 'rememberMe',
+  };
 
   constructor() {
     super();
     this.initForm();
   }
 
-  togglePasswordVisibility() {
+  togglePasswordVisibility(): void {
     this.hide = !this.hide;
   }
 
-  initForm() {
+  private initForm(): void {
+    // Try to get saved credentials if they exist
+    const savedEmail = localStorage.getItem('savedEmail') || '';
+    const rememberMe = savedEmail !== '';
+
     this.loginForm = new FormGroup({
-      email: new FormControl('', [Validators.required, Validators.email]),
-      password: new FormControl('', [Validators.required]),
+      [this.formFields.email]: new FormControl(savedEmail, [
+        Validators.required,
+        Validators.email,
+        Validators.maxLength(100),
+      ]),
+      [this.formFields.password]: new FormControl('', [
+        Validators.required,
+        Validators.minLength(6),
+        Validators.maxLength(50),
+      ]),
+      [this.formFields.rememberMe]: new FormControl(rememberMe),
     });
   }
 
-  signInWithGoogle() {
-
+  get email() {
+    return this.loginForm.get(this.formFields.email);
   }
 
-  login(data: any) {
+  get password() {
+    return this.loginForm.get(this.formFields.password);
+  }
+
+  signInWithGoogle(): void {
     this.authService
-      .login(data.email, data.password)
-      .pipe(takeUntil(this.destroy$))
+      .loginWithGoogle()
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.setLoading(false))
+      )
       .subscribe({
-        next: (res) => {
-          if (res?.status === 200) {
-            this.tokenService.setUser(res?.body);
-            this.tokenService.setUserLang(this.translate.getCurrentLanguage());
-            this.toastService.presentSuccessToast(
-              'bottom',
-              'Action was successful!'
-            );
-            this.routerService.navigate(['/']);
-          }
+        next: () => {
+          this.toastService.presentSuccessToast(
+            'bottom',
+            this.translateService.instant('AUTH.LOGIN_SUCCESS')
+          );
+          this.router.navigate(['/']);
+        },
+        error: (error: any) => {
+          console.error('Login error:', error);
+          this.errorMessage =
+            error?.error?.message ||
+            this.translateService.instant('AUTH.LOGIN_ERROR');
+          this.toastService.presentErrorToast('bottom', this.errorMessage);
+        },
+      });
+  }
+
+  login(): void {
+    if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();
+      return;
+    }
+
+    this.setLoading(true);
+    this.errorMessage = '';
+    const { email, password, rememberMe } = this.loginForm.value;
+    const credentials = { email, password };
+
+    // Handle remember me functionality (only email)
+    if (rememberMe) {
+      localStorage.setItem('savedEmail', email);
+    } else {
+      localStorage.removeItem('savedEmail');
+    }
+
+    this.authService
+      .login(credentials.email, credentials.password)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.setLoading(false))
+      )
+      .subscribe({
+        next: () => {
+          // Navigation and state are handled by the AuthService.
+          // We just show a success message here.
+          this.toastService.presentSuccessToast(
+            'bottom',
+            this.translateService.instant('AUTH.LOGIN_SUCCESS')
+          );
         },
         error: (error) => {
-          console.error('Error during login:', error);
-          this.toastService.presentErrorToast('bottom', 'Action failed!');
+          console.error('Login error:', error);
+          let errorMessage = 'AUTH.LOGIN_ERROR';
+
+          // Handle specific error cases
+          if (error.status === 401) {
+            errorMessage = 'AUTH.INVALID_CREDENTIALS';
+          } else if (error.status === 0) {
+            errorMessage = 'AUTH.NETWORK_ERROR';
+          } else if (error.status >= 500) {
+            errorMessage = 'AUTH.SERVER_ERROR';
+          }
+
+          this.errorMessage = this.translateService.instant(errorMessage);
+          this.toastService.presentErrorToast('bottom', this.errorMessage);
         },
       });
   }

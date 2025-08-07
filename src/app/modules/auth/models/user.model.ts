@@ -1,5 +1,5 @@
 export interface User {
-  userId?: string;
+  _id?: string;
   socialId?: string;
   signupType?: 'normal' | 'facebook' | 'google';
   email?: string;
@@ -7,4 +7,12 @@ export interface User {
   image?: string;
   emailVerified?: boolean;
   sessions?: [token: string, expiresAt: number];
+  roles?: string[];
+  permissions?: string[];
+  createdAt?: string;
+  updatedAt?: string;
+  tokens?: {
+    accessToken: string;
+    refreshToken: string;
+  };
 }

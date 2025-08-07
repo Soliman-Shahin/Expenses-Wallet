@@ -1,20 +1,152 @@
+@import "src/theme/variables";
+
 .animated-tab-button.router-link-active {
   color: var(--ion-color-primary);
-  transform: scale(1.1);
+  transform: scale(var(--tab-active-scale));
+  opacity: var(--tab-active-opacity);
 }
 
 .animated-tab-button {
-  transition: transform 0.3s ease, color 0.3s ease;
+  transition: var(--tab-transition);
 }
 
 .animated-tab-button:hover {
-  transform: scale(1.1);
+  transform: scale(var(--tab-hover-scale));
+  opacity: 1;
 }
 
 .animated-tab-button ion-icon {
-  transition: transform 0.3s ease;
+  transition: var(--tab-transition);
+  font-size: var(--tab-icon-size);
 }
 
 .animated-tab-button:hover ion-icon {
-  transform: scale(1.1);
+  transform: scale(var(--tab-hover-scale));
+}
+
+ion-tabs {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  width: 100%;
+
+  ion-tab-bar {
+    --background: var(--ion-card-background);
+    --border: 1px solid var(--ion-border-color);
+    --color: var(--ion-text-color);
+    --color-selected: var(--ion-color-primary);
+    height: var(--tabs-height, 60px);
+    padding: var(--tabs-padding, 5px 0);
+    border-top-left-radius: var(--border-radius-lg, 16px);
+    border-top-right-radius: var(--border-radius-lg, 16px);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    position: relative;
+    overflow: visible;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+
+    // Add a subtle top border for better visual separation
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: var(--ion-border-color);
+    }
+  }
+
+  ion-tab-button {
+    --color: var(--text-tertiary);
+    --color-selected: var(--ion-color-primary);
+    --padding-top: var(--spacing-xxs);
+    --padding-bottom: var(--spacing-xs);
+    transition: var(--tab-transition);
+    opacity: var(--tab-inactive-opacity);
+    position: relative;
+    overflow: visible;
+
+    // Active tab indicator
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%) scaleX(0);
+      width: 30%;
+      height: 3px;
+      background: var(--ion-color-primary);
+      border-radius: 3px 3px 0 0;
+      transition: var(--tab-transition);
+      opacity: 0;
+    }
+
+    ion-icon {
+      font-size: var(--tab-icon-size);
+      transition: var(--tab-transition);
+    }
+
+    ion-label {
+      font-size: var(--tab-label-font-size);
+      font-weight: var(--font-weight-medium);
+      margin: var(--tab-label-margin);
+      transition: var(--tab-transition);
+    }
+
+    // Hover state
+    &:hover {
+      opacity: 1;
+      transform: translateY(-2px);
+
+      ion-icon {
+        transform: scale(var(--tab-hover-scale));
+      }
+    }
+
+    // Active state
+    &.tab-selected {
+      opacity: var(--tab-active-opacity);
+      transform: translateY(-3px);
+
+      &::after {
+        transform: translateX(-50%) scaleX(1);
+        opacity: 1;
+      }
+
+      ion-icon {
+        transform: scale(var(--tab-active-scale));
+      }
+
+      ion-label {
+        font-weight: var(--font-weight-semibold);
+      }
+    }
+  }
+
+  // Animation for tab indicator
+  @keyframes tabIndicator {
+    from {
+      transform: translateX(-50%) scaleX(0);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(-50%) scaleX(1);
+      opacity: 1;
+    }
+  }
+
+  // Responsive adjustments
+  @media (max-width: 360px) {
+    ion-tab-button {
+      --tab-icon-size: 1.35rem;
+      --tab-label-font-size: 0.6rem;
+      --tab-label-margin: 0.15rem 0 0 0;
+      --padding-top: 0.25rem;
+      --padding-bottom: 0.25rem;
+    }
+  }
 }

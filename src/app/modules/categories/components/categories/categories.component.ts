@@ -1,12 +1,12 @@
 import { Component, inject, OnInit } from '@angular/core';
 import {
+  AlertController,
   InfiniteScrollCustomEvent,
   ItemReorderEventDetail,
 } from '@ionic/angular';
 import { BehaviorSubject, finalize, switchMap, takeUntil, tap } from 'rxjs';
 import { BaseListComponent } from 'src/app/shared/base';
-import { Category } from '../../models';
-import { CategoriesService } from '../../services';
+import { Category, CategoryParams } from '../../models';
 
 @Component({
   selector: 'app-categories',
@@ -17,7 +17,7 @@ export class CategoriesComponent
   extends BaseListComponent<Category>
   implements OnInit
 {
-  private categoryService = inject(CategoriesService);
+  private alertController = inject(AlertController);
 
   sizeOptions = {
     pageSizeOptions: this.pageSizeOptions,
@@ -28,13 +28,13 @@ export class CategoriesComponent
     sortBy: 'createdAt',
   };
 
-  readonly #defaultParams = {
+  readonly #defaultParams: CategoryParams = {
     skip: 0,
     limit: this.pageSize,
     sort: `-${this.sortOptions?.sortBy}`,
   };
 
-  readonly #paramsSub = new BehaviorSubject({
+  readonly #paramsSub = new BehaviorSubject<CategoryParams>({
     ...this.#defaultParams,
   });
 
@@ -43,34 +43,13 @@ export class CategoriesComponent
   }
 
   isActionSheetOpen = false;
-  public actionSheetButtons = [
-    {
-      text: 'Delete',
-      role: 'destructive',
-      data: {
-        action: 'delete',
-      },
-    },
-    {
-      text: 'Edit',
-      data: {
-        action: 'edit',
-      },
-    },
-    {
-      text: 'Cancel',
-      role: 'cancel',
-      data: {
-        action: 'cancel',
-      },
-    },
-  ];
+  selectedCategory: Category | null = null;
 
   constructor() {
     super();
   }
 
-  ngOnInit() {
+  override ngOnInit() {
     this.activatedRoute.data.subscribe((data) => {
       this.headerService.updateButtonConfig({
         title: data['title'],
@@ -93,24 +72,22 @@ export class CategoriesComponent
             .pipe(finalize(() => (this.isLoadingResults = false)))
         )
       )
-      .subscribe((res) => {
+      .subscribe((res: any) => {
         this._responseSub.next(res);
       });
   }
 
   onIonInfinite(ev: InfiniteScrollCustomEvent) {
     this.loadMoreCategories();
-    ev.target.complete();
+    setTimeout(() => {
+      ev.target.complete();
+    }, 500);
   }
 
   loadMoreCategories() {
-    this.selectedPage++;
-    this.categoryService
-      .getCategories({ page: this.selectedPage, size: this.pageSize })
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((data: Category[]) => {
-        console.log('data', data)
-      });
+    this.activatedParams.skip =
+      this.activatedParams.skip + this.activatedParams.limit;
+    this.#paramsSub.next({ ...this.activatedParams });
   }
 
   handleReorder(ev: CustomEvent<ItemReorderEventDetail>) {
@@ -118,8 +95,54 @@ export class CategoriesComponent
     ev.detail.complete();
   }
 
+  async presentActionSheet(category: Category) {
+    this.selectedCategory = category;
+    const actionSheet = await this.alertController.create({
+      header: 'Actions',
+      buttons: [
+        {
+          text: 'Delete',
+          role: 'destructive',
+          handler: () => {
+            this.deleteCategory(this.selectedCategory?.id as string);
+          },
+        },
+        {
+          text: 'Edit',
+          handler: () => {
+            this.router.navigate([
+              '/categories/edit',
+              this.selectedCategory?.id,
+            ]);
+          },
+        },
+        {
+          text: 'Cancel',
+          role: 'cancel',
+        },
+      ],
+    });
+
+    await actionSheet.present();
+  }
+
+  deleteCategory(id: string) {
+    this.categoryService
+      .deleteCategory(id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        const currentResponse = this._responseSub.getValue();
+        if (currentResponse) {
+          const filteredData = currentResponse.data.filter((c) => c.id !== id);
+          this._responseSub.next({ ...currentResponse, data: filteredData });
+        }
+      });
+  }
+
   filter(event: any) {
     const query = event.target.value.toLowerCase();
+    this.activatedParams.q = query;
+    this.#paramsSub.next({ ...this.activatedParams });
   }
 
   setOpen(isOpen: boolean) {

@@ -1,13 +1,21 @@
-<ion-header>
+<ion-header [class.header-collapse]="isCollapsed" class="header">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-menu-button></ion-menu-button>
-    </ion-buttons>
-    <ion-title>{{ title | translate }}</ion-title>
-    <ion-buttons slot="end" *ngIf="actionIcon">
-      <ion-button (click)="onActionButtonClick()">
-        <ion-icon [name]="actionIcon"></ion-icon>
+      <ion-button (click)="toggleMenu()" class="menu-button">
+        <ion-icon name="menu-outline" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
+
+    <div class="header-content" [class.collapsed]="isCollapsed">
+      <ion-title class="title">
+        <span class="title-text">{{ title | translate }}</span>
+      </ion-title>
+
+      <div class="header-actions">
+        <!-- All action buttons removed -->
+      </div>
+    </div>
   </ion-toolbar>
+
+  <div class="header-gradient"></div>
 </ion-header>

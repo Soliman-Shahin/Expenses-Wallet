@@ -1,9 +1,147 @@
-ion-avatar{
-  border: 2px solid;
-  height: 4rem;
-  width: 4rem;
+@import "src/theme/variables";
+
+:host {
+  --side-menu-background: var(--ion-background-color);
+  --side-menu-text-color: var(--ion-text-color);
+  --side-menu-item-hover-background: var(--ion-item-background);
+  --side-menu-item-active-background: var(--ion-color-primary);
+  --side-menu-item-active-text-color: var(--ion-color-primary-contrast);
+  --side-menu-border-color: var(--ion-border-color);
+
+  ion-header {
+    ion-toolbar {
+      --background: transparent;
+      --border-color: var(--side-menu-border-color);
+    }
+    ion-title {
+      color: var(--side-menu-text-color);
+      font-weight: 600;
+    }
+  }
+
+  ion-content {
+    --background: var(--side-menu-background);
+    --padding-top: 16px;
+    --padding-bottom: 16px;
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      padding: 16px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid var(--side-menu-border-color);
+      cursor: pointer;
+      transition: background-color 0.2s ease-in-out;
+
+      &:hover {
+        background-color: var(--side-menu-item-hover-background);
+      }
+
+      ion-avatar {
+        width: 50px;
+        height: 50px;
+        margin-right: 16px;
+        border: 2px solid var(--ion-color-primary);
+      }
+
+      .user-details {
+        h3 {
+          margin: 0;
+          font-size: 1.1rem;
+          font-weight: 600;
+          color: var(--ion-text-color);
+        }
+        p {
+          margin: 0;
+          font-size: 0.9rem;
+          color: var(--ion-color-medium-shade);
+        }
+      }
+    }
+
+    .login-prompt {
+      padding: 16px;
+      text-align: center;
+      color: var(--ion-text-color);
+    }
+
+    ion-list {
+      padding: 0;
+      background: var(--ion-item-background);
+      border-radius: 12px;
+
+      ion-item {
+        --padding-start: 16px;
+        --inner-padding-end: 16px;
+        --background: var(--ion-item-background);
+        --color: var(--ion-text-color);
+        --border-radius: 8px;
+        margin: 4px 8px;
+        transition: all 0.2s ease-in-out;
+
+        &.active {
+          background: var(--ion-color-primary);
+          color: var(--ion-color-primary-contrast);
+          font-weight: 600;
+
+          ion-icon {
+            color: var(--ion-color-primary-contrast);
+          }
+        }
+
+        &:hover:not(.active) {
+          background: var(--ion-item-background);
+          filter: brightness(0.96);
+        }
+
+        &.disabled {
+          opacity: 0.5;
+          pointer-events: none;
+        }
+
+        ion-icon {
+          color: var(--ion-color-medium-shade);
+          margin-right: 16px;
+          transition: color 0.2s ease-in-out;
+        }
+      }
+    }
+
+    .bottom-menu {
+      border-top: 1px solid var(--side-menu-border-color);
+      margin-top: 16px;
+      padding-top: 8px;
+
+      .version-info {
+        --color: var(--ion-color-medium-shade);
+        font-size: 0.8rem;
+        text-align: center;
+      }
+    }
+  }
 }
 
-ion-col, ion-row {
-  padding-block: 0 !important;
+body.dark {
+  :host {
+    --side-menu-background: var(--ion-background-color);
+    --side-menu-text-color: var(--ion-text-color);
+    --side-menu-item-hover-background: var(--ion-item-background);
+    --side-menu-item-active-background: var(--ion-color-primary);
+    --side-menu-item-active-text-color: var(--ion-color-primary-contrast);
+    --side-menu-border-color: var(--ion-border-color);
+  }
+}
+
+[dir="rtl"] {
+  :host {
+    .user-info ion-avatar {
+      margin-left: 16px;
+      margin-right: 0;
+    }
+
+    ion-item ion-icon[slot="start"] {
+      margin-left: 16px;
+      margin-right: 0;
+    }
+  }
 }

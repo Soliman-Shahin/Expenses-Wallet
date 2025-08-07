@@ -1,18 +1,22 @@
-import { Component, ViewEncapsulation } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { SalaryDetail } from 'src/app/home/models';
 
 @Component({
   selector: 'app-total-salary',
   templateUrl: './total-salary.component.html',
   styleUrls: ['./total-salary.component.scss'],
-  encapsulation: ViewEncapsulation.None,
 })
 export class TotalSalaryComponent {
-  totalSalary = 21000;
-  expense = 4800;
-  remaining = this.totalSalary - this.expense;
-  currency: string = 'EGP';
-  // progress from 0 to 1
-  public progress = this.expense / this.totalSalary;
+  @Input() month: number | null = null;
+  @Input({
+    transform: (value: string | number | null | undefined) =>
+      value ? +value : null,
+  })
+  year: number | null = null;
+  @Input() totalAmount: number | null = null;
+  @Input() details: SalaryDetail[] = [];
+  @Input() isLoading = false;
+  @Input() currency: string = 'EGP';
 
   constructor() {}
 }

@@ -1,0 +1,44 @@
+// Form Variables
+:root {
+  // Form Elements
+  --form-element-padding: 16px 16px 8px 16px;
+  --form-element-margin: 0 0 16px 0;
+  --form-element-border-radius: 8px;
+  --form-element-border-width: 1px;
+  --form-element-border-color: var(--ion-color-medium-shade);
+  --form-element-background: var(--ion-color-light);
+
+  // Input Fields
+  --input-padding: 8px 0;
+  --input-placeholder-color: var(--ion-color-medium);
+  --input-placeholder-opacity: 0.8;
+  --input-text-color: var(--ion-color-dark);
+  --input-font-size: 16px;
+  --input-font-weight: 500;
+
+  // Labels
+  --label-color: var(--ion-color-medium);
+  --label-font-size: 14px;
+  --label-margin: 0 0 4px 0;
+
+  // Validation States
+  --error-color: var(--ion-color-danger);
+  --success-color: var(--ion-color-success);
+  --warning-color: var(--ion-color-warning);
+
+  // Focus/Hover States
+  --focus-border-color: var(--ion-color-primary);
+  --hover-border-color: var(--ion-color-medium);
+
+  // Transitions
+  --transition-duration: 0.2s;
+  --transition-timing: ease-in-out;
+}
+
+// Dark Theme Overrides
+body.dark {
+  --form-element-background: var(--ion-color-dark);
+  --form-element-border-color: var(--ion-color-medium);
+  --input-text-color: var(--ion-color-light);
+  --label-color: var(--ion-color-medium);
+}

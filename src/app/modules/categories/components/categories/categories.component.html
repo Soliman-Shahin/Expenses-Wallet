@@ -23,7 +23,11 @@
               <ion-icon size="large" [name]="item.icon"></ion-icon>
             </span>
             <ion-label>{{ item.title }}</ion-label>
-            <ion-button (click)="setOpen(true)">1111</ion-button>
+            <ion-buttons slot="end">
+              <ion-button (click)="presentActionSheet(item)">
+                <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
+              </ion-button>
+            </ion-buttons>
             <ion-reorder slot="end"></ion-reorder>
           </ion-item>
         </ion-reorder-group>
@@ -32,13 +36,7 @@
   </ion-infinite-scroll>
 </ion-content>
 
-<ion-action-sheet
-  [isOpen]="isActionSheetOpen"
-  header="Actions"
-  [buttons]="actionSheetButtons"
-  (didDismiss)="setOpen(false)"
->
-</ion-action-sheet>
+
 
 <ng-template #noData>
   <div class="no_data">

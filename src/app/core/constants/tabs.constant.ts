@@ -1,5 +1,5 @@
 import { Tab } from 'src/app/shared/models';
-import { APP_ROUTES } from './routes';
+import { APP_ROUTES } from './routes.constant';
 
 export const TABS_MENU_ITEMS: Tab[] = [
   {

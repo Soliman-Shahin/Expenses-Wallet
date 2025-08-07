@@ -1,68 +1,111 @@
 import {
-  AfterViewInit,
-  ChangeDetectorRef,
   Component,
-  ElementRef,
   EventEmitter,
+  Input,
   Output,
-  QueryList,
-  TrackByFunction,
-  ViewChildren,
-  ViewEncapsulation
+  OnInit,
+  AfterViewInit,
+  ViewChild,
+  ElementRef,
 } from '@angular/core';
+import { MonthYear } from 'src/app/home/models';
 
 @Component({
   selector: 'app-months-scroll-header',
   templateUrl: './months-scroll-header.component.html',
   styleUrls: ['./months-scroll-header.component.scss'],
-  encapsulation: ViewEncapsulation.None,
 })
-export class MonthsScrollHeaderComponent implements AfterViewInit {
-  @Output() month = new EventEmitter<{ month: number; year: number }>();
+export class MonthsScrollHeaderComponent implements OnInit, AfterViewInit {
+  @Input() selectedDate: MonthYear | undefined;
+  @Input() monthTotals: { [key: string]: number } = {};
+  @Output() monthSelected = new EventEmitter<MonthYear>();
+  @Output() scrolled = new EventEmitter<{
+    isAtStart: boolean;
+    isAtEnd: boolean;
+  }>();
 
-  months: { month: number; year: number }[] = [];
-  activeMonthIndex = new Date().getMonth();
+  @ViewChild('monthsContainer') monthsContainer!: ElementRef;
 
-  @ViewChildren('monthCard', { read: ElementRef })
-  monthCards!: QueryList<ElementRef>;
-  trackByMonth!: TrackByFunction<{ month: number; year: number }>;
+  months: MonthYear[] = [];
 
-  constructor(private cdr: ChangeDetectorRef) {
+  constructor() {}
+
+  ngOnInit(): void {
     this.generateMonths();
-  }
-
-  private generateMonths() {
-    const currentYear = new Date().getFullYear();
-    this.months = Array.from({ length: 12 }, (_, index) => ({
-      month: index + 1,
-      year: currentYear,
-    }));
-  }
-
-  ngAfterViewInit() {
-    this.scrollToActiveMonth();
-  }
-
-  selectMonth(index: number, month: { month: number; year: number }) {
-    if (index !== this.activeMonthIndex) {
-      this.activeMonthIndex = index;
-      this.cdr.detectChanges();
-      this.scrollToActiveMonth();
-      this.month.emit(month);
+    if (!this.selectedDate) {
+      const today = new Date();
+      this.selectedDate = {
+        month: today.getMonth() + 1,
+        year: today.getFullYear(),
+      };
     }
   }
 
-  private scrollToActiveMonth() {
-    const activeMonth = this.months[this.activeMonthIndex];
-    this.month.emit(activeMonth);
-    const activeCard = this.monthCards?.toArray()[this.activeMonthIndex];
-    if (activeCard) {
-      activeCard.nativeElement.scrollIntoView({
+  ngAfterViewInit(): void {
+    this.scrollToSelected();
+  }
+
+  generateMonths(): void {
+    const today = new Date();
+    const months: MonthYear[] = [];
+    for (let i = 0; i < 12; i++) {
+      const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      months.push({ month: date.getMonth() + 1, year: date.getFullYear() });
+    }
+    this.months = months.reverse();
+  }
+
+  selectMonth(month: MonthYear): void {
+    this.selectedDate = month;
+    this.monthSelected.emit(month);
+    this.scrollToSelected();
+  }
+
+  isSelected(month: MonthYear): boolean {
+    if (!this.selectedDate) {
+      return false;
+    }
+    return (
+      month.year === this.selectedDate.year &&
+      month.month === this.selectedDate.month
+    );
+  }
+
+  // Helper to create a Date object from MonthYear for the pipe
+  getDate(monthYear: MonthYear): Date {
+    return new Date(monthYear.year, monthYear.month - 1, 1);
+  }
+
+  onScroll(): void {
+    this.updateScrollPosition();
+  }
+
+  private updateScrollPosition(): void {
+    if (!this.monthsContainer) return;
+
+    const container = this.monthsContainer.nativeElement;
+    const isAtStart = container.scrollLeft <= 0;
+    const isAtEnd =
+      container.scrollLeft + container.clientWidth >= container.scrollWidth - 1; // Allow 1px tolerance
+
+    this.scrolled.emit({ isAtStart, isAtEnd });
+  }
+
+  private scrollToSelected(): void {
+    if (!this.monthsContainer) return;
+
+    const container = this.monthsContainer.nativeElement;
+    const selectedElement = container.querySelector('.month-item.selected');
+
+    if (selectedElement) {
+      selectedElement.scrollIntoView({
         behavior: 'smooth',
+        block: 'nearest',
         inline: 'center',
       });
-    } else {
-      console.warn(`Active card at index ${this.activeMonthIndex} not found.`);
     }
+
+    // Update scroll position after a short delay to ensure scrolling is complete
+    setTimeout(() => this.updateScrollPosition(), 100);
   }
 }

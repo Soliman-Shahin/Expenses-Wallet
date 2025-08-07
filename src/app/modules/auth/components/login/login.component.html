@@ -1,68 +1,165 @@
-<ion-content class="ion-padding">
-  <form [formGroup]="loginForm" (ngSubmit)="login(loginForm.value)">
-    <ion-title class="ion-text-center">{{
-      "AUTH.SIGN_IN" | translate
-    }}</ion-title>
+<ion-content class="ion-padding" [fullscreen]="true">
+  <div class="login-container" style="min-height: 100%">
+    <div class="login-card">
+      <!-- App Logo -->
+      <div class="logo-container">
+        <ion-icon name="wallet-outline" class="app-logo"></ion-icon>
+        <h1 class="app-name">Expenses Wallet</h1>
+      </div>
 
-    <ion-item class="ion-margin-vertical">
-      <ion-input
-        type="text"
-        formControlName="email"
-        placeholder="{{ 'AUTH.EMAIL' | translate }}"
-      >
-        <ion-icon slot="start" name="person" aria-hidden="true"></ion-icon>
-      </ion-input>
-    </ion-item>
-    <ion-item class="ion-margin-vertical">
-      <ion-input
-        [type]="hide ? 'password' : 'text'"
-        formControlName="password"
-        placeholder="{{ 'AUTH.PASSWORD' | translate }}"
-      >
-        <ion-icon slot="start" name="lock-closed" aria-hidden="true"></ion-icon>
+      <h2 class="ion-text-center welcome-text">
+        {{ "AUTH.WELCOME_BACK" | translate }}
+      </h2>
+      <p class="ion-text-center subtitle">
+        {{ "AUTH.SIGN_IN_TO_CONTINUE" | translate }}
+      </p>
+
+      <!-- Social Login Buttons -->
+      <div class="social-login-buttons">
         <ion-button
-          fill="clear"
-          slot="end"
-          aria-label="Show/hide"
-          (click)="togglePasswordVisibility()"
+          expand="block"
+          fill="outline"
+          class="google-btn"
+          (click)="signInWithGoogle()"
+          [disabled]="isLoading"
         >
+          <ion-icon slot="start" name="logo-google"></ion-icon>
+          {{ "AUTH.CONTINUE_WITH_GOOGLE" | translate }}
+        </ion-button>
+      </div>
+
+      <div class="divider">
+        <span class="divider-line"></span>
+        <span class="divider-text">{{ "AUTH.OR" | translate }}</span>
+        <span class="divider-line"></span>
+      </div>
+
+      <form
+        [formGroup]="loginForm"
+        (ngSubmit)="login()"
+        class="login-form form-container"
+      >
+        <!-- Error message display -->
+        <ion-note *ngIf="errorMessage" color="danger" class="error-message">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          {{ errorMessage }}
+        </ion-note>
+
+        <!-- Email Input -->
+        <ion-item
+          lines="full"
+          class="form-item ion-margin-vertical"
+          [class.ion-invalid]="
+            email?.invalid && (email?.dirty || email?.touched)
+          "
+        >
+          <ion-input
+            type="email"
+            [formControlName]="formFields.email"
+            [placeholder]="'AUTH.EMAIL_PLACEHOLDER' | translate"
+            autocomplete="email"
+            inputmode="email"
+            required
+            class="form-input"
+          ></ion-input>
           <ion-icon
-            slot="icon-only"
-            [name]="hide ? 'eye' : 'eye-off'"
+            slot="start"
+            name="mail-outline"
             aria-hidden="true"
-          ></ion-icon> </ion-button
-      ></ion-input>
-    </ion-item>
-    <ion-button type="submit" [disabled]="loginForm.invalid" expand="block">
-      <ion-icon slot="start" name="log-in"></ion-icon>
-      {{ "AUTH.LOGIN" | translate }}
-    </ion-button>
-  </form>
-  <div>
-    <span class="no_account">{{ "AUTH.NO_ACCOUNT" | translate }}</span>
+          ></ion-icon>
+          <ion-note slot="error" *ngIf="email?.errors?.['required']">
+            {{ "VALIDATION.REQUIRED" | translate }}
+          </ion-note>
+          <ion-note slot="error" *ngIf="email?.errors?.['email']">
+            {{ "VALIDATION.INVALID_EMAIL" | translate }}
+          </ion-note>
+        </ion-item>
 
-    <ion-button routerLink="/auth/signup" fill="clear">{{
-      "AUTH.SIGNUP" | translate
-    }}</ion-button>
+        <!-- Password Input -->
+        <ion-item
+          lines="full"
+          class="form-item ion-margin-vertical"
+          [class.ion-invalid]="
+            password?.invalid && (password?.dirty || password?.touched)
+          "
+        >
+          <ion-input
+            [type]="hide ? 'password' : 'text'"
+            [formControlName]="formFields.password"
+            [placeholder]="'AUTH.PASSWORD_PLACEHOLDER' | translate"
+            autocomplete="current-password"
+            required
+            class="form-input"
+          ></ion-input>
+          <ion-icon
+            slot="start"
+            name="lock-closed-outline"
+            aria-hidden="true"
+          ></ion-icon>
+          <ion-button
+            fill="clear"
+            slot="end"
+            [attr.aria-label]="
+              (hide ? 'SHOW_PASSWORD' : 'HIDE_PASSWORD') | translate
+            "
+            (click)="togglePasswordVisibility()"
+            type="button"
+          >
+            <ion-icon
+              [name]="hide ? 'eye-outline' : 'eye-off-outline'"
+            ></ion-icon>
+          </ion-button>
+          <ion-note slot="error" *ngIf="password?.errors?.['required']">
+            {{ "VALIDATION.REQUIRED" | translate }}
+          </ion-note>
+          <ion-note slot="error" *ngIf="password?.errors?.['minlength']">
+            {{ "VALIDATION.MIN_LENGTH" | translate : { min: 6 } }}
+          </ion-note>
+        </ion-item>
 
-    <p class="ion-margin-vertical">{{ "OR" | translate }}</p>
+        <!-- Remember Me & Forgot Password -->
+        <div class="form-options">
+          <ion-item lines="none" class="remember-me">
+            <ion-checkbox
+              slot="start"
+              [formControlName]="formFields.rememberMe"
+            ></ion-checkbox>
+            <ion-label>{{ "AUTH.REMEMBER_ME" | translate }}</ion-label>
+          </ion-item>
+          <ion-button
+            fill="clear"
+            size="small"
+            routerLink="/auth/forgot-password"
+            class="forgot-password"
+          >
+            {{ "AUTH.FORGOT_PASSWORD" | translate }}
+          </ion-button>
+        </div>
 
-    <ion-item
-      class="ion-margin-vertical"
-      [button]="true"
-      (click)="signInWithGoogle()"
-    >
-      <ion-icon aria-hidden="true" name="logo-google" slot="start"></ion-icon>
-      <ion-label>{{ "AUTH.GOOGLE" | translate }}</ion-label>
-    </ion-item>
+        <!-- Submit Button -->
+        <ion-button
+          type="submit"
+          expand="block"
+          [disabled]="loginForm.invalid || isLoading"
+          class="login-button"
+          [class.loading]="isLoading"
+        >
+          <ion-spinner
+            *ngIf="isLoading"
+            name="crescent"
+            class="ion-margin-end"
+          ></ion-spinner>
+          <span *ngIf="!isLoading">{{ "AUTH.SIGN_IN" | translate }}</span>
+        </ion-button>
+      </form>
 
-    <!-- <ion-item
-      class="ion-margin-vertical"
-      [button]="true"
-      [routerLink]="['/auth/login-phone']"
-    >
-      <ion-icon aria-hidden="true" name="call" slot="start"></ion-icon>
-      <ion-label>{{ "AUTH.PHONE" | translate }}</ion-label>
-    </ion-item> -->
+      <!-- Sign Up Link -->
+      <div class="signup-link ion-text-center">
+        {{ "AUTH.DONT_HAVE_ACCOUNT" | translate }}
+        <a routerLink="/auth/signup" class="signup-text">{{
+          "AUTH.SIGN_UP" | translate
+        }}</a>
+      </div>
+    </div>
   </div>
 </ion-content>

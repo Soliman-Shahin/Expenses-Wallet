@@ -1,34 +1,48 @@
-.month-scroll-container {
+.months-scroll-container {
   display: flex;
   overflow-x: auto;
-  scroll-behavior: smooth;
+  padding: 8px 0;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
 
   &::-webkit-scrollbar {
-    display: none;
+    display: none; /* Chrome, Safari, and Opera */
   }
 
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-
-  ion-card {
+  .month-item {
     flex: 0 0 auto;
-    width: 4rem;
-    height: 5rem;
+    padding: 10px 16px;
     text-align: center;
-    transition: transform 0.3s;
-    margin-inline-end: 0;
+    cursor: pointer;
+    border-radius: 20px;
+    transition: background-color 0.3s, color 0.3s;
+    margin: 0 4px;
 
-    &:not(:last-child) {
-      margin-inline-end: 0.5rem;
+    .month-name {
+      font-size: 0.9em;
+      font-weight: 500;
     }
 
-    &.active {
-      transform: scale(1.1);
-      border: 2px solid var(--ion-color-primary);
+    .year {
+      font-size: 0.7em;
+      opacity: 0.7;
     }
 
-    ion-card-header {
-      padding: 0.5rem;
+    &.selected {
+      background-color: var(--ion-color-primary);
+      color: var(--ion-color-primary-contrast);
+
+      .month-name {
+        font-weight: 700;
+      }
+
+      .year {
+        opacity: 1;
+      }
+    }
+
+    &:hover:not(.selected) {
+      background-color: rgba(var(--ion-color-primary-rgb), 0.1);
     }
   }
 }
