@@ -70,10 +70,12 @@ export class ApiService {
   }
 
   get<T>(path: string, params?: HttpParams): Observable<T> {
-    return this.http.get<T>(`${this.baseUrl}${path}`, {
-      headers: this.getHeaders(),
-      params,
-    }).pipe(catchError(this.handleError));
+    return this.http
+      .get<T>(`${this.baseUrl}${path}`, {
+        headers: this.getHeaders(),
+        params,
+      })
+      .pipe(catchError(this.handleError));
   }
 
   post<T>(
@@ -96,10 +98,45 @@ export class ApiService {
       ...extraHeaders,
     });
 
-    return this.http.post<T>(`${this.baseUrl}${path}`, body, {
-      headers: mergedHeaders,
-      params: options.params,
-    }).pipe(catchError(this.handleError));
+    return this.http
+      .post<T>(`${this.baseUrl}${path}`, body, {
+        headers: mergedHeaders,
+        params: options.params,
+      })
+      .pipe(catchError(this.handleError));
+  }
+
+  /**
+   * Post multipart/form-data without forcing Content-Type so the browser can set the boundary.
+   */
+  postFormData<T>(
+    path: string,
+    formData: FormData,
+    options: { headers?: HttpHeaders; params?: HttpParams } = {}
+  ): Observable<T> {
+    const defaultHeaders = this.getHeadersObject();
+    // Remove Content-Type to allow the browser to set it for multipart
+    delete (defaultHeaders as any)['Content-Type'];
+
+    let extraHeaders: { [key: string]: string } = {};
+    if (options.headers) {
+      options.headers.keys().forEach((key) => {
+        const val = options.headers!.get(key);
+        if (val) extraHeaders[key] = val;
+      });
+    }
+
+    const mergedHeaders = new HttpHeaders({
+      ...defaultHeaders,
+      ...extraHeaders,
+    });
+
+    return this.http
+      .post<T>(`${this.baseUrl}${path}`, formData, {
+        headers: mergedHeaders,
+        params: options.params,
+      })
+      .pipe(catchError(this.handleError));
   }
 
   put<T>(
@@ -107,20 +144,24 @@ export class ApiService {
     body: any,
     options: { params?: HttpParams } = {}
   ): Observable<T> {
-    return this.http.put<T>(`${this.baseUrl}${path}`, body, {
-      headers: this.getHeaders(),
-      params: options.params,
-    }).pipe(catchError(this.handleError));
+    return this.http
+      .put<T>(`${this.baseUrl}${path}`, body, {
+        headers: this.getHeaders(),
+        params: options.params,
+      })
+      .pipe(catchError(this.handleError));
   }
 
   delete<T>(
     path: string,
     options: { params?: HttpParams } = {}
   ): Observable<T> {
-    return this.http.delete<T>(`${this.baseUrl}${path}`, {
-      headers: this.getHeaders(),
-      params: options.params,
-    }).pipe(catchError(this.handleError));
+    return this.http
+      .delete<T>(`${this.baseUrl}${path}`, {
+        headers: this.getHeaders(),
+        params: options.params,
+      })
+      .pipe(catchError(this.handleError));
   }
 
   patch<T>(
@@ -128,10 +169,12 @@ export class ApiService {
     body: any,
     options: { params?: HttpParams } = {}
   ): Observable<T> {
-    return this.http.patch<T>(`${this.baseUrl}${path}`, body, {
-      headers: this.getHeaders(),
-      params: options.params,
-    }).pipe(catchError(this.handleError));
+    return this.http
+      .patch<T>(`${this.baseUrl}${path}`, body, {
+        headers: this.getHeaders(),
+        params: options.params,
+      })
+      .pipe(catchError(this.handleError));
   }
 
   // Centralized error handler

@@ -7,7 +7,12 @@
   swipeGesture="true"
   (ionDidOpen)="onMenuOpen()"
 >
-  <ion-content class="ion-padding" role="navigation" aria-label="Main menu">
+  <ion-content
+    class="ion-padding"
+    role="navigation"
+    aria-label="Main menu"
+    tabindex="0"
+  >
     <ng-container *ngIf="user$ | async as user; else loginPrompt">
       <!-- User is Logged In -->
       <div class="user-info" [routerLink]="['/profile']" (click)="closeMenu()">
@@ -82,7 +87,13 @@
     <!-- Common Bottom Menu Items -->
     <ion-list lines="none" class="bottom-menu" role="menu">
       <!-- Language Toggle -->
-      <ion-item (click)="changeLanguage()" button role="menuitem" tabindex="0">
+      <ion-item
+        (click)="changeLanguage()"
+        button
+        role="menuitem"
+        tabindex="0"
+        aria-label="Switch language"
+      >
         <ion-icon
           [name]="language === 'ar' ? 'language-outline' : 'language-outline'"
           slot="start"
@@ -97,15 +108,10 @@
       </ion-item>
 
       <!-- Theme Toggle -->
-      <ion-item (click)="toggleTheme()" button role="menuitem" tabindex="0">
-        <ion-icon
-          [name]="isDarkMode ? 'moon-outline' : 'sunny-outline'"
-          slot="start"
-        ></ion-icon>
-        <ion-label>{{
-          (isDarkMode ? "LIGHT_MODE" : "DARK_MODE") | translate
-        }}</ion-label>
-        <ion-toggle [checked]="isDarkMode" slot="end"></ion-toggle>
+      <ion-item>
+        <ion-icon name="contrast-outline" slot="start"></ion-icon>
+        <ion-label>{{ "THEME" | translate }}</ion-label>
+        <app-theme-toggle slot="end"></app-theme-toggle>
       </ion-item>
 
       <!-- Help & About -->
@@ -115,6 +121,7 @@
         button
         role="menuitem"
         tabindex="0"
+        [attr.aria-current]="isActive('/help') ? 'page' : null"
       >
         <ion-icon name="help-circle-outline" slot="start"></ion-icon>
         <ion-label>{{ "HELP" | translate }}</ion-label>

@@ -23,6 +23,9 @@ export const APP_ROUTES = {
     LIST: 'list',
     CREATE: 'create',
   },
+  PROFILE: {
+    INDEX: 'profile',
+  },
   __get: (key: string) => `${key}`.replace(':', ''),
 } as const;
 
@@ -31,4 +34,5 @@ export const MenuItemIds = {
   categories: 'categories',
   expenses: 'expenses',
   settings: 'settings',
+  profile: 'profile',
 } as const;

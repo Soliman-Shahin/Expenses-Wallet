@@ -8,12 +8,14 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { TranslateModule } from '@ngx-translate/core';
+import { UiInputComponent } from 'src/app/shared/ui/ui-input/ui-input.component';
 
 @NgModule({
   imports: [
     CommonModule,
     AuthRoutingModule,
     SharedModule,
+    UiInputComponent,
     ReactiveFormsModule,
     RouterModule,
     IonicModule,

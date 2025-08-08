@@ -1,4 +1,7 @@
-<ion-card class="monthly-summary-card" [class.is-loading]="isLoading">
+<ion-card
+  class="monthly-summary-card fade-in-up"
+  [class.is-loading]="isLoading"
+>
   <ion-card-header>
     <ion-card-title>{{ "HOME.MONTHLY_SUMMARY" | translate }}</ion-card-title>
     <ion-button fill="clear" size="small">{{
@@ -40,10 +43,12 @@
           <ion-skeleton-text
             animated
             style="width: 40%; height: 20px"
+            class="fade-in"
           ></ion-skeleton-text>
           <ion-skeleton-text
             animated
             style="width: 30%; height: 20px"
+            class="fade-in"
           ></ion-skeleton-text>
         </div>
       </div>

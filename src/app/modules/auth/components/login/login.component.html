@@ -26,6 +26,16 @@
           <ion-icon slot="start" name="logo-google"></ion-icon>
           {{ "AUTH.CONTINUE_WITH_GOOGLE" | translate }}
         </ion-button>
+        <ion-button
+          expand="block"
+          fill="outline"
+          class="facebook-btn ion-margin-top"
+          (click)="signInWithFacebook()"
+          [disabled]="isLoading"
+        >
+          <ion-icon slot="start" name="logo-facebook"></ion-icon>
+          {{ "AUTH.CONTINUE_WITH_FACEBOOK" | translate }}
+        </ion-button>
       </div>
 
       <div class="divider">
@@ -44,78 +54,31 @@
           <ion-icon name="alert-circle-outline"></ion-icon>
           {{ errorMessage }}
         </ion-note>
-
-        <!-- Email Input -->
-        <ion-item
-          lines="full"
-          class="form-item ion-margin-vertical"
-          [class.ion-invalid]="
-            email?.invalid && (email?.dirty || email?.touched)
-          "
-        >
-          <ion-input
-            type="email"
+        <ion-list>
+          <!-- Email Input -->
+          <app-ui-input
+            id="login-email"
             [formControlName]="formFields.email"
+            type="email"
             [placeholder]="'AUTH.EMAIL_PLACEHOLDER' | translate"
             autocomplete="email"
             inputmode="email"
-            required
-            class="form-input"
-          ></ion-input>
-          <ion-icon
-            slot="start"
-            name="mail-outline"
-            aria-hidden="true"
-          ></ion-icon>
-          <ion-note slot="error" *ngIf="email?.errors?.['required']">
-            {{ "VALIDATION.REQUIRED" | translate }}
-          </ion-note>
-          <ion-note slot="error" *ngIf="email?.errors?.['email']">
-            {{ "VALIDATION.INVALID_EMAIL" | translate }}
-          </ion-note>
-        </ion-item>
+            [required]="true"
+            startIcon="mail-outline"
+          ></app-ui-input>
 
-        <!-- Password Input -->
-        <ion-item
-          lines="full"
-          class="form-item ion-margin-vertical"
-          [class.ion-invalid]="
-            password?.invalid && (password?.dirty || password?.touched)
-          "
-        >
-          <ion-input
-            [type]="hide ? 'password' : 'text'"
+          <!-- Password Input -->
+          <app-ui-input
+            id="login-password"
             [formControlName]="formFields.password"
+            type="password"
             [placeholder]="'AUTH.PASSWORD_PLACEHOLDER' | translate"
             autocomplete="current-password"
-            required
-            class="form-input"
-          ></ion-input>
-          <ion-icon
-            slot="start"
-            name="lock-closed-outline"
-            aria-hidden="true"
-          ></ion-icon>
-          <ion-button
-            fill="clear"
-            slot="end"
-            [attr.aria-label]="
-              (hide ? 'SHOW_PASSWORD' : 'HIDE_PASSWORD') | translate
-            "
-            (click)="togglePasswordVisibility()"
-            type="button"
-          >
-            <ion-icon
-              [name]="hide ? 'eye-outline' : 'eye-off-outline'"
-            ></ion-icon>
-          </ion-button>
-          <ion-note slot="error" *ngIf="password?.errors?.['required']">
-            {{ "VALIDATION.REQUIRED" | translate }}
-          </ion-note>
-          <ion-note slot="error" *ngIf="password?.errors?.['minlength']">
-            {{ "VALIDATION.MIN_LENGTH" | translate : { min: 6 } }}
-          </ion-note>
-        </ion-item>
+            [required]="true"
+            startIcon="lock-closed-outline"
+            [togglePassword]="true"
+          ></app-ui-input>
+        </ion-list>
 
         <!-- Remember Me & Forgot Password -->
         <div class="form-options">

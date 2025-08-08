@@ -31,6 +31,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: APP_ROUTES.PROFILE.INDEX,
+    loadChildren: () =>
+      import('./modules/profile/profile.module').then(
+        (m) => m.ProfileModule
+      ),
+  },
+  {
     path: '**',
     redirectTo: '',
     pathMatch: 'full',

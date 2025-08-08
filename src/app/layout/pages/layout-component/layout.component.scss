@@ -89,14 +89,41 @@ app-tabs-bar {
   ion-router-outlet {
     margin-left: var(--side-menu-width);
     width: calc(100% - var(--side-menu-width));
+    padding: var(--spacing-lg) var(--spacing-xl);
+    @extend .rounded-lg;
+    @extend .shadow;
+    transition: margin 0.22s, width 0.22s, padding 0.22s;
   }
 
   // Adjust tabs bar position
   app-tabs-bar {
     width: calc(100% - var(--side-menu-width));
     left: var(--side-menu-width);
+    border-top-left-radius: 18px;
+    border-top-right-radius: 18px;
+    box-shadow: 0 -4px 24px rgba(34,211,238,0.10);
+    transition: width 0.22s, left 0.22s;
   }
 }
+
+// Extra large screens
+@media (min-width: 1200px) {
+  :host {
+    --side-menu-width: 340px;
+  }
+  ion-router-outlet {
+    margin-left: var(--side-menu-width);
+    width: calc(100% - var(--side-menu-width));
+    padding: var(--spacing-xl) var(--spacing-xxl);
+  }
+  app-tabs-bar {
+    width: calc(100% - var(--side-menu-width));
+    left: var(--side-menu-width);
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+  }
+}
+
 
 // Dark mode adjustments
 @media (prefers-color-scheme: dark) {

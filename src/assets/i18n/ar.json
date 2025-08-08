@@ -38,7 +38,18 @@
       "BUDGETING": "ميزانية ذكية",
       "INSIGHTS": "رؤى واضحة"
     },
-    "SELECT_MONTH": "اختر الشهر"
+    "SELECT_MONTH": "اختر الشهر",
+    "CHARTS": "الرسوم البيانية المالية",
+    "INCOME_VS_EXPENSES": "الدخل مقابل المصروفات",
+    "INCOME_VS_EXPENSES_CHART": "مخطط شريطي يوضح الدخل مقابل المصروفات",
+    "INCOME_VS_EXPENSES_DESC": "مقارنة بين إجمالي الدخل والمصروفات للفترة المحددة",
+    "EXPENSE_BY_CATEGORY": "المصروفات حسب الفئة",
+    "EXPENSE_BY_CATEGORY_CHART": "مخطط دائري يوضح توزيع المصروفات حسب الفئة",
+    "MONTHLY_EXPENSES": "اتجاه المصروفات الشهرية",
+    "MONTHLY_EXPENSES_CHART": "مخطط خطي يوضح اتجاه المصروفات الشهرية",
+    "MONTHLY_EXPENSES_DESC": "اتجاه المصروفات على مدى الأشهر الستة الماضية",
+    "SALARY_BREAKDOWN": "تفصيل الراتب",
+    "SALARY_BREAKDOWN_CHART": "مخطط دائري يوضح تكوين الراتب"
   },
   "SIDEBAR": {
     "HOME": "الرئيسية",
@@ -79,7 +90,8 @@
     "CANCEL": "إلغاء",
     "UPDATE": "تحديث",
     "ADD": "إضافة",
-    "SAVE": "حفظ"
+    "SAVE": "حفظ",
+    "REMOVE": "حذف"
   },
   "CATEGORY": {
     "ADD": "إضافة قسم جديد",
@@ -166,6 +178,7 @@
     "WELCOME_BACK": "مرحباً بعودتك!",
     "SIGN_IN_TO_CONTINUE": "سجل الدخول للوصول إلى حسابك",
     "CONTINUE_WITH_GOOGLE": "المتابعة باستخدام جوجل",
+    "CONTINUE_WITH_FACEBOOK": "المتابعة باستخدام فيسبوك",
     "OR": "أو",
     "LOGIN_SUCCESS": "تم تسجيل الدخول بنجاح",
     "INVALID_CREDENTIALS": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
@@ -202,11 +215,54 @@
     "CREATE_ACCOUNT": "إنشاء حساب",
     "SIGN_UP_TO_CONTINUE": "سجل لإنشاء حساب جديد",
     "SIGN_UP_WITH_GOOGLE": "التسجيل عبر جوجل",
+    "SIGN_UP_WITH_FACEBOOK": "التسجيل عبر فيسبوك",
     "SHOW_PASSWORD": "إظهار كلمة المرور",
     "HIDE_PASSWORD": "إخفاء كلمة المرور",
     "PASSWORD_REQUIREMENTS": "يجب أن تحتوي كلمة المرور على:",
     "PASSWORD_UPPERCASE": "حرف كبير واحد على الأقل (A-Z)",
     "PASSWORD_LOWERCASE": "حرف صغير واحد على الأقل (a-z)",
     "PASSWORD_NUMBER": "رقم واحد على الأقل (0-9)"
+  },
+  "PROFILE": {
+    "TITLE": "الملف الشخصي",
+    "AVATAR": "الصورة الشخصية",
+    "AVATAR_TITLE": "الصورة الشخصية",
+    "AVATAR_SUBTITLE": "قم برفع أو تغيير صورتك الشخصية",
+    "EDIT_AVATAR": "تعديل الصورة",
+    "PERSONAL_INFO": {
+      "TITLE": "البيانات الشخصية",
+      "SUBTITLE": "قم بتعديل الاسم والبريد الإلكتروني ورقم الهاتف",
+      "FULL_NAME": "الاسم الكامل",
+      "FULL_NAME_PLACEHOLDER": "أدخل اسمك الكامل",
+      "EMAIL": "البريد الإلكتروني",
+      "EMAIL_PLACEHOLDER": "example@email.com",
+      "PHONE": "رقم الهاتف (اختياري)",
+      "PHONE_PLACEHOLDER": "05xxxxxxxx",
+      "SAVE": "حفظ البيانات"
+    },
+    "SALARY": {
+      "TITLE": "الراتب والعملة",
+      "SUBTITLE": "حدد قيمة راتبك واختر العملة",
+      "LABEL": "التسمية",
+      "LABEL_PLACEHOLDER": "مثال: أساسي، مكافأة",
+      "AMOUNT": "الراتب الشهري",
+      "AMOUNT_PLACEHOLDER": "0.00",
+      "CURRENCY": "العملة",
+      "SELECT_CURRENCY": "اختر العملة",
+      "SAVE": "حفظ الراتب",
+      "DUPLICATE_LABEL": "تم استخدام هذه التسمية مسبقاً",
+      "DUPLICATE_LABELS": "غير مسموح بتكرار التسميات. يرجى استخدام تسميات فريدة.",
+      "TOTAL": "الإجمالي"
+    },
+    "TOASTS": {
+      "PERSONAL_INVALID": "يرجى تعبئة البيانات الشخصية بشكل صحيح",
+      "PERSONAL_SAVED": "تم حفظ البيانات الشخصية",
+      "SALARY_INVALID": "يرجى إدخال قيمة الراتب والعملة",
+      "SALARY_SAVED": "تم حفظ الراتب والعملة",
+      "AVATAR_SAVED": "تم تحديث الصورة الشخصية",
+      "AVATAR_FAILED": "فشل تحديث الصورة الشخصية",
+      "INVALID_FILE_TYPE": "يرجى اختيار ملف صورة صحيح (JPEG، PNG، GIF، أو WebP)",
+      "FILE_TOO_LARGE": "حجم الملف يتجاوز الحد المسموح به 5 ميغابايت. يرجى اختيار صورة أصغر."
+    }
   }
 }

@@ -41,7 +41,7 @@ export const TABS_MENU_ITEMS: Tab[] = [
     routerLinkActiveOptions: { exact: true },
     icon: 'receipt',
     visible: true,
-    disabled: true,
+    disabled: false,
     roles: [],
   },
   {
@@ -53,7 +53,7 @@ export const TABS_MENU_ITEMS: Tab[] = [
     routerLinkActiveOptions: { exact: true },
     icon: 'settings',
     visible: true,
-    disabled: true,
+    disabled: false,
     roles: [],
   },
 ];

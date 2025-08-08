@@ -246,7 +246,6 @@ export class SignupComponent extends BaseComponent implements OnInit {
     this.errorMessage = '';
 
     const { name, email, password } = this.signupForm.value;
-    const userData = { name, email, password };
 
     this.authService
       .signup(email, password)
@@ -262,7 +261,7 @@ export class SignupComponent extends BaseComponent implements OnInit {
           );
 
           // Redirect to login or the intended URL
-          const redirectUrl = this.redirectUrl || '/auth/login';
+          const redirectUrl = this.redirectUrl || '/home';
           this.router.navigateByUrl(redirectUrl, { replaceUrl: true });
         },
         error: (error) => {
@@ -270,11 +269,21 @@ export class SignupComponent extends BaseComponent implements OnInit {
 
           let errorKey = 'AUTH.SIGNUP_ERROR';
 
-          if (error.status === 400) {
+          // Handle specific error cases
+          if (error.code === 'auth/email-already-in-use') {
+            errorKey = 'AUTH.EMAIL_ALREADY_EXISTS';
+          } else if (error.code === 'auth/invalid-email') {
+            errorKey = 'AUTH.INVALID_EMAIL';
+          } else if (error.code === 'auth/weak-password') {
+            errorKey = 'AUTH.WEAK_PASSWORD';
+          } else if (error.status === 400) {
+            // Handle HTTP 400 errors
             errorKey = 'AUTH.EMAIL_ALREADY_EXISTS';
           } else if (error.status === 0) {
+            // Handle network errors
             errorKey = 'AUTH.NETWORK_ERROR';
           } else if (error.status >= 500) {
+            // Handle server errors
             errorKey = 'AUTH.SERVER_ERROR';
           }
 

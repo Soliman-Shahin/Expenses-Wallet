@@ -64,191 +64,335 @@
 
     <!-- Welcome State -->
     <ng-container *ngIf="!user; else authenticatedView">
-      <div class="welcome-container ion-padding-vertical">
-        <div class="welcome-illustration">
-          <ion-icon name="wallet-outline" class="welcome-icon"></ion-icon>
-          <div class="welcome-dots">
-            <span *ngFor="let dot of [1, 2, 3, 4, 5]"></span>
-          </div>
-        </div>
+      <ion-grid class="welcome-container ion-padding-vertical">
+        <ion-row class="ion-justify-content-center ion-align-items-center">
+          <ion-col size="12" size-md="10" size-lg="8" class="ion-text-center">
+            <div class="welcome-illustration">
+              <ion-icon name="wallet-outline" class="welcome-icon"></ion-icon>
+              <div class="welcome-dots">
+                <span *ngFor="let dot of [1, 2, 3, 4, 5]"></span>
+              </div>
+            </div>
 
-        <div class="ion-padding-horizontal ion-text-center">
-          <h1
-            class="welcome-title"
-            [attr.aria-label]="'HOME.WELCOME_TITLE' | translate"
-          >
-            {{ "HOME.WELCOME_TITLE" | translate }}
-          </h1>
-          <p
-            class="welcome-message"
-            [attr.aria-label]="'HOME.WELCOME_MESSAGE' | translate"
-          >
-            {{ "HOME.WELCOME_MESSAGE" | translate }}
-          </p>
-        </div>
+            <div class="ion-padding-horizontal ion-text-center">
+              <h1
+                class="welcome-title"
+                [attr.aria-label]="'HOME.WELCOME_TITLE' | translate"
+              >
+                {{ "HOME.WELCOME_TITLE" | translate }}
+              </h1>
+              <p
+                class="welcome-message"
+                [attr.aria-label]="'HOME.WELCOME_MESSAGE' | translate"
+              >
+                {{ "HOME.WELCOME_MESSAGE" | translate }}
+              </p>
+            </div>
 
-        <div class="welcome-actions ion-padding-horizontal ion-margin-top">
-          <ion-button
-            routerLink="/auth/login"
-            expand="block"
-            class="ion-margin-bottom"
-            [attr.aria-label]="'AUTH.SIGN_IN' | translate"
-            shape="round"
-            size="large"
-          >
-            {{ "AUTH.SIGN_IN" | translate }}
-          </ion-button>
-          <ion-button
-            routerLink="/auth/signup"
-            fill="outline"
-            expand="block"
-            [attr.aria-label]="'AUTH.SIGN_UP' | translate"
-            shape="round"
-            size="large"
-          >
-            {{ "AUTH.SIGN_UP" | translate }}
-          </ion-button>
-        </div>
+            <div class="welcome-actions ion-padding-horizontal ion-margin-top">
+              <ion-button
+                routerLink="/auth/login"
+                expand="block"
+                class="ion-margin-bottom"
+                [attr.aria-label]="'AUTH.SIGN_IN' | translate"
+                shape="round"
+                size="large"
+              >
+                {{ "AUTH.SIGN_IN" | translate }}
+              </ion-button>
+              <ion-button
+                routerLink="/auth/signup"
+                fill="outline"
+                expand="block"
+                [attr.aria-label]="'AUTH.SIGN_UP' | translate"
+                shape="round"
+                size="large"
+              >
+                {{ "AUTH.SIGN_UP" | translate }}
+              </ion-button>
+            </div>
 
-        <div class="features-preview ion-padding-top">
-          <div class="feature-item">
-            <ion-icon name="analytics-outline"></ion-icon>
-            <span>{{ "HOME.FEATURES.TRACKING" | translate }}</span>
-          </div>
-          <div class="feature-item">
-            <ion-icon name="calendar-outline"></ion-icon>
-            <span>{{ "HOME.FEATURES.BUDGETING" | translate }}</span>
-          </div>
-          <div class="feature-item">
-            <ion-icon name="stats-chart-outline"></ion-icon>
-            <span>{{ "HOME.FEATURES.INSIGHTS" | translate }}</span>
-          </div>
-        </div>
-      </div>
+            <div class="features-preview ion-padding-top">
+              <div class="feature-item">
+                <ion-icon name="analytics-outline"></ion-icon>
+                <span>{{ "HOME.FEATURES.TRACKING" | translate }}</span>
+              </div>
+              <div class="feature-item">
+                <ion-icon name="calendar-outline"></ion-icon>
+                <span>{{ "HOME.FEATURES.BUDGETING" | translate }}</span>
+              </div>
+              <div class="feature-item">
+                <ion-icon name="stats-chart-outline"></ion-icon>
+                <span>{{ "HOME.FEATURES.INSIGHTS" | translate }}</span>
+              </div>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
     </ng-container>
 
     <!-- Authenticated Content -->
     <ng-template #authenticatedView>
-      <div class="authenticated-content">
-        <!-- Welcome Header -->
-        <div class="welcome-header ion-padding-horizontal ion-padding-bottom">
-          <h1 class="greeting">
-            {{ "HOME.GREETING" | translate }},
-            <span class="user-name">{{ displayUsername }}</span>
-          </h1>
-          <p class="current-date">{{ currentDate | date : "EEEE, MMMM d" }}</p>
-        </div>
-
-        <!-- Month Selector -->
-        <app-months-scroll-header
-          (monthSelected)="onMonthChange($event)"
-          (scrolled)="onMonthScroll($event)"
-          [selectedDate]="selectedMonth"
-          [monthTotals]="monthTotals"
-          [ngClass]="{
-            'scroll-start': isScrolledToStart,
-            'scroll-end': isScrolledToEnd
-          }"
-          ariaLabel="{{ 'HOME.SELECT_MONTH' | translate }}"
-          class="month-selector"
-        ></app-months-scroll-header>
-
-        <!-- Quick Actions -->
-        <div class="quick-actions ion-padding-horizontal">
-          <ion-button
-            fill="clear"
-            class="quick-action"
-            routerLink="/transactions/add"
-          >
-            <ion-icon name="add-circle-outline"></ion-icon>
-            <span class="action-label">{{
-              "TRANSACTIONS.ADD" | translate
-            }}</span>
-          </ion-button>
-          <ion-button fill="clear" class="quick-action" routerLink="/budget">
-            <ion-icon name="wallet-outline"></ion-icon>
-            <span class="action-label">{{ "BUDGET.TITLE" | translate }}</span>
-          </ion-button>
-          <ion-button fill="clear" class="quick-action" routerLink="/reports">
-            <ion-icon name="pie-chart-outline"></ion-icon>
-            <span class="action-label">{{ "REPORTS.TITLE" | translate }}</span>
-          </ion-button>
-        </div>
-
-        <!-- Balance Summary -->
-        <section
-          aria-labelledby="balance-heading"
-          class="card-section ion-margin-vertical"
-        >
-          <h2 id="balance-heading" class="section-title">
-            {{ "HOME.BALANCE_SUMMARY" | translate }}
-          </h2>
-          <app-balance-card
-            [balance]="balance"
-            [income]="income"
-            [expenses]="expenses"
-            [percentageChange]="percentageChange"
-            [isLoading]="isLoading"
-            [currency]="currency"
-          >
-          </app-balance-card>
-        </section>
-
-        <!-- Monthly Summary -->
-        <section
-          aria-labelledby="summary-heading"
-          class="card-section ion-margin-vertical"
-        >
-          <div class="section-header">
-            <h2 id="summary-heading" class="section-title">
-              {{ "HOME.MONTHLY_SUMMARY" | translate }}
-            </h2>
-            <ion-button
-              fill="clear"
-              size="small"
-              routerLink="/reports"
-              [attr.aria-label]="'COMMON.VIEW_DETAILS' | translate"
+      <ion-grid class="authenticated-content">
+        <ion-row>
+          <ion-col size="12" size-md="10" size-lg="8" class="ion-margin-auto">
+            <!-- Welcome Header -->
+            <div
+              class="welcome-header ion-padding-horizontal ion-padding-bottom"
             >
-              {{ "COMMON.VIEW_DETAILS" | translate }}
-              <ion-icon slot="end" name="arrow-forward"></ion-icon>
-            </ion-button>
-          </div>
-          <app-total-salary
-            [month]="selectedMonth.month"
-            [year]="selectedMonth.year"
-            [totalAmount]="totalSalary"
-            [details]="salaryDetails"
-            [isLoading]="isLoading"
-            [currency]="currency"
-          >
-          </app-total-salary>
-        </section>
+              <h1 class="greeting">
+                {{ "HOME.GREETING" | translate }},
+                <span class="user-name">{{ displayUsername }}</span>
+              </h1>
+              <p class="current-date">
+                {{ currentDate | date : "EEEE, MMMM d" }}
+              </p>
+            </div>
 
-        <!-- Recent Transactions -->
-        <section
-          aria-labelledby="transactions-heading"
-          class="card-section ion-margin-vertical"
-        >
-          <div class="section-header">
-            <h2 id="transactions-heading" class="section-title">
-              {{ "TRANSACTIONS.RECENT" | translate }}
-            </h2>
-            <ion-button
-              fill="clear"
-              size="small"
-              routerLink="/transactions"
-              [attr.aria-label]="'COMMON.VIEW_ALL' | translate"
+            <!-- Month Selector -->
+            <app-months-scroll-header
+              (monthSelected)="onMonthChange($event)"
+              (scrolled)="onMonthScroll($event)"
+              [selectedDate]="selectedMonth"
+              [monthTotals]="monthTotals"
+              [ngClass]="{
+                'scroll-start': isScrolledToStart,
+                'scroll-end': isScrolledToEnd
+              }"
+              ariaLabel="{{ 'HOME.SELECT_MONTH' | translate }}"
+              class="month-selector"
+            ></app-months-scroll-header>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions ion-padding-horizontal">
+              <ion-button
+                fill="clear"
+                class="quick-action"
+                routerLink="/transactions/add"
+                attr.aria-label="{{ 'TRANSACTIONS.ADD' | translate }}"
+                role="link"
+                tabindex="0"
+                (mouseenter)="onCardHover('quickActions', true)"
+                (mouseleave)="onCardHover('quickActions', false)"
+                (click)="onCardClick('quickActions')"
+                [class.interact]="cardStates['quickActions']"
+              >
+                <ion-icon
+                  name="add-circle-outline"
+                  aria-hidden="true"
+                ></ion-icon>
+                <span class="action-label">{{
+                  "TRANSACTIONS.ADD" | translate
+                }}</span>
+              </ion-button>
+              <ion-button
+                fill="clear"
+                class="quick-action"
+                routerLink="/budget"
+                attr.aria-label="{{ 'BUDGET.TITLE' | translate }}"
+                role="link"
+                tabindex="0"
+                (mouseenter)="onCardHover('quickActions', true)"
+                (mouseleave)="onCardHover('quickActions', false)"
+                (click)="onCardClick('quickActions')"
+                [class.interact]="cardStates['quickActions']"
+              >
+                <ion-icon name="wallet-outline" aria-hidden="true"></ion-icon>
+                <span class="action-label">{{
+                  "BUDGET.TITLE" | translate
+                }}</span>
+              </ion-button>
+              <ion-button
+                fill="clear"
+                class="quick-action"
+                routerLink="/reports"
+                attr.aria-label="{{ 'REPORTS.TITLE' | translate }}"
+                role="link"
+                tabindex="0"
+                (mouseenter)="onCardHover('quickActions', true)"
+                (mouseleave)="onCardHover('quickActions', false)"
+                (click)="onCardClick('quickActions')"
+                [class.interact]="cardStates['quickActions']"
+              >
+                <ion-icon
+                  name="pie-chart-outline"
+                  aria-hidden="true"
+                ></ion-icon>
+                <span class="action-label">{{
+                  "REPORTS.TITLE" | translate
+                }}</span>
+              </ion-button>
+            </div>
+
+            <!-- Charts Section -->
+            <section
+              aria-labelledby="charts-heading"
+              class="card-section charts-card ion-margin-vertical"
+              role="region"
+              aria-live="polite"
             >
-              {{ "COMMON.VIEW_ALL" | translate }}
-              <ion-icon slot="end" name="arrow-forward"></ion-icon>
-            </ion-button>
-          </div>
-          <!-- <app-transactions [limit]="5" [showHeader]="false"></app-transactions> -->
-        </section>
-      </div>
+              <h2 id="charts-heading" class="section-title">
+                <ion-icon
+                  name="analytics-outline"
+                  aria-hidden="true"
+                ></ion-icon>
+                {{ "HOME.CHARTS" | translate }}
+              </h2>
+
+              <!-- Income vs Expenses Bar Chart -->
+              <app-bar-chart
+                *ngIf="incomeVsExpenseData.length > 0"
+                [data]="incomeVsExpenseData"
+                [title]="'HOME.INCOME_VS_EXPENSES' | translate"
+                [ariaLabel]="'HOME.INCOME_VS_EXPENSES_CHART' | translate"
+                [chartDescription]="'HOME.INCOME_VS_EXPENSES_DESC' | translate"
+              ></app-bar-chart>
+
+              <!-- Expense by Category Pie Chart -->
+              <app-pie-chart
+                *ngIf="expenseByCategoryData.length > 0"
+                [data]="expenseByCategoryData"
+                [title]="'HOME.EXPENSE_BY_CATEGORY' | translate"
+                [ariaLabel]="'HOME.EXPENSE_BY_CATEGORY_CHART' | translate"
+                [showLegend]="true"
+                [size]="300"
+              ></app-pie-chart>
+
+              <!-- Monthly Expenses Line Chart -->
+              <app-line-chart
+                *ngIf="monthlyExpensesData.length > 0"
+                [data]="monthlyExpensesData"
+                [title]="'HOME.MONTHLY_EXPENSES' | translate"
+                [ariaLabel]="'HOME.MONTHLY_EXPENSES_CHART' | translate"
+                [chartDescription]="'HOME.MONTHLY_EXPENSES_DESC' | translate"
+              ></app-line-chart>
+            </section>
+
+            <!-- Balance Summary -->
+            <section
+              aria-labelledby="balance-heading"
+              class="card-section balance-card ion-margin-vertical"
+              role="region"
+              aria-live="polite"
+            >
+              <h2 id="balance-heading" class="section-title">
+                <ion-icon name="wallet-outline" aria-hidden="true"></ion-icon>
+                {{ "HOME.BALANCE_SUMMARY" | translate }}
+              </h2>
+              <app-balance-card
+                [balance]="balance"
+                [income]="income"
+                [expenses]="expenses"
+                [percentageChange]="percentageChange"
+                [isLoading]="isLoading"
+                [currency]="currency"
+                role="group"
+                attr.aria-label="{{ 'HOME.BALANCE_SUMMARY' | translate }}"
+                (mouseenter)="onCardHover('balance', true)"
+                (mouseleave)="onCardHover('balance', false)"
+                (click)="onCardClick('balance')"
+                [class.interact]="cardStates['balance']"
+              >
+              </app-balance-card>
+            </section>
+
+            <!-- Monthly Summary -->
+            <section
+              aria-labelledby="summary-heading"
+              class="card-section summary-card ion-margin-vertical"
+              role="region"
+              aria-live="polite"
+            >
+              <div class="section-header">
+                <h2 id="summary-heading" class="section-title">
+                  <ion-icon
+                    name="calendar-outline"
+                    aria-hidden="true"
+                  ></ion-icon>
+                  {{ "HOME.MONTHLY_SUMMARY" | translate }}
+                </h2>
+                <ion-button
+                  fill="clear"
+                  size="small"
+                  routerLink="/reports"
+                  [attr.aria-label]="'COMMON.VIEW_DETAILS' | translate"
+                >
+                  {{ "COMMON.VIEW_DETAILS" | translate }}
+                  <ion-icon
+                    slot="end"
+                    name="arrow-forward"
+                    aria-hidden="true"
+                  ></ion-icon>
+                </ion-button>
+              </div>
+              <app-total-salary
+                [month]="selectedMonth.month"
+                [year]="selectedMonth.year"
+                [totalAmount]="totalSalary"
+                [details]="salaryDetails"
+                [isLoading]="isLoading"
+                [currency]="currency"
+                role="group"
+                attr.aria-label="{{ 'HOME.TOTAL_SALARY' | translate }}"
+                (mouseenter)="onCardHover('salary', true)"
+                (mouseleave)="onCardHover('salary', false)"
+                (click)="onCardClick('salary')"
+                [class.interact]="cardStates['salary']"
+              ></app-total-salary>
+
+              <!-- Salary Breakdown Pie Chart -->
+              <app-pie-chart
+                *ngIf="salaryBreakdownData.length > 0"
+                [data]="salaryBreakdownData"
+                [title]="'HOME.SALARY_BREAKDOWN' | translate"
+                [ariaLabel]="'HOME.SALARY_BREAKDOWN_CHART' | translate"
+                [showLegend]="true"
+                [size]="250"
+              ></app-pie-chart>
+            </section>
+
+            <!-- Recent Transactions -->
+            <section
+              aria-labelledby="transactions-heading"
+              class="card-section transactions-card ion-margin-vertical"
+              role="region"
+              aria-live="polite"
+            >
+              <div class="section-header">
+                <h2 id="transactions-heading" class="section-title">
+                  <ion-icon name="list-outline" aria-hidden="true"></ion-icon>
+                  {{ "TRANSACTIONS.RECENT" | translate }}
+                </h2>
+                <ion-button
+                  fill="clear"
+                  size="small"
+                  routerLink="/transactions"
+                  [attr.aria-label]="'COMMON.VIEW_ALL' | translate"
+                >
+                  {{ "COMMON.VIEW_ALL" | translate }}
+                  <ion-icon
+                    slot="end"
+                    name="arrow-forward"
+                    aria-hidden="true"
+                  ></ion-icon>
+                </ion-button>
+              </div>
+              <!-- <app-transactions [limit]="5" [showHeader]="false"></app-transactions> -->
+            </section>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
     </ng-template>
   </ng-template>
-  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+  <ion-fab
+    vertical="bottom"
+    horizontal="end"
+    slot="fixed"
+    (mouseenter)="onCardHover('quickActions', true)"
+    (mouseleave)="onCardHover('quickActions', false)"
+    (click)="onCardClick('quickActions')"
+    [class.interact]="cardStates['quickActions']"
+  >
     <ion-fab-button (click)="openExpenseModal()">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>

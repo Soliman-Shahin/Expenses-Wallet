@@ -93,7 +93,13 @@ export class SideMenuComponent
         this.setActiveLink(event.url);
       });
 
+    // Subscribe to theme changes
+    this.themeService.theme$.subscribe((theme) => {
+      this.isDarkMode = theme === 'dark';
+    });
 
+    // Initialize theme
+    this.isDarkMode = this.themeService.isDarkMode();
   }
 
   onMenuOpen() {

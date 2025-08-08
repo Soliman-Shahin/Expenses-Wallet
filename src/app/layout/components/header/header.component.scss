@@ -180,10 +180,13 @@ ion-header {
   ion-header {
     ion-toolbar {
       --min-height: 56px;
+      padding-left: var(--spacing-xs);
+      padding-right: var(--spacing-xs);
     }
 
     .title {
       font-size: 1.1rem;
+      @extend .p-y-1;
     }
 
     .menu-button,
@@ -192,6 +195,8 @@ ion-header {
       --padding-end: 6px;
       --padding-top: 6px;
       --padding-bottom: 6px;
+      @extend .rounded;
+      @extend .shadow;
 
       ion-icon {
         font-size: 1.25rem;
@@ -199,3 +204,31 @@ ion-header {
     }
   }
 }
+
+// Extra large screens
+@media (min-width: 1200px) {
+  ion-header {
+    ion-toolbar {
+      --min-height: 72px;
+      padding-left: var(--spacing-xl);
+      padding-right: var(--spacing-xl);
+    }
+    .title {
+      font-size: 2rem;
+      @extend .p-y-3;
+    }
+    .menu-button,
+    .action-button {
+      --padding-start: 16px;
+      --padding-end: 16px;
+      --padding-top: 12px;
+      --padding-bottom: 12px;
+      @extend .rounded-lg;
+      @extend .shadow-header;
+      ion-icon {
+        font-size: 2rem;
+      }
+    }
+  }
+}
+

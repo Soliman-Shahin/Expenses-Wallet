@@ -1,9 +1,9 @@
-// Form Variables
+// === FORM VARIABLES (consolidated) ===
 :root {
   // Form Elements
   --form-element-padding: 16px 16px 8px 16px;
   --form-element-margin: 0 0 16px 0;
-  --form-element-border-radius: 8px;
+  --form-element-border-radius: var(--card-border-radius, 12px);
   --form-element-border-width: 1px;
   --form-element-border-color: var(--ion-color-medium-shade);
   --form-element-background: var(--ion-color-light);

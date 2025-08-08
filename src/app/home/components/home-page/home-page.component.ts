@@ -4,6 +4,11 @@ import { MonthYear, SalaryDetail } from '../../models';
 import { User } from 'src/app/modules/auth/models';
 import { catchError, finalize, of, takeUntil, tap } from 'rxjs';
 import { ExpenseFormComponent } from '../expense-form/expense-form.component';
+import { ChartDataService } from 'src/app/shared/services/chart-data.service';
+import { BarChartComponent } from 'src/app/shared/components/charts';
+import { PieChartComponent } from 'src/app/shared/components/charts';
+import { LineChartComponent } from 'src/app/shared/components/charts';
+import { ProfileService } from 'src/app/modules/profile/services/profile.service';
 
 // Constants
 const MAX_RETRY_ATTEMPTS = 3;
@@ -22,7 +27,13 @@ export class HomePageComponent extends BaseComponent implements OnInit {
   percentageChange: number | null = null;
   totalSalary: number | null = null;
   salaryDetails: SalaryDetail[] = [];
-  currency: string = 'EGP';
+  currency: string = 'USD';
+
+  // Chart data
+  incomeVsExpenseData: any[] = [];
+  expenseByCategoryData: any[] = [];
+  monthlyExpensesData: any[] = [];
+  salaryBreakdownData: any[] = [];
 
   // Month totals for the scroll header
   monthTotals: { [key: string]: number } = {};
@@ -37,7 +48,21 @@ export class HomePageComponent extends BaseComponent implements OnInit {
     icon: 'home-outline',
   };
 
-  constructor() {
+  // Card interaction states
+  cardStates: { [key: string]: boolean } = {
+    balance: false,
+    income: false,
+    expenses: false,
+    salary: false,
+    quickActions: false,
+    monthlySummary: false,
+    recentTransactions: false,
+  };
+
+  constructor(
+    private chartDataService: ChartDataService,
+    private profileService: ProfileService
+  ) {
     super();
   }
 
@@ -53,6 +78,36 @@ export class HomePageComponent extends BaseComponent implements OnInit {
     this.setupRouteDataSubscription();
     this.loadDashboardData();
     this.loadMonthTotals();
+
+    // Initialize from existing profile cache for immediate UX
+    const existingProfile = this.profileService.getProfile();
+    if (existingProfile) {
+      if (existingProfile.currency) this.currency = existingProfile.currency;
+      if (Array.isArray(existingProfile.salary)) {
+        this.salaryDetails = existingProfile.salary;
+        this.totalSalary = existingProfile.salary.reduce(
+          (sum, s) => sum + (s?.amount ?? 0),
+          0
+        );
+      }
+    }
+
+    // Sync currency and salary from Profile
+    this.profileService.profile$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((profile) => {
+        if (profile) {
+          if (profile.currency) this.currency = profile.currency;
+          if (Array.isArray(profile.salary)) {
+            this.salaryDetails = profile.salary;
+            this.totalSalary = profile.salary.reduce(
+              (sum, s) => sum + (s?.amount ?? 0),
+              0
+            );
+          }
+          this.cdr.markForCheck();
+        }
+      });
   }
 
   /**
@@ -188,18 +243,65 @@ export class HomePageComponent extends BaseComponent implements OnInit {
           this.expenses = expenses;
           this.balance = income - expenses;
 
-          // Mock salary data until a real service is available
-          this.totalSalary = 5000.0;
-          this.salaryDetails = [
-            { label: 'Basic Salary', amount: 4500.0 },
-            { label: 'Bonus', amount: 500.0 },
-          ];
+          // Salary and currency are sourced from user profile via ProfileService
+          // salaryDetails stays in sync from the profile subscription
+
+          // Load chart data
+          this.loadChartData();
         },
         error: (err: any) => {
           console.error('Failed to load dashboard data', err);
           this.setError('Failed to load dashboard data. Please try again.');
         },
       });
+  }
+
+  private loadChartData(): void {
+    // Load income vs expense data
+    this.chartDataService.getIncomeVsExpense().subscribe((data) => {
+      this.incomeVsExpenseData = data;
+      this.cdr.markForCheck();
+    });
+
+    // Load expense by category data
+    this.chartDataService.getExpenseByCategory().subscribe((data) => {
+      this.expenseByCategoryData = data;
+      this.cdr.markForCheck();
+    });
+
+    // Load monthly expenses data
+    this.chartDataService.getMonthlyExpenses().subscribe((data) => {
+      this.monthlyExpensesData = data;
+      this.cdr.markForCheck();
+    });
+
+    // Load salary breakdown data
+    this.chartDataService.getSalaryBreakdown().subscribe((data) => {
+      this.salaryBreakdownData = data;
+      this.cdr.markForCheck();
+    });
+  }
+
+  // Card interaction methods
+  onCardHover(cardName: string, isHovering: boolean) {
+    this.cardStates[cardName] = isHovering;
+    this.cdr.markForCheck();
+  }
+
+  onCardClick(cardName: string) {
+    // Add specific click behavior for each card if needed
+    console.log(`${cardName} card clicked`);
+
+    // Trigger a subtle animation
+    this.cardStates[cardName] = false;
+    setTimeout(() => {
+      this.cardStates[cardName] = true;
+      this.cdr.markForCheck();
+      setTimeout(() => {
+        this.cardStates[cardName] = false;
+        this.cdr.markForCheck();
+      }, 150);
+    }, 10);
   }
 
   async openExpenseModal() {

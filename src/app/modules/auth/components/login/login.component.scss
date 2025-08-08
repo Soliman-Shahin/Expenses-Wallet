@@ -1,31 +1,129 @@
+// Utility Classes
 .no_account {
   vertical-align: sub;
 }
 
-// Main container
+// Make the container list transparent and remove default paddings
+.login-form ion-list {
+  background: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  --ion-item-background: transparent;
+}
+
+// Ensure the whole form area has no extra background blocks
+.login-form.form-container,
+.login-form .form-container {
+  background: transparent !important;
+}
+
+// Prefix icon chip inside inputs
+.prefix-icon {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--ion-color-primary);
+  border-radius: 10px;
+  padding: 6px;
+  width: 28px;
+  height: 28px;
+}
+
+// Improve spacing and look for forgot password link button
+.forgot-password {
+  --color: var(--ion-color-primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+// Make the main submit button feel clickable without being flashy
+.login-button {
+  --border-radius: 12px;
+  height: 48px;
+}
+
+.text-success {
+  color: var(--ion-color-success);
+}
+
+// Divider
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: var(--spacing-md) 0;
+  color: var(--text-secondary);
+
+  &::before,
+  &::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid var(--ion-color-medium);
+  }
+
+  &:not(:empty)::before {
+    margin-right: var(--spacing-md);
+  }
+
+  &:not(:empty)::after {
+    margin-left: var(--spacing-md);
+  }
+
+  // End eye icon (toggle) unified with the field
+  .end-toggle {
+    color: var(--ion-color-medium);
+    margin-left: 6px;
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: color 0.15s ease;
+    cursor: pointer;
+
+    &:hover, &:focus {
+      color: var(--ion-color-primary);
+      outline: none;
+    }
+  }
+}
+
+// Note Styling
+ion-note {
+  ul {
+    padding-left: var(--spacing-lg);
+    margin: var(--spacing-xs) 0 0 0;
+  }
+
+  li {
+    margin: var(--spacing-xxs) 0;
+    color: var(--text-tertiary);
+  }
+}
+
+// Form Container
+.signup-container,
 .login-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100%;
-  background: var(--ion-background-color, var(--ion-color-light));
   padding: var(--spacing-lg);
+  background: var(--ion-background-color, var(--ion-color-light));
 }
 
-// Login card
+// Auth Card
+.signup-card,
 .login-card {
   width: 100%;
-  max-width: 440px;
+  max-width: 480px;
   background: var(--ion-background-color, var(--ion-color-light));
   border-radius: var(--card-border-radius, 16px);
-  padding: var(--spacing-xxl) var(--spacing-lg);
+  padding: var(--spacing-xl);
   box-shadow: var(--card-box-shadow, 0 4px 20px rgba(0, 0, 0, 0.1));
   margin: var(--spacing-lg) 0;
-  position: relative;
-  overflow: hidden;
 }
 
-// App logo and name
+// Logo Container
 .logo-container {
   text-align: center;
   margin-bottom: var(--spacing-xxl);
@@ -44,146 +142,25 @@
   }
 }
 
-// Welcome text
+// Welcome Text
 .welcome-text {
   font-size: var(--text-2xl);
   font-weight: var(--font-weight-semibold);
   color: var(--text-primary);
   margin-bottom: var(--spacing-xs);
+  text-align: center;
 }
 
+// Subtitle Text
 .subtitle {
-  color: var(--ion-color-medium);
-  margin-top: 0;
-  margin-bottom: 24px;
-  font-size: 14px;
+  color: var(--text-tertiary);
+  text-align: center;
+  margin-bottom: var(--spacing-lg);
+  font-size: var(--text-base);
 }
 
-// Form styles
-.login-form {
-  margin-top: 24px;
-}
-
-.form-item {
-  --background: var(--ion-color-light);
-  --border-radius: 12px;
-  --padding-start: 16px;
-  --padding-end: 8px;
-  --min-height: 56px;
-  margin-bottom: 16px;
-  border: 1px solid var(--ion-color-light-shade);
-  transition: border-color 0.3s ease;
-
-  &.ion-invalid {
-    border-color: var(--ion-color-danger);
-  }
-
-  &.ion-valid {
-    border-color: var(--ion-color-success);
-  }
-
-  ion-icon {
-    color: var(--ion-color-medium);
-    font-size: 20px;
-    margin-right: 12px;
-  }
-
-  ion-input {
-    --padding-top: 8px;
-    --padding-bottom: 8px;
-  }
-
-  ion-button {
-    --padding-start: 8px;
-    --padding-end: 8px;
-    --ripple-color: transparent;
-
-    ion-icon {
-      margin-right: 0;
-      color: var(--ion-color-medium);
-    }
-  }
-}
-
-// Form options
-.form-options {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 20px 0 24px;
-
-  .remember-me {
-    --min-height: auto;
-    --padding-start: 0;
-    --inner-padding-end: 0;
-    --inner-border-width: 0;
-    --background: transparent;
-
-    ion-checkbox {
-      --size: 18px;
-      --background-checked: var(--ion-color-primary);
-      --border-color: var(--ion-color-medium);
-      --border-color-checked: var(--ion-color-primary);
-      margin-right: 8px;
-    }
-
-    ion-label {
-      font-size: 14px;
-      color: var(--ion-color-medium);
-    }
-  }
-
-  .forgot-password {
-    --color: var(--ion-color-medium);
-    --color-activated: var(--ion-color-primary);
-    --color-focused: var(--ion-color-primary);
-    --color-hover: var(--ion-color-primary);
-    --background-hover: transparent;
-    --background-activated: transparent;
-    --background-focused: transparent;
-    --background: transparent;
-    --box-shadow: none;
-    font-size: 14px;
-    text-transform: none;
-    margin: 0;
-    --padding-start: 8px;
-    --padding-end: 8px;
-  }
-}
-
-// Login button
-.login-button {
-  --border-radius: 12px;
-  --padding-top: 16px;
-  --padding-bottom: 16px;
-  --box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.2);
-  font-weight: 600;
-  text-transform: none;
-  height: 48px;
-  margin: 0;
-  transition: all 0.3s ease;
-
-  &:hover {
-    --box-shadow: 0 6px 16px rgba(var(--ion-color-primary-rgb), 0.3);
-    transform: translateY(-1px);
-  }
-
-  &:active {
-    --box-shadow: 0 2px 8px rgba(var(--ion-color-primary-rgb), 0.2);
-    transform: translateY(1px);
-  }
-
-  &.loading {
-    --box-shadow: none;
-    transform: none;
-  }
-
-  ion-spinner {
-    --color: var(--ion-color-light);
-  }
-}
-
-// Social login buttons
+// Social Buttons
+.social-signup-buttons,
 .social-login-buttons {
   margin: 24px 0;
 
@@ -227,90 +204,191 @@
       color: var(--ion-text-color);
     }
   }
-}
 
-// Divider
-.divider {
-  display: flex;
-  align-items: center;
-  margin: 24px 0;
-  color: var(--ion-color-medium);
-  font-size: 14px;
-
-  .divider-line {
-    flex: 1;
-    height: 1px;
-    background-color: var(--ion-color-light-shade);
-  }
-
-  .divider-text {
-    padding: 0 12px;
+  .facebook-btn {
+    --color: var(--ion-text-color);
   }
 }
 
-// Error message
-.error-message {
-  display: flex;
-  align-items: center;
-  background: rgba(var(--ion-color-danger-rgb), 0.1);
-  border-radius: 8px;
-  padding: 12px 16px;
-  margin-bottom: 20px;
-  font-size: 14px;
-  color: var(--ion-color-danger);
+// Form Styles
+.signup-form,
+.login-form {
+  margin-top: var(--spacing-lg);
+}
+
+.form-item {
+  // Lighter background (more transparent) per user's preference
+  --background: rgba(255, 255, 255, 0.03);
+  --border-radius: 16px;
+  --padding-start: 14px; // tighter start padding so icon sticks to edge
+  --padding-end: 14px;   // symmetric end padding
+  --min-height: 60px;
+  margin-bottom: 16px;
+  border: 1px solid transparent; // remove visible border to avoid double-box look
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  overflow: hidden; // clip children to the same capsule
+  --inner-border-width: 0;
+  --inner-padding-top: 0;
+  --inner-padding-bottom: 0;
+  --inner-padding-start: 0; // remove inner start padding so icon hugs the edge
+  --inner-padding-end: 0;   // remove inner end padding so end icon hugs the edge
+  --highlight-color-focused: transparent;
+  --highlight-color-invalid: transparent;
+  --highlight-color-valid: transparent;
+  --box-shadow: none;
+  --ripple-color: transparent;
+  --background: rgba(255, 255, 255, 0.02);
+
+  &.ion-invalid {
+    // keep border subtle; indicate invalid via soft glow instead of harsh red border
+    border-color: transparent;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--ion-color-danger) 14%, transparent);
+    --highlight-color-invalid: transparent;
+
+    // Kill native invalid red outline inside the shadow DOM
+    ion-input::part(native) {
+      box-shadow: none !important;
+      outline: none !important;
+    }
+    ion-input::part(container) {
+      box-shadow: none !important;
+      border: 0 !important;
+    }
+  }
+
+  // Keep valid border neutral to avoid flashing green frames
+  &.ion-valid {
+    border-color: var(--ion-color-light-shade);
+  }
+
+  // Focus ring and subtle elevation when the input is focused
+  &:focus-within {
+    border-color: transparent;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--ion-color-primary) 18%, transparent);
+    --background: rgba(255, 255, 255, 0.05);
+  }
 
   ion-icon {
+    color: var(--ion-color-medium);
+    font-size: 20px;
+    margin-right: 8px; // reduce gap between icon and text
+    background: transparent !important;
+  }
+
+  // Icons are now inside ion-input via slots; style them too
+  ion-input ion-icon[slot="start"] {
+    color: var(--ion-color-medium);
     margin-right: 8px;
-    font-size: 18px;
-  }
-}
-
-// Sign up link
-.signup-link {
-  margin-top: 24px;
-  font-size: 14px;
-  color: var(--ion-color-medium);
-
-  .signup-text {
-    color: var(--ion-color-primary);
-    font-weight: 500;
-    text-decoration: none;
-    margin-left: 4px;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-}
-
-// Responsive adjustments
-@media (max-width: 576px) {
-  .login-card {
-    padding: 24px 16px;
-    margin: 16px;
+    font-size: 20px;
   }
 
-  .logo-container {
-    .app-logo {
-      font-size: 56px;
-    }
+  ion-input {
+    --padding-top: 12px;
+    --padding-bottom: 12px;
+    --padding-start: 0; // text starts right after icon
+    --padding-end: 0;   // text ends right before end icon
+    --background: transparent; // kill any inner filled bg
+    --border-width: 0;
+    --border-color: transparent;
+    --border-radius: 0;
+    --box-shadow: none;
+    --color: var(--ion-text-color);
+    --placeholder-color: var(--ion-color-medium);
+    --placeholder-opacity: 0.9;
+    font-size: 16px;
+    caret-color: var(--ion-color-primary);
+    flex: 1 1 auto;       // fill remaining space inside ion-item
+    width: 100%;
+    min-width: 0;         // allow flexbox to shrink properly
+  }
 
-    .app-name {
+  // Ensure the native input element itself has no default background/margins
+  ion-input::part(native) {
+    background: transparent !important;
+    border: 0 !important;
+    outline: none;
+    padding: 12px 0 !important; // vertical only; horizontal handled by item paddings
+    box-shadow: none !important;
+    width: 100% !important;
+  }
+
+  // Remove any inner container pill/background from ion-input
+  ion-input::part(container) {
+    background: transparent !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: 0 !important;
+    width: 100% !important;
+  }
+
+  // Also ensure the ion-item surface itself is the capsule (no inner box)
+  &::part(native) {
+    background: var(--background);
+    border-radius: var(--border-radius);
+    padding-inline-start: var(--padding-start);
+    padding-inline-end: var(--padding-end);
+    min-height: var(--min-height);
+  }
+
+  ion-button {
+    // Make the end-eye icon feel part of the input (no separate chip/button look)
+    --padding-start: 0;
+    --padding-end: 0;
+    --background: transparent;
+    --box-shadow: none;
+    --ripple-color: transparent;
+    height: 32px;
+    min-height: 32px;
+    min-width: 32px;
+    color: var(--ion-color-medium);
+
+    ion-icon {
+      margin-right: 0;
+      color: var(--ion-color-medium);
       font-size: 22px;
     }
   }
+}
 
-  .welcome-text {
-    font-size: 22px;
-  }
+// Form options
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px 0 24px;
 
-  .form-options {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
+  .ion-margin-vertical {
+    --min-height: auto;
+    --padding-start: 0;
+    --inner-padding-end: 0;
+    --inner-border-width: 0;
+    --background: transparent;
 
-    .forgot-password {
-      align-self: flex-end;
+    ion-checkbox {
+      --size: 18px;
+      --background-checked: var(--ion-color-primary);
+      --border-color: var(--ion-color-medium);
+      --border-color-checked: var(--ion-color-primary);
+      margin-right: 8px;
     }
+
+    ion-label {
+      font-size: 14px;
+      color: var(--ion-color-medium);
+    }
+  }
+}
+
+// Error Message
+.error-message {
+  color: var(--ion-color-danger);
+  font-size: var(--text-sm);
+  margin: var(--spacing-xs) 0;
+  display: flex;
+  align-items: center;
+
+  ion-icon {
+    margin-right: var(--spacing-xs);
   }
 }

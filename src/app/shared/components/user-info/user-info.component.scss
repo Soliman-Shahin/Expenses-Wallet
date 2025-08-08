@@ -1,0 +1,33 @@
+.user-info-card {
+  animation: fadeIn 0.6s cubic-bezier(0.33, 1, 0.68, 1);
+  border-radius: 1.2rem;
+  box-shadow: 0 2px 12px rgba(34,211,238,0.10);
+  background: var(--ion-background-color);
+  padding: 1.2rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  transition: box-shadow 0.18s, background 0.18s, transform 0.18s;
+
+  .avatar {
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(34,211,238,0.10);
+    overflow: hidden;
+  }
+
+  &:hover, &:focus-visible {
+    box-shadow: 0 4px 20px rgba(34,211,238,0.13);
+    background: rgba(var(--ion-color-primary-rgb), 0.04);
+    transform: scale(1.025);
+    transition: box-shadow 0.14s, background 0.14s, transform 0.14s;
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}

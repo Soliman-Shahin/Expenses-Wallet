@@ -12,6 +12,8 @@ import {
   UserInfoComponent,
 } from './components';
 
+import { ThemeToggleComponent } from './components/theme-toggle/theme-toggle.component';
+
 @NgModule({
   imports: [
     CommonModule,
@@ -33,6 +35,7 @@ import {
     MonthsScrollHeaderComponent,
     BalanceCardComponent,
     TotalSalaryComponent,
+    ThemeToggleComponent,
   ],
   declarations: [
     UserInfoComponent,
@@ -40,6 +43,7 @@ import {
     MonthsScrollHeaderComponent,
     BalanceCardComponent,
     TotalSalaryComponent,
+    ThemeToggleComponent,
   ],
 })
 export class SharedModule {}

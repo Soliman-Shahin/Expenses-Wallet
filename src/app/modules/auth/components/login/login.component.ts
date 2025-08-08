@@ -23,7 +23,45 @@ export class LoginComponent extends BaseComponent {
 
   constructor() {
     super();
+  }
+
+  override ngOnInit(): void {
     this.initForm();
+  }
+
+  // Ensure UI resets correctly when returning to login (e.g., after logout)
+  ionViewWillEnter(): void {
+    this.setLoading(false);
+    this.errorMessage = '';
+    if (this.loginForm) {
+      this.loginForm.markAsPristine();
+      this.loginForm.markAsUntouched();
+      this.loginForm.updateValueAndValidity({ onlySelf: false, emitEvent: false });
+    }
+  }
+
+  signInWithFacebook(): void {
+    this.authService
+      .loginWithFacebook()
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.setLoading(false))
+      )
+      .subscribe({
+        next: () => {
+          this.toastService.presentSuccessToast(
+            'bottom',
+            this.translateService.instant('AUTH.LOGIN_SUCCESS')
+          );
+        },
+        error: (error: any) => {
+          console.error('Login error:', error);
+          this.errorMessage =
+            error?.error?.message ||
+            this.translateService.instant('AUTH.LOGIN_ERROR');
+          this.toastService.presentErrorToast('bottom', this.errorMessage);
+        },
+      });
   }
 
   togglePasswordVisibility(): void {
@@ -71,7 +109,6 @@ export class LoginComponent extends BaseComponent {
             'bottom',
             this.translateService.instant('AUTH.LOGIN_SUCCESS')
           );
-          this.router.navigate(['/']);
         },
         error: (error: any) => {
           console.error('Login error:', error);

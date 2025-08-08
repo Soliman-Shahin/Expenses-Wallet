@@ -1,3 +1,7 @@
+// =============================
+// Signup Page Styles
+// =============================
+
 // Utility Classes
 .no_account {
   vertical-align: sub;
@@ -5,6 +9,19 @@
 
 .text-success {
   color: var(--ion-color-success);
+}
+
+// Visually Hidden (for accessibility)
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 // Divider
@@ -63,6 +80,8 @@ ion-note {
   padding: var(--spacing-xl);
   box-shadow: var(--card-box-shadow, 0 4px 20px rgba(0, 0, 0, 0.1));
   margin: var(--spacing-lg) 0;
+  position: relative;
+  overflow: hidden;
 }
 
 // Logo Container
@@ -160,14 +179,24 @@ ion-note {
   --min-height: 56px;
   margin-bottom: 16px;
   border: 1px solid var(--ion-color-light-shade);
-  transition: border-color 0.3s ease;
+  box-shadow: 0 2px 10px rgba(var(--ion-color-primary-rgb), 0.07);
+  transition: border-color 0.22s, box-shadow 0.22s;
 
   &.ion-invalid {
     border-color: var(--ion-color-danger);
+    box-shadow: 0 2px 10px rgba(var(--ion-color-danger-rgb), 0.11);
   }
 
   &.ion-valid {
     border-color: var(--ion-color-success);
+    box-shadow: 0 2px 10px rgba(var(--ion-color-success-rgb), 0.11);
+  }
+
+  &:focus-within, &:focus-visible {
+    border-color: var(--ion-color-primary);
+    box-shadow: 0 4px 18px rgba(var(--ion-color-primary-rgb), 0.15);
+    outline: 2px solid var(--ion-color-primary);
+    outline-offset: 2px;
   }
 
   ion-icon {
@@ -179,12 +208,19 @@ ion-note {
   ion-input {
     --padding-top: 8px;
     --padding-bottom: 8px;
+    font-size: 1.06rem;
+    background: transparent;
+    color: var(--text-primary);
+    border-radius: 10px;
+    transition: background 0.18s;
   }
 
   ion-button {
     --padding-start: 8px;
     --padding-end: 8px;
     --ripple-color: transparent;
+    border-radius: 12px;
+    transition: box-shadow 0.18s, background 0.18s;
 
     ion-icon {
       margin-right: 0;
@@ -235,6 +271,60 @@ ion-note {
   }
 }
 
+// Password Strength Meter
+.password-strength {
+  margin: 16px 0;
+  
+  .strength-meter {
+    height: 6px;
+    background: var(--ion-color-light-shade);
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+    
+    .strength-meter-fill {
+      height: 100%;
+      width: 0;
+      transition: width 0.3s ease, background 0.3s ease;
+      border-radius: 3px;
+      
+      &.weak {
+        background: var(--ion-color-danger);
+        width: 33%;
+      }
+      
+      &.medium {
+        background: var(--ion-color-warning);
+        width: 66%;
+      }
+      
+      &.strong {
+        background: var(--ion-color-success);
+        width: 100%;
+      }
+    }
+  }
+  
+  .strength-text {
+    margin-top: 8px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    text-align: right;
+    
+    &.weak {
+      color: var(--ion-color-danger);
+    }
+    
+    &.medium {
+      color: var(--ion-color-warning);
+    }
+    
+    &.strong {
+      color: var(--ion-color-success);
+    }
+  }
+}
+
 // Password Requirements
 .password-requirements {
   margin: var(--spacing-sm) 0;
@@ -271,6 +361,65 @@ ion-note {
           color: var(--ion-color-success);
         }
       }
+      
+      &.text-success {
+        color: var(--ion-color-success);
+
+        &::before {
+          content: "✓";
+          color: var(--ion-color-success);
+        }
+      }
+    }
+  }
+}
+
+// Login Link
+.login-link-container {
+  margin-top: 24px;
+  font-size: 14px;
+  color: var(--ion-color-medium);
+  
+  .login-link {
+    color: var(--ion-color-primary);
+    font-weight: 500;
+    text-decoration: none;
+    margin-left: 4px;
+    
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// Responsive Adjustments
+@media (max-width: 576px) {
+  .signup-card {
+    padding: 24px 16px;
+    margin: 16px;
+  }
+  
+  .logo-container {
+    .app-logo {
+      font-size: 56px;
+    }
+    
+    .app-name {
+      font-size: 22px;
+    }
+  }
+  
+  .welcome-text {
+    font-size: 22px;
+  }
+  
+  .form-options {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    
+    .ion-margin-vertical {
+      align-self: flex-start;
     }
   }
 }

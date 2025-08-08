@@ -4,7 +4,8 @@ ion-item {
   --border-radius: 12px;
   --padding-start: 16px;
   --padding-end: 16px;
-  --inner-padding-end: 0;
+  --inner-padding-start: 0; // prevent inner container from shrinking content
+  --inner-padding-end: 0;   // prevent trailing gap that reduces input width
   margin-bottom: 20px;
   --min-height: 60px;
   --highlight-height: 0;
@@ -13,6 +14,8 @@ ion-item {
   --border-style: solid;
   --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   transition: all 0.3s ease;
+  display: flex;           // ensure slotted children can flex
+  align-items: center;     // vertical centering of content
 
   // Auth form specific styles
   .login-form &,
@@ -29,6 +32,56 @@ ion-item {
       transition: color var(--transition-duration, 0.2s)
         var(--transition-timing, ease);
     }
+
+/* Ensure inputs fill the full width of ion-item across the app */
+ion-item::part(native) {
+  display: flex;
+  align-items: center;
+}
+
+ion-item ion-input,
+ion-item ion-textarea,
+ion-item ion-select,
+ion-item ion-datetime-button {
+  display: flex !important;
+  align-items: center !important;
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important; /* allow shrinking inside flex */
+}
+
+/* Fallback: make any middle child (not slotted start/end) flex to fill */
+ion-item > *:not([slot="start"]):not([slot="end"]) {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
+/* Common slotted companions should not block input growth */
+ion-item ion-icon[slot="start"],
+ion-item ion-icon[slot="end"],
+ion-item ion-button[slot="end"],
+ion-item ion-buttons[slot="end"] {
+  flex: 0 0 auto;
+}
+
+/* Make ion-input internal parts expand as well */
+ion-item ion-input::part(container),
+ion-item ion-input::part(native) {
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+}
+
+/* Labels/icons should not flex-grow; keep them intrinsic so input can grow */
+ion-item ion-label,
+ion-item ion-icon[slot="start"],
+ion-item ion-icon[slot="end"],
+ion-item ion-button[slot="end"],
+ion-item ion-buttons[slot="end"] {
+  flex: 0 0 auto !important;
+  max-width: none !important;
+}
 
     ion-label[position="floating"] {
       margin-left: 8px;
@@ -84,14 +137,22 @@ ion-datetime-button {
   // Auth form specific overrides
   .login-form &,
   .signup-form & {
-    --padding-top: 16px;
-    --padding-bottom: 8px;
-    margin-left: 8px;
+    --padding-top: 12px;
+    --padding-bottom: 12px;
+    margin-left: 0;
 
     &::part(placeholder) {
       font-weight: 400;
     }
   }
+}
+
+// Make invalid state subtle for auth forms to avoid harsh red outlines
+.login-form .form-item.ion-invalid.ion-touched,
+.signup-form .form-item.ion-invalid.ion-touched {
+  --background: transparent;
+  --border-color: transparent;
+  --box-shadow: 0 0 0 2px color-mix(in srgb, var(--ion-color-danger) 14%, transparent);
 }
 
 // Form Labels
