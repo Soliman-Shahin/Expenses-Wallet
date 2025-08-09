@@ -90,8 +90,8 @@ app-tabs-bar {
     margin-left: var(--side-menu-width);
     width: calc(100% - var(--side-menu-width));
     padding: var(--spacing-lg) var(--spacing-xl);
-    @extend .rounded-lg;
-    @extend .shadow;
+    @extend .rounded-lg !optional;
+    @extend .shadow !optional;
     transition: margin 0.22s, width 0.22s, padding 0.22s;
   }
 

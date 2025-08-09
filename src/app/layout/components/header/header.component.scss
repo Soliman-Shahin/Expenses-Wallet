@@ -215,7 +215,7 @@ ion-header {
     }
     .title {
       font-size: 2rem;
-      @extend .p-y-3;
+      @extend .p-y-3 !optional;
     }
     .menu-button,
     .action-button {
@@ -223,12 +223,11 @@ ion-header {
       --padding-end: 16px;
       --padding-top: 12px;
       --padding-bottom: 12px;
-      @extend .rounded-lg;
-      @extend .shadow-header;
+      @extend .rounded-lg !optional;
+      @extend .shadow-header !optional;
       ion-icon {
         font-size: 2rem;
       }
     }
   }
 }
-
