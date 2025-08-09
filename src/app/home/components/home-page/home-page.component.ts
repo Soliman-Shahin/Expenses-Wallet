@@ -28,6 +28,13 @@ export class HomePageComponent extends BaseComponent implements OnInit {
 
   // UI state
   activeTab: 'charts' | 'summary' = 'summary';
+  // Local loading flags to avoid flipping the whole page
+  isDashboardLoading = false;
+  isTransactionsLoading = false;
+  // Use global loading only for the initial load to unblock the page content
+  private _useGlobalLoadingOnce = true;
+  // Track if dashboard loaded successfully at least once
+  private _hasLoadedOnce = false;
 
   // Chart data
   incomeVsExpenseData: any[] = [];
@@ -157,6 +164,10 @@ export class HomePageComponent extends BaseComponent implements OnInit {
   protected override onUserChanged(user: User | null): void {
     super.onUserChanged(user);
     this.setError(null);
+    // If user just became available after login and we haven't loaded yet, load dashboard now
+    if (user && !this._hasLoadedOnce) {
+      this.loadDashboardData();
+    }
     this.cdr.markForCheck();
   }
 
@@ -202,7 +213,11 @@ export class HomePageComponent extends BaseComponent implements OnInit {
   }
 
   private loadDashboardData(): void {
-    this.setLoading(true);
+    if (this._useGlobalLoadingOnce) {
+      this.setLoading(true);
+    } else {
+      this.isDashboardLoading = true;
+    }
     this.cdr.markForCheck();
 
     const { year, month } = this.selectedMonth;
@@ -216,7 +231,13 @@ export class HomePageComponent extends BaseComponent implements OnInit {
       .pipe(
         takeUntil(this.destroy$),
         finalize(() => {
-          this.setLoading(false);
+          if (this._useGlobalLoadingOnce) {
+            this.setLoading(false);
+            this._useGlobalLoadingOnce = false;
+          } else {
+            this.isDashboardLoading = false;
+          }
+          this.cdr.markForCheck();
         })
       )
       .subscribe({
@@ -224,6 +245,7 @@ export class HomePageComponent extends BaseComponent implements OnInit {
           this.income = income;
           this.expenses = expenses;
           this.balance = income - expenses;
+          this._hasLoadedOnce = true;
 
           // Salary and currency are sourced from user profile via ProfileService
           // salaryDetails stays in sync from the profile subscription
@@ -445,26 +467,10 @@ export class HomePageComponent extends BaseComponent implements OnInit {
    * Loads transactions for the selected month and year
    */
   private loadTransactionsForMonth(month: number, year: number): void {
-    this.setLoading(true);
+    this.isTransactionsLoading = true;
+    // TODO: implement real fetch; keep UI responsive without flipping whole page
+    // Example (when implementing): call service, then set isTransactionsLoading=false in finalize.
+    this.isTransactionsLoading = false;
     this.cdr.markForCheck();
-
-    // Example implementation (uncomment and implement as needed):
-    /*
-    this.transactionService.getForMonth(month, year).pipe(
-      takeUntil(this.destroy$),
-      finalize(() => {
-        this.setLoading(false);
-        this.cdr.markForCheck();
-      })
-    ).subscribe({
-      next: (transactions) => {
-        // Handle successful transaction load
-      },
-      error: (error) => {
-        this.error = 'Failed to load transactions. Please try again.';
-        this.toastService.presentErrorToast('bottom', 'TRANSACTIONS.ERRORS.LOAD_FAILED');
-      }
-    });
-    */
   }
 }

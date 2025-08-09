@@ -22,6 +22,8 @@
       "es2019",
       "dom"
     ],
+    "types": [],
+    "skipLibCheck": true,
     "useDefineForClassFields": false
   },
   "angularCompilerOptions": {
