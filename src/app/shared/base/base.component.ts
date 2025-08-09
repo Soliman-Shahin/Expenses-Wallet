@@ -208,10 +208,32 @@ export abstract class BaseComponent<T = any> implements OnInit, OnDestroy {
 
   //#region Language & Theme
   protected initializeLanguage(): void {
+    try {
+      // Apply saved language immediately on startup to avoid flash/mismatch
+      const savedLang =
+        this.translationService?.getCurrentLanguage?.() ||
+        this.translateService?.currentLang ||
+        'en';
+      if (savedLang) {
+        // Sync TranslateService to saved language if needed
+        this.translateService?.setDefaultLang(savedLang);
+        if (this.translateService?.currentLang !== savedLang) {
+          this.translateService?.use(savedLang);
+        }
+        // Ensure html dir/lang attributes are in sync
+        document.documentElement.dir = savedLang === 'ar' ? 'rtl' : 'ltr';
+        document.documentElement.lang = savedLang;
+        this.language = savedLang;
+      }
+    } catch {}
+
     this.translateService?.onLangChange
       .pipe(takeUntil(this.destroy$))
       .subscribe((event: { lang: string }) => {
         this.language = event.lang;
+        // Keep html attributes updated
+        document.documentElement.dir = event.lang === 'ar' ? 'rtl' : 'ltr';
+        document.documentElement.lang = event.lang;
         this.onLanguageChanged(event.lang);
       });
   }

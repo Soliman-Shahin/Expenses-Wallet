@@ -26,6 +26,10 @@
   "HOME": {
     "TITLE": "Home",
     "GREETING": "Hello",
+    "TABS": {
+      "CHARTS": "Charts",
+      "SUMMARY": "Summary"
+    },
     "BALANCE_SUMMARY": "Balance Summary",
     "MONTHLY_SUMMARY": "Monthly Summary",
     "INCOME": "Income",
@@ -111,6 +115,9 @@
     "ADD": "Add New Category",
     "NAME": "Name",
     "COLOR": "Color",
+    "ICON": "Icon",
+    "EDIT": "Edit Category",
+    "TITLE_HINT": "Tip: Keep it short and clear, e.g., Home, Food, Transport",
     "CREATE": "Add New Category",
     "UPDATE": "Update Category",
     "DELETE": "Delete",

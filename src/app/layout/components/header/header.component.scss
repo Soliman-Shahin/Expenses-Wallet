@@ -186,7 +186,7 @@ ion-header {
 
     .title {
       font-size: 1.1rem;
-      @extend .p-y-1;
+      @extend .p-y-1 !optional;
     }
 
     .menu-button,
@@ -195,8 +195,8 @@ ion-header {
       --padding-end: 6px;
       --padding-top: 6px;
       --padding-bottom: 6px;
-      @extend .rounded;
-      @extend .shadow;
+      @extend .rounded !optional;
+      @extend .shadow !optional;
 
       ion-icon {
         font-size: 1.25rem;

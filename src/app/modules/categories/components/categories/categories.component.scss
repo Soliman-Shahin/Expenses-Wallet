@@ -12,3 +12,93 @@
   text-align: center;
   margin-top: 3rem;
 }
+
+/* Floating Add Button styles */
+:root {
+  --fab-bg: var(--ion-color-primary);
+  --fab-fg: var(--ion-color-primary-contrast);
+  --fab-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+ion-fab .fab-add {
+  --background: var(--fab-bg);
+  --color: var(--fab-fg);
+  box-shadow: var(--fab-shadow);
+  transition: transform 200ms ease, box-shadow 200ms ease, filter 200ms ease;
+}
+
+ion-fab .fab-add:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 14px 24px rgba(0, 0, 0, 0.22);
+  filter: brightness(1.05);
+}
+
+ion-fab .fab-add:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.18);
+}
+
+ion-fab .fab-add:focus-visible {
+  outline: 3px solid var(--ion-color-primary);
+  outline-offset: 3px;
+}
+
+/* Categories list polish */
+.categories-list {
+  padding: 0.5rem 0.75rem; /* more breathing room */
+}
+
+.category-item {
+  --background: var(--ion-card-background, var(--ion-color-step-50, #1e1e1e));
+  margin: 10px 6px;
+  border-radius: 16px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+  animation: cardAppear 320ms ease both;
+}
+
+.category-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
+}
+
+.category-item:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.category-item .title {
+  font-weight: 600;
+}
+
+.skeleton-list ion-item {
+  margin: 10px 6px;
+}
+
+/* Appear animation */
+@keyframes cardAppear {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Subtle stagger for first items */
+.categories-list ion-item.category-item:nth-child(1) { animation-delay: 20ms; }
+.categories-list ion-item.category-item:nth-child(2) { animation-delay: 40ms; }
+.categories-list ion-item.category-item:nth-child(3) { animation-delay: 60ms; }
+.categories-list ion-item.category-item:nth-child(4) { animation-delay: 80ms; }
+.categories-list ion-item.category-item:nth-child(5) { animation-delay: 100ms; }
+.categories-list ion-item.category-item:nth-child(6) { animation-delay: 120ms; }
+.categories-list ion-item.category-item:nth-child(7) { animation-delay: 140ms; }
+.categories-list ion-item.category-item:nth-child(8) { animation-delay: 160ms; }
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .category-item { animation: none !important; transition: none !important; }
+  ion-fab .fab-add { transition: none !important; }
+}

@@ -16,8 +16,15 @@ export class TranslationService {
   }
 
   setLanguage(lang: string) {
-    // Set the language for translation
-    this.translateService.use(lang);
+    if (!lang) {
+      return;
+    }
+
+    // Set default and ensure TranslateService uses the lang on startup/reload
+    this.translateService.setDefaultLang(lang);
+    if (this.translateService.currentLang !== lang) {
+      this.translateService.use(lang);
+    }
 
     // Set the document direction based on the language
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';

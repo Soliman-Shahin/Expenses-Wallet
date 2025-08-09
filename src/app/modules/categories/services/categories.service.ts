@@ -15,30 +15,25 @@ export class CategoryService {
     skip: number;
     limit: number;
     sort: string;
-  }): Observable<Category[]> {
+  }): Observable<{ data: Category[]; total: number }> {
     const httpParams = new HttpParams()
       .set('skip', params.skip.toString())
       .set('limit', params.limit.toString())
       .set('sort', params.sort);
 
     return this.apiService
-      .get<{ data?: Category[]; items?: Category[] }>(
+      .get<{ success: boolean; data: { data: Category[]; total: number }; message: string }>(
         '/categories/list',
         httpParams
       )
       .pipe(
-        map(
-          (
-            response: { data?: Category[]; items?: Category[] } | Category[]
-          ) => {
-            // Ensure we're returning an array
-            if (Array.isArray(response)) {
-              return response;
-            }
-            console.warn('Unexpected categories response format:', response);
-            return [];
+        map((response) => {
+          if (response && response.data && Array.isArray(response.data.data)) {
+            return { data: response.data.data, total: response.data.total };
           }
-        )
+          console.warn('Unexpected categories response format:', response);
+          return { data: [], total: 0 };
+        })
       );
   }
 

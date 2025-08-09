@@ -7,11 +7,13 @@ import {
 
 // Custom Toast Animations (fade/slide/scale)
 export const customToastEnterAnimation = (baseEl: HTMLElement): Animation => {
-  const wrapperEl = baseEl.querySelector('.toast-wrapper') as HTMLElement;
+  // Support both older '.toast-wrapper' and newer '.toast-container' structures; fallback to baseEl
+  const root = (baseEl as any).shadowRoot || baseEl;
+  const containerEl = (root.querySelector?.('.toast-wrapper') || root.querySelector?.('.toast-container') || baseEl) as HTMLElement;
 
   const backdropAnimation = new AnimationController()
     .create()
-    .addElement(wrapperEl)
+    .addElement(containerEl)
     .duration(440)
     .easing('cubic-bezier(0.4, 0, 0.2, 1)')
     .fromTo('opacity', '0', '1')
@@ -24,7 +26,7 @@ export const customToastEnterAnimation = (baseEl: HTMLElement): Animation => {
   // Add a subtle glow effect during entrance
   const glowAnimation = new AnimationController()
     .create()
-    .addElement(wrapperEl)
+    .addElement(containerEl)
     .duration(440)
     .easing('cubic-bezier(0.4, 0, 0.2, 1)')
     .fromTo(
@@ -40,11 +42,13 @@ export const customToastEnterAnimation = (baseEl: HTMLElement): Animation => {
 };
 
 export const customToastLeaveAnimation = (baseEl: HTMLElement): Animation => {
-  const wrapperEl = baseEl.querySelector('.toast-wrapper') as HTMLElement;
+  // Support both older '.toast-wrapper' and newer '.toast-container' structures; fallback to baseEl
+  const root = (baseEl as any).shadowRoot || baseEl;
+  const containerEl = (root.querySelector?.('.toast-wrapper') || root.querySelector?.('.toast-container') || baseEl) as HTMLElement;
 
   const backdropAnimation = new AnimationController()
     .create()
-    .addElement(wrapperEl)
+    .addElement(containerEl)
     .duration(360)
     .easing('cubic-bezier(0.4, 0, 0.2, 1)')
     .fromTo('opacity', '1', '0')
@@ -57,7 +61,7 @@ export const customToastLeaveAnimation = (baseEl: HTMLElement): Animation => {
   // Add a subtle glow effect during exit
   const glowAnimation = new AnimationController()
     .create()
-    .addElement(wrapperEl)
+    .addElement(containerEl)
     .duration(360)
     .easing('cubic-bezier(0.4, 0, 0.2, 1)')
     .fromTo(

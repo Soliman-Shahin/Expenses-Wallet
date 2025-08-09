@@ -1,5 +1,12 @@
 <ion-content *ngIf="response$ | async as categories">
   <ion-toolbar>
+    <ion-title>{{ 'SIDEBAR.CATEGORIES' | translate }}</ion-title>
+    <ion-chip slot="end" color="primary" outline>
+      <ion-label>{{ categories.total }}</ion-label>
+    </ion-chip>
+  </ion-toolbar>
+
+  <ion-toolbar>
     <ion-searchbar
       animated="true"
       [placeholder]="'SEARCH' | translate"
@@ -10,19 +17,37 @@
     </ion-searchbar>
   </ion-toolbar>
 
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
   <ion-infinite-scroll (ionInfinite)="onIonInfinite($event)">
     <ion-infinite-scroll-content>
-      <ion-spinner *ngIf="isLoadingResults" name="crescent"></ion-spinner>
-      <ion-list *ngIf="categories.total > 0; else noData">
+      <!-- Skeleton loaders while fetching -->
+      <div *ngIf="isLoadingResults" class="skeleton-list">
+        <ion-item lines="none" *ngFor="let s of [1,2,3,4,5]">
+          <ion-avatar slot="start">
+            <ion-skeleton-text animated style="width:40px;height:40px;border-radius:50%"></ion-skeleton-text>
+          </ion-avatar>
+          <ion-label>
+            <h3><ion-skeleton-text animated style="width: 60%"></ion-skeleton-text></h3>
+            <p><ion-skeleton-text animated style="width: 40%"></ion-skeleton-text></p>
+          </ion-label>
+        </ion-item>
+      </div>
+
+      <ion-list class="categories-list" *ngIf="!isLoadingResults && categories.total > 0; else noData">
         <ion-reorder-group
           [disabled]="false"
           (ionItemReorder)="handleReorder($any($event))"
         >
-          <ion-item *ngFor="let item of categories.data; let index">
-            <span class="category-icon" [style.background]="item.color">
+          <ion-item class="category-item" lines="none" *ngFor="let item of categories.data; let index" detail>
+            <span class="category-icon" [style.background]="item.color" aria-hidden="true">
               <ion-icon size="large" [name]="item.icon"></ion-icon>
             </span>
-            <ion-label>{{ item.title }}</ion-label>
+            <ion-label>
+              <h3 class="title">{{ item.title }}</h3>
+            </ion-label>
             <ion-buttons slot="end">
               <ion-button (click)="presentActionSheet(item)">
                 <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
@@ -34,6 +59,13 @@
       </ion-list>
     </ion-infinite-scroll-content>
   </ion-infinite-scroll>
+
+  <!-- Floating Add Button -->
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button class="fab-add" (click)="navigateToAdd()" [attr.aria-label]="'CATEGORY.ADD' | translate">
+      <ion-icon name="add-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 </ion-content>
 
 
@@ -42,5 +74,8 @@
   <div class="no_data">
     <ion-icon size="large" name="sad"></ion-icon>
     <p>{{ "NO_DATA" | translate }}</p>
+    <ion-button color="primary" shape="round" (click)="navigateToAdd()">
+      {{ 'CATEGORY.ADD' | translate }}
+    </ion-button>
   </div>
 </ng-template>

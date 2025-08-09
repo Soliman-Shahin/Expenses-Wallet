@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup, Validators } from '@angular/forms';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
+
 import { BaseComponent } from 'src/app/shared/base/base.component';
 import { Expense, Category } from 'src/app/shared/models';
 
@@ -18,6 +19,7 @@ export class ExpenseFormComponent extends BaseComponent implements OnInit {
   isEditMode = false;
   minDate = '2000-01-01';
   maxDate = '2100-12-31';
+  submitting = false;
 
   override ngOnInit() {
     super.ngOnInit();
@@ -33,7 +35,14 @@ export class ExpenseFormComponent extends BaseComponent implements OnInit {
     }
 
     this.expenseForm = this.fb.group({
-      description: [this.expense?.description || '', Validators.required],
+      description: [
+        this.expense?.description || '',
+        [
+          Validators.required,
+          Validators.minLength(2),
+          Validators.pattern(/^(?=.*\S).+$/), // no all-whitespace
+        ],
+      ],
       amount: [
         this.expense?.amount || '',
         [Validators.required, Validators.min(0.01)],
@@ -49,11 +58,17 @@ export class ExpenseFormComponent extends BaseComponent implements OnInit {
   }
 
   private loadCategories() {
-    this.categories$ = this.categoryService.getCategories({
-      skip: 0,
-      limit: 100,
-      sort: 'name',
-    });
+    this.categories$ = this.categoryService
+      .getCategories({
+        skip: 0,
+        limit: 100,
+        sort: 'name',
+      })
+      .pipe(
+        map((res) =>
+          (res.data || []).map((c: any) => ({ ...c, name: c.title }))
+        )
+      );
   }
 
   private getCategoryId(category: Category | string): string {
@@ -73,14 +88,21 @@ export class ExpenseFormComponent extends BaseComponent implements OnInit {
     if (this.expenseForm.invalid) {
       return;
     }
+    this.submitting = true;
 
-    const formValue = this.expenseForm.value;
+    const { description, amount, date, category } = this.expenseForm.value;
+    const payload: Partial<Expense> = {
+      description: (description || '').trim(),
+      amount: Number(amount),
+      date: new Date(date).toISOString(),
+      category,
+    } as any;
     let action$: Observable<Expense>;
 
     if (this.isEditMode) {
-      action$ = this.expenseService.updateExpense(this.expense!._id, formValue);
+      action$ = this.expenseService.updateExpense(this.expense!._id, payload);
     } else {
-      action$ = this.expenseService.createExpense(formValue);
+      action$ = this.expenseService.createExpense(payload);
     }
 
     action$.subscribe({
@@ -95,6 +117,7 @@ export class ExpenseFormComponent extends BaseComponent implements OnInit {
         });
         toast?.present();
         this.modalCtrl?.dismiss(response, 'confirm');
+        this.submitting = false;
       },
       error: async (error) => {
         const message = this.isEditMode
@@ -107,6 +130,7 @@ export class ExpenseFormComponent extends BaseComponent implements OnInit {
         });
         toast?.present();
         console.error(message, error);
+        this.submitting = false;
       },
     });
   }

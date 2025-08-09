@@ -471,6 +471,8 @@ ion-textarea {
   border: none;
   animation: toastFadeInUp 0.44s cubic-bezier(0.4, 0, 0.2, 1);
   transition: box-shadow 0.22s, background 0.18s;
+  // Ensure toast sits above overlays
+  z-index: 10010;
 }
 .custom-toast.ion-leave-active {
   animation: toastFadeOutDown 0.36s cubic-bezier(0.4, 0, 0.2, 1) forwards;
@@ -589,7 +591,8 @@ ion-textarea {
   width: 100vw;
   height: 100vh;
   background: rgba(var(--ion-background-color-rgb, 255, 255, 255), 0.6);
-  z-index: 9999;
+  // Keep loader below toast overlays
+  z-index: 9000;
   display: flex;
   align-items: center;
   justify-content: center;

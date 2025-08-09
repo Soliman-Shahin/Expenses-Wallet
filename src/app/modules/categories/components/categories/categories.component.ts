@@ -3,6 +3,7 @@ import {
   AlertController,
   InfiniteScrollCustomEvent,
   ItemReorderEventDetail,
+  RefresherCustomEvent,
 } from '@ionic/angular';
 import { BehaviorSubject, finalize, switchMap, takeUntil, tap } from 'rxjs';
 import { BaseListComponent } from 'src/app/shared/base';
@@ -88,6 +89,17 @@ export class CategoriesComponent
     this.activatedParams.skip =
       this.activatedParams.skip + this.activatedParams.limit;
     this.#paramsSub.next({ ...this.activatedParams });
+  }
+
+  doRefresh(ev: RefresherCustomEvent) {
+    // reset pagination and reload
+    this.activatedParams.skip = 0;
+    this.#paramsSub.next({ ...this.activatedParams });
+    setTimeout(() => ev.target.complete(), 600);
+  }
+
+  navigateToAdd() {
+    this.router.navigate(['/categories/create']);
   }
 
   handleReorder(ev: CustomEvent<ItemReorderEventDetail>) {

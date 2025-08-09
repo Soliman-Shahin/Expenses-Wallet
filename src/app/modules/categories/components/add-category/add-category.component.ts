@@ -13,6 +13,7 @@ export class AddCategoryComponent extends BaseComponent implements OnInit {
   categoryForm: FormGroup = this.initFormGroup();
   editMode = false;
   categoryId: string | null = null;
+  animatePreview = false;
 
   constructor() {
     super();
@@ -35,11 +36,19 @@ export class AddCategoryComponent extends BaseComponent implements OnInit {
         callback: this.editMode ? this.updateCategory.bind(this) : this.addCategory.bind(this),
       });
     });
+
+    // Animate preview on title changes
+    const titleCtrl = this.categoryForm.get('title');
+    titleCtrl?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => this.bumpPreview());
   }
 
   private initFormGroup(): FormGroup {
     return new FormGroup({
-      title: new FormControl('', Validators.required),
+      title: new FormControl('', [
+        Validators.required,
+        Validators.minLength(2),
+        Validators.pattern(/^(?!\s*$).+/), // not only whitespace
+      ]),
       icon: new FormControl('add', Validators.required),
       color: new FormControl('#28ba62', Validators.required),
     });
@@ -50,6 +59,7 @@ export class AddCategoryComponent extends BaseComponent implements OnInit {
     if (control) {
       control.setValue(color.colorCode);
     }
+    this.bumpPreview();
   }
 
   selectIcon(icon: string): void {
@@ -57,6 +67,12 @@ export class AddCategoryComponent extends BaseComponent implements OnInit {
     if (control) {
       control.setValue(icon);
     }
+    this.bumpPreview();
+  }
+
+  private bumpPreview() {
+    this.animatePreview = true;
+    setTimeout(() => (this.animatePreview = false), 220);
   }
 
   loadCategory() {

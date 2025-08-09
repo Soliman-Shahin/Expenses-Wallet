@@ -1,13 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { BaseComponent } from 'src/app/shared/base';
 import { MonthYear, SalaryDetail } from '../../models';
 import { User } from 'src/app/modules/auth/models';
-import { catchError, finalize, of, takeUntil, tap } from 'rxjs';
+import { catchError, finalize, of, takeUntil, tap, forkJoin } from 'rxjs';
 import { ExpenseFormComponent } from '../expense-form/expense-form.component';
 import { ChartDataService } from 'src/app/shared/services/chart-data.service';
-import { BarChartComponent } from 'src/app/shared/components/charts';
-import { PieChartComponent } from 'src/app/shared/components/charts';
-import { LineChartComponent } from 'src/app/shared/components/charts';
 import { ProfileService } from 'src/app/modules/profile/services/profile.service';
 
 // Constants
@@ -29,14 +26,14 @@ export class HomePageComponent extends BaseComponent implements OnInit {
   salaryDetails: SalaryDetail[] = [];
   currency: string = 'USD';
 
+  // UI state
+  activeTab: 'charts' | 'summary' = 'summary';
+
   // Chart data
   incomeVsExpenseData: any[] = [];
   expenseByCategoryData: any[] = [];
   monthlyExpensesData: any[] = [];
   salaryBreakdownData: any[] = [];
-
-  // Month totals for the scroll header
-  monthTotals: { [key: string]: number } = {};
 
   // Scroll position state
   isScrolledToStart = true;
@@ -66,6 +63,17 @@ export class HomePageComponent extends BaseComponent implements OnInit {
     super();
   }
 
+  // Switch between Charts and Summary tabs
+  setActiveTab(tab: string | number | null | undefined) {
+    // Normalize to a valid key; default to 'charts'
+    const val = tab != null ? String(tab) : '';
+    this.activeTab = val === 'summary' ? 'summary' : 'charts';
+    try {
+      localStorage.setItem('home.activeTab', this.activeTab);
+    } catch {}
+    this.cdr.markForCheck();
+  }
+
   get displayUsername(): string {
     return this.user?.['username'] || 'User';
   }
@@ -75,9 +83,15 @@ export class HomePageComponent extends BaseComponent implements OnInit {
    */
   override ngOnInit(): void {
     super.ngOnInit();
+    // Restore last selected tab
+    try {
+      const savedTab = localStorage.getItem('home.activeTab');
+      if (savedTab === 'summary' || savedTab === 'charts') {
+        this.activeTab = savedTab;
+      }
+    } catch {}
     this.setupRouteDataSubscription();
     this.loadDashboardData();
-    this.loadMonthTotals();
 
     // Initialize from existing profile cache for immediate UX
     const existingProfile = this.profileService.getProfile();
@@ -126,7 +140,6 @@ export class HomePageComponent extends BaseComponent implements OnInit {
     this.selectedMonth = monthYear;
     this.loadDashboardData();
     this.loadTransactionsForMonth(monthYear.month, monthYear.year);
-    this.loadMonthTotals();
   }
 
   /**
@@ -136,39 +149,6 @@ export class HomePageComponent extends BaseComponent implements OnInit {
     this.isScrolledToStart = event.isAtStart;
     this.isScrolledToEnd = event.isAtEnd;
     this.cdr.markForCheck();
-  }
-
-  /**
-   * Loads the totals for each month to display in the scroll header
-   */
-  private loadMonthTotals(): void {
-    const currentYear = new Date().getFullYear();
-    const months = Array.from({ length: 12 }, (_, i) => i + 1);
-
-    // In a real app, you would fetch this data from your API
-    // This is a mock implementation
-    months.forEach((month) => {
-      const monthKey = `${currentYear}-${month.toString().padStart(2, '0')}`;
-      // Mock data - replace with actual API call
-      this.monthTotals[monthKey] = this.getRandomAmount(-500, 5000);
-    });
-
-    this.cdr.markForCheck();
-  }
-
-  /**
-   * Helper to generate random amounts for demo purposes
-   */
-  private getRandomAmount(min: number, max: number): number {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
-
-  /**
-   * Handles content scroll events
-   */
-  onContentScroll(event: any): void {
-    // Can be used for scroll-based effects if needed
-    console.log('scroll event', event);
   }
 
   /**
@@ -226,8 +206,10 @@ export class HomePageComponent extends BaseComponent implements OnInit {
     this.cdr.markForCheck();
 
     const { year, month } = this.selectedMonth;
-    const startDate = new Date(year, month - 1, 1);
-    const endDate = new Date(year, month, 0);
+    // Start of first day (local)
+    const startDate = new Date(year, month - 1, 1, 0, 0, 0, 0);
+    // End of last day (local) - inclusive
+    const endDate = new Date(year, month, 0, 23, 59, 59, 999);
 
     this.expenseService
       .getTotals(startDate, endDate)
@@ -252,28 +234,170 @@ export class HomePageComponent extends BaseComponent implements OnInit {
         error: (err: any) => {
           console.error('Failed to load dashboard data', err);
           this.setError('Failed to load dashboard data. Please try again.');
+          // Still attempt to load chart data so the dashboard remains useful
+          this.loadChartData();
         },
       });
   }
 
   private loadChartData(): void {
-    // Load income vs expense data
-    this.chartDataService.getIncomeVsExpense().subscribe((data) => {
-      this.incomeVsExpenseData = data;
+    // Load income vs expense data (use real totals)
+    if (this.income != null && this.expenses != null) {
+      this.incomeVsExpenseData = [
+        { name: 'Income', value: this.income },
+        { name: 'Expenses', value: this.expenses },
+      ];
       this.cdr.markForCheck();
-    });
+    } else {
+      const { year, month } = this.selectedMonth;
+      const startDate = new Date(year, month - 1, 1);
+      // Inclusive end-of-month for totals endpoint
+      const endDate = new Date(year, month, 0);
+      this.expenseService
+        .getTotals(startDate, endDate)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(({ income, expenses }) => {
+          this.income = income;
+          this.expenses = expenses;
+          this.balance = income - expenses;
+          this.incomeVsExpenseData = [
+            { name: 'Income', value: income },
+            { name: 'Expenses', value: expenses },
+          ];
+          this.cdr.markForCheck();
+        });
+    }
 
-    // Load expense by category data
-    this.chartDataService.getExpenseByCategory().subscribe((data) => {
-      this.expenseByCategoryData = data;
-      this.cdr.markForCheck();
-    });
+    // Load expense by category data (real aggregation for selected month)
+    const { year, month } = this.selectedMonth;
+    const startDate = new Date(year, month - 1, 1);
+    // End-exclusive: first day of next month to include entire current month
+    const endExclusive = new Date(year, month, 1);
 
-    // Load monthly expenses data
-    this.chartDataService.getMonthlyExpenses().subscribe((data) => {
-      this.monthlyExpensesData = data;
-      this.cdr.markForCheck();
-    });
+    forkJoin({
+      categoriesResp: this.categoryService.getCategories({
+        skip: 0,
+        limit: 1000,
+        sort: 'name',
+      }),
+      expenses: this.expenseService.getExpenses(),
+    })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(({ categoriesResp, expenses }: any) => {
+        // Normalize categories response to an array
+        const catResp: any = categoriesResp;
+        const categories: any[] = Array.isArray(catResp)
+          ? catResp
+          : catResp?.data?.data || catResp?.data || [];
+        const byId = new Map<string, { name: string; type?: string }>();
+        categories.forEach((c: any) =>
+          byId.set(c._id, { name: c?.title || c?.name, type: c?.type })
+        );
+
+        // Normalize expenses response to an array
+        const expResp: any = expenses;
+        const expensesArr: any[] = Array.isArray(expResp)
+          ? expResp
+          : expResp?.data?.data || expResp?.data || [];
+
+        const start = startDate.getTime();
+        const end = endExclusive.getTime();
+        const sums = new Map<string, number>();
+        let incomeSum = 0;
+        let expenseSum = 0;
+
+        expensesArr
+          .filter((e: any) => {
+            const rawDate = e?.date || e?.createdAt;
+            if (!rawDate) return false;
+            const d = new Date(rawDate).getTime();
+            // include expenses on the last day by using end-exclusive bound (d < end)
+            return d >= start && d < end;
+          })
+          .forEach((e: any) => {
+            let name = 'Uncategorized';
+            let catType: string | undefined;
+            if (e.category && typeof e.category === 'object') {
+              name = e.category.title || e.category.name || name;
+              catType = e.category.type;
+            } else if (typeof e.category === 'string') {
+              const meta = byId.get(e.category);
+              if (meta) {
+                name = meta.name;
+                catType = meta.type;
+              }
+            }
+            const amt = Number(e.amount);
+            if (!Number.isFinite(amt) || Number.isNaN(amt)) return;
+            const prev = sums.get(name) || 0;
+            sums.set(name, prev + amt);
+
+            // Compute totals for bar chart using category type when available
+            if (catType === 'income') {
+              incomeSum += amt;
+            } else {
+              // default to expenses when unknown or explicitly expense
+              expenseSum += amt;
+            }
+          });
+
+        // Prefer user's salary as income if available; fallback to computed incomeSum
+        const effectiveIncome =
+          this.totalSalary != null ? this.totalSalary : incomeSum;
+
+        // Update income vs expenses chart from effective income and computed expenses
+        this.incomeVsExpenseData = [
+          { name: 'Income', value: effectiveIncome },
+          { name: 'Expenses', value: expenseSum },
+        ];
+        this.income = effectiveIncome;
+        this.expenses = expenseSum;
+        this.balance = effectiveIncome - expenseSum;
+
+        this.expenseByCategoryData = Array.from(sums.entries())
+          .map(([name, value]) => ({ name, value }))
+          .sort((a, b) => b.value - a.value);
+
+        // Build real Monthly Expenses (daily) line chart data for selected month
+        const daysInMonth = new Date(year, month, 0).getDate();
+        const dailyTotals = new Array<number>(daysInMonth).fill(0);
+        expensesArr
+          .filter((e: any) => {
+            const rawDate = e?.date || e?.createdAt;
+            if (!rawDate) return false;
+            const d = new Date(rawDate);
+            const t = d.getTime();
+            return t >= start && t < end; // same end-exclusive window
+          })
+          .forEach((e: any) => {
+            // classify by type to exclude income from daily expenses
+            let catType: string | undefined;
+            if (e.category && typeof e.category === 'object') {
+              catType = e.category.type;
+            } else if (typeof e.category === 'string') {
+              const meta = byId.get(e.category);
+              if (meta) catType = meta.type;
+            }
+            if (catType === 'income') return; // skip incomes
+
+            const amt = Number(e.amount);
+            if (!Number.isFinite(amt) || Number.isNaN(amt)) return;
+            const d = new Date(e?.date || e?.createdAt);
+            const dayIndex = d.getDate() - 1; // 0-based
+            if (dayIndex >= 0 && dayIndex < daysInMonth) {
+              dailyTotals[dayIndex] += amt;
+            }
+          });
+
+        this.monthlyExpensesData = dailyTotals.map((v, i) => ({
+          name: String(i + 1),
+          value: v,
+        }));
+
+        this.cdr.markForCheck();
+      });
+
+    // Monthly expenses data now computed from real transactions above
 
     // Load salary breakdown data
     this.chartDataService.getSalaryBreakdown().subscribe((data) => {
@@ -308,7 +432,13 @@ export class HomePageComponent extends BaseComponent implements OnInit {
     const modal = await this.modalCtrl?.create({
       component: ExpenseFormComponent,
     });
-    modal?.present();
+    await modal?.present();
+
+    const result = await modal?.onDidDismiss();
+    if (result && result.role === 'confirm') {
+      // Refresh dashboard totals and charts after a successful add/update
+      this.loadDashboardData();
+    }
   }
 
   /**

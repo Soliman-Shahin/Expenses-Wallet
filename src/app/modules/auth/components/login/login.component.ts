@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { finalize, takeUntil } from 'rxjs';
+import { finalize, takeUntil, map } from 'rxjs';
 
 import { BaseComponent } from 'src/app/shared/base/base.component';
+import { Category } from 'src/app/shared/models/category.model';
 
 @Component({
   selector: 'app-login',
@@ -13,6 +14,7 @@ export class LoginComponent extends BaseComponent {
   loginForm!: FormGroup;
   hide = true;
   errorMessage = '';
+  categories: Category[] = [];
 
   // Form control names for template access
   readonly formFields = {
@@ -27,6 +29,7 @@ export class LoginComponent extends BaseComponent {
 
   override ngOnInit(): void {
     this.initForm();
+    this.loadCategories();
   }
 
   // Ensure UI resets correctly when returning to login (e.g., after logout)
@@ -36,7 +39,10 @@ export class LoginComponent extends BaseComponent {
     if (this.loginForm) {
       this.loginForm.markAsPristine();
       this.loginForm.markAsUntouched();
-      this.loginForm.updateValueAndValidity({ onlySelf: false, emitEvent: false });
+      this.loginForm.updateValueAndValidity({
+        onlySelf: false,
+        emitEvent: false,
+      });
     }
   }
 
@@ -59,8 +65,21 @@ export class LoginComponent extends BaseComponent {
           this.errorMessage =
             error?.error?.message ||
             this.translateService.instant('AUTH.LOGIN_ERROR');
-          this.toastService.presentErrorToast('bottom', this.errorMessage);
+          this.toastService.presentErrorToast('top', this.errorMessage);
         },
+      });
+  }
+
+  private loadCategories(): void {
+    this.categoryService
+      .getCategories({ skip: 0, limit: 20, sort: '-createdAt' })
+      .pipe(
+        map((res) => res.data),
+        takeUntil(this.destroy$)
+      )
+      .subscribe({
+        next: (list) => (this.categories = list),
+        error: (err) => console.warn('Failed to load categories:', err),
       });
   }
 
@@ -115,7 +134,7 @@ export class LoginComponent extends BaseComponent {
           this.errorMessage =
             error?.error?.message ||
             this.translateService.instant('AUTH.LOGIN_ERROR');
-          this.toastService.presentErrorToast('bottom', this.errorMessage);
+          this.toastService.presentErrorToast('top', this.errorMessage);
         },
       });
   }
@@ -145,29 +164,35 @@ export class LoginComponent extends BaseComponent {
         finalize(() => this.setLoading(false))
       )
       .subscribe({
-        next: () => {
+        next: (res: any) => {
           // Navigation and state are handled by the AuthService.
           // We just show a success message here.
           this.toastService.presentSuccessToast(
             'bottom',
             this.translateService.instant('AUTH.LOGIN_SUCCESS')
           );
+          if (!res?.success) {
+            this.toastService.presentErrorToast('bottom', res?.error?.message);
+          }
         },
         error: (error) => {
-          console.error('Login error:', error);
-          let errorMessage = 'AUTH.LOGIN_ERROR';
+          // Prefer backend message when available
+          const backendMessage: string | undefined = error?.error?.message;
+          let fallbackKey = 'AUTH.LOGIN_ERROR';
 
-          // Handle specific error cases
-          if (error.status === 401) {
-            errorMessage = 'AUTH.INVALID_CREDENTIALS';
-          } else if (error.status === 0) {
-            errorMessage = 'AUTH.NETWORK_ERROR';
-          } else if (error.status >= 500) {
-            errorMessage = 'AUTH.SERVER_ERROR';
+          // Map status codes only for fallback text
+          if (error?.status === 401) {
+            fallbackKey = 'AUTH.INVALID_CREDENTIALS';
+          } else if (error?.status === 0) {
+            fallbackKey = 'AUTH.NETWORK_ERROR';
+          } else if (error?.status >= 500) {
+            fallbackKey = 'AUTH.SERVER_ERROR';
           }
 
-          this.errorMessage = this.translateService.instant(errorMessage);
-          this.toastService.presentErrorToast('bottom', this.errorMessage);
+          const message =
+            backendMessage || this.translateService.instant(fallbackKey);
+          this.errorMessage = message;
+          this.toastService.presentErrorToast('bottom', message);
         },
       });
   }

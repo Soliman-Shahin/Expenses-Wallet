@@ -11,15 +11,26 @@
 
   .month-item {
     animation: fadeInSlideUp 0.6s cubic-bezier(0.33, 1, 0.68, 1);
-    transition: background-color 0.3s, color 0.3s, box-shadow 0.18s, transform 0.18s;
+    transition: background-color 200ms ease, color 200ms ease,
+      box-shadow 160ms ease, transform 160ms ease, backdrop-filter 160ms ease,
+      border-color 160ms ease;
 
     flex: 0 0 auto;
     padding: 10px 16px;
     text-align: center;
     cursor: pointer;
     border-radius: 20px;
-    transition: background-color 0.3s, color 0.3s;
     margin: 0 4px;
+    position: relative;
+
+    /* Subtle glass for non-selected */
+    background: color-mix(
+      in srgb,
+      var(--ion-background-color) 82%,
+      transparent
+    );
+    backdrop-filter: saturate(120%) blur(6px);
+    border: 1px solid rgba(var(--ion-color-primary-rgb), 0.12);
 
     .month-name {
       font-size: 0.9em;
@@ -34,8 +45,9 @@
     &.selected {
       background-color: var(--ion-color-primary);
       color: var(--ion-color-primary-contrast);
-      box-shadow: 0 2px 12px rgba(34,211,238,0.13);
+      box-shadow: 0 2px 12px rgba(34, 211, 238, 0.13);
       transform: scale(1.07);
+      border-color: transparent;
 
       .month-name {
         font-weight: 700;
@@ -48,10 +60,18 @@
 
     &:hover:not(.selected),
     &:focus-visible:not(.selected) {
-      background-color: rgba(var(--ion-color-primary-rgb), 0.13);
-      transform: scale(1.04);
-      box-shadow: 0 2px 8px rgba(34,211,238,0.09);
-      transition: transform 0.14s, box-shadow 0.14s, background 0.14s;
+      background-color: rgba(var(--ion-color-primary-rgb), 0.12);
+      transform: translateY(-1px) scale(1.03);
+      box-shadow: 0 2px 8px rgba(34, 211, 238, 0.1);
+      border-color: rgba(var(--ion-color-primary-rgb), 0.24);
+    }
+  }
+
+  /* Reduce motion */
+  @media (prefers-reduced-motion: reduce) {
+    .month-item {
+      transition: none;
+      animation: none;
     }
   }
 }
