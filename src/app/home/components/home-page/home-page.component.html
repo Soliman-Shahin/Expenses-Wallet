@@ -207,7 +207,7 @@
                   {{ "HOME.CHARTS" | translate }}
                 </h2>
 
-                <ng-container *ngIf="!isLoading; else chartsSkeleton">
+                <ng-container *ngIf="!isDashboardLoading; else chartsSkeleton">
                   <!-- Income vs Expenses Bar Chart -->
                   <app-bar-chart
                     *ngIf="incomeVsExpenseData.length > 0"
@@ -272,13 +272,13 @@
                   <ion-icon name="wallet-outline" aria-hidden="true"></ion-icon>
                   {{ "HOME.BALANCE_SUMMARY" | translate }}
                 </h2>
-                <ng-container *ngIf="!isLoading; else summarySkeleton">
+                <ng-container *ngIf="!isDashboardLoading; else summarySkeleton">
                   <app-balance-card
                     [balance]="balance"
                     [income]="income"
                     [expenses]="expenses"
                     [percentageChange]="percentageChange"
-                    [isLoading]="isLoading"
+                    [isLoading]="isDashboardLoading"
                     [currency]="currency"
                     role="group"
                     attr.aria-label="{{ 'HOME.BALANCE_SUMMARY' | translate }}"
@@ -320,13 +320,13 @@
                     ></ion-icon>
                   </ion-button>
                 </div>
-                <ng-container *ngIf="!isLoading; else summarySkeleton">
+                <ng-container *ngIf="!isDashboardLoading; else summarySkeleton">
                   <app-total-salary
                     [month]="selectedMonth.month"
                     [year]="selectedMonth.year"
                     [totalAmount]="totalSalary"
                     [details]="salaryDetails"
-                    [isLoading]="isLoading"
+                    [isLoading]="isDashboardLoading"
                     [currency]="currency"
                     role="group"
                     attr.aria-label="{{ 'HOME.TOTAL_SALARY' | translate }}"
@@ -338,7 +338,7 @@
                 </ng-container>
 
                 <!-- Salary Breakdown Pie Chart -->
-                <ng-container *ngIf="!isLoading; else summarySkeleton">
+                <ng-container *ngIf="!isDashboardLoading; else summarySkeleton">
                   <app-pie-chart
                     *ngIf="salaryBreakdownData.length > 0"
                     [data]="salaryBreakdownData"
