@@ -1,0 +1,270 @@
+:host {
+  display: block;
+}
+
+ion-content {
+  --background: var(--ion-background-color);
+}
+
+.card {
+  background: var(--ion-color-step-50, #1e1e1e);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: fadeIn 0.4s ease-out;
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12);
+}
+.card-header {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--ion-color-step-150, rgba(0, 0, 0, 0.07));
+}
+.card-header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 6px;
+  color: var(--ion-text-color);
+}
+.card-header .subtitle {
+  color: var(--ion-color-medium);
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* Avatar section */
+.avatar-card {
+  padding: 20px;
+  text-align: center;
+}
+
+.avatar-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--ion-color-step-100, #2a2a2a);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 4px solid var(--ion-color-step-100, #2a2a2a);
+}
+.avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+.avatar ion-icon {
+  font-size: 80px;
+  color: var(--ion-color-medium);
+}
+
+.avatar-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.avatar-actions h2 {
+  margin: 0 0 8px;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+.avatar-actions .subtitle {
+  margin: 0 0 16px;
+  color: var(--ion-color-medium);
+  font-size: 1rem;
+}
+.avatar-actions .actions {
+  display: flex;
+  gap: 12px;
+}
+.avatar-actions .actions ion-button {
+  --border-radius: 14px;
+  --box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+  --padding-start: 20px;
+  --padding-end: 20px;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.avatar-actions .actions ion-button:hover {
+  --box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.salary-details-group {
+  display: grid;
+  gap: 20px;
+}
+
+.array-error {
+  padding: 16px 20px;
+  border-radius: 14px;
+  background: color-mix(in oklab, var(--ion-color-danger) 20%, transparent);
+  animation: fadeIn 0.3s ease;
+  font-weight: 500;
+}
+
+.salary-detail-row {
+  --min-height: 72px;
+  border-radius: 16px;
+  background: var(--ion-color-step-75, rgba(0, 0, 0, 0.04));
+  margin-bottom: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+.salary-detail-row:hover {
+  background: var(--ion-color-step-100, rgba(0, 0, 0, 0.06));
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.salary-detail-row .row-content {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr auto;
+  gap: 20px;
+  align-items: center;
+  padding: 20px;
+}
+
+.inline-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.field-error {
+  grid-column: 1 / -1;
+  font-size: 0.9rem;
+  padding: 12px 0 0;
+  font-weight: 500;
+}
+
+.add-detail {
+  display: flex;
+  justify-content: flex-start;
+  margin: 16px 0;
+}
+
+.total-row {
+  display: flex;
+  justify-content: flex-start;
+  margin: 20px 0 12px;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--ion-color-medium);
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+.select-item {
+  --inner-padding-end: 16px;
+  --inner-padding-start: 16px;
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+  border-radius: 14px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.actions {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--ion-color-step-150, rgba(0, 0, 0, 0.07));
+}
+
+.spacer {
+  height: 40px;
+}
+
+@media (min-width: 640px) {
+  .form-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .actions {
+    grid-column: 1 / -1;
+  }
+  .salary-detail-row .row-content {
+    grid-template-columns: 1.2fr 0.8fr auto;
+  }
+  .avatar-row {
+    flex-direction: row;
+    text-align: left;
+    gap: 24px;
+  }
+  .avatar-actions {
+    align-items: flex-start;
+  }
+  .avatar-actions .actions {
+    justify-content: flex-start;
+  }
+}
+
+/* Micro-interactions */
+.salary-detail-row,
+.salary-detail-row .row-content {
+  transition: background-color 300ms ease, box-shadow 300ms ease, transform 300ms ease;
+}
+.salary-detail-row:hover {
+  background: var(--ion-color-step-100, rgba(0, 0, 0, 0.06));
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .salary-detail-row {
+    transition: none !important;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-in {
+  animation: fadeIn 0.4s ease forwards;
+}
+
+.pulse-on-change {
+  animation: pulse 0.3s ease;
+}
+
+.slide-in-up {
+  animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}

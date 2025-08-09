@@ -1,0 +1,178 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>{{
+      (isEditMode ? "EXPENSE.UPDATE" : "EXPENSE.CREATE") | translate
+    }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="onClose()">
+        {{ "COMMON.CLOSE" | translate }}
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form
+    [formGroup]="expenseForm"
+    (ngSubmit)="onSubmit()"
+    class="ion-padding form-container"
+    [attr.aria-busy]="submitting"
+  >
+    <div class="form-group">
+      <ion-item class="item-label-floating">
+        <ion-label>{{ "EXPENSE.AMOUNT" | translate }}</ion-label>
+        <ion-input
+          type="number"
+          formControlName="amount"
+          inputmode="decimal"
+          class="input-with-icon"
+          aria-label="Amount"
+        >
+          <span slot="start" class="ion-padding-end">$</span>
+        </ion-input>
+      </ion-item>
+      <ion-note
+        *ngIf="expenseForm.get('amount')?.touched && expenseForm.get('amount')?.errors?.['required']"
+        color="danger"
+        slot="error"
+      >
+        {{ "VALIDATION.REQUIRED" | translate }}
+      </ion-note>
+      <ion-note
+        *ngIf="expenseForm.get('amount')?.touched && expenseForm.get('amount')?.errors?.['min']"
+        color="danger"
+        slot="error"
+      >
+        {{ "VALIDATION.MIN" | translate : { min: 0.01 } }}
+      </ion-note>
+    </div>
+
+    <div class="form-group">
+      <ion-item class="item-label-floating">
+        <ion-label>{{ "EXPENSE.DESCRIPTION" | translate }}</ion-label>
+        <ion-input
+          formControlName="description"
+          class="input-with-icon"
+          aria-label="Description"
+        >
+          <ion-icon name="document-text-outline" slot="start"></ion-icon>
+        </ion-input>
+      </ion-item>
+      <ion-note
+        *ngIf="expenseForm.get('description')?.touched && expenseForm.get('description')?.errors?.['required']"
+        color="danger"
+        slot="error"
+      >
+        {{ "VALIDATION.REQUIRED" | translate }}
+      </ion-note>
+      <ion-note
+        *ngIf="expenseForm.get('description')?.touched && expenseForm.get('description')?.errors?.['minlength']"
+        color="danger"
+        slot="error"
+      >
+        {{ "VALIDATION.MIN_LENGTH" | translate : { min: 2 } }}
+      </ion-note>
+      <ion-note
+        *ngIf="expenseForm.get('description')?.touched && expenseForm.get('description')?.errors?.['pattern']"
+        color="danger"
+        slot="error"
+      >
+        {{ "VALIDATION.NO_WHITESPACE" | translate }}
+      </ion-note>
+    </div>
+
+    <div class="form-group">
+      <ion-item class="item-label-floating">
+        <ion-label>{{ "EXPENSE.DATE" | translate }}</ion-label>
+        <div class="input-with-icon" style="width: 100%">
+          <ion-icon name="calendar-outline" slot="start"></ion-icon>
+          <ion-datetime-button datetime="datetime" aria-label="Pick date">
+            <span
+              *ngIf="!expenseForm.get('date')?.value"
+              class="placeholder-text"
+            >
+              {{ "EXPENSE.SELECT_DATE" | translate }}
+            </span>
+          </ion-datetime-button>
+        </div>
+        <ion-modal [keepContentsMounted]="true">
+          <ng-template>
+            <ion-datetime
+              id="datetime"
+              formControlName="date"
+              presentation="date"
+              [min]="minDate"
+              [max]="maxDate"
+              presentation="date"
+              aria-label="Date"
+            ></ion-datetime>
+          </ng-template>
+        </ion-modal>
+      </ion-item>
+    </div>
+
+    <div class="form-group">
+      <ion-item class="item-label-floating">
+        <ion-label>{{ "EXPENSE.CATEGORY" | translate }}</ion-label>
+        <ion-select
+          formControlName="category"
+          interface="action-sheet"
+          class="input-with-icon"
+          aria-label="Category"
+        >
+          <ion-icon name="pricetags-outline" slot="start"></ion-icon>
+          <ion-select-option
+            *ngFor="let category of categories$ | async"
+            [value]="category._id"
+          >
+            <ion-icon name="pricetag-outline" slot="start"></ion-icon>
+            {{ category.name }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+      <ion-note
+        *ngIf="expenseForm.get('category')?.touched && expenseForm.get('category')?.errors?.['required']"
+        color="danger"
+        slot="error"
+      >
+        {{ "VALIDATION.REQUIRED" | translate }}
+      </ion-note>
+    </div>
+
+    <div class="form-actions">
+      <ion-button
+        expand="block"
+        type="submit"
+        [disabled]="submitting || !expenseForm.valid"
+        shape="round"
+        size="large"
+        class="ion-margin-top"
+        aria-label="Submit expense"
+      >
+        <ion-icon
+          slot="start"
+          [name]="isEditMode ? 'save-outline' : 'add-circle-outline'"
+        ></ion-icon>
+        <ion-spinner slot="end" *ngIf="submitting"></ion-spinner>
+        {{
+          isEditMode
+            ? ("COMMON.UPDATE" | translate)
+            : ("COMMON.ADD" | translate)
+        }}
+      </ion-button>
+
+      <ion-button
+        *ngIf="isEditMode"
+        expand="block"
+        fill="outline"
+        color="medium"
+        (click)="onCancel()"
+        shape="round"
+        size="large"
+      >
+        <ion-icon slot="start" name="close-circle-outline"></ion-icon>
+        {{ "COMMON.CANCEL" | translate }}
+      </ion-button>
+    </div>
+  </form>
+</ion-content>

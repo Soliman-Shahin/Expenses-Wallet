@@ -19,6 +19,11 @@ const categoriesRoutes: Routes = [
     component: AddCategoryComponent,
     data: { title: 'CATEGORY.ADD', action: 'save', icon: 'save' },
   },
+  {
+    path: APP_ROUTES.CATEGORIES.EDIT,
+    component: AddCategoryComponent,
+    data: { title: 'CATEGORY.EDIT', action: 'save', icon: 'save' },
+  },
 ];
 
 @NgModule({

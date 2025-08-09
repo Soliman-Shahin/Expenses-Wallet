@@ -11,6 +11,7 @@
         [disabled]="tab.disabled"
         [tab]="tab.label"
         class="animated-tab-button"
+        [attr.aria-current]="tab.routerLink === activeRoute ? 'page' : null"
       >
         <ion-icon [name]="tab.icon"></ion-icon>
         <ion-label *ngIf="tab.show_label">

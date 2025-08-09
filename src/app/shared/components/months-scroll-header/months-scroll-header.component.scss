@@ -1,34 +1,77 @@
-.month-scroll-container {
+.months-scroll-container {
   display: flex;
   overflow-x: auto;
-  scroll-behavior: smooth;
+  padding: 8px 0;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
 
   &::-webkit-scrollbar {
-    display: none;
+    display: none; /* Chrome, Safari, and Opera */
   }
 
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+  .month-item {
+    animation: fadeInSlideUp 0.6s cubic-bezier(0.33, 1, 0.68, 1);
+    transition: background-color 200ms ease, color 200ms ease,
+      box-shadow 160ms ease, transform 160ms ease, backdrop-filter 160ms ease,
+      border-color 160ms ease;
 
-  ion-card {
     flex: 0 0 auto;
-    width: 4rem;
-    height: 5rem;
+    padding: 10px 16px;
     text-align: center;
-    transition: transform 0.3s;
-    margin-inline-end: 0;
+    cursor: pointer;
+    border-radius: 20px;
+    margin: 0 4px;
+    position: relative;
 
-    &:not(:last-child) {
-      margin-inline-end: 0.5rem;
+    /* Subtle glass for non-selected */
+    background: color-mix(
+      in srgb,
+      var(--ion-background-color) 82%,
+      transparent
+    );
+    backdrop-filter: saturate(120%) blur(6px);
+    border: 1px solid rgba(var(--ion-color-primary-rgb), 0.12);
+
+    .month-name {
+      font-size: 0.9em;
+      font-weight: 500;
     }
 
-    &.active {
-      transform: scale(1.1);
-      border: 2px solid var(--ion-color-primary);
+    .year {
+      font-size: 0.7em;
+      opacity: 0.7;
     }
 
-    ion-card-header {
-      padding: 0.5rem;
+    &.selected {
+      background-color: var(--ion-color-primary);
+      color: var(--ion-color-primary-contrast);
+      box-shadow: 0 2px 12px rgba(34, 211, 238, 0.13);
+      transform: scale(1.07);
+      border-color: transparent;
+
+      .month-name {
+        font-weight: 700;
+      }
+
+      .year {
+        opacity: 1;
+      }
+    }
+
+    &:hover:not(.selected),
+    &:focus-visible:not(.selected) {
+      background-color: rgba(var(--ion-color-primary-rgb), 0.12);
+      transform: translateY(-1px) scale(1.03);
+      box-shadow: 0 2px 8px rgba(34, 211, 238, 0.1);
+      border-color: rgba(var(--ion-color-primary-rgb), 0.24);
+    }
+  }
+
+  /* Reduce motion */
+  @media (prefers-reduced-motion: reduce) {
+    .month-item {
+      transition: none;
+      animation: none;
     }
   }
 }

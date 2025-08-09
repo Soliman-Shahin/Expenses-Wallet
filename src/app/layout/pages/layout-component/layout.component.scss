@@ -1,0 +1,157 @@
+@import "src/theme/variables";
+
+ion-app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  background-color: var(--ion-background-color);
+  color: var(--ion-text-color);
+}
+
+.ion-page {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  contain: layout size style;
+  z-index: 0;
+}
+
+ion-content {
+  --padding-top: var(--header-height, 56px);
+  --padding-bottom: var(--tabs-height, 56px);
+  --background: var(--ion-background-color);
+  --color: var(--ion-text-color);
+}
+
+:host {
+  --header-height: 56px;
+  --tabs-height: 56px;
+  --side-menu-width: 280px;
+  --side-menu-z-index: 1000;
+  --content-padding: var(--spacing-md);
+}
+
+// Main content area
+ion-router-outlet {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  contain: layout size style;
+
+  // Add padding to account for header and tabs
+  &::before {
+    content: "";
+    display: block;
+    height: var(--header-height);
+    width: 100%;
+    flex: 0 0 auto;
+    background: transparent;
+  }
+
+  &::after {
+    content: "";
+    display: block;
+    height: var(--tabs-height);
+    width: 100%;
+    flex: 0 0 auto;
+    background: transparent;
+  }
+}
+
+// Tabs bar styles
+app-tabs-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+  height: var(--tabs-height);
+  background: var(--ion-color-light);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  border-top: 1px solid var(--ion-color-light-shade);
+
+  // Add safe area padding for devices with notches
+  padding-bottom: env(safe-area-inset-bottom);
+  height: calc(var(--tabs-height) + env(safe-area-inset-bottom));
+}
+
+// Responsive adjustments
+@media (min-width: 768px) {
+  :host {
+    --side-menu-width: 300px;
+  }
+
+  // Adjust content position when side menu is visible
+  ion-router-outlet {
+    margin-left: var(--side-menu-width);
+    width: calc(100% - var(--side-menu-width));
+    padding: var(--spacing-lg) var(--spacing-xl);
+    @extend .rounded-lg;
+    @extend .shadow;
+    transition: margin 0.22s, width 0.22s, padding 0.22s;
+  }
+
+  // Adjust tabs bar position
+  app-tabs-bar {
+    width: calc(100% - var(--side-menu-width));
+    left: var(--side-menu-width);
+    border-top-left-radius: 18px;
+    border-top-right-radius: 18px;
+    box-shadow: 0 -4px 24px rgba(34,211,238,0.10);
+    transition: width 0.22s, left 0.22s;
+  }
+}
+
+// Extra large screens
+@media (min-width: 1200px) {
+  :host {
+    --side-menu-width: 340px;
+  }
+  ion-router-outlet {
+    margin-left: var(--side-menu-width);
+    width: calc(100% - var(--side-menu-width));
+    padding: var(--spacing-xl) var(--spacing-xxl);
+  }
+  app-tabs-bar {
+    width: calc(100% - var(--side-menu-width));
+    left: var(--side-menu-width);
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+  }
+}
+
+
+// Dark mode adjustments
+@media (prefers-color-scheme: dark) {
+  :host {
+    --ion-background-color: var(--ion-color-dark);
+    --ion-text-color: var(--ion-color-light);
+  }
+
+  app-tabs-bar {
+    background: var(--ion-color-dark);
+    border-top-color: var(--ion-color-dark-shade);
+  }
+}
+
+// Print styles
+@media print {
+  app-side-menu,
+  app-tabs-bar {
+    display: none !important;
+  }
+
+  ion-router-outlet {
+    margin: 0 !important;
+    width: 100% !important;
+
+    &::before,
+    &::after {
+      display: none !important;
+    }
+  }
+}

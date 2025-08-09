@@ -1,49 +1,50 @@
-import { Injectable } from '@angular/core';
-import { EventEmitter } from '@angular/core';
+import { Injectable, Renderer2, RendererFactory2 } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ThemeService {
-  private DARK_THEME = 'dark-theme';
-  private LIGHT_THEME = 'light-theme';
-  private htmlElement: HTMLElement = document.getElementsByTagName('html')[0];
+  private renderer: Renderer2;
+  private _theme = new BehaviorSubject<string>('light');
+  theme$ = this._theme.asObservable();
 
-  themeChange: EventEmitter<string> = new EventEmitter<string>();
-
-  constructor() {
-    this.initializeTheme();
+  constructor(rendererFactory: RendererFactory2) {
+    this.renderer = rendererFactory.createRenderer(null, null);
   }
 
-  // Initialize theme on startup
-  private initializeTheme() {
-    const theme = this.getCurrentTheme();
-    this.setTheme(theme);
+  initTheme() {
+    const storedTheme = localStorage.getItem('theme') || 'light';
+    this._theme.next(storedTheme);
+
+    this.theme$.subscribe((theme) => {
+      if (theme === 'dark') {
+        this.enableDark();
+      } else {
+        this.enableLight();
+      }
+    });
   }
 
-  // Toggle between dark and light themes
   toggleTheme() {
-    const newTheme =
-      this.getCurrentTheme() === this.DARK_THEME
-        ? this.LIGHT_THEME
-        : this.DARK_THEME;
-    this.setTheme(newTheme);
+    const newTheme = this._theme.value === 'dark' ? 'light' : 'dark';
+    this._theme.next(newTheme);
+    localStorage.setItem('theme', newTheme);
   }
 
-  // Set the theme
-  private setTheme(theme: string) {
-    this.htmlElement.classList.remove(this.DARK_THEME, this.LIGHT_THEME, 'md');
-    this.htmlElement.classList.add(theme);
-    if (theme === this.DARK_THEME) {
-      this.htmlElement.classList.add('md');
-    }
-    localStorage.setItem('theme', theme);
-    // Emit theme change event
-    this.themeChange.emit(theme);
+  private enableDark() {
+    this.renderer.addClass(document.body, 'dark');
   }
 
-  // Check the current theme
-  getCurrentTheme(): string {
-     return localStorage.getItem('theme') || this.LIGHT_THEME;
-   }
+  private enableLight() {
+    this.renderer.removeClass(document.body, 'dark');
+  }
+
+  getCurrentTheme() {
+    return this._theme.value;
+  }
+
+  isDarkMode(): boolean {
+    return document.body.classList.contains('dark');
+  }
 }

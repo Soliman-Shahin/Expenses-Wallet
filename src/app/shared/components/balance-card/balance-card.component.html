@@ -1,28 +1,110 @@
-<ion-card #balanceCard>
+<ion-card class="balance-card fade-in-up" [class.is-loading]="isLoading">
   <ion-card-header>
-    <ion-card-subtitle class="sub-title">
-      <span>{{ "TOTAL_BALANCE" | translate }}</span>
+    <ion-card-title>{{ "HOME.BALANCE_SUMMARY" | translate }}</ion-card-title>
+    <ion-button
+      fill="clear"
+      size="small"
+      slot="end"
+      [attr.aria-label]="showBalance ? 'Hide balance' : 'Show balance'"
+      (click)="toggleBalance()"
+    >
       <ion-icon
-        [name]="showBalance ? 'eye-outline' : 'eye-off-outline'"
-        (click)="toggleBalance()"
+        [name]="showBalance ? 'eye-off-outline' : 'eye-outline'"
       ></ion-icon>
-    </ion-card-subtitle>
-    <ion-card-title>{{ formattedBalance }}</ion-card-title>
+    </ion-button>
   </ion-card-header>
-  <ion-card-content class="card-content">
-    <div class="balance-item">
-      <ion-icon name="arrow-down-circle-outline"></ion-icon>
-      <span>{{ "INCOME" | translate }}</span>
-      <div>
-        <span>{{ formattedIncome }}</span>
+
+  <ion-card-content>
+    <ng-container *ngIf="!isLoading; else loadingState">
+  <div class="total-balance" aria-live="polite" aria-labelledby="balance-heading" aria-describedby="balance-desc">
+    <span class="amount">{{ formattedBalance }}</span>
+    <ion-badge
+      *ngIf="percentageChange !== null"
+      [color]="percentageChange >= 0 ? 'success' : 'danger'"
+      [attr.aria-label]="
+        (percentageChange >= 0 ? 'Positive' : 'Negative') +
+        ' change ' +
+        (percentageChange | number : '1.0-1') +
+        '%'
+      "
+    >
+      {{ percentageChange | number : "1.0-1" }}%
+    </ion-badge>
+  </div>
+  <span id="balance-desc" class="visually-hidden">This shows your current total balance and the percentage change compared to last period.</span>
+
+      <ion-grid>
+        <ion-row>
+          <ion-col size="6" class="ion-no-padding">
+            <div class="balance-item income">
+              <ion-icon
+                name="arrow-up-circle-outline"
+                color="success"
+                aria-label="Income"
+              ></ion-icon>
+              <div class="item-details">
+                <span class="label">{{ "HOME.INCOME" | translate }}</span>
+                <span class="amount">{{ formattedIncome }}</span>
+              </div>
+            </div>
+          </ion-col>
+          <ion-col size="6" class="ion-no-padding">
+            <div class="balance-item expenses">
+              <ion-icon
+                name="arrow-down-circle-outline"
+                color="danger"
+                aria-label="Expenses"
+              ></ion-icon>
+              <div class="item-details">
+                <span class="label">{{ "HOME.EXPENSES" | translate }}</span>
+                <span class="amount">{{ formattedExpenses }}</span>
+              </div>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+</ng-container>
+
+    <ng-template #loadingState>
+      <div class="total-balance">
+        <ion-skeleton-text
+          animated
+          style="width: 60%; height: 40px"
+          class="fade-in"
+        ></ion-skeleton-text>
       </div>
-    </div>
-    <div class="balance-item">
-      <ion-icon name="arrow-up-circle-outline"></ion-icon>
-      <span>{{ "OUTCOME" | translate }}</span>
-      <div>
-        <span>{{ formattedOutcome }}</span>
-      </div>
-    </div>
+      <ion-grid>
+        <ion-row>
+          <ion-col size="6" class="ion-no-padding">
+            <div class="balance-item income">
+              <ion-skeleton-text
+                animated
+                style="width: 80%; height: 20px; margin-top: 8px"
+                class="fade-in"
+              ></ion-skeleton-text>
+              <ion-skeleton-text
+                animated
+                style="width: 60%; height: 24px"
+                class="fade-in"
+              ></ion-skeleton-text>
+            </div>
+          </ion-col>
+          <ion-col size="6" class="ion-no-padding">
+            <div class="balance-item expenses">
+              <ion-skeleton-text
+                animated
+                style="width: 80%; height: 20px; margin-top: 8px"
+                class="fade-in"
+              ></ion-skeleton-text>
+              <ion-skeleton-text
+                animated
+                style="width: 60%; height: 24px"
+                class="fade-in"
+              ></ion-skeleton-text>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ng-template>
   </ion-card-content>
 </ion-card>

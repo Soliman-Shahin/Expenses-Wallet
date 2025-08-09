@@ -1,5 +1,5 @@
 import { Tab } from 'src/app/shared/models';
-import { APP_ROUTES } from './routes';
+import { APP_ROUTES } from './routes.constant';
 
 export const TABS_MENU_ITEMS: Tab[] = [
   {
@@ -41,7 +41,7 @@ export const TABS_MENU_ITEMS: Tab[] = [
     routerLinkActiveOptions: { exact: true },
     icon: 'receipt',
     visible: true,
-    disabled: true,
+    disabled: false,
     roles: [],
   },
   {
@@ -53,7 +53,7 @@ export const TABS_MENU_ITEMS: Tab[] = [
     routerLinkActiveOptions: { exact: true },
     icon: 'settings',
     visible: true,
-    disabled: true,
+    disabled: false,
     roles: [],
   },
 ];

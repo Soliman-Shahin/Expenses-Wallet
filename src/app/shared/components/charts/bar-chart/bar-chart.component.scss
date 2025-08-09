@@ -1,0 +1,139 @@
+.chart-container {
+  padding: 16px;
+  border-radius: 8px;
+  background-color: var(--ion-background-color, #fff);
+  box-shadow: var(--card-shadow, 0 2px 8px rgba(0, 0, 0, 0.1));
+  margin: 16px 0;
+}
+
+.chart-title {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: var(--ion-text-color, #000);
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.chart-wrapper {
+  display: flex;
+  align-items: flex-end;
+  height: 160px;
+  padding: 12px 0 8px;
+  border-bottom: 1px solid var(--ion-border-color, #ddd);
+  overflow: hidden; /* contain tall bars */
+  box-sizing: border-box;
+}
+
+.chart-bars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  width: 100%;
+  height: 100%;
+}
+
+.bar-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 1;
+  height: 100%;
+  margin: 0 4px;
+}
+
+.bar-area {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 100%;
+  height: 70%; /* reserve space for labels */
+}
+
+.bar-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  height: 25%;
+}
+
+.bar {
+  width: 70%;
+  min-height: 2px;
+  max-height: 70%; /* avoid touching top edge */
+  border-radius: 4px 4px 0 0;
+  transition: height 0.3s ease;
+}
+
+.bar-label {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  text-align: center;
+  color: var(--ion-text-color, #000);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.bar-value {
+  margin-top: 4px;
+  font-size: 0.7rem;
+  text-align: center;
+  color: var(--ion-text-color-secondary, #666);
+}
+
+/* Dark mode support */
+body.dark {
+  .chart-container {
+    background-color: var(--ion-background-color, #1e1e1e);
+    box-shadow: var(--card-shadow, 0 2px 8px rgba(0, 0, 0, 0.3));
+  }
+
+  .chart-title,
+  .bar-label {
+    color: var(--ion-text-color, #fff);
+  }
+
+  .bar-value {
+    color: var(--ion-text-color-secondary, #aaa);
+  }
+
+  .chart-wrapper {
+    border-bottom: 1px solid var(--ion-border-color, #444);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .chart-container {
+    padding: 12px;
+  }
+
+  .chart-title {
+    font-size: 1.1rem;
+  }
+
+  .bar-label {
+    font-size: 0.7rem;
+  }
+
+  .bar-value {
+    font-size: 0.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-wrapper {
+    height: 150px;
+  }
+
+  .bar-label {
+    font-size: 0.6rem;
+  }
+
+  .bar-value {
+    font-size: 0.5rem;
+  }
+}

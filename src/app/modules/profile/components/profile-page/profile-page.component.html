@@ -1,0 +1,246 @@
+<ion-content class="ion-padding" [fullscreen]="true">
+  <!-- Avatar Section -->
+  <section class="card avatar-card animate-in" aria-labelledby="avatar-title">
+    <div class="avatar-row">
+      <div
+        class="avatar pulse-on-change"
+        [style.background-image]="avatarUrl ? 'url(' + avatarUrl + ')' : ''"
+        [attr.aria-label]="'PROFILE.AVATAR' | translate"
+      >
+        <ion-icon
+          *ngIf="!avatarUrl"
+          name="person-circle-outline"
+          aria-hidden="true"
+        ></ion-icon>
+      </div>
+      <div class="avatar-actions">
+        <h2 id="avatar-title">{{ "PROFILE.AVATAR_TITLE" | translate }}</h2>
+        <p class="subtitle">{{ "PROFILE.AVATAR_SUBTITLE" | translate }}</p>
+        <div class="actions">
+          <ion-button
+            fill="solid"
+            (click)="triggerAvatarFile()"
+            class="slide-in-up"
+          >
+            <ion-icon slot="start" name="camera-outline"></ion-icon>
+            {{ "PROFILE.EDIT_AVATAR" | translate }}
+          </ion-button>
+          <input
+            #avatarInput
+            type="file"
+            accept="image/*"
+            hidden
+            (change)="onAvatarSelected($event)"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Personal Info Section -->
+  <section class="card animate-in" aria-labelledby="personal-info-title">
+    <div class="card-header">
+      <h2 id="personal-info-title">
+        {{ "PROFILE.PERSONAL_INFO.TITLE" | translate }}
+      </h2>
+      <p class="subtitle">{{ "PROFILE.PERSONAL_INFO.SUBTITLE" | translate }}</p>
+    </div>
+
+    <form
+      [formGroup]="personalForm"
+      (ngSubmit)="savePersonal()"
+      class="form-grid"
+      novalidate
+    >
+      <app-ui-input
+        formControlName="username"
+        [label]="'PROFILE.PERSONAL_INFO.FULL_NAME' | translate"
+        [placeholder]="
+          'PROFILE.PERSONAL_INFO.FULL_NAME_PLACEHOLDER' | translate
+        "
+        required
+        class="slide-in-up"
+      ></app-ui-input>
+
+      <app-ui-input
+        formControlName="email"
+        type="email"
+        [label]="'PROFILE.PERSONAL_INFO.EMAIL' | translate"
+        [placeholder]="'PROFILE.PERSONAL_INFO.EMAIL_PLACEHOLDER' | translate"
+        required
+        autocomplete="email"
+        class="slide-in-up"
+      ></app-ui-input>
+
+      <app-ui-input
+        formControlName="phone"
+        type="text"
+        [label]="'PROFILE.PERSONAL_INFO.PHONE' | translate"
+        [placeholder]="'PROFILE.PERSONAL_INFO.PHONE_PLACEHOLDER' | translate"
+        inputmode="tel"
+        class="slide-in-up"
+      ></app-ui-input>
+
+      <div class="actions">
+        <ion-button
+          type="submit"
+          expand="block"
+          [disabled]="personalForm.invalid"
+          class="pulse-on-change"
+        >
+          {{ "PROFILE.PERSONAL_INFO.SAVE" | translate }}
+        </ion-button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Salary & Currency Section -->
+  <section class="card animate-in" aria-labelledby="salary-info-title">
+    <div class="card-header">
+      <h2 id="salary-info-title">{{ "PROFILE.SALARY.TITLE" | translate }}</h2>
+      <p class="subtitle">{{ "PROFILE.SALARY.SUBTITLE" | translate }}</p>
+    </div>
+
+    <form
+      [formGroup]="salaryForm"
+      (ngSubmit)="saveSalary()"
+      class="form-grid"
+      novalidate
+    >
+      <div formArrayName="details" class="salary-details-group">
+        <div
+          class="array-error"
+          *ngIf="salaryForm.get('details')?.errors?.['duplicateLabels']"
+        >
+          <ion-text color="danger">{{
+            "PROFILE.SALARY.DUPLICATE_LABELS" | translate
+          }}</ion-text>
+        </div>
+        <ion-list lines="none">
+          <ion-reorder-group
+            [disabled]="false"
+            (ionItemReorder)="onReorder($event)"
+          >
+            <ion-item
+              class="salary-detail-row slide-in-up"
+              *ngFor="
+                let grp of details.controls;
+                let i = index;
+                trackBy: trackByIndex
+              "
+            >
+              <ion-reorder slot="start" aria-label="Reorder"></ion-reorder>
+              <div class="row-content" [formGroupName]="i">
+                <div class="field">
+                  <ion-icon
+                    name="pricetag-outline"
+                    aria-hidden="true"
+                  ></ion-icon>
+                  <ion-input
+                    formControlName="label"
+                    type="text"
+                    [placeholder]="
+                      'PROFILE.SALARY.LABEL_PLACEHOLDER' | translate
+                    "
+                    [attr.aria-label]="'PROFILE.SALARY.LABEL' | translate"
+                  ></ion-input>
+                </div>
+
+                <div class="field">
+                  <ion-icon name="cash-outline" aria-hidden="true"></ion-icon>
+                  <ion-input
+                    formControlName="amount"
+                    type="number"
+                    inputmode="decimal"
+                    step="0.01"
+                    min="0"
+                    [placeholder]="'0.00'"
+                    [attr.aria-label]="'PROFILE.SALARY.AMOUNT' | translate"
+                  ></ion-input>
+                </div>
+
+                <div class="inline-actions">
+                  <ion-button
+                    type="button"
+                    color="danger"
+                    fill="outline"
+                    (click)="removeDetail(i)"
+                    [disabled]="details.length <= 1"
+                    class="remove-detail-btn"
+                  >
+                    {{ "COMMON.REMOVE" | translate }}
+                  </ion-button>
+                </div>
+
+                <div
+                  class="field-error"
+                  *ngIf="
+                    grp.get('label')?.touched &&
+                    grp.get('label')?.hasError('duplicateLabel')
+                  "
+                >
+                  <ion-text color="danger">{{
+                    "PROFILE.SALARY.DUPLICATE_LABEL" | translate
+                  }}</ion-text>
+                </div>
+              </div>
+            </ion-item>
+          </ion-reorder-group>
+        </ion-list>
+
+        <div class="add-detail">
+          <ion-button
+            type="button"
+            (click)="addDetail()"
+            fill="clear"
+            class="pulse-on-change"
+          >
+            <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+            {{ "COMMON.ADD" | translate }}
+          </ion-button>
+        </div>
+
+        <div class="total-row">
+          <ion-badge color="primary" class="pulse-on-change">
+            {{ "PROFILE.SALARY.TOTAL" | translate }}:
+            {{ totalSalary | number : "1.0-2" }}
+            {{ salaryForm.get("currency")?.value }}
+          </ion-badge>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="currencySelect">{{
+          "PROFILE.SALARY.CURRENCY" | translate
+        }}</label>
+        <ion-item lines="full" class="select-item slide-in-up">
+          <ion-select
+            aria-labelledby="currencySelect"
+            interface="popover"
+            [interfaceOptions]="{ cssClass: 'currency-popover' }"
+            formControlName="currency"
+            [placeholder]="'PROFILE.SALARY.SELECT_CURRENCY' | translate"
+          >
+            <ion-select-option *ngFor="let c of currencies" [value]="c">{{
+              c
+            }}</ion-select-option>
+          </ion-select>
+        </ion-item>
+      </div>
+
+      <div class="actions">
+        <ion-button
+          type="button"
+          expand="block"
+          [disabled]="salaryForm.invalid"
+          (click)="saveSalary()"
+          class="pulse-on-change"
+        >
+          {{ "PROFILE.SALARY.SAVE" | translate }}
+        </ion-button>
+      </div>
+    </form>
+  </section>
+
+  <div class="spacer"></div>
+</ion-content>

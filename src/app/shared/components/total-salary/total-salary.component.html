@@ -1,19 +1,57 @@
-<ion-card #salaryCard>
+<ion-card
+  class="monthly-summary-card fade-in-up"
+  [class.is-loading]="isLoading"
+>
   <ion-card-header>
-    <ion-card-title>
-      <span>{{ "TOTAL_SALARY" | translate }}</span>
-    </ion-card-title>
+    <ion-card-title>{{ "HOME.MONTHLY_SUMMARY" | translate }}</ion-card-title>
+    <ion-button fill="clear" size="small">{{
+      "COMMON.VIEW_ALL" | translate
+    }}</ion-button>
   </ion-card-header>
+
   <ion-card-content>
-    <div class="salary-from-to">
-      <span>{{ expense + " " + currency }}</span>
-      <span>{{ totalSalary + " " + currency }}</span>
-    </div>
-    <ion-progress-bar [value]="progress"></ion-progress-bar>
-    <div>
-      <span>
-        {{ ("REMAINING" | translate) + " " + remaining + " " + currency }}
-      </span>
-    </div>
+    <ng-container *ngIf="!isLoading; else loadingState">
+      <div class="chart-container">
+        <div class="chart-placeholder"></div>
+        <div class="total-amount">
+          <span class="amount">{{
+            totalAmount | currency : currency : "symbol" : "1.2-2"
+          }}</span>
+          <span class="label">{{ "HOME.TOTAL_SALARY" | translate }}</span>
+        </div>
+      </div>
+
+      <div class="details-list">
+        <div *ngFor="let detail of details" class="detail-item">
+          <span class="label">{{ detail.label }}</span>
+          <span class="amount">{{
+            detail.amount | currency : currency : "symbol" : "1.2-2"
+          }}</span>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-template #loadingState>
+      <div class="chart-container">
+        <ion-skeleton-text
+          animated
+          class="chart-placeholder-skeleton"
+        ></ion-skeleton-text>
+      </div>
+      <div class="details-list">
+        <div class="detail-item" *ngFor="let i of [1, 2]">
+          <ion-skeleton-text
+            animated
+            style="width: 40%; height: 20px"
+            class="fade-in"
+          ></ion-skeleton-text>
+          <ion-skeleton-text
+            animated
+            style="width: 30%; height: 20px"
+            class="fade-in"
+          ></ion-skeleton-text>
+        </div>
+      </div>
+    </ng-template>
   </ion-card-content>
 </ion-card>

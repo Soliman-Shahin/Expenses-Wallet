@@ -1,0 +1,774 @@
+// Import theme variables
+@import "src/theme/variables";
+
+// Animations
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+// Loading skeleton
+.skeleton-container {
+  ion-skeleton-text {
+    --background: rgba(var(--ion-color-medium-rgb), 0.1);
+    --border-radius: var(--border-radius-md, 8px);
+    margin: var(--spacing-sm) auto;
+
+    &[style*="border-radius: 16px"] {
+      --border-radius: var(--border-radius-lg, 16px);
+    }
+  }
+}
+
+// Error state
+.error-state {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  text-align: center;
+  padding: var(--spacing-xl);
+
+  .error-icon {
+    font-size: 4rem;
+    color: var(--ion-color-danger);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .error-title {
+    font-size: var(--text-xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .error-message {
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-lg);
+    max-width: 400px;
+  }
+
+  .retry-button {
+    --padding-start: var(--spacing-xl);
+    --padding-end: var(--spacing-xl);
+    --padding-top: var(--spacing-md);
+    --padding-bottom: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+    font-weight: var(--font-weight-medium);
+  }
+}
+
+// Welcome state (unauthenticated)
+.welcome-container {
+  // Remove direct flex layout; handled by grid
+  min-height: 80vh;
+  padding: 0;
+  text-align: center;
+
+  .welcome-illustration {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    margin: 0 auto var(--spacing-xl);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .welcome-icon {
+      font-size: 6rem;
+      color: var(--ion-color-primary);
+      position: relative;
+      z-index: 2;
+    }
+
+    .welcome-dots {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-gap: var(--spacing-sm);
+      padding: var(--spacing-lg);
+
+      span {
+        background: rgba(var(--ion-color-primary-rgb), 0.1);
+        border-radius: 50%;
+        animation: pulse 2s infinite ease-in-out;
+
+        @for $i from 1 through 5 {
+          &:nth-child(#{$i}) {
+            animation-delay: #{$i * 0.2}s;
+          }
+        }
+      }
+    }
+  }
+
+  .welcome-title {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-md);
+    line-height: var(--line-height-tight);
+  }
+
+  .welcome-message {
+    color: var(--ion-color-medium);
+    font-size: 1rem;
+    line-height: 1.5;
+    margin: 0 0 2rem;
+  }
+
+  .welcome-actions {
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+
+    ion-button {
+      --border-radius: 50px;
+      --padding-top: 1.5rem;
+      --padding-bottom: 1.5rem;
+      font-weight: 600;
+      margin: 0.5rem 0;
+
+      &[fill="outline"] {
+        --border-width: 2px;
+      }
+    }
+  }
+
+  .features-preview {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-top: 2.5rem;
+
+    .feature-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: var(--ion-color-medium);
+      font-size: 0.85rem;
+      min-width: 80px;
+
+      ion-icon {
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+        color: var(--ion-color-primary);
+      }
+    }
+  }
+}
+
+// Authenticated content
+.authenticated-content {
+  padding-bottom: 2rem;
+  // Remove max-width/margin if present; handled by grid
+  max-width: none;
+  margin: 0;
+
+  .welcome-header {
+    background: linear-gradient(
+      135deg,
+      var(--ion-color-primary),
+      var(--ion-color-secondary)
+    );
+    color: white;
+    padding-top: 1.5rem;
+    margin: 0 0 1rem;
+    border-radius: 0 0 24px 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.08),
+      0 4px 12px rgba(0, 0, 0, 0.04);
+    transition: transform 0.3s var(--animation-easing),
+      box-shadow 0.3s var(--animation-easing);
+
+    .greeting {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0 0 0.25rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+
+      .user-name {
+        font-weight: 700;
+        margin-left: 0.5rem;
+      }
+    }
+
+    .current-date {
+      margin: 0;
+      opacity: 0.9;
+      font-size: 0.9rem;
+    }
+  }
+
+  .month-selector {
+    margin-top: -1.5rem;
+    position: relative;
+    z-index: 10;
+  }
+
+  // Home tabs styling
+  .home-tabs {
+    --background: rgba(var(--ion-color-light-rgb), 0.65);
+    backdrop-filter: saturate(180%) blur(10px);
+    -webkit-backdrop-filter: saturate(180%) blur(10px);
+    border-radius: 16px;
+    padding: 6px;
+    margin: 0 1.5rem 1rem;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+    transition: var(--tab-transition, all 280ms cubic-bezier(0.4, 0, 0.2, 1));
+
+    // container adjustments
+    .segment-scroll {
+      overscroll-behavior: contain;
+    }
+
+    ion-segment-button {
+      --background: transparent;
+      --color: var(--ion-text-color);
+      --border-radius: 12px;
+      min-height: 42px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      transition: var(--tab-transition, all 200ms ease);
+
+      &:hover {
+        background: rgba(var(--ion-color-primary-rgb), 0.06);
+      }
+
+      &.segment-button-checked {
+        --color: var(--ion-color-primary-contrast);
+        background: var(--ion-color-primary);
+        box-shadow: 0 6px 20px rgba(var(--ion-color-primary-rgb), 0.25);
+        transform: translateY(-1px);
+      }
+
+      &:focus-visible {
+        outline: 2px solid rgba(var(--ion-color-primary-rgb), 0.65);
+        outline-offset: 2px;
+      }
+
+      ion-label {
+        font-size: 0.95rem;
+      }
+    }
+
+    // Reduced motion
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+      ion-segment-button {
+        transition: none;
+      }
+    }
+  }
+
+  .quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1.25rem;
+    padding: 0 1.5rem;
+    margin: 2rem 0 2.5rem;
+
+    .quick-action {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem 1rem;
+      background: var(--ion-card-background);
+      border-radius: var(--card-border-radius, 16px);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.08),
+        0 4px 12px rgba(0, 0, 0, 0.04);
+      text-align: center;
+      transition: transform var(--animation-duration-base)
+          var(--animation-easing),
+        box-shadow var(--animation-duration-base) var(--animation-easing),
+        background var(--animation-duration-base) var(--animation-easing);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+
+      // Focus-visible state for accessibility
+      &:focus-visible {
+        outline: 2px solid var(--ion-color-primary);
+        outline-offset: 2px;
+        box-shadow: 0 0 0 3px rgba(var(--ion-color-primary-rgb), 0.25),
+          0 4px 6px rgba(0, 0, 0, 0.07), 0 4px 6px rgba(0, 0, 0, 0.1),
+          0 12px 24px rgba(0, 0, 0, 0.06);
+        transform: translateY(-6px) scale(1.03);
+        z-index: 10;
+      }
+
+      &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          145deg,
+          var(--surface-gradient),
+          var(--ion-card-background)
+        );
+        opacity: 0;
+        transition: opacity var(--animation-duration-base)
+          var(--animation-easing);
+        z-index: 0;
+      }
+
+      &:hover,
+      &:focus {
+        transform: translateY(-6px) scale(1.03);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 4px 6px rgba(0, 0, 0, 0.1),
+          0 12px 24px rgba(0, 0, 0, 0.06);
+        background: var(--surface-gradient);
+
+        &::before {
+          opacity: 0.05;
+        }
+
+        ion-icon {
+          transform: scale(1.15);
+        }
+
+        .action-label {
+          color: var(--ion-color-primary);
+        }
+      }
+
+      &:active {
+        transform: translateY(-2px) scale(1.01);
+      }
+
+      ion-icon {
+        font-size: 2.2rem;
+        color: var(--ion-color-primary);
+        margin-bottom: 0.75rem;
+        transition: transform var(--animation-duration-fast)
+          var(--animation-easing);
+        z-index: 1;
+      }
+
+      .action-label {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--ion-text-color);
+        transition: color var(--animation-duration-fast) var(--animation-easing);
+        z-index: 1;
+      }
+    }
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+    padding: 0 0.5rem;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--ion-color-primary);
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+
+    ion-icon {
+      margin-right: 0.5rem;
+      font-size: 1.1rem;
+    }
+  }
+
+  .card-section {
+    background: var(--ion-card-background);
+    border-radius: var(--card-border-radius, 16px);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.08),
+      0 4px 12px rgba(0, 0, 0, 0.04);
+    margin: 1.5rem;
+    padding: 1.5rem;
+    transition: transform var(--animation-duration-base) var(--animation-easing),
+      box-shadow var(--animation-duration-base) var(--animation-easing);
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 4px 6px rgba(0, 0, 0, 0.1),
+        0 12px 24px rgba(0, 0, 0, 0.06);
+    }
+
+    &.balance-card {
+      background: linear-gradient(
+        145deg,
+        var(--ion-color-primary),
+        var(--ion-color-secondary)
+      );
+      color: white;
+
+      .section-title {
+        color: white;
+      }
+    }
+
+    &.summary-card {
+      border-top: 4px solid var(--ion-color-primary);
+    }
+
+    &.transactions-card {
+      border-top: 4px solid var(--ion-color-secondary);
+    }
+
+    &.charts-card {
+      border-top: 4px solid var(--ion-color-tertiary);
+
+      .section-title {
+        color: var(--ion-color-tertiary);
+      }
+    }
+  }
+
+  // Chart container styles
+  app-bar-chart,
+  app-pie-chart,
+  app-line-chart {
+    display: block;
+    margin: 1.5rem 0;
+
+    &:first-child {
+      margin-top: 0;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+@keyframes fadeInSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+// Staggered card animations
+@keyframes fadeInUpStaggered {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card-section {
+  opacity: 0;
+  animation: fadeInUpStaggered 0.6s var(--animation-easing) forwards;
+
+  // Stagger delay for each section
+  &:nth-child(1) {
+    animation-delay: 0.1s;
+  }
+  &:nth-child(2) {
+    animation-delay: 0.3s;
+  }
+  &:nth-child(3) {
+    animation-delay: 0.5s;
+  }
+  &:nth-child(4) {
+    animation-delay: 0.7s;
+  }
+}
+
+// Responsive adjustments
+// Small devices (landscape phones, 576px and up)
+@media (min-width: 576px) {
+  .quick-actions {
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 1rem 2rem;
+  }
+
+  .card-section {
+    margin: 1rem;
+  }
+}
+
+// Medium devices (tablets, 768px and up)
+@media (min-width: 768px) {
+  .welcome-header {
+    margin: 0 1rem 1rem;
+    width: calc(100% - 2rem);
+    padding-top: 2rem;
+  }
+
+  .quick-actions {
+    margin: 1rem 1rem 1.5rem;
+    padding: 1.5rem 0;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1.5rem;
+
+    .quick-action {
+      --padding-start: 1.25rem;
+      --padding-end: 1.25rem;
+      padding: 1.5rem 1rem;
+
+      ion-icon {
+        font-size: 2.2rem;
+      }
+
+      .action-label {
+        font-size: 0.9rem;
+      }
+    }
+  }
+
+  .card-section {
+    margin: 1rem 1rem 1.5rem;
+    padding: 1.75rem;
+  }
+}
+
+// Large devices (desktops, 992px and up)
+@media (min-width: 992px) {
+  .welcome-header {
+    padding-top: 2.5rem;
+    margin: 0 1.5rem 1.5rem;
+    width: calc(100% - 3rem);
+  }
+
+  .quick-actions {
+    margin: 1.5rem 1.5rem 2rem;
+    padding: 2rem 0;
+    gap: 2rem;
+
+    .quick-action {
+      padding: 2rem 1.25rem;
+
+      ion-icon {
+        font-size: 2.4rem;
+      }
+
+      .action-label {
+        font-size: 1rem;
+      }
+    }
+  }
+
+  .card-section {
+    margin: 1.5rem 1.5rem 2rem;
+    padding: 2rem;
+  }
+}
+
+// Extra large devices (large desktops, 1200px and up)
+@media (min-width: 1200px) {
+  .welcome-header {
+    margin: 0 2rem 1.5rem;
+    width: calc(100% - 4rem);
+  }
+
+  .quick-actions {
+    margin: 2rem 2rem 2.5rem;
+    padding: 2rem 0;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .card-section {
+    margin: 1.5rem auto 2rem;
+    max-width: 1200px;
+  }
+}
+
+// Dark mode support
+ion-fab {
+  z-index: 1100;
+  right: 20px;
+  bottom: 20px;
+
+  ion-fab-button {
+    background: var(--ion-color-primary);
+    color: var(--ion-color-primary-contrast);
+    box-shadow: var(--shadow-elevated, 0 4px 24px rgba(34, 211, 238, 0.17));
+    transition: var(--tab-transition);
+    border-radius: 50%;
+    font-size: 2rem;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulse 2s infinite;
+
+    &:hover {
+      background: var(--ion-color-secondary);
+      box-shadow: 0 8px 32px rgba(var(--ion-color-primary-rgb), 0.18);
+      transition: var(--tab-transition);
+      animation: none; // Stop pulse on hover
+    }
+    &:focus-visible {
+      outline: 2px solid var(--ion-color-secondary);
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px rgba(var(--ion-color-secondary-rgb), 0.15);
+      transition: var(--tab-transition);
+      animation: none; // Stop pulse on focus
+    }
+  }
+}
+
+// FAB pulse animation
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(var(--ion-color-primary-rgb), 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgba(var(--ion-color-primary-rgb), 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(var(--ion-color-primary-rgb), 0);
+  }
+}
+
+// Dark theme styles
+body.dark {
+  ion-content {
+    --background: var(--ion-color-dark);
+  }
+
+  .authenticated-content {
+    .quick-actions,
+    .card-section {
+      background: var(--ion-color-dark-tint);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .section-title {
+      color: var(--ion-color-light);
+    }
+
+    .welcome-message {
+      color: var(--ion-color-medium);
+    }
+  }
+}
+
+/* === Micro-interactions === */
+
+// Card interaction effects
+.card-section,
+.quick-actions .quick-action,
+ion-fab {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(var(--ion-color-primary-rgb), 0.15);
+  }
+
+  &.interact {
+    animation: cardInteract 0.3s ease-out;
+  }
+}
+
+@keyframes cardInteract {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.98);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+// Quick action button effects
+.quick-actions .quick-action {
+  &:hover {
+    transform: translateY(-3px) scale(1.05);
+  }
+
+  &.interact {
+    animation: buttonInteract 0.2s ease-out;
+  }
+}
+
+@keyframes buttonInteract {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+// FAB interaction effects
+ion-fab {
+  &:hover {
+    transform: translateY(-4px) scale(1.1);
+  }
+
+  &.interact {
+    animation: fabInteract 0.3s ease-out;
+  }
+}
+
+@keyframes fabInteract {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+// Reduce motion support
+@media (prefers-reduced-motion: reduce) {
+  .card-section,
+  .quick-actions .quick-action,
+  ion-fab {
+    transition: none !important;
+    animation: none !important;
+
+    &:hover {
+      transform: none !important;
+      box-shadow: none !important;
+    }
+  }
+}

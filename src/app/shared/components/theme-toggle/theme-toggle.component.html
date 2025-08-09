@@ -1,0 +1,16 @@
+<ion-button
+  fill="clear"
+  class="theme-toggle"
+  (click)="toggleTheme()"
+  [attr.aria-label]="(isDarkMode ? 'LIGHT_MODE' : 'DARK_MODE') | translate"
+  aria-live="polite"
+  role="switch"
+  [attr.aria-checked]="isDarkMode"
+>
+  <ion-icon
+    [name]="isDarkMode ? 'sunny-outline' : 'moon-outline'"
+    slot="icon-only"
+    class="theme-icon"
+    [class.dark]="isDarkMode"
+  ></ion-icon>
+</ion-button>

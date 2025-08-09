@@ -1,55 +1,55 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
-import { catchError, map, Observable } from 'rxjs';
-import { environment } from 'src/environments/environment';
-import { TokenService } from '../../auth/services';
+import { Injectable, inject } from '@angular/core';
+import { HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { Category } from 'src/app/shared/models';
+import { ApiService } from 'src/app/core/services';
 
 @Injectable({
   providedIn: 'root',
 })
-export class CategoriesService {
-  private readonly http = inject(HttpClient);
-  private readonly tokenService = inject(TokenService);
-  constructor() {}
+export class CategoryService {
+  private apiService = inject(ApiService);
 
-  // get all categories
-  getCategories(params?: any): Observable<any> {
-    return this.http
-      .get(`${environment.apiUrl}/categories/list`, {
-        params: params,
-        headers: new HttpHeaders({
-          'refresh-token': this.tokenService.getRefreshToken() || '',
-          _id: this.tokenService.getUserId() || '',
-        }),
-        observe: 'response',
-      })
+  getCategories(params: {
+    skip: number;
+    limit: number;
+    sort: string;
+  }): Observable<{ data: Category[]; total: number }> {
+    const httpParams = new HttpParams()
+      .set('skip', params.skip.toString())
+      .set('limit', params.limit.toString())
+      .set('sort', params.sort);
+
+    return this.apiService
+      .get<{ success: boolean; data: { data: Category[]; total: number }; message: string }>(
+        '/categories/list',
+        httpParams
+      )
       .pipe(
         map((response) => {
-          return response.body;
-        }),
-        catchError((error) => {
-          return error;
+          if (response && response.data && Array.isArray(response.data.data)) {
+            return { data: response.data.data, total: response.data.total };
+          }
+          console.warn('Unexpected categories response format:', response);
+          return { data: [], total: 0 };
         })
       );
   }
 
-  // cerate new category
-  createCategory(data: any): Observable<any> {
-    return this.http
-      .post(`${environment.apiUrl}/categories/create`, data, {
-        headers: new HttpHeaders({
-          'refresh-token': this.tokenService.getRefreshToken() || '',
-          _id: this.tokenService.getUserId() || '',
-        }),
-        observe: 'response',
-      })
-      .pipe(
-        map((response) => {
-          return response.body;
-        }),
-        catchError((error) => {
-          return error;
-        })
-      );
+  getCategory(id: string): Observable<Category> {
+    return this.apiService.get<Category>(`/categories/${id}`);
+  }
+
+  createCategory(categoryData: Partial<Category>): Observable<Category> {
+    return this.apiService.post<Category>('/categories/create', categoryData);
+  }
+
+  updateCategory(id: string, categoryData: Partial<Category>): Observable<Category> {
+    return this.apiService.put<Category>(`/categories/${id}`, categoryData);
+  }
+
+  deleteCategory(id: string): Observable<void> {
+    return this.apiService.delete<void>(`/categories/${id}`);
   }
 }

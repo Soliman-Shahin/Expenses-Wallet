@@ -1,0 +1,90 @@
+@import "src/theme/variables";
+
+// Theme toggle animation keyframes
+@keyframes rotateThemeIcon {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.2);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+@keyframes pulseThemeIcon {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.theme-toggle {
+  --background: transparent;
+  --background-hover: rgba(var(--ion-color-primary-rgb), 0.1);
+  --background-focused: rgba(var(--ion-color-primary-rgb), 0.15);
+  --color: var(--ion-text-color);
+  --border-radius: 50%;
+  --padding-start: 8px;
+  --padding-end: 8px;
+  --padding-top: 8px;
+  --padding-bottom: 8px;
+
+  width: 40px;
+  height: 40px;
+
+  .theme-icon {
+    font-size: 20px;
+    transition: transform 0.3s var(--animation-easing),
+      color 0.3s var(--animation-easing);
+
+    &.dark {
+      color: #f59e42; // Warm orange for dark mode
+    }
+  }
+
+  &:hover {
+    --background: var(--background-hover);
+
+    .theme-icon {
+      transform: scale(1.15);
+      animation: pulseThemeIcon 0.6s var(--animation-easing);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ion-color-primary);
+    outline-offset: 2px;
+    --background: var(--background-focused);
+  }
+
+  &:active {
+    .theme-icon {
+      transform: scale(0.95);
+      animation: rotateThemeIcon 0.4s var(--animation-easing);
+    }
+  }
+}
+
+// Enhanced dark mode styling
+body.dark {
+  .theme-toggle {
+    --background-hover: rgba(59, 130, 246, 0.15);
+    --background-focused: rgba(59, 130, 246, 0.2);
+
+    .theme-icon {
+      &.dark {
+        color: #3b82f6; // Bright blue for dark mode
+      }
+    }
+  }
+}

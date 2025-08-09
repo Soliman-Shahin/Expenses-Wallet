@@ -1,3 +1,3 @@
-export * from './pages';
-export * from './routes';
-export * from './tabs';
+export * from './pages.constant';
+export * from './routes.constant';
+export * from './tabs.constant';

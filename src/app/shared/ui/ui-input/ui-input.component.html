@@ -1,0 +1,73 @@
+<ion-item
+  class="ui-form-item"
+  lines="none"
+  [class.ion-invalid]="isInvalid"
+  [class.ion-touched]="ngControl?.control?.touched"
+>
+  <ion-icon
+    *ngIf="startIcon"
+    slot="start"
+    [name]="startIcon"
+    aria-hidden="true"
+  ></ion-icon>
+
+  <ion-input
+    class="ui-form-input"
+    [id]="id"
+    [type]="
+      type === 'password' && togglePassword
+        ? hide
+          ? 'password'
+          : 'text'
+        : type
+    "
+    [value]="value"
+    (ionInput)="onChange($any($event).detail.value)"
+    (ionBlur)="onTouched()"
+    [placeholder]="placeholder"
+    [autocomplete]="autocomplete"
+    [inputmode]="inputmode"
+    [required]="!!required"
+    [attr.aria-invalid]="ariaInvalid"
+  ></ion-input>
+
+  <ion-icon
+    *ngIf="type === 'password' && togglePassword"
+    slot="end"
+    class="end-toggle"
+    tabindex="0"
+    role="button"
+    [attr.aria-label]="hide ? 'Show password' : 'Hide password'"
+    [name]="hide ? 'eye-outline' : 'eye-off-outline'"
+    (click)="togglePasswordVisibility()"
+  ></ion-icon>
+
+  <ion-icon
+    *ngIf="!togglePassword && endIcon"
+    slot="end"
+    [name]="endIcon"
+    aria-hidden="true"
+  ></ion-icon>
+
+  <ion-note *ngIf="isInvalid" slot="error" color="danger">
+    <ng-container *ngIf="ngControl?.control as c">
+      <span *ngIf="c.errors?.['required']">{{
+        "VALIDATION.REQUIRED" | translate
+      }}</span>
+      <span *ngIf="c.errors?.['email']">{{
+        "VALIDATION.INVALID_EMAIL" | translate
+      }}</span>
+      <span
+        *ngIf="c.errors?.['minlength']"
+        >{{ 'VALIDATION.MIN_LENGTH' | translate : { min: c.errors?.['minlength']?.requiredLength } }}</span
+      >
+      <span
+        *ngIf="c.errors?.['maxlength']"
+        >{{ 'VALIDATION.MAX_LENGTH' | translate : { max: c.errors?.['maxlength']?.requiredLength } }}</span
+      >
+      <span *ngIf="c.errors?.['pattern']">{{
+        "VALIDATION.INVALID" | translate
+      }}</span>
+    </ng-container>
+  </ion-note>
+</ion-item>
