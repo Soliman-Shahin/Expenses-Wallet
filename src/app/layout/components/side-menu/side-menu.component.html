@@ -10,7 +10,7 @@
   <ion-content
     class="ion-padding"
     role="navigation"
-    aria-label="Main menu"
+    [attr.aria-label]="'SIDEBAR.MAIN_MENU' | translate"
     tabindex="0"
   >
     <ng-container *ngIf="user$ | async as user; else loginPrompt">
@@ -25,8 +25,8 @@
           </ion-avatar>
         </div>
         <div class="user-details">
-          <h3>{{ user.username || "User" }}</h3>
-          <p>{{ user.email || "user@example.com" }}</p>
+          <h3>{{ user.username || ("USER.DEFAULT_NAME" | translate) }}</h3>
+          <p>{{ user.email || ("USER.DEFAULT_EMAIL" | translate) }}</p>
         </div>
       </div>
 
@@ -92,7 +92,7 @@
         button
         role="menuitem"
         tabindex="0"
-        aria-label="Switch language"
+        [attr.aria-label]="'LANG.CHANGE_LANG' | translate"
       >
         <ion-icon
           [name]="language === 'ar' ? 'language-outline' : 'language-outline'"

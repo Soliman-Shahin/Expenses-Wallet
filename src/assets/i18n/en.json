@@ -30,11 +30,17 @@
       "CHARTS": "Charts",
       "SUMMARY": "Summary"
     },
+    "SECTIONS": "Home sections",
     "BALANCE_SUMMARY": "Balance Summary",
     "MONTHLY_SUMMARY": "Monthly Summary",
     "INCOME": "Income",
     "EXPENSES": "Expenses",
     "TOTAL_SALARY": "Total Salary",
+    "SHOW_BALANCE": "Show balance",
+    "HIDE_BALANCE": "Hide balance",
+    "POSITIVE_CHANGE": "{{value}}% increase",
+    "NEGATIVE_CHANGE": "{{value}}% decrease",
+    "BALANCE_DESCRIPTION": "This shows your current total balance and the percentage change compared to last period.",
     "WELCOME_TITLE": "Welcome to Your Wallet",
     "WELCOME_MESSAGE": "Take control of your finances. Track your spending, create budgets, and achieve your financial goals.",
     "FEATURES": {
@@ -60,13 +66,15 @@
     "CATEGORIES": "Categories",
     "EXPENSES": "Expenses",
     "REPORTS": "Reports",
-    "SETTINGS": "Settings"
+    "SETTINGS": "Settings",
+    "MAIN_MENU": "Main menu"
   },
   "DASHBOARD": "Dashboard",
   "TRANSACTIONS": {
     "TITLE": "Transactions",
     "ADD": "Add Transaction",
     "RECENT": "Recent Transactions",
+    "NO_RECENT": "No recent transactions",
     "NONE_FOUND": "No transactions found.",
     "AMOUNT": "Amount",
     "DATE": "Date",
@@ -78,6 +86,10 @@
   "LOGOUT": "Logout",
   "HELP": "Help",
   "USER_AVATAR": "User avatar",
+  "USER": {
+    "DEFAULT_NAME": "User",
+    "DEFAULT_EMAIL": "user@example.com"
+  },
   "ENGLISH": "English",
   "ARABIC": "Arabic",
   "LIGHT_MODE": "Light Mode",
@@ -103,6 +115,7 @@
     "AND": "and",
     "BACK": "Back",
     "LOADING": "Loading...",
+    "REORDER": "Reorder",
     "CLOSE": "Close",
     "OK": "OK",
     "CANCEL": "Cancel",

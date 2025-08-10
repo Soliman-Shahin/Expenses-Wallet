@@ -25,6 +25,44 @@
       --border-radius: var(--border-radius-lg, 16px);
     }
   }
+
+  // Semantic sizes
+  .skeleton-title {
+    width: 60%;
+    height: 32px;
+    border-radius: var(--border-radius-md, 8px);
+  }
+
+  .skeleton-line {
+    width: 40%;
+    height: 16px;
+    border-radius: var(--border-radius-sm, 6px);
+  }
+
+  .skeleton-card-sm {
+    width: 100%;
+    height: 120px;
+    border-radius: var(--border-radius-lg, 16px);
+  }
+
+  .skeleton-card-md {
+    width: 80%;
+    height: 120px;
+    border-radius: var(--border-radius-lg, 16px);
+  }
+
+  .skeleton-card-lg {
+    width: 90%;
+    height: 180px;
+    border-radius: var(--border-radius-lg, 16px);
+    margin: 24px auto;
+  }
+
+  .skeleton-card-xl {
+    width: 90%;
+    height: 200px;
+    border-radius: var(--border-radius-lg, 16px);
+  }
 }
 
 // Error state
@@ -238,6 +276,8 @@
       --background: transparent;
       --color: var(--ion-text-color);
       --border-radius: 12px;
+      --padding-start: 12px;
+      --padding-end: 12px;
       min-height: 42px;
       font-weight: 600;
       letter-spacing: 0.3px;
@@ -269,6 +309,20 @@
       transition: none;
       ion-segment-button {
         transition: none;
+        &:hover,
+        &.segment-button-checked {
+          transform: none;
+          box-shadow: none;
+        }
+      }
+    }
+  }
+
+  // Dark mode: improve focus ring contrast
+  :host-context(body.dark) {
+    .home-tabs {
+      ion-segment-button:focus-visible {
+        outline-color: rgba(var(--ion-color-primary-contrast-rgb, 255, 255, 255), 0.9);
       }
     }
   }
@@ -453,6 +507,16 @@
 
     &:last-child {
       margin-bottom: 0;
+    }
+  }
+
+  // Chart skeleton block
+  .chart-skeleton {
+    .skeleton-chart {
+      width: 100%;
+      height: 200px;
+      border-radius: var(--border-radius-lg, 16px);
+      margin: 16px auto;
     }
   }
 }

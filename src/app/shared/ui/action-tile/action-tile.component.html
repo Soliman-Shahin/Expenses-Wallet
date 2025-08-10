@@ -1,0 +1,10 @@
+<button
+  class="action-tile"
+  [attr.aria-label]="ariaLabel || label"
+  [disabled]="disabled"
+  (click)="onClick()"
+  [routerLink]="routerLink || null"
+>
+  <ion-icon [name]="icon" aria-hidden="true"></ion-icon>
+  <div class="action-label">{{ label }}</div>
+</button>

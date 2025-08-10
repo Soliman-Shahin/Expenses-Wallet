@@ -14,6 +14,12 @@ import { TranslateModule } from '@ngx-translate/core';
 import { BarChartComponent } from 'src/app/shared/components/charts';
 import { PieChartComponent } from 'src/app/shared/components/charts';
 import { LineChartComponent } from 'src/app/shared/components/charts';
+import {
+  SectionHeaderComponent,
+  ActionTileComponent,
+  SkeletonBlockComponent,
+  EmptyStateComponent,
+} from 'src/app/shared/ui';
 
 @NgModule({
   imports: [
@@ -26,6 +32,10 @@ import { LineChartComponent } from 'src/app/shared/components/charts';
     BarChartComponent,
     PieChartComponent,
     LineChartComponent,
+    SectionHeaderComponent,
+    ActionTileComponent,
+    SkeletonBlockComponent,
+    EmptyStateComponent,
   ],
   declarations: [
     HomePageComponent,

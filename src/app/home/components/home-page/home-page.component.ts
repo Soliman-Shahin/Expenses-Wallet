@@ -1,11 +1,28 @@
-import { Component, OnInit, inject } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  inject,
+  ChangeDetectionStrategy,
+} from '@angular/core';
+import { ModalController } from '@ionic/angular';
 import { BaseComponent } from 'src/app/shared/base';
-import { MonthYear, SalaryDetail } from '../../models';
+import { MonthYear } from '../../models';
 import { User } from 'src/app/modules/auth/models';
-import { catchError, finalize, of, takeUntil, tap, forkJoin } from 'rxjs';
+import {
+  combineLatest,
+  BehaviorSubject,
+  of,
+  map,
+  startWith,
+  shareReplay,
+  switchMap,
+  takeUntil,
+  tap,
+  catchError,
+} from 'rxjs';
 import { ExpenseFormComponent } from '../expense-form/expense-form.component';
-import { ChartDataService } from 'src/app/shared/services/chart-data.service';
-import { ProfileService } from 'src/app/modules/profile/services/profile.service';
+import { DashboardFacade } from 'src/app/shared/facades';
+import { formatCurrency } from 'src/app/shared/utils';
 
 // Constants
 const MAX_RETRY_ATTEMPTS = 3;
@@ -14,16 +31,13 @@ const MAX_RETRY_ATTEMPTS = 3;
   selector: 'app-home-page',
   templateUrl: './home-page.component.html',
   styleUrls: ['./home-page.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomePageComponent extends BaseComponent implements OnInit {
   selectedMonth: MonthYear = this.getCurrentMonthYear();
   currentDate: Date = new Date();
-  balance: number | null = null;
-  income: number | null = null;
-  expenses: number | null = null;
+  // Keep simple fallbacks where needed
   percentageChange: number | null = null;
-  totalSalary: number | null = null;
-  salaryDetails: SalaryDetail[] = [];
   currency: string = 'USD';
 
   // UI state
@@ -33,14 +47,6 @@ export class HomePageComponent extends BaseComponent implements OnInit {
   isTransactionsLoading = false;
   // Use global loading only for the initial load to unblock the page content
   private _useGlobalLoadingOnce = true;
-  // Track if dashboard loaded successfully at least once
-  private _hasLoadedOnce = false;
-
-  // Chart data
-  incomeVsExpenseData: any[] = [];
-  expenseByCategoryData: any[] = [];
-  monthlyExpensesData: any[] = [];
-  salaryBreakdownData: any[] = [];
 
   // Scroll position state
   isScrolledToStart = true;
@@ -63,11 +69,107 @@ export class HomePageComponent extends BaseComponent implements OnInit {
     recentTransactions: false,
   };
 
-  constructor(
-    private chartDataService: ChartDataService,
-    private profileService: ProfileService
-  ) {
+  constructor() {
     super();
+  }
+
+  private readonly ionModal = inject(ModalController);
+
+  // Facade and VM
+  private readonly dashboard = inject(DashboardFacade);
+
+  // Reactive month selection for totals
+  private readonly monthSelection$ = new BehaviorSubject<MonthYear>(
+    this.selectedMonth
+  );
+  private readonly totalsByMonth$ = this.monthSelection$.pipe(
+    switchMap((m) =>
+      combineLatest([
+        this.dashboard.totalsForMonth(m.month, m.year),
+        this.dashboard.profile$.pipe(startWith(null)),
+      ]).pipe(
+        map(([t, profile]) => {
+          const base = t ?? { income: 0, expenses: 0, balance: 0 };
+          const salaryDetails = Array.isArray((profile as any)?.salary)
+            ? (profile as any).salary
+            : [];
+          const totalSalary = salaryDetails.reduce(
+            (sum: number, item: any) => sum + (Number(item?.amount) || 0),
+            0
+          );
+          if ((base.income ?? 0) === 0 && totalSalary > 0) {
+            const income = totalSalary;
+            const expenses = base.expenses ?? 0;
+            return { income, expenses, balance: income - expenses } as const;
+          }
+          return base as { income: number; expenses: number; balance: number };
+        }),
+        switchMap((res) =>
+          res && (res.income !== 0 || res.expenses !== 0)
+            ? of(res)
+            : this.dashboard.totals$
+        )
+      )
+    ),
+    startWith({ income: 0, expenses: 0, balance: 0 } as const)
+  );
+  private readonly expenseByCategoryByMonth$ = this.monthSelection$.pipe(
+    switchMap((m) => this.dashboard.expenseByCategoryForMonth(m.month, m.year)),
+    startWith([] as any[])
+  );
+  private readonly monthlyExpensesByMonth$ = this.monthSelection$.pipe(
+    switchMap((m) => this.dashboard.monthlyExpensesForMonth(m.month, m.year)),
+    startWith([] as any[])
+  );
+  // Derive income vs expenses for the selected month from totalsByMonth$
+  private readonly incomeVsExpenseByMonth$ = this.totalsByMonth$.pipe(
+    map((t) => [
+      { name: 'Income', value: t.income },
+      { name: 'Expenses', value: t.expenses },
+    ])
+  );
+
+  readonly vm$ = combineLatest({
+    profile: this.dashboard.profile$.pipe(startWith(null)),
+    incomeVsExpense: this.incomeVsExpenseByMonth$,
+    expenseByCategory: this.expenseByCategoryByMonth$,
+    monthlyExpenses: this.monthlyExpensesByMonth$,
+    totals: this.totalsByMonth$,
+  }).pipe(
+    map((s) => {
+      const salaryDetails = Array.isArray(s.profile?.salary)
+        ? s.profile!.salary
+        : [];
+      const totalSalary = salaryDetails.reduce(
+        (sum: number, item: any) => sum + (Number(item?.amount) || 0),
+        0
+      );
+      const salaryBreakdown = salaryDetails
+        .map((d: any) => {
+          const rawName = (d?.title ?? d?.name ?? d?.label ?? '').toString();
+          const name = rawName.trim();
+          const value = Number(d?.amount) || 0;
+          return { name, value };
+        })
+        .filter((x) => x.value > 0);
+      return {
+        ...s,
+        salaryDetails,
+        salaryBreakdown,
+        totalSalary,
+        currency: s.profile?.currency ?? this.currency,
+      };
+    }),
+    shareReplay({ bufferSize: 1, refCount: true })
+  );
+
+  // trackBy helpers
+  trackByIndex(index: number): number {
+    return index;
+  }
+
+  formatAmount(amount: number | null | undefined): string {
+    return formatCurrency(amount ?? 0, this.currency);
   }
 
   // Switch between Charts and Summary tabs
@@ -98,46 +200,6 @@ export class HomePageComponent extends BaseComponent implements OnInit {
       }
     } catch {}
     this.setupRouteDataSubscription();
-    this.loadDashboardData();
-
-    // Initialize from existing profile cache for immediate UX
-    const existingProfile = this.profileService.getProfile();
-    if (existingProfile) {
-      if (existingProfile.currency) this.currency = existingProfile.currency;
-      if (Array.isArray(existingProfile.salary)) {
-        this.salaryDetails = existingProfile.salary;
-        this.totalSalary = existingProfile.salary.reduce(
-          (sum, s) => sum + (s?.amount ?? 0),
-          0
-        );
-      }
-    }
-
-    // Sync currency and salary from Profile
-    this.profileService.profile$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((profile) => {
-        if (profile) {
-          if (profile.currency) this.currency = profile.currency;
-          if (Array.isArray(profile.salary)) {
-            this.salaryDetails = profile.salary;
-            this.totalSalary = profile.salary.reduce(
-              (sum, s) => sum + (s?.amount ?? 0),
-              0
-            );
-          }
-          this.cdr.markForCheck();
-        }
-      });
-  }
-
-  /**
-   * Retries fetching the user data.
-   */
-  retry(): void {
-    this.setError(null);
-    this.setLoading(true);
-    this.subscribeToUserChanges();
   }
 
   /**
@@ -145,8 +207,8 @@ export class HomePageComponent extends BaseComponent implements OnInit {
    */
   onMonthChange(monthYear: MonthYear): void {
     this.selectedMonth = monthYear;
-    this.loadDashboardData();
-    this.loadTransactionsForMonth(monthYear.month, monthYear.year);
+    // Notify reactive totals stream
+    this.monthSelection$.next(monthYear);
   }
 
   /**
@@ -164,10 +226,6 @@ export class HomePageComponent extends BaseComponent implements OnInit {
   protected override onUserChanged(user: User | null): void {
     super.onUserChanged(user);
     this.setError(null);
-    // If user just became available after login and we haven't loaded yet, load dashboard now
-    if (user && !this._hasLoadedOnce) {
-      this.loadDashboardData();
-    }
     this.cdr.markForCheck();
   }
 
@@ -204,222 +262,6 @@ export class HomePageComponent extends BaseComponent implements OnInit {
       .subscribe();
   }
 
-  private loadDashboardData(): void {
-    if (this._useGlobalLoadingOnce) {
-      this.setLoading(true);
-    } else {
-      this.isDashboardLoading = true;
-    }
-    this.cdr.markForCheck();
-
-    const { year, month } = this.selectedMonth;
-    // Start of first day (local)
-    const startDate = new Date(year, month - 1, 1, 0, 0, 0, 0);
-    // End of last day (local) - inclusive
-    const endDate = new Date(year, month, 0, 23, 59, 59, 999);
-
-    this.expenseService
-      .getTotals(startDate, endDate)
-      .pipe(
-        takeUntil(this.destroy$),
-        finalize(() => {
-          if (this._useGlobalLoadingOnce) {
-            this.setLoading(false);
-            this._useGlobalLoadingOnce = false;
-          } else {
-            this.isDashboardLoading = false;
-          }
-          this.cdr.markForCheck();
-        })
-      )
-      .subscribe({
-        next: ({ income, expenses }: { income: number; expenses: number }) => {
-          this.income = income;
-          this.expenses = expenses;
-          this.balance = income - expenses;
-          this._hasLoadedOnce = true;
-
-          // Salary and currency are sourced from user profile via ProfileService
-          // salaryDetails stays in sync from the profile subscription
-
-          // Load chart data
-          this.loadChartData();
-        },
-        error: (err: any) => {
-          console.error('Failed to load dashboard data', err);
-          this.setError('Failed to load dashboard data. Please try again.');
-          // Still attempt to load chart data so the dashboard remains useful
-          this.loadChartData();
-        },
-      });
-  }
-
-  private loadChartData(): void {
-    // Load income vs expense data (use real totals)
-    if (this.income != null && this.expenses != null) {
-      this.incomeVsExpenseData = [
-        { name: 'Income', value: this.income },
-        { name: 'Expenses', value: this.expenses },
-      ];
-      this.cdr.markForCheck();
-    } else {
-      const { year, month } = this.selectedMonth;
-      const startDate = new Date(year, month - 1, 1);
-      // Inclusive end-of-month for totals endpoint
-      const endDate = new Date(year, month, 0);
-      this.expenseService
-        .getTotals(startDate, endDate)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe(({ income, expenses }) => {
-          this.income = income;
-          this.expenses = expenses;
-          this.balance = income - expenses;
-          this.incomeVsExpenseData = [
-            { name: 'Income', value: income },
-            { name: 'Expenses', value: expenses },
-          ];
-          this.cdr.markForCheck();
-        });
-    }
-
-    // Load expense by category data (real aggregation for selected month)
-    const { year, month } = this.selectedMonth;
-    const startDate = new Date(year, month - 1, 1);
-    // End-exclusive: first day of next month to include entire current month
-    const endExclusive = new Date(year, month, 1);
-
-    forkJoin({
-      categoriesResp: this.categoryService.getCategories({
-        skip: 0,
-        limit: 1000,
-        sort: 'name',
-      }),
-      expenses: this.expenseService.getExpenses(),
-    })
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(({ categoriesResp, expenses }: any) => {
-        // Normalize categories response to an array
-        const catResp: any = categoriesResp;
-        const categories: any[] = Array.isArray(catResp)
-          ? catResp
-          : catResp?.data?.data || catResp?.data || [];
-        const byId = new Map<string, { name: string; type?: string }>();
-        categories.forEach((c: any) =>
-          byId.set(c._id, { name: c?.title || c?.name, type: c?.type })
-        );
-
-        // Normalize expenses response to an array
-        const expResp: any = expenses;
-        const expensesArr: any[] = Array.isArray(expResp)
-          ? expResp
-          : expResp?.data?.data || expResp?.data || [];
-
-        const start = startDate.getTime();
-        const end = endExclusive.getTime();
-        const sums = new Map<string, number>();
-        let incomeSum = 0;
-        let expenseSum = 0;
-
-        expensesArr
-          .filter((e: any) => {
-            const rawDate = e?.date || e?.createdAt;
-            if (!rawDate) return false;
-            const d = new Date(rawDate).getTime();
-            // include expenses on the last day by using end-exclusive bound (d < end)
-            return d >= start && d < end;
-          })
-          .forEach((e: any) => {
-            let name = 'Uncategorized';
-            let catType: string | undefined;
-            if (e.category && typeof e.category === 'object') {
-              name = e.category.title || e.category.name || name;
-              catType = e.category.type;
-            } else if (typeof e.category === 'string') {
-              const meta = byId.get(e.category);
-              if (meta) {
-                name = meta.name;
-                catType = meta.type;
-              }
-            }
-            const amt = Number(e.amount);
-            if (!Number.isFinite(amt) || Number.isNaN(amt)) return;
-            const prev = sums.get(name) || 0;
-            sums.set(name, prev + amt);
-
-            // Compute totals for bar chart using category type when available
-            if (catType === 'income') {
-              incomeSum += amt;
-            } else {
-              // default to expenses when unknown or explicitly expense
-              expenseSum += amt;
-            }
-          });
-
-        // Prefer user's salary as income if available; fallback to computed incomeSum
-        const effectiveIncome =
-          this.totalSalary != null ? this.totalSalary : incomeSum;
-
-        // Update income vs expenses chart from effective income and computed expenses
-        this.incomeVsExpenseData = [
-          { name: 'Income', value: effectiveIncome },
-          { name: 'Expenses', value: expenseSum },
-        ];
-        this.income = effectiveIncome;
-        this.expenses = expenseSum;
-        this.balance = effectiveIncome - expenseSum;
-
-        this.expenseByCategoryData = Array.from(sums.entries())
-          .map(([name, value]) => ({ name, value }))
-          .sort((a, b) => b.value - a.value);
-
-        // Build real Monthly Expenses (daily) line chart data for selected month
-        const daysInMonth = new Date(year, month, 0).getDate();
-        const dailyTotals = new Array<number>(daysInMonth).fill(0);
-        expensesArr
-          .filter((e: any) => {
-            const rawDate = e?.date || e?.createdAt;
-            if (!rawDate) return false;
-            const d = new Date(rawDate);
-            const t = d.getTime();
-            return t >= start && t < end; // same end-exclusive window
-          })
-          .forEach((e: any) => {
-            // classify by type to exclude income from daily expenses
-            let catType: string | undefined;
-            if (e.category && typeof e.category === 'object') {
-              catType = e.category.type;
-            } else if (typeof e.category === 'string') {
-              const meta = byId.get(e.category);
-              if (meta) catType = meta.type;
-            }
-            if (catType === 'income') return; // skip incomes
-
-            const amt = Number(e.amount);
-            if (!Number.isFinite(amt) || Number.isNaN(amt)) return;
-            const d = new Date(e?.date || e?.createdAt);
-            const dayIndex = d.getDate() - 1; // 0-based
-            if (dayIndex >= 0 && dayIndex < daysInMonth) {
-              dailyTotals[dayIndex] += amt;
-            }
-          });
-
-        this.monthlyExpensesData = dailyTotals.map((v, i) => ({
-          name: String(i + 1),
-          value: v,
-        }));
-
-        this.cdr.markForCheck();
-      });
-
-    // Monthly expenses data now computed from real transactions above
-
-    // Load salary breakdown data
-    this.chartDataService.getSalaryBreakdown().subscribe((data) => {
-      this.salaryBreakdownData = data;
-      this.cdr.markForCheck();
-    });
-  }
-
   // Card interaction methods
   onCardHover(cardName: string, isHovering: boolean) {
     this.cardStates[cardName] = isHovering;
@@ -431,27 +273,32 @@ export class HomePageComponent extends BaseComponent implements OnInit {
     console.log(`${cardName} card clicked`);
 
     // Trigger a subtle animation
-    this.cardStates[cardName] = false;
-    setTimeout(() => {
-      this.cardStates[cardName] = true;
-      this.cdr.markForCheck();
-      setTimeout(() => {
-        this.cardStates[cardName] = false;
-        this.cdr.markForCheck();
-      }, 150);
-    }, 10);
+    this.cardStates[cardName] = true;
+    setTimeout(() => (this.cardStates[cardName] = false), 150);
   }
 
-  async openExpenseModal() {
-    const modal = await this.modalCtrl?.create({
-      component: ExpenseFormComponent,
-    });
-    await modal?.present();
+  // Retry handler from template: re-emit current month to refresh streams
+  retry(): void {
+    this.monthSelection$.next({ ...this.selectedMonth });
+  }
 
-    const result = await modal?.onDidDismiss();
-    if (result && result.role === 'confirm') {
-      // Refresh dashboard totals and charts after a successful add/update
-      this.loadDashboardData();
+  // FAB: open expense form modal
+  async openExpenseModal(): Promise<void> {
+    try {
+      const modal = await this.ionModal.create({
+        component: ExpenseFormComponent,
+        componentProps: {
+          month: this.selectedMonth.month,
+          year: this.selectedMonth.year,
+        },
+        presentingElement: document.querySelector('ion-router-outlet') as
+          | HTMLElement
+          | undefined,
+      });
+      await modal.present();
+    } catch (err) {
+      console.error('Failed to open expense modal', err);
+      this.toastService?.presentErrorToast('bottom', 'COMMON.ERRORS.DEFAULT');
     }
   }
 

@@ -14,11 +14,14 @@
   --surface-gradient: linear-gradient(180deg, #f8f9fe 0%, #e8eafc 100%);
 
   // === SHADOWS ===
-  --shadow-elevated: 0 18px 40px rgba(0, 0, 0, 0.12), 0 6px 16px rgba(0, 0, 0, 0.08);
+  --shadow-elevated: 0 18px 40px rgba(0, 0, 0, 0.12),
+    0 6px 16px rgba(0, 0, 0, 0.08);
   /* Map generic shadow variables used by mixins */
   --shadow: 0 18px 40px rgba(0, 0, 0, 0.12), 0 6px 16px rgba(0, 0, 0, 0.08);
-  --shadow-card: 0 16px 38px rgba(67, 97, 238, 0.16), 0 8px 20px rgba(0, 0, 0, 0.06);
-  --shadow-header: 0 12px 28px rgba(0, 0, 0, 0.14), 0 4px 10px rgba(0, 0, 0, 0.08);
+  --shadow-card: 0 16px 38px rgba(67, 97, 238, 0.16),
+    0 8px 20px rgba(0, 0, 0, 0.06);
+  --shadow-header: 0 12px 28px rgba(0, 0, 0, 0.14),
+    0 4px 10px rgba(0, 0, 0, 0.08);
 
   // === RADII ===
   --radius: 14px;
@@ -101,6 +104,7 @@
 
   // === BACKGROUND & SURFACE ===
   --ion-background-color: #f6f8fa;
+  --ion-background-color-rgb: 246, 248, 250;
   --ion-text-color: #1a202c;
   --ion-item-background: #fff;
   --ion-card-background: #fff;
@@ -143,20 +147,23 @@ $theme-colors: (
   "light": var(--ion-color-light),
 );
 
-body.dark {
+.dark {
   --brand-gradient: linear-gradient(90deg, #181a20 0%, #23263a 100%);
   --surface-gradient: linear-gradient(180deg, #181a20 0%, #23263a 100%);
-  --shadow-elevated: 0 20px 44px rgba(0, 0, 0, 0.36), 0 8px 18px rgba(0, 0, 0, 0.28);
+  --shadow-elevated: 0 20px 44px rgba(0, 0, 0, 0.36),
+    0 8px 18px rgba(0, 0, 0, 0.28);
   /* Map generic shadow variables used by mixins in dark mode */
   --shadow: 0 20px 44px rgba(0, 0, 0, 0.36), 0 8px 18px rgba(0, 0, 0, 0.28);
-  --shadow-card: 0 18px 42px rgba(34, 211, 238, 0.18), 0 10px 22px rgba(0, 0, 0, 0.30);
-  --shadow-header: 0 14px 30px rgba(0, 0, 0, 0.38), 0 6px 12px rgba(0, 0, 0, 0.26);
+  --shadow-card: 0 18px 42px rgba(34, 211, 238, 0.18),
+    0 10px 22px rgba(0, 0, 0, 0.3);
+  --shadow-header: 0 14px 30px rgba(0, 0, 0, 0.38),
+    0 6px 12px rgba(0, 0, 0, 0.26);
   --shadow-card: 0 2px 12px rgba(16, 185, 129, 0.09);
   --shadow-header: 0 2px 10px rgba(59, 130, 246, 0.11);
 
   --brand-gradient: linear-gradient(90deg, #282a36 0%, #6272a4 100%);
   --surface-gradient: linear-gradient(180deg, #282a36 0%, #44475a 100%);
-  --shadow-elevated: 0 4px 24px rgba(98, 114, 164, 0.10);
+  --shadow-elevated: 0 4px 24px rgba(98, 114, 164, 0.1);
   --shadow-card: 0 2px 12px rgba(98, 114, 164, 0.08);
   --shadow-header: 0 2px 10px rgba(98, 114, 164, 0.09);
 
@@ -227,12 +234,12 @@ body.dark {
   --ion-color-danger-tint: #ff6666;
 
   /** dark **/
-  --ion-color-dark: #f8f8f2;
-  --ion-color-dark-rgb: 248, 248, 242;
-  --ion-color-dark-contrast: #282a36;
-  --ion-color-dark-contrast-rgb: 40, 42, 54;
-  --ion-color-dark-shade: #d9d9d5;
-  --ion-color-dark-tint: #f9f9f3;
+  --ion-color-dark: #181a20; /* dark should be dark */
+  --ion-color-dark-rgb: 24, 26, 32;
+  --ion-color-dark-contrast: #f4f4fa;
+  --ion-color-dark-contrast-rgb: 244, 244, 250;
+  --ion-color-dark-shade: #12141a;
+  --ion-color-dark-tint: #222635;
 
   /** medium **/
   --ion-color-medium: #6272a4;
@@ -243,26 +250,21 @@ body.dark {
   --ion-color-medium-tint: #7280ac;
 
   /** light **/
-  --ion-color-light: #44475a;
-  --ion-color-light-rgb: 68, 71, 90;
-  --ion-color-light-contrast: #f8f8f2;
-  --ion-color-light-contrast-rgb: 248, 248, 242;
-  --ion-color-light-shade: #3c3e4f;
-  --ion-color-light-tint: #57596a;
+  --ion-color-light: #f4f4fa; /* light should be light */
+  --ion-color-light-rgb: 244, 244, 250;
+  --ion-color-light-contrast: #1a202c;
+  --ion-color-light-contrast-rgb: 26, 32, 44;
+  --ion-color-light-shade: #d9d9e5;
+  --ion-color-light-tint: #fafafe;
 
   --ion-background-color: #181a20;
+  --ion-background-color-rgb: 24, 26, 32;
   --ion-text-color: #f4f4fa;
   --ion-item-background: #23263a;
   --ion-card-background: #23263a;
-  --ion-border-color: #23263a;
+  --ion-border-color: #2b2f45;
 
-  --ion-text-color: #f4f4fa;
-  --ion-item-background: #35354b;
-  --ion-border-color: #6272a4;
-
-  --ion-toolbar-background: #35354b;
-  --ion-tab-bar-background: #35354b;
-  --ion-card-background: #35354b;
+  /* Remove duplicate/conflicting overrides to prevent inversion issues */
 }
 
 html {

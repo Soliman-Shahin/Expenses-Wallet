@@ -30,11 +30,17 @@
       "CHARTS": "الرسوم",
       "SUMMARY": "الملخص"
     },
+    "SECTIONS": "أقسام الرئيسية",
     "BALANCE_SUMMARY": "ملخص الرصيد",
     "MONTHLY_SUMMARY": "الملخص الشهري",
     "INCOME": "الدخل",
     "EXPENSES": "المصروفات",
     "TOTAL_SALARY": "إجمالي الراتب",
+    "SHOW_BALANCE": "إظهار الرصيد",
+    "HIDE_BALANCE": "إخفاء الرصيد",
+    "POSITIVE_CHANGE": "زيادة بنسبة {{value}}٪",
+    "NEGATIVE_CHANGE": "انخفاض بنسبة {{value}}٪",
+    "BALANCE_DESCRIPTION": "يعرض هذا رصيدك الإجمالي الحالي ونسبة التغيير مقارنة بالفترة السابقة.",
     "WELCOME_TITLE": "أهلاً بك في محفظتك",
     "WELCOME_MESSAGE": "تحكم في أموالك. تتبع إنفاقك، وأنشئ ميزانيات، وحقق أهدافك المالية.",
     "FEATURES": {
@@ -60,13 +66,15 @@
     "CATEGORIES": "الأقسام",
     "EXPENSES": "المصروفات",
     "REPORTS": "التقارير",
-    "SETTINGS": "إعدادات"
+    "SETTINGS": "إعدادات",
+    "MAIN_MENU": "القائمة الرئيسية"
   },
   "DASHBOARD": "الرئيسية",
   "TRANSACTIONS": {
     "TITLE": "المعاملات",
     "ADD": "إضافة معاملة",
     "RECENT": "أحدث المعاملات",
+    "NO_RECENT": "لا توجد معاملات حديثة",
     "NONE_FOUND": "لا توجد معاملات.",
     "AMOUNT": "المبلغ",
     "DATE": "التاريخ",
@@ -78,6 +86,10 @@
   "LOGOUT": "تسجيل الخروج",
   "HELP": "مساعدة",
   "USER_AVATAR": "صورة المستخدم",
+  "USER": {
+    "DEFAULT_NAME": "مستخدم",
+    "DEFAULT_EMAIL": "user@example.com"
+  },
   "ENGLISH": "الإنجليزية",
   "ARABIC": "العربية",
   "LIGHT_MODE": "الوضع الفاتح",
@@ -89,6 +101,7 @@
     "AND": "و",
     "BACK": "رجوع",
     "LOADING": "جاري التحميل...",
+    "REORDER": "إعادة الترتيب",
     "CLOSE": "إغلاق",
     "OK": "موافق",
     "CANCEL": "إلغاء",

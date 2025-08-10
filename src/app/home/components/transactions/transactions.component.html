@@ -1,8 +1,39 @@
-<ion-card>
-  <ion-card-header>
-    <ion-card-title>Card Title</ion-card-title>
-  </ion-card-header>
-  <ion-card-content>
-    <p>Card content</p>
-  </ion-card-content>
-</ion-card>
+<ng-container *ngIf="transactions$ | async as txs">
+  <ion-list class="transactions-list" *ngIf="txs.length > 0; else empty">
+    <ion-item
+      class="transaction-item"
+      lines="none"
+      *ngFor="let t of txs; trackBy: trackById"
+    >
+      <span
+        class="category-icon"
+        [style.background]="getCategoryColor(t) || null"
+        slot="start"
+        aria-hidden="true"
+      >
+        <ion-icon size="large" [name]="getCategoryIcon(t)"></ion-icon>
+      </span>
+      <ion-label>
+        <h3 class="ion-text-wrap transaction-title">
+          {{ getOperationName(t) }}
+        </h3>
+        <p>
+          {{ getDateValue(t) | date : "mediumDate" }}
+          <span *ngIf="getCategoryName(t) as cat"> • {{ cat }}</span>
+        </p>
+      </ion-label>
+      <ion-note slot="end" color="primary">
+        {{ getAmountValue(t) | number : "1.0-0" }}
+      </ion-note>
+    </ion-item>
+  </ion-list>
+  <ng-template #empty>
+    <div class="ion-text-center ion-padding">
+      <ion-icon
+        name="receipt-outline"
+        style="font-size: 28px; opacity: 0.6"
+      ></ion-icon>
+      <p class="ion-margin-top">{{ "TRANSACTIONS.NO_RECENT" | translate }}</p>
+    </div>
+  </ng-template>
+</ng-container>

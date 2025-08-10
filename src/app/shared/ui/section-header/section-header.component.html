@@ -1,0 +1,20 @@
+<div class="section-header" [attr.aria-label]="ariaLabel || title">
+  <h2 class="section-title">
+    <ion-icon *ngIf="icon" [name]="icon" aria-hidden="true"></ion-icon>
+    <span>{{ title }}</span>
+  </h2>
+
+  <ng-container *ngIf="ctaText || ctaRouterLink">
+    <ion-button
+      fill="clear"
+      size="small"
+      [routerLink]="ctaRouterLink || null"
+      [disabled]="ctaDisabled"
+      (click)="ctaClick.emit()"
+      [attr.aria-label]="ctaText || title"
+    >
+      {{ ctaText }}
+      <ion-icon slot="end" [name]="ctaIcon" aria-hidden="true"></ion-icon>
+    </ion-button>
+  </ng-container>
+</div>

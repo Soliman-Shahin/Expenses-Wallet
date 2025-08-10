@@ -10,13 +10,13 @@
       class="custom-loader"
       role="alertdialog"
       aria-modal="true"
-      aria-label="Loading"
+      [attr.aria-label]="'COMMON.LOADING' | translate"
     >
       <ion-spinner
         name="crescent"
         style="width: 48px; height: 48px"
       ></ion-spinner>
-      <span class="visually-hidden">Loading…</span>
+      <span class="visually-hidden">{{ 'COMMON.LOADING' | translate }}</span>
     </div>
   </div>
   <!-- Side Menu -->

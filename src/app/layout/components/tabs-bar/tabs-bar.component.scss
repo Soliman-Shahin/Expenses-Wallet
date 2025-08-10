@@ -150,6 +150,42 @@ ion-tabs {
   }
 }
 
+/* Dark mode: match glassmorphism to dark palette */
+:host-context(.dark) {
+  ion-tabs {
+    ion-tab-bar {
+      /* Translucent dark background */
+      --background: rgba(24, 26, 32, 0.85);
+      /* Keep blur */
+      backdrop-filter: blur(10px);
+      /* Subtle shadow upwards */
+      box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.35);
+      /* Text/icon color inherits from dark variables */
+      --color: var(--ion-text-color);
+      --color-selected: var(--ion-color-primary);
+      --border: none;
+    }
+
+    ion-tab-button {
+      /* Hover with subtle light overlay in dark */
+      &:hover {
+        background: rgba(255, 255, 255, 0.06);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+      }
+
+      /* Focus ring tuned for dark */
+      &:focus-visible {
+        background: rgba(var(--ion-color-primary-rgb), 0.18);
+        box-shadow: 0 0 0 4px rgba(var(--ion-color-primary-rgb), 0.18);
+      }
+
+      &.tab-selected::after {
+        background: var(--ion-color-primary);
+      }
+    }
+  }
+}
+
 @keyframes tabIndicator {
     from {
       transform: translateX(-50%) scaleX(0);

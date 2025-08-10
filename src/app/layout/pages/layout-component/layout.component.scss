@@ -125,18 +125,9 @@ app-tabs-bar {
   }
 }
 
-// Dark mode adjustments
-@media (prefers-color-scheme: dark) {
-  :host {
-    --ion-background-color: var(--ion-color-dark);
-    --ion-text-color: var(--ion-color-light);
-  }
-
-  app-tabs-bar {
-    background: var(--ion-color-dark);
-    border-top-color: var(--ion-color-dark-shade);
-  }
-}
+// Dark mode adjustments are managed globally via CSS variables in `theme/variables.scss`
+// and toggled by `ThemeService` by adding/removing the `.dark` class on `body`.
+// Avoid duplicating overrides here to prevent conflicts/inversion.
 
 // Print styles
 @media print {

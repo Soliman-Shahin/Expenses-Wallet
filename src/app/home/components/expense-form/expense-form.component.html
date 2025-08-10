@@ -26,7 +26,7 @@
           formControlName="amount"
           inputmode="decimal"
           class="input-with-icon"
-          aria-label="Amount"
+          [attr.aria-label]="'EXPENSE.AMOUNT' | translate"
         >
           <span slot="start" class="ion-padding-end">$</span>
         </ion-input>
@@ -53,7 +53,7 @@
         <ion-input
           formControlName="description"
           class="input-with-icon"
-          aria-label="Description"
+          [attr.aria-label]="'EXPENSE.DESCRIPTION' | translate"
         >
           <ion-icon name="document-text-outline" slot="start"></ion-icon>
         </ion-input>
@@ -86,7 +86,7 @@
         <ion-label>{{ "EXPENSE.DATE" | translate }}</ion-label>
         <div class="input-with-icon" style="width: 100%">
           <ion-icon name="calendar-outline" slot="start"></ion-icon>
-          <ion-datetime-button datetime="datetime" aria-label="Pick date">
+          <ion-datetime-button datetime="datetime" [attr.aria-label]="'EXPENSE.DATE_PLACEHOLDER' | translate">
             <span
               *ngIf="!expenseForm.get('date')?.value"
               class="placeholder-text"
@@ -104,7 +104,7 @@
               [min]="minDate"
               [max]="maxDate"
               presentation="date"
-              aria-label="Date"
+              [attr.aria-label]="'EXPENSE.DATE' | translate"
             ></ion-datetime>
           </ng-template>
         </ion-modal>
@@ -118,7 +118,7 @@
           formControlName="category"
           interface="action-sheet"
           class="input-with-icon"
-          aria-label="Category"
+          [attr.aria-label]="'EXPENSE.CATEGORY' | translate"
         >
           <ion-icon name="pricetags-outline" slot="start"></ion-icon>
           <ion-select-option
@@ -147,7 +147,7 @@
         shape="round"
         size="large"
         class="ion-margin-top"
-        aria-label="Submit expense"
+        [attr.aria-label]="(isEditMode ? 'EXPENSE.UPDATE' : 'EXPENSE.CREATE') | translate"
       >
         <ion-icon
           slot="start"
