@@ -13,7 +13,6 @@ import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { Observable, Subject, throwError } from 'rxjs';
 import { catchError, finalize, takeUntil } from 'rxjs/operators';
-import { HeaderService } from 'src/app/layout/services';
 import { ToastService } from '../services/toast.service';
 import { TranslationService } from '../services/translation.service';
 import {
@@ -77,7 +76,6 @@ export abstract class BaseComponent<T = any> implements OnInit, OnDestroy {
   protected readonly translationService = inject(TranslationService);
   protected readonly themeService = inject(ThemeService);
   protected readonly http = inject(HttpClient);
-  protected readonly headerService = inject(HeaderService);
   protected readonly tokenService = inject(TokenService);
   // protected readonly transactionService = inject(TransactionService);
 

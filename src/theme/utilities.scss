@@ -2,27 +2,40 @@
 // Adjust values to your design system as needed
 
 @mixin rounded-lg {
-  border-radius: 12px;
+  /* Larger radius for surfaces/cards */
+  border-radius: var(--radius-lg, 18px);
 }
 
 @mixin rounded {
-  border-radius: 8px;
+  border-radius: var(--radius, 12px);
 }
 
 @mixin shadow {
-  // General card/content shadow
-  // Light theme default; can be themed via variables if desired
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  /* General elevated shadow; uses CSS var if provided */
+  box-shadow: var(
+    --shadow,
+    /* layered light shadow fallback */
+    0 12px 24px rgba(0, 0, 0, 0.07),
+    0 4px 12px rgba(0, 0, 0, 0.06)
+  );
 }
 
 @mixin shadow-header {
-  // Tighter, lighter shadow for header buttons
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  /* Tighter shadow for header buttons; overridable via var */
+  box-shadow: var(
+    --shadow-header,
+    0 6px 16px rgba(0, 0, 0, 0.10),
+    0 2px 6px rgba(0, 0, 0, 0.06)
+  );
 }
 
 @mixin shadow-card {
-  // Elevated card shadow
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.10);
+  /* Stronger, colorful accent shadow for interactive cards */
+  box-shadow: var(
+    --shadow-card,
+    0 16px 40px rgba(0, 0, 0, 0.10),
+    0 8px 20px rgba(34, 211, 238, 0.10)
+  );
 }
 
 @mixin p-y-3 {

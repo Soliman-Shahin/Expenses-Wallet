@@ -51,14 +51,6 @@ export class CategoriesComponent
   }
 
   override ngOnInit() {
-    this.activatedRoute.data.subscribe((data) => {
-      this.headerService.updateButtonConfig({
-        title: data['title'],
-        action: data['action'],
-        icon: data['icon'],
-        route: '/categories/create',
-      });
-    });
     this.loadCategories();
   }
 

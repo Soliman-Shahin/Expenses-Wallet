@@ -14,9 +14,15 @@
   --surface-gradient: linear-gradient(180deg, #f8f9fe 0%, #e8eafc 100%);
 
   // === SHADOWS ===
-  --shadow-elevated: 0 4px 24px rgba(67, 97, 238, 0.08);
-  --shadow-card: 0 2px 12px rgba(67, 97, 238, 0.05);
-  --shadow-header: 0 2px 10px rgba(67, 97, 238, 0.07);
+  --shadow-elevated: 0 18px 40px rgba(0, 0, 0, 0.12), 0 6px 16px rgba(0, 0, 0, 0.08);
+  /* Map generic shadow variables used by mixins */
+  --shadow: 0 18px 40px rgba(0, 0, 0, 0.12), 0 6px 16px rgba(0, 0, 0, 0.08);
+  --shadow-card: 0 16px 38px rgba(67, 97, 238, 0.16), 0 8px 20px rgba(0, 0, 0, 0.06);
+  --shadow-header: 0 12px 28px rgba(0, 0, 0, 0.14), 0 4px 10px rgba(0, 0, 0, 0.08);
+
+  // === RADII ===
+  --radius: 14px;
+  --radius-lg: 22px;
 
   // === TYPOGRAPHY ===
   --ion-font-family: "Ubuntu", sans-serif;
@@ -140,7 +146,11 @@ $theme-colors: (
 body.dark {
   --brand-gradient: linear-gradient(90deg, #181a20 0%, #23263a 100%);
   --surface-gradient: linear-gradient(180deg, #181a20 0%, #23263a 100%);
-  --shadow-elevated: 0 4px 24px rgba(59, 130, 246, 0.10);
+  --shadow-elevated: 0 20px 44px rgba(0, 0, 0, 0.36), 0 8px 18px rgba(0, 0, 0, 0.28);
+  /* Map generic shadow variables used by mixins in dark mode */
+  --shadow: 0 20px 44px rgba(0, 0, 0, 0.36), 0 8px 18px rgba(0, 0, 0, 0.28);
+  --shadow-card: 0 18px 42px rgba(34, 211, 238, 0.18), 0 10px 22px rgba(0, 0, 0, 0.30);
+  --shadow-header: 0 14px 30px rgba(0, 0, 0, 0.38), 0 6px 12px rgba(0, 0, 0, 0.26);
   --shadow-card: 0 2px 12px rgba(16, 185, 129, 0.09);
   --shadow-header: 0 2px 10px rgba(59, 130, 246, 0.11);
 

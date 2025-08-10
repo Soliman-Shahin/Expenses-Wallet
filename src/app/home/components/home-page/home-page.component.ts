@@ -183,13 +183,6 @@ export class HomePageComponent extends BaseComponent implements OnInit {
   }
 
   /**
-   * Updates the header configuration
-   */
-  private updateHeaderConfig(): void {
-    this.headerService.updateButtonConfig(this.headerConfig);
-  }
-
-  /**
    * Sets up subscription to route data changes
    */
   private setupRouteDataSubscription(): void {
@@ -198,7 +191,6 @@ export class HomePageComponent extends BaseComponent implements OnInit {
         takeUntil(this.destroy$),
         tap((data: any) => {
           this.headerConfig = { ...this.headerConfig, ...data };
-          this.updateHeaderConfig();
         }),
         catchError((error) => {
           console.error('Error loading route data:', error);

@@ -20,26 +20,21 @@ export class AddCategoryComponent extends BaseComponent implements OnInit {
   }
 
   override ngOnInit() {
-    this.activatedRoute.params.pipe(takeUntil(this.destroy$)).subscribe((params) => {
-      this.categoryId = params['id'];
-      this.editMode = !!this.categoryId;
-      if (this.editMode) {
-        this.loadCategory();
-      }
-    });
-
-    this.activatedRoute.data.subscribe((data) => {
-      this.headerService.updateButtonConfig({
-        title: data['title'],
-        action: data['action'],
-        icon: data['icon'],
-        callback: this.editMode ? this.updateCategory.bind(this) : this.addCategory.bind(this),
+    this.activatedRoute.params
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((params) => {
+        this.categoryId = params['id'];
+        this.editMode = !!this.categoryId;
+        if (this.editMode) {
+          this.loadCategory();
+        }
       });
-    });
 
     // Animate preview on title changes
     const titleCtrl = this.categoryForm.get('title');
-    titleCtrl?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => this.bumpPreview());
+    titleCtrl?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.bumpPreview());
   }
 
   private initFormGroup(): FormGroup {
