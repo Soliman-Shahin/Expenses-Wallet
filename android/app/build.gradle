@@ -24,15 +24,16 @@ android {
     }
 }
 
-// Enforce AndroidX core versions compatible with compileSdk 34
-configurations.all {
+// Enforce AndroidX versions compatible with compileSdk 34
+configurations.configureEach {
     resolutionStrategy {
-        force 
+        force(
             "androidx.core:core:$androidxCoreVersion",
             "androidx.core:core-ktx:$androidxCoreVersion",
             // Avoid D8 NPE by staying on appcompat 1.6.1 with AGP 8.0/Gradle 8.0.2
             "androidx.appcompat:appcompat:$androidxAppCompatVersion",
             "androidx.appcompat:appcompat-resources:$androidxAppCompatVersion"
+        )
     }
 }
 
