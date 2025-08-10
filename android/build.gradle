@@ -25,7 +25,12 @@ allprojects {
     // Force AndroidX core versions across all subprojects to avoid resolving 1.15.0 (which requires compileSdk 35)
     configurations.all {
         resolutionStrategy {
-            force "androidx.core:core:${androidxCoreVersion}", "androidx.core:core-ktx:${androidxCoreVersion}"
+            force 
+                "androidx.core:core:${androidxCoreVersion}",
+                "androidx.core:core-ktx:${androidxCoreVersion}",
+                // Avoid D8 NPE with appcompat 1.7.0 on AGP 8.0/Gradle 8.0.2
+                "androidx.appcompat:appcompat:${androidxAppCompatVersion}",
+                "androidx.appcompat:appcompat-resources:${androidxAppCompatVersion}"
         }
     }
 }
