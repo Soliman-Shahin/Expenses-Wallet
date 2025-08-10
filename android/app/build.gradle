@@ -24,6 +24,13 @@ android {
     }
 }
 
+// Enforce AndroidX core versions compatible with compileSdk 34
+configurations.all {
+    resolutionStrategy {
+        force "androidx.core:core:$androidxCoreVersion", "androidx.core:core-ktx:$androidxCoreVersion"
+    }
+}
+
 repositories {
     flatDir{
         dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'

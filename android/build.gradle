@@ -22,6 +22,12 @@ allprojects {
         google()
         mavenCentral()
     }
+    // Force AndroidX core versions across all subprojects to avoid resolving 1.15.0 (which requires compileSdk 35)
+    configurations.all {
+        resolutionStrategy {
+            force "androidx.core:core:${androidxCoreVersion}", "androidx.core:core-ktx:${androidxCoreVersion}"
+        }
+    }
 }
 
 task clean(type: Delete) {
