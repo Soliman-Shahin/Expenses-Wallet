@@ -33,6 +33,9 @@ repositories {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    // Pin core and core-ktx to versions compatible with compileSdk 34 to satisfy AAR metadata checks
+    implementation "androidx.core:core:$androidxCoreVersion"
+    implementation "androidx.core:core-ktx:$androidxCoreVersion"
     implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
     implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
     implementation project(':capacitor-android')
