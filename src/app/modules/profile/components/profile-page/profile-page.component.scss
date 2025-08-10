@@ -2,15 +2,32 @@
   display: block;
 }
 
+/* Contain widths to viewport to prevent horizontal overflow */
+:host *,
+:host *::before,
+:host *::after {
+  box-sizing: border-box;
+}
+
 ion-content {
   --background: var(--ion-background-color);
+  contain: layout paint;
 }
 
 .card {
-  background: var(--ion-color-step-50, #1e1e1e);
+  width: 100%;
+  max-width: 100%;
+  background: color-mix(
+    in srgb,
+    var(--ion-background-color) 80%,
+    var(--ion-color-step-100)
+  );
+  backdrop-filter: saturate(160%) blur(12px);
+  -webkit-backdrop-filter: saturate(160%) blur(12px);
   border-radius: 16px;
   padding: 20px;
   margin-bottom: 20px;
+  border: 1px solid color-mix(in srgb, var(--ion-text-color) 8%, transparent);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   animation: fadeIn 0.4s ease-out;
@@ -47,6 +64,8 @@ ion-content {
   flex-direction: column;
   align-items: center;
   gap: 20px;
+  width: 100%;
+  max-width: 100%;
 }
 
 .avatar {
@@ -55,13 +74,13 @@ ion-content {
   border-radius: 50%;
   background-size: cover;
   background-position: center;
-  background-color: var(--ion-color-step-100, #2a2a2a);
+  background-color: var(--ion-color-step-100, rgba(0, 0, 0, 0.06));
   display: inline-flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 4px solid var(--ion-color-step-100, #2a2a2a);
+  border: 4px solid color-mix(in srgb, var(--ion-text-color) 10%, transparent);
 }
 .avatar:hover {
   transform: scale(1.05);
@@ -108,7 +127,7 @@ ion-content {
 
 .form-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 20px;
 }
 
@@ -126,16 +145,25 @@ ion-content {
 }
 
 .salary-detail-row {
-  --min-height: 72px;
+  --min-height: 56px;
   border-radius: 16px;
-  background: var(--ion-color-step-75, rgba(0, 0, 0, 0.04));
-  margin-bottom: 16px;
+  background: color-mix(
+    in srgb,
+    var(--ion-background-color) 86%,
+    var(--ion-color-step-150)
+  );
+  margin-bottom: 12px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid color-mix(in srgb, var(--ion-text-color) 8%, transparent);
 }
 .salary-detail-row:hover {
-  background: var(--ion-color-step-100, rgba(0, 0, 0, 0.06));
+  background: color-mix(
+    in srgb,
+    var(--ion-background-color) 92%,
+    var(--ion-color-step-150)
+  );
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
   transform: translateY(-2px);
 }
@@ -143,11 +171,71 @@ ion-content {
 .salary-detail-row .row-content {
   width: 100%;
   display: grid;
-  grid-template-columns: 1.2fr 1fr auto;
-  gap: 20px;
+  /* Make amount column wider and enforce a sensible minimum width */
+  grid-template-columns: minmax(0, 1.4fr) minmax(130px, 0.8fr) 0px; // fixed action column to ensure visibility
+  gap: 8px;
   align-items: center;
-  padding: 20px;
+  padding: 14px 14px;
+  overflow-x: hidden; // prevent horizontal scroll
+  overflow-y: visible; // allow icon to render fully
 }
+
+// prevent overflow of fields inside grid
+.salary-detail-row .row-content .field,
+.salary-detail-row .row-content .inline-actions {
+  min-width: 0;
+}
+.salary-detail-row .row-content .inline-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  justify-self: end;
+  overflow: visible;
+}
+.salary-detail-row .row-content .field app-ui-input,
+.salary-detail-row .row-content .field ion-input,
+.salary-detail-row .row-content .field ion-item {
+  width: 100%;
+  max-width: 100%;
+}
+.salary-detail-row .row-content .inline-actions ion-button {
+  flex: 0 1 auto;
+  max-width: 100%;
+  white-space: nowrap;
+}
+.salary-detail-row .row-content .inline-actions .remove-detail-icon ion-icon {
+  color: var(--ion-color-danger);
+  font-size: 20px;
+}
+.salary-detail-row .row-content .inline-actions .remove-detail-icon[disabled] {
+  opacity: 0.45; // keep visible when disabled
+}
+
+/* Force caret visibility and text color inside salary inputs */
+.salary-detail-row .row-content .field ion-input::part(native),
+.salary-detail-row .row-content .field input {
+  caret-color: var(--ion-color-primary, #4361ee) !important;
+  color: var(--ion-text-color) !important;
+  -webkit-text-fill-color: var(--ion-text-color) !important;
+  text-shadow: none !important; /* avoid blend issues on glass backgrounds */
+}
+
+/* Cover number inputs explicitly (Chrome/Safari quirks) */
+.salary-detail-row .row-content .field input[type="number"],
+.salary-detail-row .row-content .field ion-input[type="number"]::part(native) {
+  appearance: textfield !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: textfield !important;
+  caret-color: var(--ion-color-primary, #4361ee) !important;
+}
+
+/* Ensure vertical centering within item in salary row */
+.salary-detail-row .row-content .field ion-item::part(container) {
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* Keep single-row layout across sizes */
 
 .inline-actions {
   display: flex;
@@ -173,6 +261,11 @@ ion-content {
   justify-content: flex-start;
   margin: 20px 0 12px;
 }
+.total-row ion-badge {
+  max-width: 100%;
+  white-space: normal;
+  line-height: 1.25;
+}
 
 .field label {
   display: block;
@@ -182,13 +275,71 @@ ion-content {
   font-size: 0.95rem;
 }
 .select-item {
-  --inner-padding-end: 16px;
-  --inner-padding-start: 16px;
-  --padding-top: 16px;
-  --padding-bottom: 16px;
+  /* tighten paddings on the container item */
+  --inner-padding-end: 8px;
+  --inner-padding-start: 8px;
+  --padding-top: 6px;
+  --padding-bottom: 6px;
+  --padding-start: 0;
+  --padding-end: 0;
+  /* remove any built-in borders from ion-item itself */
+  --inner-border-width: 0;
+  --border-width: 0;
+  --border-color: transparent;
+  --highlight-height: 0;
   border-radius: 14px;
   transition: all 0.2s ease;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  &.glass {
+    background: color-mix(
+      in srgb,
+      var(--ion-background-color) 78%,
+      var(--ion-color-step-100)
+    );
+    backdrop-filter: saturate(160%) blur(12px);
+    -webkit-backdrop-filter: saturate(160%) blur(12px);
+    /* remove outer border to avoid double outline */
+    border: 0;
+  }
+  &.pill {
+    border-radius: 999px;
+  }
+  &.variant-outline {
+    --inner-border-width: 0;
+  }
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* make the select itself minimal (no extra border/background), and control padding here */
+.select-item ion-select {
+  width: 100%;
+  --padding-start: 14px;
+  --padding-end: 14px;
+  --padding-top: 10px;
+  --padding-bottom: 10px;
+  --min-height: 40px;
+  --border-width: 0;
+  --background: transparent;
+  --box-shadow: none;
+  --highlight-height: 0;
+}
+
+/* Ensure no default hairline borders from ion-item parts (iOS/MD) */
+.select-item::part(native),
+.select-item::part(inner) {
+  border: 0 !important;
+}
+
+/* optional: refine popover style */
+.currency-popover {
+  --background: color-mix(
+    in srgb,
+    var(--ion-background-color) 92%,
+    var(--ion-color-step-150)
+  );
+  --backdrop-opacity: 0.2;
+  --width: auto;
 }
 
 .actions {
@@ -203,13 +354,16 @@ ion-content {
 
 @media (min-width: 640px) {
   .form-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .actions {
     grid-column: 1 / -1;
   }
   .salary-detail-row .row-content {
-    grid-template-columns: 1.2fr 0.8fr auto;
+    /* On larger screens, give the amount more room and a larger min width */
+    grid-template-columns: minmax(0, 1.6fr) minmax(200px, 0.9fr) 40px; // fixed action column on larger screens
+    gap: 12px;
+    padding: 16px 18px;
   }
   .avatar-row {
     flex-direction: row;
@@ -224,13 +378,44 @@ ion-content {
   }
 }
 
+/* Hide reorder handle on mobile and reclaim start padding */
+@media (max-width: 640px) {
+  .salary-detail-row {
+    --padding-start: 0;
+  }
+  .salary-detail-row ion-reorder {
+    display: none !important;
+    width: 0 !important;
+    min-width: 0 !important;
+  }
+}
+
+/* Very small devices: stack actions and reduce paddings */
+@media (max-width: 360px) {
+  .salary-detail-row .row-content {
+    padding: 16px;
+  }
+  .salary-detail-row .row-content .inline-actions ion-button {
+    --padding-start: 10px;
+    --padding-end: 10px;
+    --padding-top: 8px;
+    --padding-bottom: 8px;
+    font-size: 0.85rem;
+  }
+}
+
 /* Micro-interactions */
 .salary-detail-row,
 .salary-detail-row .row-content {
-  transition: background-color 300ms ease, box-shadow 300ms ease, transform 300ms ease;
+  transition: background-color 300ms ease, box-shadow 300ms ease,
+    transform 300ms ease;
 }
 .salary-detail-row:hover {
-  background: var(--ion-color-step-100, rgba(0, 0, 0, 0.06));
+  background: color-mix(
+    in srgb,
+    var(--ion-background-color) 92%,
+    var(--ion-color-step-150)
+  );
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
@@ -242,19 +427,37 @@ ion-content {
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.03); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 @keyframes slideInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-in {

@@ -265,7 +265,7 @@
       "SUBTITLE": "حدد قيمة راتبك واختر العملة",
       "LABEL": "التسمية",
       "LABEL_PLACEHOLDER": "مثال: أساسي، مكافأة",
-      "AMOUNT": "الراتب الشهري",
+      "AMOUNT": "المبلغ",
       "AMOUNT_PLACEHOLDER": "0.00",
       "CURRENCY": "العملة",
       "SELECT_CURRENCY": "اختر العملة",

@@ -1,4 +1,4 @@
-<ion-tabs>
+<ion-tabs *ngIf="isLoggedIn$ | async">
   <ion-tab-bar slot="bottom">
     <ng-container *ngFor="let tab of tabs">
       <ion-tab-button

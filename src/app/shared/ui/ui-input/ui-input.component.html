@@ -3,6 +3,13 @@
   lines="none"
   [class.ion-invalid]="isInvalid"
   [class.ion-touched]="ngControl?.control?.touched"
+  [class.item-has-focus]="focused"
+  [ngClass]="[
+    'variant-' + variant,
+    'size-' + size,
+    glass ? 'is-glass' : '',
+    shape === 'pill' ? 'is-pill' : ''
+  ]"
 >
   <ion-icon
     *ngIf="startIcon"
@@ -14,6 +21,8 @@
   <ion-input
     class="ui-form-input"
     [id]="id"
+    [label]="label || null"
+    [labelPlacement]="labelPlacement"
     [type]="
       type === 'password' && togglePassword
         ? hide
@@ -23,13 +32,27 @@
     "
     [value]="value"
     (ionInput)="onChange($any($event).detail.value)"
-    (ionBlur)="onTouched()"
+    (ionFocus)="focused = true"
+    (ionBlur)="focused = false; onTouched()"
     [placeholder]="placeholder"
     [autocomplete]="autocomplete"
     [inputmode]="inputmode"
     [required]="!!required"
+    [maxlength]="maxLength ?? null"
     [attr.aria-invalid]="ariaInvalid"
   ></ion-input>
+
+  <!-- Clear button -->
+  <ion-icon
+    *ngIf="clearable && hasValue && !(type === 'password' && togglePassword)"
+    slot="end"
+    class="end-clear"
+    tabindex="0"
+    role="button"
+    aria-label="Clear input"
+    name="close-circle"
+    (click)="clear()"
+  ></ion-icon>
 
   <ion-icon
     *ngIf="type === 'password' && togglePassword"
@@ -48,6 +71,18 @@
     [name]="endIcon"
     aria-hidden="true"
   ></ion-icon>
+
+  <!-- Helper / Counter -->
+  <ion-note
+    *ngIf="hint || maxLength !== undefined"
+    slot="helper"
+    class="helper-line"
+  >
+    <span class="hint" *ngIf="hint">{{ hint }}</span>
+    <span class="counter" *ngIf="maxLength !== undefined">{{
+      (value?.length || 0) + "/" + maxLength
+    }}</span>
+  </ion-note>
 
   <ion-note *ngIf="isInvalid" slot="error" color="danger">
     <ng-container *ngIf="ngControl?.control as c">

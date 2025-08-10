@@ -1,6 +1,6 @@
 {
   "name": "expenses-wallet",
-  "version": "0.0.1",
+  "version": "1.0.1",
   "author": "Soliman Shahin",
   "homepage": "https://ionicframework.com/",
   "scripts": {
@@ -68,7 +68,7 @@
     "karma-jasmine-html-reporter": "~2.1.0",
     "typescript": "~5.5.4"
   },
-  "description": "An Ionic project",
+  "description": "Expenses Wallet Mobile App",
   "overrides": {
     "@angular-eslint/builder": "18.4.3",
     "@angular-eslint/eslint-plugin": "18.4.3",

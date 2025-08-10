@@ -1,32 +1,38 @@
 import { HttpHandler, HttpInterceptor } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, catchError, switchMap, throwError } from 'rxjs';
-import { BaseService } from '../../../shared/services';
+import { AuthService } from '../services/auth.service';
+import { TokenService } from '../services/token.service';
 
 @Injectable()
-export class ErrorInterceptor extends BaseService implements HttpInterceptor {
-  constructor() {
-    super();
-  }
+export class ErrorInterceptor implements HttpInterceptor {
+  constructor(
+    private authService: AuthService,
+    private tokenService: TokenService
+  ) {}
 
   intercept(req: any, next: HttpHandler): Observable<any> {
+    // Bypass static assets (e.g., translations, images, fonts)
+    const url: string = req?.url || '';
+    const isAssetRequest =
+      url.includes('/assets/') ||
+      url.startsWith('/assets') ||
+      url.startsWith('assets/') ||
+      url.startsWith('./assets') ||
+      /^https?:\/\/[^\s]+\/assets\//.test(url) ||
+      /\.(json|png|jpg|jpeg|gif|svg|webp|css|js|map|woff2?|ttf)(\?|$)/i.test(url);
+    if (isAssetRequest) {
+      return next.handle(req);
+    }
+
     // pass the request to the next handler and catch any errors
     return next.handle(req).pipe(
       catchError((error) => {
-        // if the error status is 500, try to refresh the access token
-        if (error.status === 500) {
-          return this.authService.getNewAccessToken().pipe(
-            switchMap((res: any) => {
-              // if successful, save the new access token and retry the original request
-              this.tokenService.setAccessToken(res.headers.get('access-token'));
-              const retryReq = req.clone({
-                setHeaders: {
-                  'access-token': this.tokenService.getAccessToken(),
-                },
-              });
-              return next.handle(retryReq);
-            })
-          );
+        // Do NOT refresh here to avoid loops; AuthInterceptor handles 401/refresh.
+        // If we still get 401 here, refresh has failed -> logout.
+        if (error?.status === 401) {
+          this.authService.logout();
+          return throwError(() => error);
         } else {
           // otherwise, throw the error as usual
           return throwError(error);

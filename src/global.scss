@@ -143,29 +143,39 @@ ion-textarea,
 textarea,
 ion-select,
 select {
-  border-radius: 14px !important;
-  border: 1.5px solid var(--ion-border-color, #d7d8da);
-  background: var(--ion-item-background, #fff);
   color: var(--ion-text-color, #22223b);
-  padding: 0.75rem 1rem;
   font-size: 1rem;
   transition: border-color 0.18s, box-shadow 0.18s;
   outline: none;
-  box-shadow: 0 1px 4px rgba(67, 97, 238, 0.03);
-
-  &:focus {
-    border-color: var(--ion-color-primary, #4361ee);
-    box-shadow: 0 2px 10px rgba(67, 97, 238, 0.13);
-    background: #f4f6fb;
-  }
-  &:disabled {
-    opacity: 0.55;
-    background: #f4f6fb;
-    cursor: not-allowed;
-  }
+  box-shadow: none;
+  /* Make caret visible globally */
+  caret-color: var(--ion-color-primary, #4361ee) !important;
+  opacity: 1 !important;
 }
 
-body.dark ion-input,
+/* Explicit focus state for inputs/selects (avoid SCSS nesting mistakes) */
+ion-input:focus,
+input:focus,
+ion-textarea:focus,
+textarea:focus,
+ion-select:focus,
+select:focus {
+  border-color: var(--ion-color-primary, #4361ee);
+}
+
+/* Disabled states */
+input:disabled,
+textarea:disabled,
+select:disabled,
+ion-input[disabled],
+ion-textarea[disabled],
+ion-select[disabled] {
+  opacity: 0.55;
+  background: #f4f6fb;
+  cursor: not-allowed;
+}
+
+// body.dark ion-input,
 body.dark input,
 body.dark ion-textarea,
 body.dark textarea,
@@ -185,6 +195,37 @@ ion-textarea:focus,
 textarea:focus {
   outline: 2px solid var(--ion-color-primary, #4361ee);
   outline-offset: 2px;
+}
+
+/* Ensure caret shows inside Ionic shadow DOM parts */
+ion-input::part(native),
+ion-textarea::part(native) {
+  caret-color: var(--ion-color-primary, #4361ee) !important;
+  color: var(--ion-text-color) !important;
+  -webkit-text-fill-color: var(--ion-text-color) !important;
+}
+
+/* Ensure strong caret for number/text inputs across engines */
+input[type="number"],
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea {
+  caret-color: var(--ion-color-primary, #4361ee) !important;
+  color: var(--ion-text-color) !important;
+  -webkit-text-fill-color: var(--ion-text-color) !important;
+  appearance: textfield;
+  -webkit-appearance: none;
+}
+
+/* Ionic typed inputs */
+ion-input[type="number"]::part(native),
+ion-input[type="text"]::part(native),
+ion-input[type="email"]::part(native),
+ion-input[type="password"]::part(native) {
+  caret-color: var(--ion-color-primary, #4361ee) !important;
+  color: var(--ion-text-color) !important;
+  -webkit-text-fill-color: var(--ion-text-color) !important;
 }
 
 ion-button {

@@ -1,3 +1,15 @@
+export interface AuthResponse {
+  data: {
+    user: User;
+    tokens?: {
+      accessToken: string;
+      refreshToken: string;
+    };
+    token?: string;
+    refreshToken?: string;
+  };
+}
+
 export interface User {
   _id?: string;
   socialId?: string;

@@ -1,5 +1,4 @@
 <ion-content
-  class="ion-padding"
   [class.rtl]="currentLang === 'ar'"
   [dir]="currentLang === 'ar' ? 'rtl' : 'ltr'"
   [scrollY]="!isLoading"
@@ -126,157 +125,171 @@
                 </p>
               </div>
 
-              <!-- Month Selector (moved above tabs) -->
-              <app-months-scroll-header
-                (monthSelected)="onMonthChange($event)"
-                (scrolled)="onMonthScroll($event)"
-                [selectedDate]="selectedMonth"
-                [locale]="currentLang"
-                [ngClass]="{
-                  'scroll-start': isScrolledToStart,
-                  'scroll-end': isScrolledToEnd
-                }"
-                ariaLabel="{{ 'HOME.SELECT_MONTH' | translate }}"
-                class="month-selector"
-              ></app-months-scroll-header>
+              <div class="ion-padding">
+                <!-- Month Selector (moved above tabs) -->
+                <app-months-scroll-header
+                  (monthSelected)="onMonthChange($event)"
+                  (scrolled)="onMonthScroll($event)"
+                  [selectedDate]="selectedMonth"
+                  [locale]="currentLang"
+                  [ngClass]="{
+                    'scroll-start': isScrolledToStart,
+                    'scroll-end': isScrolledToEnd
+                  }"
+                  ariaLabel="{{ 'HOME.SELECT_MONTH' | translate }}"
+                  class="month-selector"
+                ></app-months-scroll-header>
 
-              <!-- Tabs -->
-              <ion-segment
-                [value]="activeTab"
-                (ionChange)="setActiveTab($event.detail.value)"
-                class="home-tabs ion-margin-horizontal"
-                role="tablist"
-                [attr.aria-label]="'HOME.SECTIONS' | translate"
-              >
-                <ion-segment-button value="summary">
-                  <ion-label>{{ "HOME.TABS.SUMMARY" | translate }}</ion-label>
-                </ion-segment-button>
-                <ion-segment-button value="charts">
-                  <ion-label>{{ "HOME.TABS.CHARTS" | translate }}</ion-label>
-                </ion-segment-button>
-              </ion-segment>
-
-              <!-- Summary skeleton template used across summary sections -->
-              <ng-template #summarySkeleton>
-                <div class="skeleton-container">
-                  <app-skeleton-block variant="line"></app-skeleton-block>
-                  <app-skeleton-block variant="card-sm"></app-skeleton-block>
-                </div>
-              </ng-template>
-
-              <!-- Charts Section (tab: charts) -->
-              <ng-container *ngIf="activeTab === 'charts'">
-                <section
-                  class="card-section charts-card ion-margin-vertical"
-                  role="region"
-                  aria-live="polite"
-                  [attr.aria-label]="'HOME.CHARTS' | translate"
+                <!-- Tabs -->
+                <ion-segment
+                  [value]="activeTab"
+                  (ionChange)="setActiveTab($event.detail.value)"
+                  class="home-tabs ion-margin-horizontal"
+                  role="tablist"
+                  [attr.aria-label]="'HOME.SECTIONS' | translate"
                 >
-                  <app-section-header
-                    icon="analytics-outline"
-                    [title]="'HOME.CHARTS' | translate"
-                  ></app-section-header>
+                  <ion-segment-button value="summary">
+                    <ion-label>{{ "HOME.TABS.SUMMARY" | translate }}</ion-label>
+                  </ion-segment-button>
+                  <ion-segment-button value="charts">
+                    <ion-label>{{ "HOME.TABS.CHARTS" | translate }}</ion-label>
+                  </ion-segment-button>
+                </ion-segment>
 
-                  <ng-container
-                    *ngIf="!isDashboardLoading; else chartsSkeleton"
+                <!-- Summary skeleton template used across summary sections -->
+                <ng-template #summarySkeleton>
+                  <div class="skeleton-container">
+                    <app-skeleton-block variant="line"></app-skeleton-block>
+                    <app-skeleton-block variant="card-sm"></app-skeleton-block>
+                  </div>
+                </ng-template>
+
+                <!-- Charts Section (tab: charts) -->
+                <ng-container *ngIf="activeTab === 'charts'">
+                  <section
+                    class="card-section charts-card ion-margin-vertical"
+                    role="region"
+                    aria-live="polite"
+                    [attr.aria-label]="'HOME.CHARTS' | translate"
                   >
-                    <!-- Income vs Expenses Bar Chart -->
-                    <app-bar-chart
-                      *ngIf="vm.incomeVsExpense.length > 0"
-                      [data]="vm.incomeVsExpense"
-                      [title]="'HOME.INCOME_VS_EXPENSES' | translate"
-                      [ariaLabel]="'HOME.INCOME_VS_EXPENSES_CHART' | translate"
-                      [chartDescription]="
-                        'HOME.INCOME_VS_EXPENSES_DESC' | translate
-                      "
-                    ></app-bar-chart>
+                    <app-section-header
+                      icon="analytics-outline"
+                      [title]="'HOME.CHARTS' | translate"
+                    ></app-section-header>
 
-                    <!-- Expense by Category Pie Chart -->
-                    <app-pie-chart
-                      *ngIf="vm.expenseByCategory.length > 0"
-                      [data]="vm.expenseByCategory"
-                      [title]="'HOME.EXPENSE_BY_CATEGORY' | translate"
-                      [ariaLabel]="'HOME.EXPENSE_BY_CATEGORY_CHART' | translate"
-                      [showLegend]="true"
-                      [size]="300"
-                    ></app-pie-chart>
-
-                    <!-- Monthly Expenses Line Chart -->
-                    <app-line-chart
-                      *ngIf="vm.monthlyExpenses.length > 0"
-                      [data]="vm.monthlyExpenses"
-                      [title]="'HOME.MONTHLY_EXPENSES' | translate"
-                      [ariaLabel]="'HOME.MONTHLY_EXPENSES_CHART' | translate"
-                      [chartDescription]="
-                        'HOME.MONTHLY_EXPENSES_DESC' | translate
-                      "
-                    ></app-line-chart>
-                  </ng-container>
-                  <ng-template #chartsSkeleton>
-                    <div class="chart-skeleton ion-margin-vertical">
-                      <app-skeleton-block variant="chart"></app-skeleton-block>
-                      <app-skeleton-block variant="chart"></app-skeleton-block>
-                      <app-skeleton-block variant="chart"></app-skeleton-block>
-                    </div>
-                  </ng-template>
-                </section>
-              </ng-container>
-
-              <!-- Summary Section (tab: summary) -->
-              <ng-container *ngIf="activeTab === 'summary'">
-                <!-- Balance Summary -->
-                <section
-                  class="card-section transactions-card ion-margin-vertical"
-                  role="region"
-                  aria-live="polite"
-                  [attr.aria-label]="'HOME.BALANCE_SUMMARY' | translate"
-                >
-                  <app-section-header
-                    icon="wallet-outline"
-                    [title]="'HOME.BALANCE_SUMMARY' | translate"
-                  ></app-section-header>
-                  <ng-container
-                    *ngIf="!isDashboardLoading; else summarySkeleton"
-                  >
-                    <app-balance-card
-                      [balance]="vm.totals.balance"
-                      [income]="vm.totals.income"
-                      [expenses]="vm.totals.expenses"
-                      [percentageChange]="percentageChange"
-                      [isLoading]="isDashboardLoading"
-                      [currency]="vm.currency || currency"
-                      role="group"
-                      attr.aria-label="{{ 'HOME.BALANCE_SUMMARY' | translate }}"
-                      (mouseenter)="onCardHover('balance', true)"
-                      (mouseleave)="onCardHover('balance', false)"
-                      (click)="onCardClick('balance')"
-                      [class.interact]="cardStates['balance']"
+                    <ng-container
+                      *ngIf="!isDashboardLoading; else chartsSkeleton"
                     >
-                    </app-balance-card>
-                  </ng-container>
-                </section>
+                      <!-- Income vs Expenses Bar Chart -->
+                      <app-bar-chart
+                        *ngIf="vm.incomeVsExpense.length > 0"
+                        [data]="vm.incomeVsExpense"
+                        [title]="'HOME.INCOME_VS_EXPENSES' | translate"
+                        [ariaLabel]="
+                          'HOME.INCOME_VS_EXPENSES_CHART' | translate
+                        "
+                        [chartDescription]="
+                          'HOME.INCOME_VS_EXPENSES_DESC' | translate
+                        "
+                      ></app-bar-chart>
 
-                <!-- Recent Transactions -->
-                <section
-                  class="card-section transactions-card ion-margin-vertical"
-                  role="region"
-                  aria-live="polite"
-                  [attr.aria-label]="'TRANSACTIONS.RECENT' | translate"
-                >
-                  <app-section-header
-                    icon="list-outline"
-                    [title]="'TRANSACTIONS.RECENT' | translate"
-                    [ctaText]="'COMMON.VIEW_ALL' | translate"
-                    ctaIcon="arrow-forward"
-                    [ctaRouterLink]="'/transactions'"
-                  ></app-section-header>
-                  <app-transactions
-                    [limit]="5"
-                    [month]="selectedMonth.month"
-                    [year]="selectedMonth.year"
-                  ></app-transactions>
-                </section>
-              </ng-container>
+                      <!-- Expense by Category Pie Chart -->
+                      <app-pie-chart
+                        *ngIf="vm.expenseByCategory.length > 0"
+                        [data]="vm.expenseByCategory"
+                        [title]="'HOME.EXPENSE_BY_CATEGORY' | translate"
+                        [ariaLabel]="
+                          'HOME.EXPENSE_BY_CATEGORY_CHART' | translate
+                        "
+                        [showLegend]="true"
+                        [size]="300"
+                      ></app-pie-chart>
+
+                      <!-- Monthly Expenses Line Chart -->
+                      <app-line-chart
+                        *ngIf="vm.monthlyExpenses.length > 0"
+                        [data]="vm.monthlyExpenses"
+                        [title]="'HOME.MONTHLY_EXPENSES' | translate"
+                        [ariaLabel]="'HOME.MONTHLY_EXPENSES_CHART' | translate"
+                        [chartDescription]="
+                          'HOME.MONTHLY_EXPENSES_DESC' | translate
+                        "
+                      ></app-line-chart>
+                    </ng-container>
+                    <ng-template #chartsSkeleton>
+                      <div class="chart-skeleton ion-margin-vertical">
+                        <app-skeleton-block
+                          variant="chart"
+                        ></app-skeleton-block>
+                        <app-skeleton-block
+                          variant="chart"
+                        ></app-skeleton-block>
+                        <app-skeleton-block
+                          variant="chart"
+                        ></app-skeleton-block>
+                      </div>
+                    </ng-template>
+                  </section>
+                </ng-container>
+
+                <!-- Summary Section (tab: summary) -->
+                <ng-container *ngIf="activeTab === 'summary'">
+                  <!-- Balance Summary -->
+                  <section
+                    class="card-section transactions-card ion-margin-vertical"
+                    role="region"
+                    aria-live="polite"
+                    [attr.aria-label]="'HOME.BALANCE_SUMMARY' | translate"
+                  >
+                    <app-section-header
+                      icon="wallet-outline"
+                      [title]="'HOME.BALANCE_SUMMARY' | translate"
+                    ></app-section-header>
+                    <ng-container
+                      *ngIf="!isDashboardLoading; else summarySkeleton"
+                    >
+                      <app-balance-card
+                        [balance]="vm.totals.balance"
+                        [income]="vm.totals.income"
+                        [expenses]="vm.totals.expenses"
+                        [percentageChange]="percentageChange"
+                        [isLoading]="isDashboardLoading"
+                        [currency]="vm.currency || currency"
+                        role="group"
+                        attr.aria-label="{{
+                          'HOME.BALANCE_SUMMARY' | translate
+                        }}"
+                        (mouseenter)="onCardHover('balance', true)"
+                        (mouseleave)="onCardHover('balance', false)"
+                        (click)="onCardClick('balance')"
+                        [class.interact]="cardStates['balance']"
+                      >
+                      </app-balance-card>
+                    </ng-container>
+                  </section>
+
+                  <!-- Recent Transactions -->
+                  <section
+                    class="card-section transactions-card ion-margin-vertical"
+                    role="region"
+                    aria-live="polite"
+                    [attr.aria-label]="'TRANSACTIONS.RECENT' | translate"
+                  >
+                    <app-section-header
+                      icon="list-outline"
+                      [title]="'TRANSACTIONS.RECENT' | translate"
+                      [ctaText]="'COMMON.VIEW_ALL' | translate"
+                      ctaIcon="arrow-forward"
+                      [ctaRouterLink]="'/transactions'"
+                    ></app-section-header>
+                    <app-transactions
+                      [limit]="5"
+                      [month]="selectedMonth.month"
+                      [year]="selectedMonth.year"
+                    ></app-transactions>
+                  </section>
+                </ng-container>
+              </div>
             </ion-col>
           </ion-row>
         </ng-container>
@@ -284,6 +297,7 @@
     </ng-template>
   </ng-template>
   <ion-fab
+    *ngIf="isLoggedIn$ | async"
     vertical="bottom"
     horizontal="end"
     slot="fixed"

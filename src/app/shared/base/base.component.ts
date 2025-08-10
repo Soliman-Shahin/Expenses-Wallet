@@ -291,7 +291,15 @@ export abstract class BaseComponent<T = any> implements OnInit, OnDestroy {
    */
   protected logOut(): void {
     this.state.setLoading(true);
-    this.authService.logout();
+    this.authService.logout().subscribe({
+      next: () => {
+        this.state.setLoading(false);
+      },
+      error: () => {
+        // Even if an error occurs, ensure the loader is hidden
+        this.state.setLoading(false);
+      },
+    });
   }
 
   /**

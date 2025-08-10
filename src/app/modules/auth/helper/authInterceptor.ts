@@ -22,11 +22,24 @@ export class AuthInterceptor implements HttpInterceptor {
     request: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
-    // Skip adding headers for login/signup/refresh endpoints
+    // Skip adding headers for login/signup/refresh endpoints and static assets
+    const url = request.url || '';
+    const isAsset =
+      url.includes('/assets/') ||
+      url.startsWith('/assets') ||
+      url.startsWith('assets/') ||
+      url.startsWith('./assets') ||
+      // absolute URL case
+      /^https?:\/\/[^\s]+\/assets\//.test(url) ||
+      // common static extensions
+      /\.(json|png|jpg|jpeg|gif|svg|webp|css|js|map|woff2?|ttf)(\?|$)/i.test(
+        url
+      );
     if (
-      request.url.includes('/login') ||
-      request.url.includes('/signup') ||
-      request.url.includes('/refresh-token')
+      url.includes('/login') ||
+      url.includes('/signup') ||
+      url.includes('/refresh-token') ||
+      isAsset
     ) {
       return next.handle(request);
     }
@@ -80,8 +93,14 @@ export class AuthInterceptor implements HttpInterceptor {
             const userId = this.authService.getUserId();
             if (userId) headers['_id'] = userId;
             // Always update tokens in storage before retry
-            this.authService['storageService'].set('access-token', tokens.accessToken);
-            this.authService['storageService'].set('refresh-token', tokens.refreshToken);
+            this.authService['storageService'].set(
+              'access-token',
+              tokens.accessToken
+            );
+            this.authService['storageService'].set(
+              'refresh-token',
+              tokens.refreshToken
+            );
             const retryReq = request.clone({ setHeaders: headers });
             return next.handle(retryReq);
           } else {
@@ -105,8 +124,7 @@ export class AuthInterceptor implements HttpInterceptor {
         switchMap((token) => {
           const headers: Record<string, string> = {};
           if (token) headers['Authorization'] = `Bearer ${token}`;
-          const refreshToken =
-            this.authService['storageService'].get('refresh-token');
+          const refreshToken = this.authService.getRefreshToken();
           if (refreshToken) headers['refresh-token'] = refreshToken;
           const userId = this.authService.getUserId();
           if (userId) headers['_id'] = userId;

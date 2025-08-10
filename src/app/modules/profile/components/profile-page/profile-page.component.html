@@ -59,6 +59,13 @@
           'PROFILE.PERSONAL_INFO.FULL_NAME_PLACEHOLDER' | translate
         "
         required
+        variant="outline"
+        shape="pill"
+        [glass]="true"
+        size="lg"
+        labelPlacement="floating"
+        [clearable]="true"
+        [maxLength]="50"
         class="slide-in-up"
       ></app-ui-input>
 
@@ -69,6 +76,12 @@
         [placeholder]="'PROFILE.PERSONAL_INFO.EMAIL_PLACEHOLDER' | translate"
         required
         autocomplete="email"
+        variant="outline"
+        shape="pill"
+        [glass]="true"
+        size="lg"
+        labelPlacement="floating"
+        [clearable]="true"
         class="slide-in-up"
       ></app-ui-input>
 
@@ -78,6 +91,13 @@
         [label]="'PROFILE.PERSONAL_INFO.PHONE' | translate"
         [placeholder]="'PROFILE.PERSONAL_INFO.PHONE_PLACEHOLDER' | translate"
         inputmode="tel"
+        variant="outline"
+        shape="pill"
+        [glass]="true"
+        size="lg"
+        labelPlacement="floating"
+        [clearable]="true"
+        [maxLength]="20"
         class="slide-in-up"
       ></app-ui-input>
 
@@ -129,48 +149,42 @@
                 trackBy: trackByIndex
               "
             >
-              <ion-reorder slot="start" [attr.aria-label]="'COMMON.REORDER' | translate"></ion-reorder>
+              <ion-reorder
+                slot="start"
+                [attr.aria-label]="'COMMON.REORDER' | translate"
+              ></ion-reorder>
               <div class="row-content" [formGroupName]="i">
                 <div class="field">
-                  <ion-icon
-                    name="pricetag-outline"
-                    aria-hidden="true"
-                  ></ion-icon>
-                  <ion-input
+                  <app-ui-input
                     formControlName="label"
                     type="text"
+                    [label]="'PROFILE.SALARY.LABEL' | translate"
                     [placeholder]="
                       'PROFILE.SALARY.LABEL_PLACEHOLDER' | translate
                     "
-                    [attr.aria-label]="'PROFILE.SALARY.LABEL' | translate"
-                  ></ion-input>
+                    startIcon="pricetag-outline"
+                    variant="ghost"
+                    size="sm"
+                    [clearable]="true"
+                    labelPlacement="floating"
+                  ></app-ui-input>
                 </div>
 
                 <div class="field">
-                  <ion-icon name="cash-outline" aria-hidden="true"></ion-icon>
-                  <ion-input
+                  <app-ui-input
                     formControlName="amount"
                     type="number"
                     inputmode="decimal"
-                    step="0.01"
-                    min="0"
+                    [label]="'PROFILE.SALARY.AMOUNT' | translate"
                     [placeholder]="'0.00'"
-                    [attr.aria-label]="'PROFILE.SALARY.AMOUNT' | translate"
-                  ></ion-input>
+                    startIcon="cash-outline"
+                    variant="ghost"
+                    size="sm"
+                    labelPlacement="floating"
+                  ></app-ui-input>
                 </div>
 
-                <div class="inline-actions">
-                  <ion-button
-                    type="button"
-                    color="danger"
-                    fill="outline"
-                    (click)="removeDetail(i)"
-                    [disabled]="details.length <= 1"
-                    class="remove-detail-btn"
-                  >
-                    {{ "COMMON.REMOVE" | translate }}
-                  </ion-button>
-                </div>
+                <!-- actions moved to ion-item end slot to avoid clipping/overflow -->
 
                 <div
                   class="field-error"
@@ -184,6 +198,21 @@
                   }}</ion-text>
                 </div>
               </div>
+
+              <ion-button
+                slot="end"
+                type="button"
+                color="danger"
+                fill="clear"
+                size="small"
+                shape="round"
+                (click)="removeDetail(i)"
+                [disabled]="details.length <= 1"
+                class="remove-detail-icon"
+                [attr.aria-label]="'COMMON.REMOVE' | translate"
+              >
+                <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+              </ion-button>
             </ion-item>
           </ion-reorder-group>
         </ion-list>
@@ -213,7 +242,10 @@
         <label for="currencySelect">{{
           "PROFILE.SALARY.CURRENCY" | translate
         }}</label>
-        <ion-item lines="full" class="select-item slide-in-up">
+        <ion-item
+          lines="none"
+          class="select-item slide-in-up glass pill"
+        >
           <ion-select
             aria-labelledby="currencySelect"
             interface="popover"

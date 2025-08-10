@@ -27,6 +27,16 @@ ion-content {
   --color: var(--ion-text-color);
 }
 
+// When tabs are hidden (logged out), remove bottom space
+ion-app.no-tabs {
+  ion-content {
+    --padding-bottom: 0px;
+  }
+  ion-router-outlet::after {
+    display: none;
+  }
+}
+
 :host {
   --header-height: 56px;
   --tabs-height: 56px;

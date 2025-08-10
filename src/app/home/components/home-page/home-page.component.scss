@@ -107,7 +107,8 @@
 // Welcome state (unauthenticated)
 .welcome-container {
   // Remove direct flex layout; handled by grid
-  min-height: 80vh;
+  height: 100%;
+  display: flex !important;
   padding: 0;
   text-align: center;
 
@@ -258,7 +259,7 @@
 
   // Home tabs styling
   .home-tabs {
-    --background: rgba(var(--ion-color-light-rgb), 0.65);
+    --background: var(--ion-card-background);
     backdrop-filter: saturate(180%) blur(10px);
     -webkit-backdrop-filter: saturate(180%) blur(10px);
     border-radius: 16px;
@@ -266,6 +267,7 @@
     margin: 0 1.5rem 1rem;
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
     transition: var(--tab-transition, all 280ms cubic-bezier(0.4, 0, 0.2, 1));
+    width: auto !important;
 
     // container adjustments
     .segment-scroll {
@@ -322,7 +324,10 @@
   :host-context(body.dark) {
     .home-tabs {
       ion-segment-button:focus-visible {
-        outline-color: rgba(var(--ion-color-primary-contrast-rgb, 255, 255, 255), 0.9);
+        outline-color: rgba(
+          var(--ion-color-primary-contrast-rgb, 255, 255, 255),
+          0.9
+        );
       }
     }
   }

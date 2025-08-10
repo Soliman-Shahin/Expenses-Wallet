@@ -1,5 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, forwardRef, Injector, OnInit } from '@angular/core';
+import {
+  Component,
+  Input,
+  forwardRef,
+  Injector,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import {
   ControlValueAccessor,
   FormsModule,
@@ -7,7 +14,7 @@ import {
   NgControl,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, IonInput } from '@ionic/angular';
 import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
@@ -42,9 +49,22 @@ export class UiInputComponent implements ControlValueAccessor, OnInit {
   @Input() required: boolean | string = false;
   @Input() id?: string;
 
+  // New dynamic UI inputs
+  @Input() hint?: string;
+  @Input() maxLength?: number;
+  @Input() clearable = false;
+  @Input() size: 'sm' | 'md' | 'lg' = 'md';
+  @Input() variant: 'filled' | 'outline' | 'ghost' = 'filled';
+  @Input() glass = false;
+  @Input() shape: 'rounded' | 'pill' = 'rounded';
+  @Input() labelPlacement: 'floating' | 'stacked' | 'fixed' = 'floating';
+
   hide = true;
   value: any = '';
   disabled = false;
+  focused = false;
+
+  @ViewChild(IonInput) inputRef?: IonInput;
 
   public ngControl?: NgControl;
   constructor(private injector: Injector) {}
@@ -88,5 +108,21 @@ export class UiInputComponent implements ControlValueAccessor, OnInit {
     if (this.type === 'password' && this.togglePassword) {
       this.hide = !this.hide;
     }
+  }
+
+  get hasValue(): boolean {
+    return (
+      this.value !== undefined &&
+      this.value !== null &&
+      `${this.value}`.length > 0
+    );
+  }
+
+  clear(): void {
+    if (this.disabled) return;
+    this.value = '';
+    this.onChange('');
+    // try to restore focus for better UX
+    setTimeout(() => this.inputRef?.setFocus && this.inputRef.setFocus(), 0);
   }
 }

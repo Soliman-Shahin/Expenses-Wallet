@@ -276,7 +276,7 @@
       "SUBTITLE": "Set your salary amount and choose the currency",
       "LABEL": "Label",
       "LABEL_PLACEHOLDER": "e.g., Base, Bonus",
-      "AMOUNT": "Monthly salary",
+      "AMOUNT": "Amount",
       "AMOUNT_PLACEHOLDER": "0.00",
       "CURRENCY": "Currency",
       "SELECT_CURRENCY": "Select currency",

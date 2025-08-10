@@ -23,6 +23,7 @@ import {
 import { ExpenseFormComponent } from '../expense-form/expense-form.component';
 import { DashboardFacade } from 'src/app/shared/facades';
 import { formatCurrency } from 'src/app/shared/utils';
+import { AuthService } from 'src/app/modules/auth/services/auth.service';
 
 // Constants
 const MAX_RETRY_ATTEMPTS = 3;
@@ -82,6 +83,9 @@ export class HomePageComponent extends BaseComponent implements OnInit {
   private readonly monthSelection$ = new BehaviorSubject<MonthYear>(
     this.selectedMonth
   );
+
+  // Auth state for UI
+  isLoggedIn$ = inject(AuthService).user$.pipe(map((u) => !!u));
   private readonly totalsByMonth$ = this.monthSelection$.pipe(
     switchMap((m) =>
       combineLatest([

@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { finalize, takeUntil, map } from 'rxjs';
+import { finalize, takeUntil } from 'rxjs';
 
 import { BaseComponent } from 'src/app/shared/base/base.component';
-import { Category } from 'src/app/shared/models/category.model';
 
 @Component({
   selector: 'app-login',
@@ -14,7 +13,6 @@ export class LoginComponent extends BaseComponent {
   loginForm!: FormGroup;
   hide = true;
   errorMessage = '';
-  categories: Category[] = [];
 
   // Form control names for template access
   readonly formFields = {
@@ -29,7 +27,6 @@ export class LoginComponent extends BaseComponent {
 
   override ngOnInit(): void {
     this.initForm();
-    this.loadCategories();
   }
 
   // Ensure UI resets correctly when returning to login (e.g., after logout)
@@ -70,18 +67,6 @@ export class LoginComponent extends BaseComponent {
       });
   }
 
-  private loadCategories(): void {
-    this.categoryService
-      .getCategories({ skip: 0, limit: 20, sort: '-createdAt' })
-      .pipe(
-        map((res) => res.data),
-        takeUntil(this.destroy$)
-      )
-      .subscribe({
-        next: (list) => (this.categories = list),
-        error: (err) => console.warn('Failed to load categories:', err),
-      });
-  }
 
   togglePasswordVisibility(): void {
     this.hide = !this.hide;

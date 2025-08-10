@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { LocalStorageKeys, User } from 'src/app/modules/auth/models';
 import { StorageService } from './storage.service';
+import { SecureStorageService } from './secure-storage.service';
 
 @Injectable({
   providedIn: 'root',
@@ -17,7 +18,10 @@ export class TokenService {
 
   user$ = new BehaviorSubject<User | null>(null);
 
-  constructor(private storage: StorageService) {
+  constructor(
+    private storage: StorageService,
+    private secure: SecureStorageService
+  ) {
     const user = this.getUser();
     if (user) this.user$.next(user);
   }
@@ -36,11 +40,11 @@ export class TokenService {
   }
 
   getAccessToken(): string | null {
-    return this.getItem<string>(this.localStorageKeys.accessToken);
+    return this.secure.get(this.localStorageKeys.accessToken);
   }
 
   getRefreshToken(): string | null {
-    return this.getItem<string>(this.localStorageKeys.refreshToken);
+    return this.secure.get(this.localStorageKeys.refreshToken);
   }
 
   getUserId(): string | null {
@@ -56,11 +60,11 @@ export class TokenService {
   }
 
   setAccessToken(accessToken: string): void {
-    this.setItem<string>(this.localStorageKeys.accessToken, accessToken);
+    this.secure.set(this.localStorageKeys.accessToken, accessToken);
   }
 
   setRefreshToken(refreshToken: string): void {
-    this.setItem<string>(this.localStorageKeys.refreshToken, refreshToken);
+    this.secure.set(this.localStorageKeys.refreshToken, refreshToken);
   }
 
   setUserId(userId: string): void {
@@ -83,7 +87,15 @@ export class TokenService {
   }
 
   removeSession(): void {
-    Object.values(this.localStorageKeys).forEach((key) => this.removeItem(key));
+    // Remove user-related keys from normal storage
+    [
+      this.localStorageKeys.user,
+      this.localStorageKeys.userId,
+      this.localStorageKeys.userLang,
+    ].forEach((key) => this.removeItem(key));
+    // Remove tokens from secure storage
+    this.secure.remove(this.localStorageKeys.accessToken);
+    this.secure.remove(this.localStorageKeys.refreshToken);
     this.user$.next(null);
   }
 
@@ -122,4 +134,3 @@ export class TokenService {
     return this.isTokenExpired(this.getRefreshToken());
   }
 }
-

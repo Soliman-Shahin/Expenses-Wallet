@@ -1,10 +1,12 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { UserProfile } from '../models/profile.model';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { ApiService } from 'src/app/core/services/api.service';
 import { catchError, map, tap } from 'rxjs/operators';
+import { StorageService } from 'src/app/modules/auth/services/storage.service';
 
-const STORAGE_KEY = 'ew_user_profile_v1';
+// Deprecated old storage key - kept for cleanup only
+const LEGACY_STORAGE_KEY = 'ew_user_profile_v1';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileService {
@@ -17,10 +19,34 @@ export class ProfileService {
   private readonly PROFILE_ME_ENDPOINT = '/user/me';
   private readonly PROFILE_AVATAR_ENDPOINT = '/user/me/avatar';
 
+  // Use app-wide storage (prefix ewallet_) so the key becomes 'ewallet_user'
+  private storage = inject(StorageService);
+
   constructor(private api: ApiService) {
     // Initialize stream with current value from storage
+    // Cleanup legacy key if exists (do not rely on it anymore)
+    try {
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
+    } catch {}
     const existing = this.getProfile();
     this.profileSubject.next(existing);
+  }
+
+  /**
+   * Clear locally cached profile completely.
+   * Removes the storage entry and resets the observable stream to null.
+   */
+  clearProfile(): void {
+    try {
+      this.storage.remove('user');
+      // Cleanup legacy key as well just in case
+      try {
+        localStorage.removeItem(LEGACY_STORAGE_KEY);
+      } catch {}
+    } catch (e) {
+      console.error('Failed to clear profile from storage', e);
+    }
+    this.profileSubject.next(null);
   }
 
   private normalizeProfile(raw: any | null): UserProfile | null {
@@ -56,18 +82,20 @@ export class ProfileService {
 
   getProfile(): UserProfile | null {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? (JSON.parse(raw) as UserProfile) : null;
+      // Read unified user object stored under key 'ewallet_user'
+      const raw = this.storage.get<any>('user');
+      // raw might already be a normalized UserProfile or a backend User; normalize either
+      return this.normalizeProfile(raw);
     } catch (e) {
-      console.error('Failed to parse profile from storage', e);
+      console.error('Failed to read profile from storage', e);
       return null;
     }
   }
 
   saveProfile(profile: UserProfile): boolean {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
-      // Emit the latest value so any subscribers (e.g., Dashboard) get updates
+      // Persist using shared storage => key becomes 'ewallet_user'
+      this.storage.set<UserProfile>('user', profile);
       this.profileSubject.next(profile);
       return true;
     } catch (e) {

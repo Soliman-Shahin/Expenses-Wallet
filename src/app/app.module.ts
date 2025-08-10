@@ -1,5 +1,6 @@
 import {
   HttpClient,
+  HTTP_INTERCEPTORS,
   provideHttpClient,
   withInterceptorsFromDi,
 } from '@angular/common/http';
@@ -15,6 +16,8 @@ import { IonicModule } from '@ionic/angular';
 import { CoreModule } from './core/core.module';
 import { LayoutModule } from './layout/layout.module';
 import { SharedModule } from './shared/shared.module';
+import { AuthInterceptor } from './modules/auth/helper/authInterceptor';
+import { ErrorInterceptor } from './modules/auth/helper/errorInterceptor';
 
 export function HttpLoaderFactory(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -38,6 +41,10 @@ export function HttpLoaderFactory(http: HttpClient) {
     CoreModule,
     LayoutModule,
   ],
-  providers: [provideHttpClient(withInterceptorsFromDi())],
+  providers: [
+    provideHttpClient(withInterceptorsFromDi()),
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
+  ],
 })
 export class AppModule {}
