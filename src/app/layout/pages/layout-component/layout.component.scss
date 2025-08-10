@@ -1,4 +1,5 @@
 @import "src/theme/variables";
+@import "src/theme/utilities";
 
 ion-app {
   display: flex;
@@ -90,8 +91,8 @@ app-tabs-bar {
     margin-left: var(--side-menu-width);
     width: calc(100% - var(--side-menu-width));
     padding: var(--spacing-lg) var(--spacing-xl);
-    @extend .rounded-lg !optional;
-    @extend .shadow !optional;
+    @include rounded-lg;
+    @include shadow;
     transition: margin 0.22s, width 0.22s, padding 0.22s;
   }
 
@@ -101,7 +102,7 @@ app-tabs-bar {
     left: var(--side-menu-width);
     border-top-left-radius: 18px;
     border-top-right-radius: 18px;
-    box-shadow: 0 -4px 24px rgba(34,211,238,0.10);
+    box-shadow: 0 -4px 24px rgba(34, 211, 238, 0.1);
     transition: width 0.22s, left 0.22s;
   }
 }
@@ -123,7 +124,6 @@ app-tabs-bar {
     border-top-right-radius: 24px;
   }
 }
-
 
 // Dark mode adjustments
 @media (prefers-color-scheme: dark) {

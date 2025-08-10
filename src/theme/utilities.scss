@@ -1,0 +1,37 @@
+// Shared mixins to avoid @extend build issues
+// Adjust values to your design system as needed
+
+@mixin rounded-lg {
+  border-radius: 12px;
+}
+
+@mixin rounded {
+  border-radius: 8px;
+}
+
+@mixin shadow {
+  // General card/content shadow
+  // Light theme default; can be themed via variables if desired
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+@mixin shadow-header {
+  // Tighter, lighter shadow for header buttons
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+@mixin shadow-card {
+  // Elevated card shadow
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.10);
+}
+
+@mixin p-y-3 {
+  // Vertical padding utility
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+@mixin p-y-1 {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}

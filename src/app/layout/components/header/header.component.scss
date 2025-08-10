@@ -1,4 +1,5 @@
 @import "src/theme/variables";
+@import "src/theme/utilities";
 
 ion-header {
   --background: transparent;
@@ -186,7 +187,7 @@ ion-header {
 
     .title {
       font-size: 1.1rem;
-      @extend .p-y-1 !optional;
+      @include p-y-1;
     }
 
     .menu-button,
@@ -195,8 +196,8 @@ ion-header {
       --padding-end: 6px;
       --padding-top: 6px;
       --padding-bottom: 6px;
-      @extend .rounded !optional;
-      @extend .shadow !optional;
+      @include rounded;
+      @include shadow;
 
       ion-icon {
         font-size: 1.25rem;
@@ -215,7 +216,7 @@ ion-header {
     }
     .title {
       font-size: 2rem;
-      @extend .p-y-3 !optional;
+      @include p-y-3;
     }
     .menu-button,
     .action-button {
@@ -223,11 +224,12 @@ ion-header {
       --padding-end: 16px;
       --padding-top: 12px;
       --padding-bottom: 12px;
-      @extend .rounded-lg !optional;
-      @extend .shadow-header !optional;
+      @include rounded-lg;
+      @include shadow-header;
       ion-icon {
         font-size: 2rem;
       }
     }
   }
 }
+

@@ -1,4 +1,5 @@
 @import "src/theme/variables";
+@import "src/theme/utilities";
 
 :host {
   --side-menu-background: var(--ion-background-color);
@@ -273,8 +274,8 @@ body.dark {
       .user-info {
         padding: 24px;
         margin-bottom: 16px;
-        @extend .rounded-lg !optional;
-        @extend .shadow !optional;
+        @include rounded-lg;
+        @include shadow;
         ion-avatar {
           width: 64px;
           height: 64px;
@@ -282,7 +283,7 @@ body.dark {
       }
       ion-list {
         border-radius: 18px;
-        @extend .shadow-card !optional;
+        @include shadow-card;
       }
     }
   }
