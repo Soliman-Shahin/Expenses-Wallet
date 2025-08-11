@@ -4,6 +4,7 @@ import {
   HttpBackend,
 } from '@angular/common/http';
 import { Injectable, inject, NgZone } from '@angular/core';
+import { Capacitor } from '@capacitor/core';
 import { Router } from '@angular/router';
 import { NavController } from '@ionic/angular';
 import { Observable, throwError, BehaviorSubject, from, of } from 'rxjs';
@@ -256,9 +257,69 @@ export class AuthService {
     url: string,
     credentials: Record<string, any>
   ): Observable<AuthResponse> {
-    // Use a bare HttpClient (bypasses interceptors and ApiService error wrapping)
+    const fullUrl = `${environment.apiUrl}${url}`;
+
+    // On native (Android/iOS), prefer Capacitor HTTP plugin to bypass WebView CORS
+    if (Capacitor.isNativePlatform()) {
+      const Http = (window as any)?.Capacitor?.Plugins?.Http;
+      if (Http && typeof Http.post === 'function') {
+        return from(
+          Http.post({
+            url: fullUrl,
+            headers: { 'Content-Type': 'application/json' },
+            data: credentials,
+          })
+        ).pipe(
+          map((resp: any) => {
+            // Plugin returns { status, data, headers, url }
+            const response = resp?.data;
+            if (!response?.data?.user) {
+              const message = response?.error?.message || 'Invalid credentials';
+              throw new HttpErrorResponse({
+                status: 401,
+                statusText: 'Unauthorized',
+                error: { message },
+              });
+            }
+
+            const user = response.data.user as AuthResponse['data']['user'];
+            const accessTokenNormalized =
+              response?.data?.tokens?.accessToken ??
+              response?.data?.accessToken ??
+              response?.data?.token ??
+              '';
+            const refreshTokenNormalized =
+              response?.data?.tokens?.refreshToken ??
+              response?.data?.refreshToken ??
+              '';
+            const tokens = {
+              accessToken: accessTokenNormalized,
+              refreshToken: refreshTokenNormalized,
+            } as NonNullable<AuthResponse['data']['tokens']>;
+
+            if (tokens?.accessToken) this.tokenService.setAccessToken(tokens.accessToken);
+            if (tokens?.refreshToken) this.tokenService.setRefreshToken(tokens.refreshToken);
+            if (user && user._id) this.tokenService.setUserId(user._id);
+            this.storageService.set('user', user);
+            this.userSubject.next(user);
+
+            const redirectUrl = this.redirectUrl || '/home';
+            this.redirectUrl = null;
+            this.zone.run(() => {
+              this.router.navigateByUrl(redirectUrl);
+            });
+
+            return response as AuthResponse;
+          }),
+          catchError(this.handleError)
+        );
+      }
+      // If plugin not available, fall back to web path below (may hit CORS on native)
+    }
+
+    // Web: Use a bare HttpClient (bypasses interceptors and ApiService error wrapping)
     const http = new HttpClient(this.httpBackend);
-    return http.post<any>(`${environment.apiUrl}${url}`, credentials).pipe(
+    return http.post<any>(fullUrl, credentials).pipe(
       map((response) => {
         // Some backends may return { success: false, error: { message } } with 200
         if (!response?.data?.user) {
