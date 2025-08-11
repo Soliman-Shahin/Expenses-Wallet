@@ -47,16 +47,7 @@ export class ApiService {
       console.warn('No valid access token found in storage');
     }
 
-    try {
-      const userId = this.storageService.getUserId();
-      if (userId) {
-        headers['_id'] = userId;
-      } else {
-        console.warn('No user ID available for request headers');
-      }
-    } catch (error) {
-      console.warn('Could not get user ID for request headers', error);
-    }
+    // Do not send user id as a custom header; JWT already carries the subject
 
     if (!environment.production) {
       console.log('Request headers:', headers);

@@ -256,7 +256,9 @@ export class AuthService {
     url: string,
     credentials: Record<string, any>
   ): Observable<AuthResponse> {
-    return this.apiService.post<any>(url, credentials).pipe(
+    // Use a bare HttpClient (bypasses interceptors and ApiService error wrapping)
+    const http = new HttpClient(this.httpBackend);
+    return http.post<any>(`${environment.apiUrl}${url}`, credentials).pipe(
       map((response) => {
         // Some backends may return { success: false, error: { message } } with 200
         if (!response?.data?.user) {
@@ -269,10 +271,20 @@ export class AuthService {
         }
 
         const user = response.data.user as AuthResponse['data']['user'];
-        const tokens = (response.data.tokens ?? {
-          accessToken: response.data.token || '',
-          refreshToken: response.data.refreshToken || '',
-        }) as NonNullable<AuthResponse['data']['tokens']>;
+        // Normalize tokens from different backend shapes
+        const accessTokenNormalized =
+          response?.data?.tokens?.accessToken ??
+          response?.data?.accessToken ??
+          response?.data?.token ??
+          '';
+        const refreshTokenNormalized =
+          response?.data?.tokens?.refreshToken ??
+          response?.data?.refreshToken ??
+          '';
+        const tokens = {
+          accessToken: accessTokenNormalized,
+          refreshToken: refreshTokenNormalized,
+        } as NonNullable<AuthResponse['data']['tokens']>;
 
         // Store tokens (secure) and user data
         if (tokens?.accessToken) {
@@ -296,6 +308,7 @@ export class AuthService {
 
         return response as AuthResponse;
       }),
+      // Preserve original HttpErrorResponse so components can display messages
       catchError(this.handleError)
     );
   }
