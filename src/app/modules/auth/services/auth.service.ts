@@ -442,4 +442,33 @@ export class AuthService {
   getUserId(): string | null {
     return this.currentUser?._id || null;
   }
+
+  /**
+   * Handle OAuth payload delivered via mobile deep link (base64-encoded JSON in URL hash)
+   * @param payloadB64 base64 string of JSON: { user, tokens: { accessToken, refreshToken } }
+   */
+  handleOAuthDeepLink(payloadB64: string): Observable<void> {
+    try {
+      const json = atob(payloadB64);
+      const parsed = JSON.parse(json);
+      const user = parsed?.user as User | undefined;
+      const accessToken = parsed?.tokens?.accessToken || parsed?.accessToken || parsed?.token;
+      const refreshToken = parsed?.tokens?.refreshToken || parsed?.refreshToken;
+      if (!user || !accessToken || !refreshToken) {
+        return throwError(() => new Error('Invalid OAuth payload'));
+      }
+
+      // Persist tokens & user
+      this.tokenService.setAccessToken(accessToken);
+      this.tokenService.setRefreshToken(refreshToken);
+      if (user && (user as any)._id) {
+        this.tokenService.setUserId((user as any)._id);
+      }
+      this.storageService.set('user', user);
+      this.userSubject.next(user);
+      return of(undefined);
+    } catch (e) {
+      return throwError(() => e);
+    }
+  }
 }
