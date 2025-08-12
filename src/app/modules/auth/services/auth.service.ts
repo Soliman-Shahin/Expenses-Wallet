@@ -98,23 +98,32 @@ export class AuthService {
             if (typeof GA.initialize === 'function' && environment.google?.webClientId) {
               try {
                 await GA.initialize({ clientId: environment.google.webClientId, scopes: ['profile', 'email'] });
+                console.log('[AuthService] GoogleAuth initialized with clientId:', environment.google.webClientId);
               } catch {}
             }
             const res = await GA.signIn();
+            console.log('[AuthService] GoogleAuth.signIn() result:', res);
             const idToken: string = res?.authentication?.idToken || res?.idToken || '';
+            console.log('[AuthService] Extracted idToken:', idToken ? '***' + idToken.substring(0, 10) + '...' : 'MISSING');
             if (!idToken) {
               throw new Error('Failed to obtain Google idToken');
             }
+            console.log('[AuthService] Sending idToken to backend:', `${environment.apiUrl}/user/auth/google/native`);
             // Reuse authenticate() to handle HTTP (native/web), token storage, navigation
             await this.authenticate(`/user/auth/google/native`, { idToken }).toPromise();
+            console.log('[AuthService] Backend response received and processed');
             return;
           } catch (err) {
+            console.error('[AuthService] Native Google Sign-In error:', err);
             throw err;
           }
         })()
       ).pipe(
         map(() => undefined),
-        catchError(this.handleError)
+        catchError((error) => {
+          console.error('[AuthService] HTTP error in native flow:', error);
+          return this.handleError(error);
+        })
       );
     }
 
