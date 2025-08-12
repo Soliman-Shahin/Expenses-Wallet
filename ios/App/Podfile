@@ -16,6 +16,7 @@ def capacitor_pods
   pod 'CapacitorKeyboard', :path => '../../node_modules/@capacitor/keyboard'
   pod 'CapacitorLiveUpdates', :path => '../../node_modules/@capacitor/live-updates'
   pod 'CapacitorStatusBar', :path => '../../node_modules/@capacitor/status-bar'
+  pod 'CodetrixStudioCapacitorGoogleAuth', :path => '../../node_modules/@codetrix-studio/capacitor-google-auth'
   pod 'CordovaPlugins', :path => '../capacitor-cordova-ios-plugins'
 end
 

@@ -83,7 +83,42 @@ export class AuthService {
   }
 
   loginWithGoogle(): Observable<void> {
-    // Popup-based OAuth: open backend Google route, listen for postMessage
+    const platform = Capacitor.getPlatform?.() || 'web';
+    const isNative = platform === 'android' || platform === 'ios';
+    // Native path: Use Capacitor GoogleAuth plugin to get idToken, then authenticate via backend
+    if (isNative) {
+      return from(
+        (async () => {
+          const GA = (window as any)?.Capacitor?.Plugins?.GoogleAuth || (window as any)?.GoogleAuth;
+          if (!GA) {
+            throw new Error('GoogleAuth plugin not available. Please install @codetrix-studio/capacitor-google-auth and run npx cap sync.');
+          }
+          try {
+            // Initialize if available (safe no-op on native if not needed)
+            if (typeof GA.initialize === 'function' && environment.google?.webClientId) {
+              try {
+                await GA.initialize({ clientId: environment.google.webClientId, scopes: ['profile', 'email'] });
+              } catch {}
+            }
+            const res = await GA.signIn();
+            const idToken: string = res?.authentication?.idToken || res?.idToken || '';
+            if (!idToken) {
+              throw new Error('Failed to obtain Google idToken');
+            }
+            // Reuse authenticate() to handle HTTP (native/web), token storage, navigation
+            await this.authenticate(`/user/auth/google/native`, { idToken }).toPromise();
+            return;
+          } catch (err) {
+            throw err;
+          }
+        })()
+      ).pipe(
+        map(() => undefined),
+        catchError(this.handleError)
+      );
+    }
+
+    // Web popup-based OAuth: open backend Google route, listen for postMessage
     const authUrl = `${environment.apiUrl}/user/google`;
     const authOrigin = new URL(environment.apiUrl).origin;
 
