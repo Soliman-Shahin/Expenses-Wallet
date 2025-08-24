@@ -115,14 +115,27 @@ export class AuthService {
             return;
           } catch (err) {
             console.error('[AuthService] Native Google Sign-In error:', err);
-            throw err;
+            // Show a more user-friendly error message
+            const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred during Google Sign-In';
+            console.error('[AuthService] Native Google Sign-In failed:', errorMessage);
+            throw new Error(`Google Sign-In failed: ${errorMessage}`);
           }
         })()
       ).pipe(
         map(() => undefined),
         catchError((error) => {
           console.error('[AuthService] HTTP error in native flow:', error);
-          return this.handleError(error);
+          // Extract more detailed error information
+          let errorMessage = 'Network error occurred during Google Sign-In';
+          if (error?.status) {
+            errorMessage += ` (HTTP ${error.status})`;
+          }
+          if (error?.message) {
+            errorMessage += `: ${error.message}`;
+          }
+          console.error('[AuthService] Detailed HTTP error:', errorMessage);
+          // Return a more descriptive error
+          return throwError(() => new Error(errorMessage));
         })
       );
     }
