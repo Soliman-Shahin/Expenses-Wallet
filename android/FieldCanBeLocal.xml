@@ -1,0 +1,80 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/capacitor-cordova-android-plugins/src/main/java/com/ionicframework/common/IonicCordovaCommon.java</file>
+  <line>41</line>
+  <module>android.capacitor-cordova-android-plugins.main</module>
+  <package>com.ionicframework.common</package>
+  <entry_point TYPE="field" FQNAME="com.ionicframework.common.IonicCordovaCommon prefs" />
+  <problem_class id="FieldCanBeLocal" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Field can be local variable</problem_class>
+  <description>Field can be converted to a local variable</description>
+  <highlighted_element>prefs</highlighted_element>
+  <language>JAVA</language>
+  <offset>28</offset>
+  <length>5</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/Bridge.java</file>
+  <line>117</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="field" FQNAME="com.getcapacitor.Bridge appUrlConfig" />
+  <problem_class id="FieldCanBeLocal" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Field can be local variable</problem_class>
+  <description>Field can be converted to a local variable</description>
+  <highlighted_element>appUrlConfig</highlighted_element>
+  <language>JAVA</language>
+  <offset>19</offset>
+  <length>12</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/FileUtils.java</file>
+  <line>56</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="field" FQNAME="com.getcapacitor.FileUtils.Type type" />
+  <problem_class id="FieldCanBeLocal" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Field can be local variable</problem_class>
+  <description>Field can be converted to a local variable</description>
+  <highlighted_element>type</highlighted_element>
+  <language>JAVA</language>
+  <offset>23</offset>
+  <length>4</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/JSExport.java</file>
+  <line>17</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="field" FQNAME="com.getcapacitor.JSExport CATCHALL_OPTIONS_PARAM" />
+  <problem_class id="FieldCanBeLocal" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Field can be local variable</problem_class>
+  <description>Field can be converted to a local variable</description>
+  <highlighted_element>CATCHALL_OPTIONS_PARAM</highlighted_element>
+  <language>JAVA</language>
+  <offset>26</offset>
+  <length>22</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/JSExport.java</file>
+  <line>18</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="field" FQNAME="com.getcapacitor.JSExport CALLBACK_PARAM" />
+  <problem_class id="FieldCanBeLocal" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Field can be local variable</problem_class>
+  <description>Field can be converted to a local variable</description>
+  <highlighted_element>CALLBACK_PARAM</highlighted_element>
+  <language>JAVA</language>
+  <offset>26</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/haptics/android/src/main/java/com/capacitorjs/plugins/haptics/Haptics.java</file>
+  <line>13</line>
+  <module>android.capacitor-haptics.main</module>
+  <package>com.capacitorjs.plugins.haptics</package>
+  <entry_point TYPE="field" FQNAME="com.capacitorjs.plugins.haptics.Haptics context" />
+  <problem_class id="FieldCanBeLocal" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Field can be local variable</problem_class>
+  <description>Field can be converted to a local variable</description>
+  <highlighted_element>context</highlighted_element>
+  <language>JAVA</language>
+  <offset>20</offset>
+  <length>7</length>
+</problem>
+</problems>

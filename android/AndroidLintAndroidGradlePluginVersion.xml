@@ -1,0 +1,15 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/capacitor-cordova-android-plugins/build.gradle</file>
+  <line>12</line>
+  <module>android.capacitor-cordova-android-plugins</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/capacitor-cordova-android-plugins/build.gradle" />
+  <problem_class id="AndroidLintAndroidGradlePluginVersion" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Obsolete Android Gradle Plugin Version</problem_class>
+  <hints />
+  <description>&lt;html&gt;A newer version of com.android.tools.build:gradle than 8.2.1 is available: 8.12.1&lt;/html&gt;</description>
+  <highlighted_element>'com.android.tools.build:gradle:8.2.1'</highlighted_element>
+  <language>Groovy</language>
+  <offset>18</offset>
+  <length>38</length>
+</problem>
+</problems>

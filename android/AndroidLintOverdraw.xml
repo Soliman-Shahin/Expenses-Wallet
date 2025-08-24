@@ -1,0 +1,15 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/res/layout/fragment_bridge.xml</file>
+  <line>5</line>
+  <module>android.capacitor-android.main</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/res/layout/fragment_bridge.xml" />
+  <problem_class id="AndroidLintOverdraw" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Overdraw: Painting regions more than once</problem_class>
+  <hints />
+  <description>&lt;html&gt;Possible overdraw: Root element paints background &lt;code&gt;#F0FF1414&lt;/code&gt; with a theme that also paints a background (inferred theme is &lt;code&gt;@style/AppTheme&lt;/code&gt;)&lt;/html&gt;</description>
+  <highlighted_element>android:background=&quot;#F0FF1414&quot;</highlighted_element>
+  <language>XML</language>
+  <offset>4</offset>
+  <length>30</length>
+</problem>
+</problems>

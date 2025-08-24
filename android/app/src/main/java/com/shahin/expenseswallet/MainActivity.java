@@ -1,4 +1,4 @@
-package io.ionic.starter;
+package com.shahin.expenseswallet;
 
 import com.getcapacitor.BridgeActivity;
 

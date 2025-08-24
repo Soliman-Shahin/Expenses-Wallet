@@ -1,0 +1,14 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@codetrix-studio/capacitor-google-auth/android/src/main/res/layout/bridge_layout_main.xml</file>
+  <line>2</line>
+  <module>android.codetrix-studio-capacitor-google-auth.main</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/../node_modules/@codetrix-studio/capacitor-google-auth/android/src/main/res/layout/bridge_layout_main.xml" />
+  <problem_class id="AndroidUnresolvableTag" severity="ERROR" attribute_key="WRONG_REFERENCES_ATTRIBUTES">Unresolvable tag</problem_class>
+  <description>Cannot resolve class androidx.coordinatorlayout.widget.CoordinatorLayout</description>
+  <highlighted_element>androidx.coordinatorlayout.widget.CoordinatorLayout</highlighted_element>
+  <language>XML</language>
+  <offset>1</offset>
+  <length>51</length>
+</problem>
+</problems>

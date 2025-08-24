@@ -1,10 +1,15 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace "io.ionic.starter"
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/NOTICE', 'META-INF/LICENSE']
+        }
+    }
+    namespace "com.shahin.expenseswallet"
     compileSdkVersion rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "io.ionic.starter"
+        applicationId "com.shahin.expenseswallet"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -48,16 +53,16 @@ dependencies {
     implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
     // Pin core and core-ktx to versions compatible with compileSdk 34 to satisfy AAR metadata checks
     implementation "androidx.core:core:$androidxCoreVersion"
-    
+
     // Google Sign-In
-    implementation 'com.google.android.gms:play-services-auth:21.0.0'
-    implementation 'com.google.android.gms:play-services-identity:18.0.1'
-    
+    implementation 'com.google.android.gms:play-services-auth:21.4.0'
+    implementation 'com.google.android.gms:play-services-identity:18.1.0'
+
     // Required for Google Sign-In
-    implementation 'com.google.android.gms:play-services-base:18.3.0'
-    implementation 'com.google.android.gms:play-services-basement:18.3.0'
-    implementation 'com.google.android.gms:play-services-tasks:18.1.0'
-    implementation 'com.google.android.gms:play-services-auth-api-phone:18.0.2'
+    implementation 'com.google.android.gms:play-services-base:18.7.2'
+    implementation 'com.google.android.gms:play-services-basement:18.7.1'
+    implementation 'com.google.android.gms:play-services-tasks:18.3.2'
+    implementation 'com.google.android.gms:play-services-auth-api-phone:18.2.0'
     implementation "androidx.core:core-ktx:$androidxCoreVersion"
     implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
     implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
@@ -75,6 +80,6 @@ try {
     if (servicesJSON.text) {
         apply plugin: 'com.google.gms.google-services'
     }
-} catch(Exception e) {
+} catch(Exception ignored) {
     logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
 }

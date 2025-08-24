@@ -1,0 +1,15 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@codetrix-studio/capacitor-google-auth/android/build.gradle</file>
+  <line>60</line>
+  <module>android.codetrix-studio-capacitor-google-auth</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/../node_modules/@codetrix-studio/capacitor-google-auth/android/build.gradle" />
+  <problem_class id="AndroidLintGradleDynamicVersion" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Gradle Dynamic Version</problem_class>
+  <hints />
+  <description>&lt;html&gt;Avoid using + in version numbers; can lead to unpredictable and unrepeatable builds (com.google.android.gms:play-services-auth:18.+)&lt;/html&gt;</description>
+  <highlighted_element>'com.google.android.gms:play-services-auth:18.+'</highlighted_element>
+  <language>Groovy</language>
+  <offset>19</offset>
+  <length>48</length>
+</problem>
+</problems>

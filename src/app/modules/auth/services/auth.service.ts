@@ -97,8 +97,8 @@ export class AuthService {
             // Initialize if available (safe no-op on native if not needed)
             if (typeof GA.initialize === 'function' && environment.google?.webClientId) {
               try {
-                await GA.initialize({ clientId: environment.google.webClientId, scopes: ['profile', 'email'] });
-                console.log('[AuthService] GoogleAuth initialized with clientId:', environment.google.webClientId);
+                await GA.initialize({ serverClientId: environment.google.webClientId, scopes: ['profile', 'email'] });
+                console.log('[AuthService] GoogleAuth initialized with serverClientId:', environment.google.webClientId);
               } catch {}
             }
             const res = await GA.signIn();

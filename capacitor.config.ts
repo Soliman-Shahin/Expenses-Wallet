@@ -1,7 +1,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'sh.expenses.wallet',
+  appId: 'com.shahin.expenseswallet',
   appName: 'Expenses Wallet',
   webDir: 'www',
   server: {

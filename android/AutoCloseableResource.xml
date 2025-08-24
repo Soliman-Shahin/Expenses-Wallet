@@ -1,0 +1,41 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/capacitor-cordova-android-plugins/src/main/java/com/ionicframework/common/IonicCordovaCommon.java</file>
+  <line>279</line>
+  <module>android.capacitor-cordova-android-plugins.main</module>
+  <package>com.ionicframework.common</package>
+  <entry_point TYPE="method" FQNAME="com.ionicframework.common.IonicCordovaCommon void downloadFile(org.apache.cordova.CallbackContext callbackContext, org.json.JSONObject options)" />
+  <problem_class id="AutoCloseableResource" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">AutoCloseable used without 'try'-with-resources</problem_class>
+  <description>'FileOutputStream' used without 'try'-with-resources statement #loc</description>
+  <highlighted_element>FileOutputStream</highlighted_element>
+  <language>JAVA</language>
+  <offset>33</offset>
+  <length>16</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/BridgeFragment.java</file>
+  <line>99</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="method" FQNAME="com.getcapacitor.BridgeFragment void onInflate(android.content.Context context, android.util.AttributeSet attrs, android.os.Bundle savedInstanceState)" />
+  <problem_class id="AutoCloseableResource" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">AutoCloseable used without 'try'-with-resources</problem_class>
+  <description>'TypedArray' used without 'try'-with-resources statement #loc</description>
+  <highlighted_element>obtainStyledAttributes</highlighted_element>
+  <language>JAVA</language>
+  <offset>31</offset>
+  <length>22</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/live-updates/android/src/main/java/com/capacitorjs/liveupdates/LiveUpdatesPlugin.java</file>
+  <line>94</line>
+  <module>android.capacitor-live-updates.main</module>
+  <package>com.capacitorjs.liveupdates</package>
+  <entry_point TYPE="method" FQNAME="com.capacitorjs.liveupdates.LiveUpdatesPlugin void init(com.getcapacitor.PluginConfig pluginConfig)" />
+  <problem_class id="AutoCloseableResource" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">AutoCloseable used without 'try'-with-resources</problem_class>
+  <description>'InputStream' used without 'try'-with-resources statement #loc</description>
+  <highlighted_element>open</highlighted_element>
+  <language>JAVA</language>
+  <offset>45</offset>
+  <length>4</length>
+</problem>
+</problems>

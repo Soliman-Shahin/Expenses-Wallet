@@ -1,0 +1,15 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@codetrix-studio/capacitor-google-auth/android/src/main/java/com/codetrixstudio/capacitor/GoogleAuth/GoogleAuth.java</file>
+  <line>77</line>
+  <module>android.codetrix-studio-capacitor-google-auth.main</module>
+  <package>com.codetrixstudio.capacitor.GoogleAuth</package>
+  <entry_point TYPE="method" FQNAME="com.codetrixstudio.capacitor.GoogleAuth.GoogleAuth void load()" />
+  <problem_class id="RedundantMethodOverride" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Method is identical to its super method</problem_class>
+  <description>Method &lt;code&gt;load()&lt;/code&gt; is identical to its super method #loc</description>
+  <highlighted_element>load</highlighted_element>
+  <language>JAVA</language>
+  <offset>14</offset>
+  <length>4</length>
+</problem>
+</problems>

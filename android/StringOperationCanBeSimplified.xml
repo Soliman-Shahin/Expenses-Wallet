@@ -1,0 +1,28 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/util/HostMask.java</file>
+  <line>110</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor.util</package>
+  <entry_point TYPE="method" FQNAME="com.getcapacitor.util.HostMask.Util boolean matches(java.lang.String mask, java.lang.String string)" />
+  <problem_class id="StringOperationCanBeSimplified" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Redundant 'String' operation</problem_class>
+  <description>&lt;code&gt;toUpperCase()&lt;/code&gt; call can be replaced with 'equalsIgnoreCase()'</description>
+  <highlighted_element>toUpperCase</highlighted_element>
+  <language>JAVA</language>
+  <offset>28</offset>
+  <length>11</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@codetrix-studio/capacitor-google-auth/android/src/main/java/com/codetrixstudio/capacitor/GoogleAuth/GoogleAuth.java</file>
+  <line>181</line>
+  <module>android.codetrix-studio-capacitor-google-auth.main</module>
+  <package>com.codetrixstudio.capacitor.GoogleAuth</package>
+  <entry_point TYPE="method" FQNAME="com.codetrixstudio.capacitor.GoogleAuth.GoogleAuth void initialize(com.getcapacitor.PluginCall call)" />
+  <problem_class id="StringOperationCanBeSimplified" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Redundant 'String' operation</problem_class>
+  <description>&lt;code&gt;new String()&lt;/code&gt; is redundant #loc</description>
+  <highlighted_element>String</highlighted_element>
+  <language>JAVA</language>
+  <offset>66</offset>
+  <length>6</length>
+</problem>
+</problems>

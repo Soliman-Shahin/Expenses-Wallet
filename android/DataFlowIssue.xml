@@ -1,0 +1,561 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/capacitor-cordova-android-plugins/src/main/java/com/ionicframework/common/IonicCordovaCommon.java</file>
+  <line>143</line>
+  <module>android.capacitor-cordova-android-plugins.main</module>
+  <package>com.ionicframework.common</package>
+  <entry_point TYPE="method" FQNAME="com.ionicframework.common.IonicCordovaCommon void copyAssets(java.lang.String assetPath, java.lang.String targetDir)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Dereference of &lt;code&gt;assetManager.list(assetPath + &quot;/&quot; + filename)&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>assetManager.list(assetPath + &quot;/&quot; + filename)</highlighted_element>
+  <language>JAVA</language>
+  <offset>12</offset>
+  <length>45</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/capacitor-cordova-android-plugins/src/main/java/com/ionicframework/common/IonicCordovaCommon.java</file>
+  <line>203</line>
+  <module>android.capacitor-cordova-android-plugins.main</module>
+  <package>com.ionicframework.common</package>
+  <entry_point TYPE="method" FQNAME="com.ionicframework.common.IonicCordovaCommon void copyTo(org.apache.cordova.CallbackContext callbackContext, org.json.JSONObject options)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;getPath&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>getPath</highlighted_element>
+  <language>JAVA</language>
+  <offset>39</offset>
+  <length>7</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/capacitor-cordova-android-plugins/src/main/java/com/ionicframework/common/IonicCordovaCommon.java</file>
+  <line>277</line>
+  <module>android.capacitor-cordova-android-plugins.main</module>
+  <package>com.ionicframework.common</package>
+  <entry_point TYPE="method" FQNAME="com.ionicframework.common.IonicCordovaCommon void downloadFile(org.apache.cordova.CallbackContext callbackContext, org.json.JSONObject options)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;mkdirs&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>mkdirs</highlighted_element>
+  <language>JAVA</language>
+  <offset>31</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/Bridge.java</file>
+  <line>264</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="method" FQNAME="com.getcapacitor.Bridge void loadWebView()" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;getScriptString&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>getScriptString</highlighted_element>
+  <language>JAVA</language>
+  <offset>75</offset>
+  <length>15</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/Bridge.java</file>
+  <line>317</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="method" FQNAME="com.getcapacitor.Bridge boolean isMinimumWebViewInstalled()" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Dereference of &lt;code&gt;info&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>info</highlighted_element>
+  <language>JAVA</language>
+  <offset>46</offset>
+  <length>4</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/Bridge.java</file>
+  <line>320</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="method" FQNAME="com.getcapacitor.Bridge boolean isMinimumWebViewInstalled()" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Argument &lt;code&gt;majorVersionStr&lt;/code&gt; might be null</description>
+  <highlighted_element>majorVersionStr</highlighted_element>
+  <language>JAVA</language>
+  <offset>52</offset>
+  <length>15</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/Bridge.java</file>
+  <line>388</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="method" FQNAME="com.getcapacitor.Bridge boolean launchIntent(android.net.Uri url)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;equals&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>equals</highlighted_element>
+  <language>JAVA</language>
+  <offset>28</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/Bridge.java</file>
+  <line>394</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="method" FQNAME="com.getcapacitor.Bridge boolean launchIntent(android.net.Uri url)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;equals&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>equals</highlighted_element>
+  <language>JAVA</language>
+  <offset>31</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/Bridge.java</file>
+  <line>969</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="method" FQNAME="com.getcapacitor.Bridge void savePermissionCall(com.getcapacitor.PluginCall call)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;add&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>add</highlighted_element>
+  <language>JAVA</language>
+  <offset>59</offset>
+  <length>3</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/Bridge.java</file>
+  <line>1553</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="method" FQNAME="com.getcapacitor.Bridge.Builder com.getcapacitor.Bridge create()" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;findViewById&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>findViewById</highlighted_element>
+  <language>JAVA</language>
+  <offset>73</offset>
+  <length>12</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/BridgeWebChromeClient.java</file>
+  <line>402</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="method" FQNAME="com.getcapacitor.BridgeWebChromeClient boolean showVideoCapturePicker(android.webkit.ValueCallback&lt;android.net.Uri[]&gt; filePathCallback)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;getData&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>getData</highlighted_element>
+  <language>JAVA</language>
+  <offset>66</offset>
+  <length>7</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/BridgeWebChromeClient.java</file>
+  <line>416</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="method" FQNAME="com.getcapacitor.BridgeWebChromeClient void showFilePicker(android.webkit.ValueCallback&lt;android.net.Uri[]&gt; filePathCallback, android.webkit.WebChromeClient.FileChooserParams fileChooserParams)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;startsWith&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>startsWith</highlighted_element>
+  <language>JAVA</language>
+  <offset>78</offset>
+  <length>10</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/BridgeWebChromeClient.java</file>
+  <line>419</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="method" FQNAME="com.getcapacitor.BridgeWebChromeClient void showFilePicker(android.webkit.ValueCallback&lt;android.net.Uri[]&gt; filePathCallback, android.webkit.WebChromeClient.FileChooserParams fileChooserParams)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;startsWith&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>startsWith</highlighted_element>
+  <language>JAVA</language>
+  <offset>33</offset>
+  <length>10</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/BridgeWebChromeClient.java</file>
+  <line>428</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="method" FQNAME="com.getcapacitor.BridgeWebChromeClient void showFilePicker(android.webkit.ValueCallback&lt;android.net.Uri[]&gt; filePathCallback, android.webkit.WebChromeClient.FileChooserParams fileChooserParams)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;getClipData&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>getClipData</highlighted_element>
+  <language>JAVA</language>
+  <offset>93</offset>
+  <length>11</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/FileUtils.java</file>
+  <line>65</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="method" FQNAME="com.getcapacitor.FileUtils java.lang.String getPortablePath(android.content.Context c, java.lang.String host, android.net.Uri u)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;startsWith&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>startsWith</highlighted_element>
+  <language>JAVA</language>
+  <offset>17</offset>
+  <length>10</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/FileUtils.java</file>
+  <line>219</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="method" FQNAME="com.getcapacitor.FileUtils java.lang.String getCopyFilePath(android.net.Uri uri, android.content.Context context)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;getColumnIndex&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>getColumnIndex</highlighted_element>
+  <language>JAVA</language>
+  <offset>31</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/FileUtils.java</file>
+  <line>229</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="method" FQNAME="com.getcapacitor.FileUtils java.lang.String getCopyFilePath(android.net.Uri uri, android.content.Context context)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;available&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>available</highlighted_element>
+  <language>JAVA</language>
+  <offset>50</offset>
+  <length>9</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/JSExport.java</file>
+  <line>87</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="method" FQNAME="com.getcapacitor.JSExport java.lang.String getFilesContent(android.content.Context context, java.lang.String path)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Dereference of &lt;code&gt;content&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>content</highlighted_element>
+  <language>JAVA</language>
+  <offset>16</offset>
+  <length>7</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/Plugin.java</file>
+  <line>106</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="method" FQNAME="com.getcapacitor.Plugin void initializeActivityLaunchers()" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;getName&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>getName</highlighted_element>
+  <language>JAVA</language>
+  <offset>26</offset>
+  <length>7</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/WebViewLocalServer.java</file>
+  <line>202</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="method" FQNAME="com.getcapacitor.WebViewLocalServer boolean isLocalFile(android.net.Uri uri)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;startsWith&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>startsWith</highlighted_element>
+  <language>JAVA</language>
+  <offset>20</offset>
+  <length>10</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/WebViewLocalServer.java</file>
+  <line>211</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="method" FQNAME="com.getcapacitor.WebViewLocalServer boolean isMainUrl(android.net.Uri loadingUrl)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;equalsIgnoreCase&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>equalsIgnoreCase</highlighted_element>
+  <language>JAVA</language>
+  <offset>70</offset>
+  <length>16</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/WebViewLocalServer.java</file>
+  <line>328</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="method" FQNAME="com.getcapacitor.WebViewLocalServer android.webkit.WebResourceResponse handleLocalRequest(android.webkit.WebResourceRequest request, com.getcapacitor.WebViewLocalServer.PathHandler handler)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;split&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>split</highlighted_element>
+  <language>JAVA</language>
+  <offset>45</offset>
+  <length>5</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/WebViewLocalServer.java</file>
+  <line>364</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="method" FQNAME="com.getcapacitor.WebViewLocalServer android.webkit.WebResourceResponse handleLocalRequest(android.webkit.WebResourceRequest request, com.getcapacitor.WebViewLocalServer.PathHandler handler)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;equals&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>equals</highlighted_element>
+  <language>JAVA</language>
+  <offset>17</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/WebViewLocalServer.java</file>
+  <line>375</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="method" FQNAME="com.getcapacitor.WebViewLocalServer android.webkit.WebResourceResponse handleLocalRequest(android.webkit.WebResourceRequest request, com.getcapacitor.WebViewLocalServer.PathHandler handler)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;contains&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>contains</highlighted_element>
+  <language>JAVA</language>
+  <offset>72</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/WebViewLocalServer.java</file>
+  <line>630</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="method" FQNAME="com.getcapacitor.WebViewLocalServer$1 java.io.InputStream handle(android.net.Uri url)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;startsWith&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>startsWith</highlighted_element>
+  <language>JAVA</language>
+  <offset>29</offset>
+  <length>10</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/plugin/util/HttpRequestHandler.java</file>
+  <line>397</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor.plugin.util</package>
+  <entry_point TYPE="method" FQNAME="com.getcapacitor.plugin.util.HttpRequestHandler com.getcapacitor.JSObject request(com.getcapacitor.PluginCall call, java.lang.String httpMethod, com.getcapacitor.Bridge bridge)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;toUpperCase&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>toUpperCase</highlighted_element>
+  <language>JAVA</language>
+  <offset>115</offset>
+  <length>11</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/plugin/util/HttpRequestHandler.java</file>
+  <line>406</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor.plugin.util</package>
+  <entry_point TYPE="method" FQNAME="com.getcapacitor.plugin.util.HttpRequestHandler com.getcapacitor.JSObject request(com.getcapacitor.PluginCall call, java.lang.String httpMethod, com.getcapacitor.Bridge bridge)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Argument &lt;code&gt;params&lt;/code&gt; might be null</description>
+  <highlighted_element>params</highlighted_element>
+  <language>JAVA</language>
+  <offset>26</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/plugin/util/HttpRequestHandler.java</file>
+  <line>406</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor.plugin.util</package>
+  <entry_point TYPE="method" FQNAME="com.getcapacitor.plugin.util.HttpRequestHandler com.getcapacitor.JSObject request(com.getcapacitor.PluginCall call, java.lang.String httpMethod, com.getcapacitor.Bridge bridge)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Unboxing of &lt;code&gt;shouldEncode&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>shouldEncode</highlighted_element>
+  <language>JAVA</language>
+  <offset>34</offset>
+  <length>12</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/haptics/android/src/main/java/com/capacitorjs/plugins/haptics/HapticsPlugin.java</file>
+  <line>22</line>
+  <module>android.capacitor-haptics.main</module>
+  <package>com.capacitorjs.plugins.haptics</package>
+  <entry_point TYPE="method" FQNAME="com.capacitorjs.plugins.haptics.HapticsPlugin void vibrate(com.getcapacitor.PluginCall call)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Unboxing of &lt;code&gt;call.getInt(&quot;duration&quot;, 300)&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>call.getInt(&quot;duration&quot;, 300)</highlighted_element>
+  <language>JAVA</language>
+  <offset>23</offset>
+  <length>28</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/keyboard/android/src/main/java/com/capacitorjs/plugins/keyboard/Keyboard.java</file>
+  <line>67</line>
+  <module>android.capacitor-keyboard.main</module>
+  <package>com.capacitorjs.plugins.keyboard</package>
+  <entry_point TYPE="method" FQNAME="com.capacitorjs.plugins.keyboard.Keyboard$1 androidx.core.view.WindowInsetsAnimationCompat.BoundsCompat onStart(androidx.core.view.WindowInsetsAnimationCompat animation, androidx.core.view.WindowInsetsAnimationCompat.BoundsCompat bounds)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;isVisible&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>isVisible</highlighted_element>
+  <language>JAVA</language>
+  <offset>87</offset>
+  <length>9</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/keyboard/android/src/main/java/com/capacitorjs/plugins/keyboard/Keyboard.java</file>
+  <line>69</line>
+  <module>android.capacitor-keyboard.main</module>
+  <package>com.capacitorjs.plugins.keyboard</package>
+  <entry_point TYPE="method" FQNAME="com.capacitorjs.plugins.keyboard.Keyboard$1 androidx.core.view.WindowInsetsAnimationCompat.BoundsCompat onStart(androidx.core.view.WindowInsetsAnimationCompat animation, androidx.core.view.WindowInsetsAnimationCompat.BoundsCompat bounds)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;getInsets&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>getInsets</highlighted_element>
+  <language>JAVA</language>
+  <offset>43</offset>
+  <length>9</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/keyboard/android/src/main/java/com/capacitorjs/plugins/keyboard/Keyboard.java</file>
+  <line>78</line>
+  <module>android.capacitor-keyboard.main</module>
+  <package>com.capacitorjs.plugins.keyboard</package>
+  <entry_point TYPE="method" FQNAME="com.capacitorjs.plugins.keyboard.Keyboard$1 androidx.core.view.WindowInsetsAnimationCompat.BoundsCompat onStart(androidx.core.view.WindowInsetsAnimationCompat animation, androidx.core.view.WindowInsetsAnimationCompat.BoundsCompat bounds)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;onKeyboardEvent&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>onKeyboardEvent</highlighted_element>
+  <language>JAVA</language>
+  <offset>46</offset>
+  <length>15</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/keyboard/android/src/main/java/com/capacitorjs/plugins/keyboard/Keyboard.java</file>
+  <line>80</line>
+  <module>android.capacitor-keyboard.main</module>
+  <package>com.capacitorjs.plugins.keyboard</package>
+  <entry_point TYPE="method" FQNAME="com.capacitorjs.plugins.keyboard.Keyboard$1 androidx.core.view.WindowInsetsAnimationCompat.BoundsCompat onStart(androidx.core.view.WindowInsetsAnimationCompat animation, androidx.core.view.WindowInsetsAnimationCompat.BoundsCompat bounds)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;onKeyboardEvent&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>onKeyboardEvent</highlighted_element>
+  <language>JAVA</language>
+  <offset>46</offset>
+  <length>15</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/keyboard/android/src/main/java/com/capacitorjs/plugins/keyboard/Keyboard.java</file>
+  <line>88</line>
+  <module>android.capacitor-keyboard.main</module>
+  <package>com.capacitorjs.plugins.keyboard</package>
+  <entry_point TYPE="method" FQNAME="com.capacitorjs.plugins.keyboard.Keyboard$1 void onEnd(androidx.core.view.WindowInsetsAnimationCompat animation)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;isVisible&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>isVisible</highlighted_element>
+  <language>JAVA</language>
+  <offset>87</offset>
+  <length>9</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/keyboard/android/src/main/java/com/capacitorjs/plugins/keyboard/Keyboard.java</file>
+  <line>90</line>
+  <module>android.capacitor-keyboard.main</module>
+  <package>com.capacitorjs.plugins.keyboard</package>
+  <entry_point TYPE="method" FQNAME="com.capacitorjs.plugins.keyboard.Keyboard$1 void onEnd(androidx.core.view.WindowInsetsAnimationCompat animation)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;getInsets&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>getInsets</highlighted_element>
+  <language>JAVA</language>
+  <offset>43</offset>
+  <length>9</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/keyboard/android/src/main/java/com/capacitorjs/plugins/keyboard/Keyboard.java</file>
+  <line>95</line>
+  <module>android.capacitor-keyboard.main</module>
+  <package>com.capacitorjs.plugins.keyboard</package>
+  <entry_point TYPE="method" FQNAME="com.capacitorjs.plugins.keyboard.Keyboard$1 void onEnd(androidx.core.view.WindowInsetsAnimationCompat animation)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;onKeyboardEvent&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>onKeyboardEvent</highlighted_element>
+  <language>JAVA</language>
+  <offset>46</offset>
+  <length>15</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/keyboard/android/src/main/java/com/capacitorjs/plugins/keyboard/Keyboard.java</file>
+  <line>97</line>
+  <module>android.capacitor-keyboard.main</module>
+  <package>com.capacitorjs.plugins.keyboard</package>
+  <entry_point TYPE="method" FQNAME="com.capacitorjs.plugins.keyboard.Keyboard$1 void onEnd(androidx.core.view.WindowInsetsAnimationCompat animation)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;onKeyboardEvent&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>onKeyboardEvent</highlighted_element>
+  <language>JAVA</language>
+  <offset>46</offset>
+  <length>15</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/live-updates/android/src/main/java/com/capacitorjs/liveupdates/LiveUpdatesPlugin.java</file>
+  <line>256</line>
+  <module>android.capacitor-live-updates.main</module>
+  <package>com.capacitorjs.liveupdates</package>
+  <entry_point TYPE="method" FQNAME="com.capacitorjs.liveupdates.LiveUpdatesPlugin void setConfig(com.getcapacitor.PluginCall call)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;getUsesSecureLiveUpdates&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>getUsesSecureLiveUpdates</highlighted_element>
+  <language>JAVA</language>
+  <offset>24</offset>
+  <length>24</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/live-updates/android/src/main/java/com/capacitorjs/liveupdates/LiveUpdatesPlugin.java</file>
+  <line>273</line>
+  <module>android.capacitor-live-updates.main</module>
+  <package>com.capacitorjs.liveupdates</package>
+  <entry_point TYPE="method" FQNAME="com.capacitorjs.liveupdates.LiveUpdatesPlugin void resetConfig(com.getcapacitor.PluginCall call)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;getUsesSecureLiveUpdates&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>getUsesSecureLiveUpdates</highlighted_element>
+  <language>JAVA</language>
+  <offset>20</offset>
+  <length>24</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/status-bar/android/src/main/java/com/capacitorjs/plugins/statusbar/StatusBarPlugin.java</file>
+  <line>102</line>
+  <module>android.capacitor-status-bar.main</module>
+  <package>com.capacitorjs.plugins.statusbar</package>
+  <entry_point TYPE="method" FQNAME="com.capacitorjs.plugins.statusbar.StatusBarPlugin void setOverlaysWebView(com.getcapacitor.PluginCall call)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Argument &lt;code&gt;overlays&lt;/code&gt; might be null</description>
+  <highlighted_element>overlays</highlighted_element>
+  <language>JAVA</language>
+  <offset>54</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@codetrix-studio/capacitor-google-auth/android/src/main/java/com/codetrixstudio/capacitor/GoogleAuth/GoogleAuth.java</file>
+  <line>98</line>
+  <module>android.codetrix-studio-capacitor-google-auth.main</module>
+  <package>com.codetrixstudio.capacitor.GoogleAuth</package>
+  <entry_point TYPE="method" FQNAME="com.codetrixstudio.capacitor.GoogleAuth.GoogleAuth void signInResult(com.getcapacitor.PluginCall call, androidx.activity.result.ActivityResult result)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;getAccount&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>getAccount</highlighted_element>
+  <language>JAVA</language>
+  <offset>62</offset>
+  <length>10</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@codetrix-studio/capacitor-google-auth/android/src/main/java/com/codetrixstudio/capacitor/GoogleAuth/GoogleAuth.java</file>
+  <line>186</line>
+  <module>android.codetrix-studio-capacitor-google-auth.main</module>
+  <package>com.codetrixstudio.capacitor.GoogleAuth</package>
+  <entry_point TYPE="method" FQNAME="com.codetrixstudio.capacitor.GoogleAuth.GoogleAuth void initialize(com.getcapacitor.PluginCall call)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Unboxing of &lt;code&gt;call.getData().getBoolean(&quot;grantOfflineAccess&quot;, configForceCodeForRefreshToken)&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>call.getData().getBoolean(&quot;grantOfflineAccess&quot;, configForceCodeForRefreshToken)</highlighted_element>
+  <language>JAVA</language>
+  <offset>39</offset>
+  <length>79</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@codetrix-studio/capacitor-google-auth/android/src/main/java/com/codetrixstudio/capacitor/GoogleAuth/GoogleAuth.java</file>
+  <line>192</line>
+  <module>android.codetrix-studio-capacitor-google-auth.main</module>
+  <package>com.codetrixstudio.capacitor.GoogleAuth</package>
+  <entry_point TYPE="method" FQNAME="com.codetrixstudio.capacitor.GoogleAuth.GoogleAuth void initialize(com.getcapacitor.PluginCall call)" />
+  <problem_class id="DataFlowIssue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Nullability and data flow problems</problem_class>
+  <description>Method invocation &lt;code&gt;replaceAll&lt;/code&gt; may produce &lt;code&gt;NullPointerException&lt;/code&gt;</description>
+  <highlighted_element>replaceAll</highlighted_element>
+  <language>JAVA</language>
+  <offset>7</offset>
+  <length>10</length>
+</problem>
+</problems>

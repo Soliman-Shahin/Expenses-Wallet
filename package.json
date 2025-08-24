@@ -13,7 +13,8 @@
     "resources": "capacitor-assets generate",
     "sync": "cap sync",
     "sync:android": "cap sync android",
-    "sync:ios": "cap sync ios"
+    "sync:ios": "cap sync ios",
+    "open:android": "npx cap sync android && npx cap open android"
   },
   "private": true,
   "dependencies": {

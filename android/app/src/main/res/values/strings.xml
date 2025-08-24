@@ -2,8 +2,8 @@
 <resources>
   <string name="app_name">Expenses Wallet</string>
   <string name="title_activity_main">Expenses Wallet</string>
-  <string name="package_name">io.ionic.starter</string>
-  <string name="custom_url_scheme">io.ionic.starter</string>
+  <string name="package_name">com.shahin.expenseswallet</string>
+  <string name="custom_url_scheme">com.shahin.expenseswallet</string>
   <string name="ionic_app_id">1e7b36fa</string>
   <string name="ionic_channel_name">Production</string>
   <string name="ionic_update_method">background</string>

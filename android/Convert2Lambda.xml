@@ -1,0 +1,54 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/capacitor-cordova-android-plugins/src/main/java/com/ionicframework/common/IonicCordovaCommon.java</file>
+  <line>69</line>
+  <module>android.capacitor-cordova-android-plugins.main</module>
+  <package>com.ionicframework.common</package>
+  <entry_point TYPE="method" FQNAME="com.ionicframework.common.IonicCordovaCommon void threadhelper(com.ionicframework.common.IonicCordovaCommon.FileOp f, org.json.JSONArray args, org.apache.cordova.CallbackContext callbackContext)" />
+  <problem_class id="Convert2Lambda" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Anonymous type can be replaced with lambda</problem_class>
+  <description>Anonymous new Runnable() can be replaced with lambda</description>
+  <highlighted_element>new Runnable()</highlighted_element>
+  <language>JAVA</language>
+  <offset>36</offset>
+  <length>15</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/capacitor-cordova-android-plugins/src/main/java/com/ionicframework/common/IonicCordovaCommon.java</file>
+  <line>102</line>
+  <module>android.capacitor-cordova-android-plugins.main</module>
+  <package>com.ionicframework.common</package>
+  <entry_point TYPE="method" FQNAME="com.ionicframework.common.IonicCordovaCommon boolean execute(java.lang.String action, org.json.JSONArray args, org.apache.cordova.CallbackContext callbackContext)" />
+  <problem_class id="Convert2Lambda" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Anonymous type can be replaced with lambda</problem_class>
+  <description>Anonymous new FileOp( ) can be replaced with lambda</description>
+  <highlighted_element>new FileOp( )</highlighted_element>
+  <language>JAVA</language>
+  <offset>20</offset>
+  <length>13</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@codetrix-studio/capacitor-google-auth/android/src/main/java/com/codetrixstudio/capacitor/GoogleAuth/GoogleAuth.java</file>
+  <line>159</line>
+  <module>android.codetrix-studio-capacitor-google-auth.main</module>
+  <package>com.codetrixstudio.capacitor.GoogleAuth</package>
+  <entry_point TYPE="method" FQNAME="com.codetrixstudio.capacitor.GoogleAuth.GoogleAuth void signOut(com.getcapacitor.PluginCall call)" />
+  <problem_class id="Convert2Lambda" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Anonymous type can be replaced with lambda</problem_class>
+  <description>Anonymous new OnSuccessListener&lt;Void&gt;() can be replaced with lambda</description>
+  <highlighted_element>new OnSuccessListener&lt;Void&gt;()</highlighted_element>
+  <language>JAVA</language>
+  <offset>43</offset>
+  <length>30</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@codetrix-studio/capacitor-google-auth/android/src/main/java/com/codetrixstudio/capacitor/GoogleAuth/GoogleAuth.java</file>
+  <line>165</line>
+  <module>android.codetrix-studio-capacitor-google-auth.main</module>
+  <package>com.codetrixstudio.capacitor.GoogleAuth</package>
+  <entry_point TYPE="method" FQNAME="com.codetrixstudio.capacitor.GoogleAuth.GoogleAuth void signOut(com.getcapacitor.PluginCall call)" />
+  <problem_class id="Convert2Lambda" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Anonymous type can be replaced with lambda</problem_class>
+  <description>Anonymous new OnFailureListener() can be replaced with lambda</description>
+  <highlighted_element>new OnFailureListener()</highlighted_element>
+  <language>JAVA</language>
+  <offset>43</offset>
+  <length>24</length>
+</problem>
+</problems>
