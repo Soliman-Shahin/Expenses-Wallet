@@ -18,6 +18,10 @@ export const APP_ROUTES = {
     LIST: 'list',
     CREATE: 'create',
   },
+  TRANSACTIONS: {
+    INDEX: 'transactions',
+    LIST: 'list',
+  },
   SETTINGS: {
     INDEX: 'settings',
     LIST: 'list',

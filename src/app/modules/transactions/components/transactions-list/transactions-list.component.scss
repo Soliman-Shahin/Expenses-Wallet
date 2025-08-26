@@ -1,0 +1,266 @@
+/* Match the category icon style used in Categories list */
+.category-icon {
+  height: var(--ew-space-9) !important; // 40px
+  width: var(--ew-space-9) !important;  // 40px
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-inline-end: var(--ew-space-4); // 12px
+}
+
+/* Optional: tweak ion-item spacing for tighter layout */
+ion-item {
+  --inner-padding-start: var(--ew-space-3); // 8px
+  --inner-padding-end: var(--ew-space-3);   // 8px
+}
+
+/* Match Categories list spacing */
+.transactions-list {
+  padding: var(--ew-space-3) var(--ew-space-4); /* same as .categories-list */
+}
+
+.transaction-title {
+  color: var(--ion-color-dark);
+  font-weight: 600;
+  margin: 0 0 4px 0;
+}
+
+.transaction-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--ew-space-2);
+  margin: 0;
+  font-size: 12px;
+  color: var(--ion-color-medium);
+
+  .transaction-date {
+    display: flex;
+    align-items: center;
+  }
+
+  .transaction-category {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    ion-icon {
+      font-size: 12px;
+    }
+  }
+}
+
+.transaction-item {
+  --background: var(--ion-card-background, var(--ion-color-step-50, #1e1e1e));
+  margin: var(--ew-space-4) var(--ew-space-3); /* same as .category-item */
+  border-radius: var(--ew-radius-lg);
+  box-shadow: var(--ew-shadow-md);
+  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+  animation: cardAppear 320ms ease both;
+}
+
+.transaction-item:hover {
+  transform: translateY(calc(var(--ew-space-px) * -1));
+  box-shadow: var(--ew-shadow-lg);
+}
+
+.transaction-item:active {
+  transform: translateY(0);
+  box-shadow: var(--ew-shadow-sm);
+}
+
+@keyframes cardAppear {
+  from {
+    opacity: 0;
+    transform: translateY(var(--ew-space-3));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .transaction-item {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Filters toolbar styling */
+.filters-toolbar {
+  --background: var(--ion-color-step-50);
+  border-bottom: 1px solid var(--ion-color-step-150);
+  --min-height: auto;
+}
+
+.filters-container {
+  display: flex;
+  gap: var(--ew-space-3);
+  padding: var(--ew-space-3) var(--ew-space-4);
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ew-space-1);
+  min-width: 140px;
+  flex: 1;
+
+  .filter-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ion-color-medium);
+    margin: 0;
+  }
+
+  .filter-select {
+    --background: var(--ion-color-light);
+    --border-radius: var(--ew-radius-md);
+    --padding-start: var(--ew-space-3);
+    --padding-end: var(--ew-space-3);
+    font-size: 14px;
+    min-height: 40px;
+  }
+
+  .date-button {
+    --border-radius: var(--ew-radius-md);
+    --padding-start: var(--ew-space-3);
+    --padding-end: var(--ew-space-3);
+    font-size: 12px;
+    height: 40px;
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+.category-option,
+.type-option {
+  display: flex;
+  align-items: center;
+  gap: var(--ew-space-2);
+
+  ion-icon {
+    font-size: 16px;
+  }
+
+  span {
+    font-size: 14px;
+  }
+}
+
+/* FAB styling */
+ion-fab-button {
+  --background: var(--ion-color-primary);
+  --color: var(--ion-color-primary-contrast);
+  --box-shadow: var(--ew-shadow-lg);
+}
+
+/* Date picker modal styling */
+ion-modal {
+  --height: auto;
+  --border-radius: var(--ew-radius-lg) var(--ew-radius-lg) 0 0;
+}
+
+/* Date picker styling */
+.date-picker-container {
+  ion-item {
+    --background: transparent;
+    --border-color: transparent;
+    --inner-border-width: 0;
+    margin-bottom: 16px;
+  }
+}
+
+ion-datetime {
+  --background: var(--ion-color-light);
+  --color: var(--ion-color-dark);
+  --wheel-highlight-background: var(--ion-color-primary);
+  --wheel-fade-background-rgb: var(--ion-color-light-rgb);
+  min-height: 300px;
+  width: 100%;
+  
+  &::part(calendar-day) {
+    color: var(--ion-color-dark) !important;
+    font-size: 14px;
+  }
+  
+  &::part(calendar-day-today) {
+    color: var(--ion-color-primary) !important;
+    font-weight: bold;
+    border: 2px solid var(--ion-color-primary);
+  }
+  
+  &::part(calendar-day-active) {
+    background: var(--ion-color-primary) !important;
+    color: var(--ion-color-primary-contrast) !important;
+  }
+  
+  &::part(calendar-month-year) {
+    color: var(--ion-color-dark);
+    font-weight: 600;
+  }
+  
+  &::part(wheel-item) {
+    color: var(--ion-color-dark);
+  }
+}
+
+/* Header buttons styling */
+ion-header {
+  ion-toolbar {
+    ion-buttons[slot="end"] {
+      ion-button {
+        --border-radius: 50%;
+        --padding-start: 8px;
+        --padding-end: 8px;
+        margin-inline-end: 4px;
+        
+        &[color="primary"] {
+          --background: var(--ion-color-primary-tint);
+          --color: var(--ion-color-primary);
+        }
+      }
+    }
+  }
+}
+
+/* Category option styling in select */
+ion-select-option {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  
+  ion-icon {
+    font-size: 16px;
+    margin-inline-end: 8px;
+  }
+}
+
+/* Search bar styling */
+ion-searchbar {
+  --background: var(--ion-color-light);
+  --border-radius: var(--ew-radius-lg);
+  --box-shadow: var(--ew-shadow-sm);
+  --color: var(--ion-color-dark);
+  --placeholder-color: var(--ion-color-medium);
+  --icon-color: var(--ion-color-medium);
+  --clear-button-color: var(--ion-color-medium);
+  
+  &.searchbar-has-focus {
+    --box-shadow: var(--ew-shadow-md);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .filters-toolbar {
+    --background: var(--ion-color-dark-tint);
+  }
+  
+  ion-searchbar {
+    --background: var(--ion-color-dark-shade);
+    --color: var(--ion-color-light);
+  }
+}

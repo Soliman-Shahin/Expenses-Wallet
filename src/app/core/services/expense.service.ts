@@ -27,7 +27,20 @@ export class ExpenseService {
     });
   }
 
-  getExpenses(forceRefresh = false): Observable<Expense[]> {
+  getExpenses(params?: any, forceRefresh = false): Observable<Expense[]> {
+    // If we have params (filters), don't use cache
+    if (params && Object.keys(params).length > 0) {
+      let httpParams = new HttpParams();
+      Object.keys(params).forEach(key => {
+        if (params[key] !== null && params[key] !== undefined && params[key] !== '') {
+          httpParams = httpParams.set(key, params[key]);
+        }
+      });
+      
+      return this.apiService.get<Expense[]>(this.endpoint, httpParams);
+    }
+
+    // Use cache for regular requests without filters
     if (!this.expensesCache$ || forceRefresh) {
       this.expensesCache$ = this.apiService
         .get<Expense[]>(this.endpoint)
