@@ -1,44 +1,84 @@
+import { CommonModule } from '@angular/common';
 import {
-  Component,
-  OnInit,
-  inject,
   ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  inject,
 } from '@angular/core';
-import { ModalController } from '@ionic/angular';
-import { BaseComponent } from 'src/app/shared/base';
-import { MonthYear } from '../../models';
-import { User } from 'src/app/modules/auth/models';
+import { IonicModule } from '@ionic/angular';
+import { TranslateModule } from '@ngx-translate/core';
 import {
-  combineLatest,
   BehaviorSubject,
-  of,
+  catchError,
+  combineLatest,
   map,
-  startWith,
+  of,
   shareReplay,
+  startWith,
   switchMap,
   takeUntil,
   tap,
-  catchError,
 } from 'rxjs';
+
 import { ExpenseFormComponent } from '../expense-form/expense-form.component';
-import { DashboardFacade } from 'src/app/shared/facades';
+import { TransactionsComponent } from '../transactions/transactions.component';
+import { BarChartComponent } from 'src/app/shared/components/charts/bar-chart/bar-chart.component';
+import { PieChartComponent } from 'src/app/shared/components/charts/pie-chart/pie-chart.component';
+import { LineChartComponent } from 'src/app/shared/components/charts/line-chart/line-chart.component';
+import { ReactiveFormsModule } from '@angular/forms';
+import { SharedModule } from 'src/app/shared/shared.module';
 import { formatCurrency } from 'src/app/shared/utils';
+import { MonthYear } from '../../models';
+import {
+  DateRange,
+  DateRangeSelectorComponent,
+} from 'src/app/shared/components/ui/date-range-selector/date-range-selector.component';
+import { BaseComponent } from 'src/app/shared/base';
+import {
+  SectionHeaderComponent,
+  SkeletonBlockComponent,
+} from 'src/app/shared/ui';
+import { User } from 'src/app/modules/auth/models';
 import { AuthService } from 'src/app/modules/auth/services/auth.service';
+import { DashboardFacade } from 'src/app/shared/facades';
 
 // Constants
 const MAX_RETRY_ATTEMPTS = 3;
 
 @Component({
+  standalone: true,
   selector: 'app-home-page',
   templateUrl: './home-page.component.html',
   styleUrls: ['./home-page.component.scss'],
+  imports: [
+    CommonModule,
+    SharedModule,
+    IonicModule,
+    ReactiveFormsModule,
+    TranslateModule,
+    TransactionsComponent,
+    BarChartComponent,
+    PieChartComponent,
+    LineChartComponent,
+    DateRangeSelectorComponent,
+    SkeletonBlockComponent,
+    SectionHeaderComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HomePageComponent extends BaseComponent implements OnInit {
+export class HomePageComponent
+  extends BaseComponent
+  implements OnInit, OnDestroy
+{
+  @ViewChild('transactionsComponent')
+  transactionsComponent?: TransactionsComponent;
   selectedMonth: MonthYear = this.getCurrentMonthYear();
   currentDate: Date = new Date();
   // Keep simple fallbacks where needed
   percentageChange: number | null = null;
+  selectedRange: DateRange = '6m';
   currency: string = 'USD';
 
   // UI state
@@ -74,26 +114,51 @@ export class HomePageComponent extends BaseComponent implements OnInit {
     super();
   }
 
-  private readonly ionModal = inject(ModalController);
-
-  // Facade and VM
-  private readonly dashboard = inject(DashboardFacade);
-
   // Reactive month selection for totals
   private readonly monthSelection$ = new BehaviorSubject<MonthYear>(
     this.selectedMonth
   );
 
+  private readonly dashboard = inject(DashboardFacade);
+
   // Auth state for UI
-  isLoggedIn$ = inject(AuthService).user$.pipe(map((u) => !!u));
-  private readonly totalsByMonth$ = this.monthSelection$.pipe(
-    switchMap((m) =>
-      combineLatest([
+  protected override readonly authService = inject(AuthService);
+  isLoggedIn$ = this.authService.user$.pipe(map((u) => !!u));
+  
+  private readonly totalsByMonth$ = combineLatest([
+    this.monthSelection$,
+    this.authService.user$.pipe(startWith(null))
+  ]).pipe(
+    switchMap(([m, user]) => {
+      // Only fetch data if user is authenticated
+      if (!user) {
+        return of({ income: 0, expenses: 0, balance: 0 });
+      }
+      
+      return combineLatest([
         this.dashboard.totalsForMonth(m.month, m.year),
-        this.dashboard.profile$.pipe(startWith(null)),
+        this.dashboard.profile$.pipe(
+          startWith(null),
+          switchMap(profile => {
+            // If profile is null, try to fetch it
+            if (!profile) {
+              return this.dashboard.profile.fetchProfile().pipe(
+                startWith(null),
+                catchError(() => of(null))
+              );
+            }
+            return of(profile);
+          })
+        ),
       ]).pipe(
         map(([t, profile]) => {
           const base = t ?? { income: 0, expenses: 0, balance: 0 };
+          
+          // If profile is null, use transaction-based totals
+          if (!profile) {
+            return base as { income: number; expenses: number; balance: number };
+          }
+          
           const salaryDetails = Array.isArray((profile as any)?.salary)
             ? (profile as any).salary
             : [];
@@ -101,45 +166,99 @@ export class HomePageComponent extends BaseComponent implements OnInit {
             (sum: number, item: any) => sum + (Number(item?.amount) || 0),
             0
           );
+          
+          // Use salary as income if base income is 0 and we have salary data
           if ((base.income ?? 0) === 0 && totalSalary > 0) {
             const income = totalSalary;
             const expenses = base.expenses ?? 0;
             return { income, expenses, balance: income - expenses } as const;
           }
+          
           return base as { income: number; expenses: number; balance: number };
         }),
-        switchMap((res) =>
-          res && (res.income !== 0 || res.expenses !== 0)
-            ? of(res)
-            : this.dashboard.totals$
-        )
-      )
-    ),
-    startWith({ income: 0, expenses: 0, balance: 0 } as const)
+        switchMap((res) => {
+          if (res && (res.income !== 0 || res.expenses !== 0)) {
+            return of(res);
+          }
+          
+          return this.dashboard.totals$;
+        }),
+        catchError(() => of({ income: 0, expenses: 0, balance: 0 }))
+      );
+    }),
+    startWith({ income: 0, expenses: 0, balance: 0 } as const),
+    shareReplay(1)
   );
-  private readonly expenseByCategoryByMonth$ = this.monthSelection$.pipe(
-    switchMap((m) => this.dashboard.expenseByCategoryForMonth(m.month, m.year)),
-    startWith([] as any[])
+  private readonly expenseByCategoryByMonth$ = combineLatest([
+    this.monthSelection$,
+    this.authService.user$.pipe(startWith(null))
+  ]).pipe(
+    switchMap(([m, user]) => {
+      if (!user) {
+        return of([] as any[]);
+      }
+      return this.dashboard.expenseByCategoryForMonth(m.month, m.year);
+    }),
+    startWith([] as any[]),
+    catchError(() => of([] as any[]))
   );
-  private readonly monthlyExpensesByMonth$ = this.monthSelection$.pipe(
-    switchMap((m) => this.dashboard.monthlyExpensesForMonth(m.month, m.year)),
-    startWith([] as any[])
+  
+  private readonly monthlyExpensesByMonth$ = combineLatest([
+    this.monthSelection$,
+    this.authService.user$.pipe(startWith(null))
+  ]).pipe(
+    switchMap(([m, user]) => {
+      if (!user) {
+        return of([] as any[]);
+      }
+      return this.dashboard.monthlyExpensesForMonth(m.month, m.year);
+    }),
+    startWith([] as any[]),
+    catchError(() => of([] as any[]))
   );
   // Derive income vs expenses for the selected month from totalsByMonth$
   private readonly incomeVsExpenseByMonth$ = this.totalsByMonth$.pipe(
-    map((t) => [
-      { name: 'Income', value: t.income },
-      { name: 'Expenses', value: t.expenses },
-    ])
+    map((t) => {
+      const lang = this.translateService.currentLang;
+      return [
+        {
+          name: lang === 'ar' ? 'دخل' : 'Income',
+          value: t.income,
+        },
+        {
+          name: lang === 'ar' ? 'مصروفات' : 'Expenses',
+          value: t.expenses,
+        },
+      ];
+    })
   );
 
-  readonly vm$ = combineLatest({
-    profile: this.dashboard.profile$.pipe(startWith(null)),
-    incomeVsExpense: this.incomeVsExpenseByMonth$,
-    expenseByCategory: this.expenseByCategoryByMonth$,
-    monthlyExpenses: this.monthlyExpensesByMonth$,
-    totals: this.totalsByMonth$,
-  }).pipe(
+  readonly vm$ = combineLatest([
+    this.authService.user$.pipe(startWith(null)),
+    combineLatest({
+      profile: this.dashboard.profile$.pipe(startWith(null)),
+      incomeVsExpense: this.incomeVsExpenseByMonth$,
+      expenseByCategory: this.expenseByCategoryByMonth$,
+      monthlyExpenses: this.monthlyExpensesByMonth$,
+      totals: this.totalsByMonth$,
+    })
+  ]).pipe(
+    switchMap(([user, data]) => {
+      if (!user) {
+        return of({
+          profile: null,
+          incomeVsExpense: [],
+          expenseByCategory: [],
+          monthlyExpenses: [],
+          totals: { income: 0, expenses: 0, balance: 0 },
+          salaryDetails: [],
+          salaryBreakdown: [],
+          totalSalary: 0,
+          currency: 'USD'
+        });
+      }
+      return of(data);
+    }),
     map((s) => {
       const salaryDetails = Array.isArray(s.profile?.salary)
         ? s.profile!.salary
@@ -225,6 +344,16 @@ export class HomePageComponent extends BaseComponent implements OnInit {
   }
 
   /**
+   * Handles date range change from the selector
+   */
+  onRangeChange(range: DateRange): void {
+    this.selectedRange = range;
+    // TODO: Wire up data fetching based on the new range
+    console.log('Selected range:', this.selectedRange);
+    this.cdr.markForCheck();
+  }
+
+  /**
    * Handles user data changes
    */
   protected override onUserChanged(user: User | null): void {
@@ -289,7 +418,7 @@ export class HomePageComponent extends BaseComponent implements OnInit {
   // FAB: open expense form modal
   async openExpenseModal(): Promise<void> {
     try {
-      const modal = await this.ionModal.create({
+      const modal = await this.modalCtrl.create({
         component: ExpenseFormComponent,
         componentProps: {
           month: this.selectedMonth.month,
@@ -299,11 +428,33 @@ export class HomePageComponent extends BaseComponent implements OnInit {
           | HTMLElement
           | undefined,
       });
+
+      // Listen for modal dismissal to refresh data
+      modal.onDidDismiss().then((result) => {
+        if (result.role === 'confirm' || result.data) {
+          // Refresh data after successful save
+          this.refreshData();
+        }
+      });
+
       await modal.present();
     } catch (err) {
       console.error('Failed to open expense modal', err);
       this.toastService?.presentErrorToast('bottom', 'COMMON.ERRORS.DEFAULT');
     }
+  }
+
+  // Refresh data method
+  private refreshData(): void {
+    // Trigger data refresh by re-emitting current month
+    this.monthSelection$.next({ ...this.selectedMonth });
+
+    // Also refresh transactions component if available
+    if (this.transactionsComponent) {
+      this.transactionsComponent.refreshTransactions();
+    }
+
+    this.cdr.markForCheck();
   }
 
   /**

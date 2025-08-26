@@ -1,0 +1,440 @@
+// Modern Input Styling System
+// This file provides consistent, beautiful input styling across the entire app
+
+// Base input variables
+:root {
+  --input-border-radius: 16px;
+  --input-padding-vertical: 16px;
+  --input-padding-horizontal: 20px;
+  --input-font-size: 16px;
+  --input-line-height: 1.5;
+  --input-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --input-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --input-shadow-focus: 0 4px 20px rgba(var(--ion-color-primary-rgb), 0.15);
+  --input-border-width: 2px;
+}
+
+// Modern input item styling
+.modern-input-item,
+.form-item,
+.ui-form-item {
+  --border-radius: var(--input-border-radius);
+  --border-width: var(--input-border-width);
+  --border-color: var(--ion-color-step-300);
+  --background: var(--ion-background-color);
+  --color: var(--ion-text-color);
+  --padding-start: var(--input-padding-horizontal);
+  --padding-end: var(--input-padding-horizontal);
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+  --min-height: 56px;
+  
+  margin: 16px 0;
+  border-radius: var(--border-radius);
+  border: var(--border-width) solid var(--border-color);
+  background: var(--background);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08), 
+              0 1px 4px rgba(0, 0, 0, 0.04),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: var(--input-transition);
+  overflow: hidden;
+  position: relative;
+
+  // Hover state
+  &:hover:not(.ion-focused):not(.ion-invalid) {
+    --border-color: var(--ion-color-step-400);
+    --background: var(--ion-background-color);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12), 
+                0 2px 8px rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+
+  // Focus state
+  &.ion-focused,
+  &.item-has-focus {
+    --border-color: var(--ion-color-primary);
+    --background: var(--ion-background-color);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 32px rgba(var(--ion-color-primary-rgb), 0.25),
+                0 4px 16px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    border: 2px solid var(--ion-color-primary);
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      border-radius: calc(var(--border-radius) + 2px);
+      background: linear-gradient(135deg, 
+        var(--ion-color-primary), 
+        var(--ion-color-secondary),
+        var(--ion-color-tertiary));
+      z-index: -1;
+      opacity: 0.8;
+    }
+  }
+
+  // Invalid state
+  &.ion-invalid {
+    --border-color: var(--ion-color-danger);
+    --background: rgba(var(--ion-color-danger-rgb), 0.05);
+    animation: inputShake 0.4s ease-in-out;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: var(--border-radius);
+      background: linear-gradient(135deg, transparent, rgba(var(--ion-color-danger-rgb), 0.1));
+      pointer-events: none;
+      z-index: 1;
+    }
+  }
+
+  // Touched state
+  &.ion-touched:not(.ion-invalid) {
+    --border-color: var(--ion-color-success);
+    
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: var(--border-radius);
+      background: linear-gradient(135deg, transparent, rgba(var(--ion-color-success-rgb), 0.05));
+      pointer-events: none;
+      z-index: 1;
+    }
+  }
+
+  // Remove default ionic styling
+  --inner-border-width: 0;
+  --border-style: none;
+  --highlight-color-focused: transparent;
+  --highlight-color-valid: transparent;
+  --highlight-color-invalid: transparent;
+}
+
+// Input field styling
+.modern-input,
+.form-input,
+.ui-form-input,
+ion-input {
+  --color: var(--ion-text-color);
+  --placeholder-color: var(--ion-color-step-500);
+  --padding-start: 0;
+  --padding-end: 0;
+  
+  font-size: 17px;
+  line-height: var(--input-line-height);
+  font-weight: 600;
+  position: relative;
+  z-index: 2;
+
+  // Placeholder styling
+  &::placeholder {
+    color: var(--placeholder-color);
+    opacity: 0.7;
+    font-weight: 500;
+    font-style: italic;
+  }
+}
+
+// Label styling
+ion-label {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--ion-color-step-700);
+  margin-bottom: 12px;
+  transition: var(--input-transition);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  
+  .ion-focused & {
+    color: var(--ion-color-primary);
+    transform: translateY(-2px);
+  }
+  
+  .ion-invalid & {
+    color: var(--ion-color-danger);
+  }
+}
+
+// Icon styling in inputs
+ion-icon[slot="start"] {
+  color: var(--ion-color-step-600);
+  font-size: 22px;
+  transition: var(--input-transition);
+  position: relative;
+  z-index: 2;
+  margin-inline-end: 12px;
+  
+  .ion-focused & {
+    color: var(--ion-color-primary);
+    transform: scale(1.15);
+  }
+  
+  .ion-invalid & {
+    color: var(--ion-color-danger);
+  }
+}
+
+ion-icon[slot="end"] {
+  color: var(--ion-color-step-600);
+  font-size: 22px;
+  transition: var(--input-transition);
+  position: relative;
+  z-index: 2;
+  margin-inline-start: 12px;
+  
+  .ion-focused & {
+    color: var(--ion-color-primary);
+    transform: scale(1.15);
+  }
+  
+  .ion-invalid & {
+    color: var(--ion-color-danger);
+  }
+}
+
+// Error note styling
+ion-note[slot="error"] {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ion-color-danger);
+  margin-top: 8px;
+  padding-inline-start: var(--input-padding-horizontal);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  animation: errorSlideIn 0.3s ease-out;
+  
+  &::before {
+    content: '⚠';
+    font-size: 14px;
+  }
+}
+
+// Helper text styling
+ion-note[slot="helper"] {
+  font-size: 12px;
+  color: var(--ion-color-step-500);
+  margin-top: 4px;
+  padding-inline-start: var(--input-padding-horizontal);
+  
+  .counter {
+    margin-inline-start: auto;
+    font-weight: 500;
+  }
+}
+
+// Select styling
+ion-select {
+  --color: var(--ion-text-color);
+  --placeholder-color: var(--ion-color-step-400);
+  
+  font-size: var(--input-font-size);
+  font-weight: 500;
+  position: relative;
+  z-index: 2;
+  
+  // Fix dropdown arrow position for LTR
+  &::part(icon) {
+    position: absolute;
+    inset-inline-end: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    margin: 0;
+  }
+  
+  // Ensure proper spacing for the arrow
+  &::part(container) {
+    padding-inline-end: 48px;
+    padding-inline-start: 0;
+  }
+}
+
+// Datetime button styling
+ion-datetime-button {
+  --color: var(--ion-text-color);
+  --background: transparent;
+  
+  font-size: var(--input-font-size);
+  font-weight: 500;
+  width: 100%;
+  text-align: left;
+  position: relative;
+  z-index: 2;
+  
+  .placeholder-text {
+    color: var(--ion-color-step-400);
+    font-weight: 400;
+  }
+}
+
+// Checkbox styling
+ion-checkbox {
+  --border-radius: 8px;
+  --border-width: 2px;
+  --border-color: var(--ion-color-step-300);
+  --background: var(--ion-color-step-50);
+  --background-checked: var(--ion-color-primary);
+  --checkmark-color: white;
+  --size: 20px;
+  
+  transition: var(--input-transition);
+  
+  &:hover {
+    --border-color: var(--ion-color-primary);
+    transform: scale(1.05);
+  }
+}
+
+// Button enhancements for forms
+ion-button[type="submit"],
+.form-submit-button {
+  --border-radius: var(--input-border-radius);
+  --padding-top: var(--input-padding-vertical);
+  --padding-bottom: var(--input-padding-vertical);
+  
+  font-weight: 600;
+  font-size: var(--input-font-size);
+  height: 60px;
+  margin-top: 24px;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
+  
+  &:hover::before {
+    left: 100%;
+  }
+  
+  &:not([disabled]):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(var(--ion-color-primary-rgb), 0.3);
+  }
+}
+
+// Animations
+@keyframes inputShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+@keyframes errorSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Glass effect variant
+.is-glass {
+  --background: rgba(var(--ion-background-color-rgb), 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: var(--border-width) solid rgba(var(--ion-color-primary-rgb), 0.2);
+  
+  &::before {
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.1), 
+      rgba(255, 255, 255, 0.05)
+    );
+  }
+}
+
+// Pill shape variant
+.is-pill {
+  --border-radius: 50px;
+}
+
+// Size variants
+.size-small {
+  --input-padding-vertical: 12px;
+  --input-font-size: 14px;
+  --min-height: 48px;
+}
+
+.size-large {
+  --input-padding-vertical: 20px;
+  --input-font-size: 18px;
+  --min-height: 68px;
+}
+
+// Dark mode optimizations
+@media (prefers-color-scheme: dark) {
+  :root {
+    --input-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+    --input-shadow-focus: 0 8px 32px rgba(var(--ion-color-primary-rgb), 0.35);
+  }
+  
+  .modern-input-item,
+  .form-item,
+  .ui-form-item {
+    --background: var(--ion-color-step-100);
+    --border-color: var(--ion-color-step-400);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15), 
+                0 1px 4px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    
+    &:hover:not(.ion-focused):not(.ion-invalid) {
+      --background: var(--ion-color-step-150);
+      --border-color: var(--ion-color-step-500);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2), 
+                  0 2px 8px rgba(0, 0, 0, 0.15),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+  }
+}
+
+// High contrast mode
+@media (prefers-contrast: high) {
+  .modern-input-item,
+  .form-item,
+  .ui-form-item {
+    --border-width: 3px;
+    
+    &.ion-focused {
+      --border-width: 4px;
+    }
+  }
+}
+
+// Reduced motion
+@media (prefers-reduced-motion: reduce) {
+  .modern-input-item,
+  .form-item,
+  .ui-form-item,
+  ion-input,
+  ion-label,
+  ion-icon,
+  ion-button {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+}

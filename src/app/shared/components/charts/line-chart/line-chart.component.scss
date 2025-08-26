@@ -1,16 +1,16 @@
 .chart-container {
-  padding: 16px;
-  border-radius: 8px;
+  padding: var(--ew-space-5);
+  border-radius: var(--ew-radius-md);
   background-color: var(--ion-background-color, #fff);
-  box-shadow: var(--card-shadow, 0 2px 8px rgba(0, 0, 0, 0.1));
-  margin: 16px 0;
+  box-shadow: var(--ew-shadow-sm);
+  margin: var(--ew-space-5) 0;
 }
 
 .chart-title {
   margin-top: 0;
-  margin-bottom: 16px;
+  margin-bottom: var(--ew-space-5);
   color: var(--ion-text-color, #000);
-  font-size: 1.2rem;
+  font-size: var(--ew-font-xl);
   font-weight: 500;
 }
 
@@ -59,20 +59,20 @@
 
 .value-label {
   fill: var(--ion-text-color, #000);
-  font-size: 12px;
+  font-size: var(--ew-font-xs);
   font-weight: 500;
 }
 
 .axis-label {
   fill: var(--ion-text-color-secondary, #666);
-  font-size: 12px;
+  font-size: var(--ew-font-xs);
 }
 
 /* Dark mode support */
 body.dark {
   .chart-container {
     background-color: var(--ion-background-color, #1e1e1e);
-    box-shadow: var(--card-shadow, 0 2px 8px rgba(0, 0, 0, 0.3));
+    box-shadow: var(--ew-shadow-sm);
   }
   
   .chart-title,
@@ -97,16 +97,16 @@ body.dark {
 /* Responsive design */
 @media (max-width: 768px) {
   .chart-container {
-    padding: 12px;
+    padding: var(--ew-space-4);
   }
   
   .chart-title {
-    font-size: 1.1rem;
+    font-size: var(--ew-font-lg);
   }
   
   .value-label,
   .axis-label {
-    font-size: 10px;
+    font-size: var(--ew-font-xs);
   }
   
   .line-chart svg {
@@ -121,6 +121,6 @@ body.dark {
   
   .value-label,
   .axis-label {
-    font-size: 9px;
+    font-size: var(--ew-font-xs);
   }
 }

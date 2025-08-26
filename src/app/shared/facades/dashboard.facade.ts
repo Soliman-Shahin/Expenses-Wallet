@@ -18,7 +18,7 @@ import { Category, Expense } from 'src/app/shared/models';
 @Injectable({ providedIn: 'root' })
 export class DashboardFacade {
   private readonly charts = inject(ChartDataService);
-  private readonly profile = inject(ProfileService);
+  readonly profile = inject(ProfileService);
   private readonly expenses = inject(ExpenseService);
   private readonly categories = inject(CategoryService);
 

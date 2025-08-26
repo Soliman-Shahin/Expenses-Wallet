@@ -1,15 +1,23 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import {
+  ChartTooltipComponent,
+  TooltipData,
+} from '../../ui/chart-tooltip/chart-tooltip.component';
 
 interface ChartData {
   name: string;
   value: number;
 }
 
+interface InternalChartData extends ChartData {
+  visible: boolean;
+}
+
 @Component({
   selector: 'app-pie-chart',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ChartTooltipComponent],
   template: `
     <div class="chart-container" [attr.aria-label]="ariaLabel">
       <h3 *ngIf="title" class="chart-title">{{ title }}</h3>
@@ -17,6 +25,7 @@ interface ChartData {
         class="chart-wrapper"
         role="img"
         [attr.aria-label]="chartDescription"
+        (mouseleave)="onMouseLeave()"
       >
         <div class="pie-chart">
           <svg [attr.viewBox]="getViewBox()" xmlns="http://www.w3.org/2000/svg">
@@ -29,6 +38,8 @@ interface ChartData {
                 [attr.stroke-width]="strokeWidth"
                 [attr.aria-label]="slice.label"
                 role="img"
+                (mouseenter)="onSliceHover($event, chartData[i], slice.originalIndex)"
+                (mousemove)="onMouseMove($event)"
               />
             </g>
           </svg>
@@ -37,6 +48,12 @@ interface ChartData {
           <div
             *ngFor="let item of chartData; let i = index"
             class="legend-item"
+            [class.legend-item-hidden]="!item.visible"
+            (click)="toggleSliceVisibility(i)"
+            tabindex="0"
+            (keydown.enter)="toggleSliceVisibility(i)"
+            role="button"
+            [attr.aria-pressed]="!item.visible"
           >
             <div
               class="legend-color"
@@ -48,6 +65,12 @@ interface ChartData {
         </div>
       </div>
     </div>
+    <app-chart-tooltip
+      [data]="tooltipData"
+      [visible]="tooltipVisible"
+      [top]="tooltipTop"
+      [inlineOffset]="tooltipInlineOffset"
+    ></app-chart-tooltip>
   `,
   styleUrls: ['./pie-chart.component.scss'],
 })
@@ -60,26 +83,43 @@ export class PieChartComponent implements OnChanges {
   @Input() size: number = 200;
   @Input() strokeWidth: number = 2;
 
-  chartData: ChartData[] = [];
+  chartData: InternalChartData[] = [];
   slices: any[] = [];
   strokeColor: string = '#ffffff';
 
+  // Tooltip properties
+  tooltipVisible = false;
+  tooltipData: TooltipData | null = null;
+  tooltipTop = '0px';
+  tooltipInlineOffset = '0px';
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data'] && this.data) {
-      this.chartData = [...this.data];
+      this.chartData = this.data.map((item) => ({ ...item, visible: true }));
       this.generateSlices();
     }
   }
 
   private generateSlices(): void {
-    const total = this.chartData.reduce((sum, item) => sum + item.value, 0);
+    const visibleData = this.chartData.filter((item) => item.visible);
+    const total = visibleData.reduce((sum, item) => sum + item.value, 0);
     if (total === 0) {
       this.slices = [];
       return;
     }
 
     let startAngle = 0;
-    this.slices = this.chartData.map((item, index) => {
+    let dataIndex = -1;
+    this.slices = this.chartData.map((item) => {
+      if (!item.visible) {
+        return {
+          path: '',
+          color: 'transparent',
+          label: '',
+          value: 0,
+        };
+      }
+      dataIndex++;
       const sliceAngle = (item.value / total) * 360;
       const endAngle = startAngle + sliceAngle;
 
@@ -87,11 +127,12 @@ export class PieChartComponent implements OnChanges {
 
       const slice = {
         path: path,
-        color: this.getColor(index),
+        color: this.getColor(dataIndex),
         label: `${item.name && item.name.trim() ? item.name : '—'}: ${
           item.value
         }`,
         value: item.value,
+        originalIndex: dataIndex,
       };
 
       startAngle = endAngle;
@@ -157,17 +198,49 @@ export class PieChartComponent implements OnChanges {
   }
 
   getColor(index: number): string {
-    // Simple color palette for slices
     const colors = [
-      '#3880ff', // primary blue
-      '#5260ff', // secondary blue
-      '#2dd36f', // success green
-      '#ffc409', // warning yellow
-      '#eb445a', // danger red
-      '#8884d8', // purple
-      '#82ca9d', // light green
-      '#ffc658', // light orange
+      'var(--ion-color-primary)',
+      'var(--ion-color-secondary)',
+      'var(--ion-color-tertiary)',
+      'var(--ion-color-success)',
+      'var(--ion-color-warning)',
+      'var(--ion-color-danger)',
+      'var(--ion-color-light)',
+      'var(--ion-color-medium)',
     ];
     return colors[index % colors.length];
+  }
+
+  // Tooltip event handlers
+  onSliceHover(event: MouseEvent, item: InternalChartData, index: number) {
+    this.tooltipData = {
+      label: item.name,
+      value: item.value,
+      color: this.getColor(index),
+    };
+    this.tooltipVisible = true;
+    this.updateTooltipPosition(event);
+  }
+
+  onMouseMove(event: MouseEvent) {
+    if (this.tooltipVisible) {
+      this.updateTooltipPosition(event);
+    }
+  }
+
+  onMouseLeave() {
+    this.tooltipVisible = false;
+  }
+
+  private updateTooltipPosition(event: MouseEvent) {
+    const offsetX = 15;
+    const offsetY = 15;
+    this.tooltipInlineOffset = `${event.clientX + offsetX}px`;
+    this.tooltipTop = `${event.clientY + offsetY}px`;
+  }
+
+  toggleSliceVisibility(index: number): void {
+    this.chartData[index].visible = !this.chartData[index].visible;
+    this.generateSlices();
   }
 }

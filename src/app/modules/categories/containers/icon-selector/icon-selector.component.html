@@ -1,8 +1,17 @@
-<ion-icon
-  class="icon"
-  *ngFor="let icon of icons; let i = index"
-  [name]="icon"
-  size="large"
-  aria-hidden="true"
-  (click)="selectIcon(icon)"
-></ion-icon>
+<div class="icon-selector-container">
+  <ion-icon
+    class="icon"
+    *ngFor="let icon of icons; trackBy: trackByIcon"
+    [class.selected]="selectedIcon === icon"
+    [name]="icon"
+    size="large"
+    [title]="icon"
+    [attr.aria-label]="icon"
+    [attr.aria-pressed]="selectedIcon === icon"
+    role="radio"
+    tabindex="0"
+    (click)="selectIcon(icon)"
+    (keydown.enter)="selectIcon(icon)"
+    (keydown.space)="selectIcon(icon)"
+  ></ion-icon>
+</div>

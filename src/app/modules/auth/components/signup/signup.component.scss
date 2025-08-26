@@ -14,10 +14,10 @@
 // Visually Hidden (for accessibility)
 .visually-hidden {
   position: absolute;
-  width: 1px;
-  height: 1px;
+  width: var(--ew-size-px);
+  height: var(--ew-size-px);
   padding: 0;
-  margin: -1px;
+  margin: var(--ew-space-px-negative);
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
@@ -36,22 +36,22 @@
   &::after {
     content: "";
     flex: 1;
-    border-bottom: 1px solid var(--ion-color-medium);
+    border-bottom: var(--ew-border-width-sm) solid var(--ion-color-medium);
   }
 
   &:not(:empty)::before {
-    margin-right: var(--spacing-md);
+    margin-inline-end: var(--spacing-md);
   }
 
   &:not(:empty)::after {
-    margin-left: var(--spacing-md);
+    margin-inline-start: var(--spacing-md);
   }
 }
 
 // Note Styling
 ion-note {
   ul {
-    padding-left: var(--spacing-lg);
+    padding-inline-start: var(--spacing-lg);
     margin: var(--spacing-xs) 0 0 0;
   }
 
@@ -74,11 +74,11 @@ ion-note {
 // Signup Card
 .signup-card {
   width: 100%;
-  max-width: 480px;
+  max-width: var(--ew-size-120);
   background: var(--ion-background-color, var(--ion-color-light));
-  border-radius: var(--card-border-radius, 16px);
+  border-radius: var(--ew-radius-xl);
   padding: var(--spacing-xl);
-  box-shadow: var(--card-box-shadow, 0 4px 20px rgba(0, 0, 0, 0.1));
+  box-shadow: var(--ew-shadow-lg);
   margin: var(--spacing-lg) 0;
   position: relative;
   overflow: hidden;
@@ -90,23 +90,23 @@ ion-note {
   margin-bottom: var(--spacing-xxl);
 
   .app-logo {
-    font-size: 4rem;
+    font-size: var(--ew-font-size-7xl);
     color: var(--ion-color-primary);
     margin-bottom: var(--spacing-xs);
   }
 
   .app-name {
     margin: 0;
-    font-size: var(--text-3xl);
-    font-weight: var(--font-weight-semibold);
+    font-size: var(--ew-font-size-3xl);
+    font-weight: var(--ew-font-weight-semibold);
     color: var(--text-primary);
   }
 }
 
 // Welcome Text
 .welcome-text {
-  font-size: var(--text-2xl);
-  font-weight: var(--font-weight-semibold);
+  font-size: var(--ew-font-size-2xl);
+  font-weight: var(--ew-font-weight-semibold);
   color: var(--text-primary);
   margin-bottom: var(--spacing-xs);
   text-align: center;
@@ -117,42 +117,42 @@ ion-note {
   color: var(--text-tertiary);
   text-align: center;
   margin-bottom: var(--spacing-lg);
-  font-size: var(--text-base);
+  font-size: var(--ew-font-size-base);
 }
 
 // Social Buttons
 .social-signup-buttons {
-  margin: 24px 0;
+  margin: var(--ew-space-6) 0;
 
   ion-button {
-    --border-radius: 12px;
+    --border-radius: var(--ew-radius-xl);
     --border-style: solid;
-    --border-width: 1px;
+    --border-width: var(--ew-border-width-sm);
     --border-color: var(--ion-color-light-shade);
-    --padding-top: 16px;
-    --padding-bottom: 16px;
+    --padding-top: var(--ew-space-4);
+    --padding-bottom: var(--ew-space-4);
     --background: var(--ion-color-light);
     --color: var(--ion-color-dark);
     --background-hover: var(--ion-color-light-shade);
     --background-activated: var(--ion-color-light-shade);
-    font-weight: 500;
+    font-weight: var(--ew-font-weight-medium);
     text-transform: none;
-    height: 48px;
+    height: var(--ew-size-12);
     margin: 0;
-    transition: all 0.3s ease;
+    transition: all var(--ew-transition-duration-medium) ease;
 
     ion-icon {
-      font-size: 20px;
-      margin-right: 12px;
+      font-size: var(--ew-font-size-xl);
+      margin-inline-end: var(--ew-space-3);
     }
 
     &:hover {
-      transform: translateY(-1px);
-      --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transform: translateY(var(--ew-space-px-negative));
+      --box-shadow: var(--ew-shadow-md);
     }
 
     &:active {
-      transform: translateY(1px);
+      transform: translateY(var(--ew-space-px));
       --box-shadow: none;
     }
   }
@@ -173,57 +173,57 @@ ion-note {
 
 .form-item {
   --background: var(--ion-color-light);
-  --border-radius: 12px;
-  --padding-start: 16px;
-  --padding-end: 8px;
-  --min-height: 56px;
-  margin-bottom: 16px;
-  border: 1px solid var(--ion-color-light-shade);
-  box-shadow: 0 2px 10px rgba(var(--ion-color-primary-rgb), 0.07);
-  transition: border-color 0.22s, box-shadow 0.22s;
+  --border-radius: var(--ew-radius-xl);
+  --padding-start: var(--ew-space-4);
+  --padding-end: var(--ew-space-2);
+  --min-height: var(--ew-size-14);
+  margin-bottom: var(--ew-space-4);
+  border: var(--ew-border-width-sm) solid var(--ion-color-light-shade);
+  box-shadow: var(--ew-shadow-sm);
+  transition: border-color var(--ew-transition-duration-fast), box-shadow var(--ew-transition-duration-fast);
 
   &.ion-invalid {
     border-color: var(--ion-color-danger);
-    box-shadow: 0 2px 10px rgba(var(--ion-color-danger-rgb), 0.11);
+    box-shadow: var(--ew-shadow-sm-danger);
   }
 
   &.ion-valid {
     border-color: var(--ion-color-success);
-    box-shadow: 0 2px 10px rgba(var(--ion-color-success-rgb), 0.11);
+    box-shadow: var(--ew-shadow-sm-success);
   }
 
   &:focus-within, &:focus-visible {
     border-color: var(--ion-color-primary);
-    box-shadow: 0 4px 18px rgba(var(--ion-color-primary-rgb), 0.15);
-    outline: 2px solid var(--ion-color-primary);
-    outline-offset: 2px;
+    box-shadow: var(--ew-shadow-md-primary);
+    outline: var(--ew-border-width-md) solid var(--ion-color-primary);
+    outline-offset: var(--ew-space-0-5);
   }
 
   ion-icon {
     color: var(--ion-color-medium);
-    font-size: 20px;
-    margin-right: 12px;
+    font-size: var(--ew-font-size-xl);
+    margin-inline-end: var(--ew-space-3);
   }
 
   ion-input {
-    --padding-top: 8px;
-    --padding-bottom: 8px;
-    font-size: 1.06rem;
+    --padding-top: var(--ew-space-2);
+    --padding-bottom: var(--ew-space-2);
+    font-size: var(--ew-font-size-lg);
     background: transparent;
     color: var(--text-primary);
-    border-radius: 10px;
-    transition: background 0.18s;
+    border-radius: var(--ew-radius-lg);
+    transition: background var(--ew-transition-duration-fast);
   }
 
   ion-button {
-    --padding-start: 8px;
-    --padding-end: 8px;
+    --padding-start: var(--ew-space-2);
+    --padding-end: var(--ew-space-2);
     --ripple-color: transparent;
-    border-radius: 12px;
-    transition: box-shadow 0.18s, background 0.18s;
+    border-radius: var(--ew-radius-xl);
+    transition: box-shadow var(--ew-transition-duration-fast), background var(--ew-transition-duration-fast);
 
     ion-icon {
-      margin-right: 0;
+      margin-inline-end: 0;
       color: var(--ion-color-medium);
     }
   }
@@ -234,7 +234,7 @@ ion-note {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 20px 0 24px;
+  margin: var(--ew-space-5) 0 var(--ew-space-6);
 
   .ion-margin-vertical {
     --min-height: auto;
@@ -244,15 +244,15 @@ ion-note {
     --background: transparent;
 
     ion-checkbox {
-      --size: 18px;
+      --size: var(--ew-size-4-5);
       --background-checked: var(--ion-color-primary);
       --border-color: var(--ion-color-medium);
       --border-color-checked: var(--ion-color-primary);
-      margin-right: 8px;
+      margin-inline-end: var(--ew-space-2);
     }
 
     ion-label {
-      font-size: 14px;
+      font-size: var(--ew-font-size-sm);
       color: var(--ion-color-medium);
     }
   }
@@ -261,32 +261,32 @@ ion-note {
 // Error Message
 .error-message {
   color: var(--ion-color-danger);
-  font-size: var(--text-sm);
+  font-size: var(--ew-font-size-sm);
   margin: var(--spacing-xs) 0;
   display: flex;
   align-items: center;
 
   ion-icon {
-    margin-right: var(--spacing-xs);
+    margin-inline-end: var(--spacing-xs);
   }
 }
 
 // Password Strength Meter
 .password-strength {
-  margin: 16px 0;
+  margin: var(--ew-space-4) 0;
   
   .strength-meter {
-    height: 6px;
+    height: var(--ew-size-1-5);
     background: var(--ion-color-light-shade);
-    border-radius: 3px;
+    border-radius: var(--ew-radius-sm);
     overflow: hidden;
     position: relative;
     
     .strength-meter-fill {
       height: 100%;
       width: 0;
-      transition: width 0.3s ease, background 0.3s ease;
-      border-radius: 3px;
+      transition: width var(--ew-transition-duration-medium) ease, background var(--ew-transition-duration-medium) ease;
+      border-radius: var(--ew-radius-sm);
       
       &.weak {
         background: var(--ion-color-danger);
@@ -306,10 +306,10 @@ ion-note {
   }
   
   .strength-text {
-    margin-top: 8px;
-    font-size: 14px;
+    margin-top: var(--ew-space-2);
+    font-size: var(--ew-font-size-sm);
     color: var(--text-secondary);
-    text-align: right;
+    text-align: end;
     
     &.weak {
       color: var(--ion-color-danger);
@@ -331,7 +331,7 @@ ion-note {
 
   p {
     color: var(--text-secondary);
-    font-size: var(--text-sm);
+    font-size: var(--ew-font-size-sm);
     margin-bottom: var(--spacing-xs);
   }
 
@@ -344,13 +344,13 @@ ion-note {
       display: flex;
       align-items: center;
       margin-bottom: var(--spacing-xxs);
-      font-size: var(--text-sm);
+      font-size: var(--ew-font-size-sm);
       color: var(--text-tertiary);
 
       &::before {
         content: "•";
         color: var(--ion-color-medium);
-        margin-right: var(--spacing-xs);
+        margin-inline-end: var(--spacing-xs);
       }
 
       &.valid {
@@ -376,15 +376,15 @@ ion-note {
 
 // Login Link
 .login-link-container {
-  margin-top: 24px;
-  font-size: 14px;
+  margin-top: var(--ew-space-6);
+  font-size: var(--ew-font-size-sm);
   color: var(--ion-color-medium);
   
   .login-link {
     color: var(--ion-color-primary);
-    font-weight: 500;
+    font-weight: var(--ew-font-weight-medium);
     text-decoration: none;
-    margin-left: 4px;
+    margin-inline-start: var(--ew-space-1);
     
     &:hover {
       text-decoration: underline;
@@ -395,28 +395,28 @@ ion-note {
 // Responsive Adjustments
 @media (max-width: 576px) {
   .signup-card {
-    padding: 24px 16px;
-    margin: 16px;
+    padding: var(--ew-space-6) var(--ew-space-4);
+    margin: var(--ew-space-4);
   }
   
   .logo-container {
     .app-logo {
-      font-size: 56px;
+      font-size: var(--ew-font-size-6xl);
     }
     
     .app-name {
-      font-size: 22px;
+      font-size: var(--ew-font-size-2xl);
     }
   }
   
   .welcome-text {
-    font-size: 22px;
+    font-size: var(--ew-font-size-2xl);
   }
   
   .form-options {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
+    gap: var(--ew-space-3);
     
     .ion-margin-vertical {
       align-self: flex-start;

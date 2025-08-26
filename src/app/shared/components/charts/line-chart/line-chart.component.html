@@ -1,0 +1,102 @@
+<div class="chart-container" [attr.aria-label]="ariaLabel">
+  <h3 *ngIf="title" class="chart-title">{{ title }}</h3>
+  <div
+    class="chart-wrapper"
+    role="img"
+    [attr.aria-label]="chartDescription"
+    (mouseleave)="onMouseLeave()"
+  >
+    <div class="line-chart">
+      <svg [attr.viewBox]="getViewBox()" xmlns="http://www.w3.org/2000/svg">
+        <!-- Grid lines -->
+        <g class="grid-lines">
+          <line
+            *ngFor="let line of gridLines"
+            [attr.x1]="line.x1"
+            [attr.y1]="line.y1"
+            [attr.x2]="line.x2"
+            [attr.y2]="line.y2"
+            class="grid-line"
+          />
+        </g>
+
+        <!-- Axes -->
+        <line
+          [attr.x1]="padding"
+          [attr.y1]="chartHeight - padding"
+          [attr.x2]="chartWidth - padding"
+          [attr.y2]="chartHeight - padding"
+          class="axis"
+        />
+        <line
+          [attr.x1]="padding"
+          [attr.y1]="padding"
+          [attr.x2]="padding"
+          [attr.y2]="chartHeight - padding"
+          class="axis"
+        />
+
+        <!-- Line path -->
+        <path
+          [attr.d]="linePath"
+          class="line-path"
+          [attr.aria-label]="'Line chart showing trends over time'"
+          role="img"
+        />
+
+        <!-- Data points with hover area -->
+        <g *ngFor="let point of dataPoints; let i = index">
+          <circle
+            [attr.cx]="point.x"
+            [attr.cy]="point.y"
+            r="4"
+            class="data-point"
+            [attr.aria-label]="chartData[i].name + ': ' + chartData[i].value"
+            role="img"
+          />
+          <!-- Hoverable area for tooltip -->
+          <rect
+            [attr.x]="point.x - 10"
+            [attr.y]="point.y - 10"
+            width="20"
+            height="20"
+            fill="transparent"
+            class="data-point-hover-area"
+            (mouseenter)="onDataPointHover($event, chartData[i])"
+            (mousemove)="onMouseMove($event)"
+          />
+        </g>
+
+        <!-- Value labels -->
+        <text
+          *ngFor="let point of dataPoints; let i = index"
+          [attr.x]="point.x"
+          [attr.y]="point.y - 10"
+          class="value-label"
+          text-anchor="middle"
+        >
+          {{ chartData[i].value | number : '1.0-0' }}
+        </text>
+
+        <!-- X-axis labels -->
+        <text
+          *ngFor="let point of dataPoints; let i = index"
+          [attr.x]="point.x"
+          [attr.y]="chartHeight - padding + 20"
+          class="axis-label"
+          text-anchor="middle"
+        >
+          {{ chartData[i].name }}
+        </text>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<app-chart-tooltip
+  [data]="tooltipData"
+  [visible]="tooltipVisible"
+  [top]="tooltipTop"
+  [inlineOffset]="tooltipInlineOffset"
+></app-chart-tooltip>
+

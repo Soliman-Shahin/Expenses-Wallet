@@ -97,16 +97,17 @@ export class ToastService {
   private async presentToast(
     position: 'top' | 'middle' | 'bottom',
     message: string,
-    color: 'success' | 'danger' | 'primary' | 'warning' | 'medium'
+    color: 'success' | 'danger' | 'primary' | 'warning' | 'medium',
+    opts?: { duration?: number; cssClassExtra?: string[] }
   ): Promise<HTMLIonToastElement | void> {
     await this.dismissActiveToast();
 
     let toast = await this.toastController.create({
       message,
-      duration: 2000,
+      duration: opts?.duration ?? 2000,
       color,
       position,
-      cssClass: 'custom-toast',
+      cssClass: ['custom-toast', ...(opts?.cssClassExtra ?? [])],
       enterAnimation: customToastEnterAnimation,
       leaveAnimation: customToastLeaveAnimation,
       keyboardClose: true,
@@ -114,8 +115,9 @@ export class ToastService {
     });
 
     // Set ARIA attributes for accessibility
-    toast.setAttribute('role', 'status');
-    toast.setAttribute('aria-live', 'polite');
+    const isAssertive = color === 'danger' || color === 'warning';
+    toast.setAttribute('role', isAssertive ? 'alert' : 'status');
+    toast.setAttribute('aria-live', isAssertive ? 'assertive' : 'polite');
 
     try {
       this.activeToast = toast;
@@ -126,10 +128,10 @@ export class ToastService {
       try {
         toast = await this.toastController.create({
           message,
-          duration: 2000,
+          duration: opts?.duration ?? 2000,
           color,
           position,
-          cssClass: 'custom-toast',
+          cssClass: ['custom-toast', ...(opts?.cssClassExtra ?? [])],
           keyboardClose: true,
           animated: true,
         });
@@ -153,6 +155,38 @@ export class ToastService {
     position: 'top' | 'middle' | 'bottom',
     message: string
   ): Promise<HTMLIonToastElement | void> {
-    return this.presentToast(position, message, 'danger');
+    return this.presentToast(position, message, 'danger', { cssClassExtra: ['toast-error'] });
+  }
+
+  async presentInfoToast(
+    position: 'top' | 'middle' | 'bottom',
+    message: string
+  ): Promise<HTMLIonToastElement | void> {
+    return this.presentToast(position, message, 'primary', { cssClassExtra: ['toast-info'] });
+  }
+
+  async presentWarningToast(
+    position: 'top' | 'middle' | 'bottom',
+    message: string
+  ): Promise<HTMLIonToastElement | void> {
+    return this.presentToast(position, message, 'warning', { cssClassExtra: ['toast-warning'] });
+  }
+
+  /**
+   * Generic API to show a toast with full control
+   */
+  async show(options: {
+    position?: 'top' | 'middle' | 'bottom';
+    message: string;
+    color?: 'success' | 'danger' | 'primary' | 'warning' | 'medium';
+    duration?: number;
+    cssClassExtra?: string[];
+  }): Promise<HTMLIonToastElement | void> {
+    const pos = options.position ?? 'bottom';
+    const col = options.color ?? 'primary';
+    return this.presentToast(pos, options.message, col, {
+      duration: options.duration,
+      cssClassExtra: options.cssClassExtra,
+    });
   }
 }

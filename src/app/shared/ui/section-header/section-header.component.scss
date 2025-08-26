@@ -2,12 +2,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.25rem;
-  padding: 0 0.5rem;
+  margin-bottom: var(--ew-space-6);
+  padding: 0 var(--ew-space-3);
 }
 
 .section-title {
-  font-size: 1.25rem;
+  font-size: var(--ew-font-xl);
   font-weight: 700;
   margin: 0;
   color: var(--ion-color-primary);
@@ -17,11 +17,11 @@
 }
 
 .section-title ion-icon {
-  margin-inline-end: 0.5rem;
+  margin-inline-end: var(--ew-space-3);
   font-size: 1.1rem;
 }
 
 ion-button[fill='clear'] {
-  --padding-start: 0.5rem;
-  --padding-end: 0.5rem;
+  --padding-start: var(--ew-space-3);
+  --padding-end: var(--ew-space-3);
 }

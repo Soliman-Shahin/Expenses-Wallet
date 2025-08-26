@@ -1,23 +1,23 @@
 /* Match the category icon style used in Categories list */
 .category-icon {
-  height: 40px !important;
-  width: 40px !important;
+  height: var(--ew-space-9) !important; // 40px
+  width: var(--ew-space-9) !important;  // 40px
   border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-inline-end: 0.7rem;
+  margin-inline-end: var(--ew-space-4); // 12px
 }
 
 /* Optional: tweak ion-item spacing for tighter layout */
 ion-item {
-  --inner-padding-start: 8px;
-  --inner-padding-end: 8px;
+  --inner-padding-start: var(--ew-space-3); // 8px
+  --inner-padding-end: var(--ew-space-3);   // 8px
 }
 
 /* Match Categories list spacing */
 .transactions-list {
-  padding: 0.5rem 0.75rem; /* same as .categories-list */
+  padding: var(--ew-space-3) var(--ew-space-4); /* same as .categories-list */
 }
 
 .transaction-title {
@@ -26,27 +26,27 @@ ion-item {
 
 .transaction-item {
   --background: var(--ion-card-background, var(--ion-color-step-50, #1e1e1e));
-  margin: 10px 6px; /* same as .category-item */
-  border-radius: 16px;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+  margin: var(--ew-space-4) var(--ew-space-3); /* same as .category-item */
+  border-radius: var(--ew-radius-lg);
+  box-shadow: var(--ew-shadow-md);
   transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
   animation: cardAppear 320ms ease both;
 }
 
 .transaction-item:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
+  transform: translateY(calc(var(--ew-space-px) * -1));
+  box-shadow: var(--ew-shadow-lg);
 }
 
 .transaction-item:active {
   transform: translateY(0);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--ew-shadow-sm);
 }
 
 @keyframes cardAppear {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(var(--ew-space-3));
   }
   to {
     opacity: 1;

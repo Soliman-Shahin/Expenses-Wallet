@@ -16,21 +16,21 @@
     }
     ion-title {
       color: var(--side-menu-text-color);
-      font-weight: 600;
+      font-weight: var(--ew-font-weight-semibold);
     }
   }
 
   ion-content {
     --background: var(--side-menu-background);
-    --padding-top: 16px;
-    --padding-bottom: 16px;
+    --padding-top: var(--ew-space-6);
+    --padding-bottom: var(--ew-space-6);
 
     .user-info {
       display: flex;
       align-items: center;
-      padding: 16px;
-      margin-bottom: 8px;
-      border-bottom: 1px solid var(--side-menu-border-color);
+      padding: var(--ew-space-6);
+      margin-bottom: var(--ew-space-3);
+      border-bottom: var(--ew-border-width-sm) solid var(--side-menu-border-color);
       cursor: pointer;
       transition: background-color 0.2s ease-in-out;
 
@@ -39,29 +39,29 @@
       }
 
       ion-avatar {
-        width: 50px;
-        height: 50px;
-        margin-right: 16px;
-        border: 2px solid var(--ion-color-primary);
+        width: var(--ew-size-12);
+        height: var(--ew-size-12);
+        margin-inline-end: var(--ew-space-6);
+        border: var(--ew-border-width-md) solid var(--ion-color-primary);
       }
 
       .user-details {
         h3 {
           margin: 0;
-          font-size: 1.1rem;
-          font-weight: 600;
+          font-size: var(--ew-font-size-lg);
+          font-weight: var(--ew-font-weight-semibold);
           color: var(--ion-text-color);
         }
         p {
           margin: 0;
-          font-size: 0.9rem;
+          font-size: var(--ew-font-size-sm);
           color: var(--ion-color-medium-shade);
         }
       }
     }
 
     .login-prompt {
-      padding: 16px;
+      padding: var(--ew-space-6);
       text-align: center;
       color: var(--ion-text-color);
     }
@@ -69,11 +69,11 @@
     ion-list {
       padding: 0;
       background: var(--ion-item-background);
-      border-radius: 12px;
+      border-radius: var(--ew-radius-lg);
 
       ion-item {
-        --padding-start: 16px;
-        --inner-padding-end: 16px;
+        --padding-start: var(--ew-space-6);
+        --inner-padding-end: var(--ew-space-6);
         --background: var(--ion-item-background);
         overflow: hidden;
         position: relative;
@@ -81,7 +81,7 @@
         &:active::after {
           content: "";
           position: absolute;
-          left: 50%;
+          inset-inline-start: 50%;
           top: 50%;
           width: 120%;
           height: 120%;
@@ -92,25 +92,25 @@
           pointer-events: none;
         }
         --color: var(--ion-text-color);
-        --border-radius: 8px;
-        margin: 4px 8px;
+        --border-radius: var(--ew-radius-md);
+        margin: var(--ew-space-1) var(--ew-space-3);
         transition: all 0.2s ease-in-out;
 
         &.active {
           background: var(--ion-color-primary);
           color: var(--ion-color-primary-contrast);
-          font-weight: 600;
+          font-weight: var(--ew-font-weight-semibold);
           position: relative;
           transition: background 0.22s, color 0.22s, box-shadow 0.22s;
 
           &::before {
             content: "";
             position: absolute;
-            left: 0;
-            top: 8px;
-            bottom: 8px;
-            width: 4px;
-            border-radius: 4px;
+            inset-inline-start: 0;
+            top: var(--ew-space-3);
+            bottom: var(--ew-space-3);
+            width: var(--ew-space-1);
+            border-radius: var(--ew-radius-sm);
             background: linear-gradient(180deg, #22d3ee 0%, #f472b6 100%);
             transition: background 0.22s;
           }
@@ -125,14 +125,14 @@
           background: rgba(var(--ion-color-primary-rgb), 0.08);
           filter: brightness(1);
           transform: scale(1.035);
-          box-shadow: 0 2px 14px rgba(var(--ion-color-primary-rgb), 0.13);
+          box-shadow: var(--ew-shadow-md);
           transition: var(--tab-transition);
         }
         &:focus-visible:not(.active) {
-          outline: 2px solid var(--ion-color-primary);
-          outline-offset: 2px;
+          outline: var(--ew-border-width-md) solid var(--ion-color-primary);
+          outline-offset: var(--ew-space-px);
           background: rgba(var(--ion-color-primary-rgb), 0.15);
-          box-shadow: 0 0 0 4px rgba(var(--ion-color-primary-rgb), 0.13);
+          box-shadow: 0 0 0 var(--ew-space-1) rgba(var(--ion-color-primary-rgb), 0.13);
           z-index: 2;
           transition: var(--tab-transition);
         }
@@ -144,20 +144,20 @@
 
         ion-icon {
           color: var(--ion-color-medium-shade);
-          margin-right: 16px;
+          margin-inline-end: var(--ew-space-6);
           transition: color 0.22s, transform 0.16s;
         }
       }
     }
 
     .bottom-menu {
-      border-top: 1px solid var(--side-menu-border-color);
-      margin-top: 16px;
-      padding-top: 8px;
+      border-top: var(--ew-border-width-sm) solid var(--side-menu-border-color);
+      margin-top: var(--ew-space-6);
+      padding-top: var(--ew-space-3);
 
       .version-info {
         --color: var(--ion-color-medium-shade);
-        font-size: 0.8rem;
+        font-size: var(--ew-font-size-xs);
         text-align: center;
       }
     }
@@ -175,14 +175,14 @@ body.dark {
 
     ion-content {
       .user-info {
-        border-bottom: 1px solid var(--side-menu-border-color);
+        border-bottom: var(--ew-border-width-sm) solid var(--side-menu-border-color);
 
         &:hover {
           background-color: rgba(var(--ion-color-primary-rgb), 0.1);
         }
 
         ion-avatar {
-          border: 2px solid var(--ion-color-primary);
+          border: var(--ew-border-width-md) solid var(--ion-color-primary);
         }
 
         .user-details {
@@ -211,13 +211,13 @@ body.dark {
 
           &:hover:not(.active) {
             background: rgba(var(--ion-color-primary-rgb), 0.15);
-            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
+            box-shadow: var(--ew-shadow-lg);
           }
 
           &:focus-visible:not(.active) {
-            outline: 2px solid var(--ion-color-primary);
+            outline: var(--ew-border-width-md) solid var(--ion-color-primary);
             background: rgba(var(--ion-color-primary-rgb), 0.2);
-            box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.15);
+            box-shadow: 0 0 0 var(--ew-space-2) rgba(59, 130, 246, 0.15);
           }
 
           ion-icon {
@@ -227,7 +227,7 @@ body.dark {
       }
 
       .bottom-menu {
-        border-top: 1px solid var(--side-menu-border-color);
+        border-top: var(--ew-border-width-sm) solid var(--side-menu-border-color);
       }
     }
   }
@@ -248,18 +248,18 @@ body.dark {
 @media (max-width: 768px) {
   :host {
     ion-content {
-      padding-left: var(--spacing-xs);
-      padding-right: var(--spacing-xs);
+      padding-inline-start: var(--ew-space-2);
+      padding-inline-end: var(--ew-space-2);
       .user-info {
-        padding: 10px;
-        margin-bottom: 4px;
+        padding: var(--ew-space-2);
+        margin-bottom: var(--ew-space-1);
         ion-avatar {
-          width: 40px;
-          height: 40px;
+          width: var(--ew-size-10);
+          height: var(--ew-size-10);
         }
       }
       ion-list {
-        border-radius: 8px;
+        border-radius: var(--ew-radius-md);
       }
     }
   }
@@ -269,36 +269,23 @@ body.dark {
 @media (min-width: 1200px) {
   :host {
     ion-content {
-      padding-left: var(--spacing-xl);
-      padding-right: var(--spacing-xl);
+      padding-inline-start: var(--ew-space-8);
+      padding-inline-end: var(--ew-space-8);
       .user-info {
-        padding: 24px;
-        margin-bottom: 16px;
-        @include rounded-lg;
-        @include shadow;
+        padding: var(--ew-space-8);
+        margin-bottom: var(--ew-space-6);
+        border-radius: var(--ew-radius-lg);
+        box-shadow: var(--ew-shadow-md);
         ion-avatar {
-          width: 64px;
-          height: 64px;
+          width: var(--ew-size-16);
+          height: var(--ew-size-16);
         }
       }
       ion-list {
-        border-radius: 18px;
-        @include shadow-card;
+        border-radius: var(--ew-radius-xl);
+        box-shadow: var(--ew-shadow-lg);
       }
     }
   }
 }
 
-[dir="rtl"] {
-  :host {
-    .user-info ion-avatar {
-      margin-left: 16px;
-      margin-right: 0;
-    }
-
-    ion-item ion-icon[slot="start"] {
-      margin-left: 16px;
-      margin-right: 0;
-    }
-  }
-}

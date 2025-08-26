@@ -1,8 +1,8 @@
 .ui-form-item {
   --background: var(--ion-color-light, rgba(0, 0, 0, 0.02));
-  --border-radius: 16px;
-  --padding-start: 16px;
-  --padding-end: 12px;
+  --border-radius: var(--ew-radius-lg);
+  --padding-start: var(--ew-space-5);
+  --padding-end: var(--ew-space-4);
   --inner-padding-top: 0;
   --inner-padding-bottom: 0;
   --inner-padding-start: 0;
@@ -14,7 +14,7 @@
   --inner-border-style: none;
   --border-color: transparent;
   --box-shadow: none;
-  margin-bottom: 16px;
+  margin-bottom: var(--ew-space-5);
   display: flex;
   align-items: center;
   overflow: visible; // allow error slot to be visible below the input
@@ -97,13 +97,13 @@
   ion-icon[slot="start"] {
     color: var(--ion-color-medium);
     font-size: 20px;
-    margin-right: 10px;
+    margin-inline-end: var(--ew-space-4);
   }
 
   ion-icon.end-toggle[slot="end"] {
     color: var(--ion-color-medium);
     font-size: 22px;
-    margin-left: 8px;
+    margin-inline-start: var(--ew-space-3);
     cursor: pointer;
     transition: color 0.2s ease, transform 0.2s ease;
 
@@ -118,7 +118,7 @@
   ion-icon.end-clear[slot="end"] {
     color: var(--ion-color-medium);
     font-size: 20px;
-    margin-left: 6px;
+    margin-inline-start: var(--ew-space-2);
     cursor: pointer;
     transition: color 0.2s ease, transform 0.2s ease;
     &:hover {
@@ -135,8 +135,8 @@
     min-width: 0;
     --padding-start: 0;
     --padding-end: 0;
-    --padding-top: 10px;
-    --padding-bottom: 10px;
+    --padding-top: var(--ew-space-4);
+    --padding-bottom: var(--ew-space-4);
     --background: transparent;
     --border-width: 0;
     --border-color: transparent;
@@ -145,7 +145,7 @@
     --highlight-color: transparent;
     --highlight-color-invalid: transparent;
     --highlight-color-valid: transparent;
-    font-size: 16px;
+    font-size: var(--ew-font-md);
 
     &::part(container) {
       background: transparent !important;
@@ -191,8 +191,8 @@
   }
 
   ion-note[slot="error"] {
-    margin-top: 6px;
-    font-size: 12px;
+    margin-top: var(--ew-space-2);
+    font-size: var(--ew-font-xs);
     line-height: 1.3;
     color: var(--ion-color-danger);
   }
@@ -200,7 +200,7 @@
   .helper-line {
     display: flex;
     justify-content: space-between;
-    gap: 12px;
+    gap: var(--ew-space-4);
     width: 100%;
     .hint {
       color: var(--ion-color-medium);
@@ -219,12 +219,12 @@
   // Size fine-tuning
   &.size-sm {
     .ui-form-input {
-      font-size: 14px;
+      font-size: var(--ew-font-sm);
     }
   }
   &.size-lg {
     .ui-form-input {
-      font-size: 18px;
+      font-size: var(--ew-font-lg);
     }
   }
 

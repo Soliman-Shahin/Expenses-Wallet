@@ -13,20 +13,7 @@
   --brand-gradient: linear-gradient(90deg, #4361ee 0%, #43eefd 100%);
   --surface-gradient: linear-gradient(180deg, #f8f9fe 0%, #e8eafc 100%);
 
-  // === SHADOWS ===
-  --shadow-elevated: 0 18px 40px rgba(0, 0, 0, 0.12),
-    0 6px 16px rgba(0, 0, 0, 0.08);
-  /* Map generic shadow variables used by mixins */
-  --shadow: 0 18px 40px rgba(0, 0, 0, 0.12), 0 6px 16px rgba(0, 0, 0, 0.08);
-  --shadow-card: 0 16px 38px rgba(67, 97, 238, 0.16),
-    0 8px 20px rgba(0, 0, 0, 0.06);
-  --shadow-header: 0 12px 28px rgba(0, 0, 0, 0.14),
-    0 4px 10px rgba(0, 0, 0, 0.08);
-
-  // === RADII ===
-  --radius: 14px;
-  --radius-lg: 22px;
-
+  
   // === TYPOGRAPHY ===
   --ion-font-family: "Ubuntu", sans-serif;
 
@@ -150,30 +137,10 @@ $theme-colors: (
 .dark {
   --brand-gradient: linear-gradient(90deg, #181a20 0%, #23263a 100%);
   --surface-gradient: linear-gradient(180deg, #181a20 0%, #23263a 100%);
-  --shadow-elevated: 0 20px 44px rgba(0, 0, 0, 0.36),
-    0 8px 18px rgba(0, 0, 0, 0.28);
-  /* Map generic shadow variables used by mixins in dark mode */
-  --shadow: 0 20px 44px rgba(0, 0, 0, 0.36), 0 8px 18px rgba(0, 0, 0, 0.28);
-  --shadow-card: 0 18px 42px rgba(34, 211, 238, 0.18),
-    0 10px 22px rgba(0, 0, 0, 0.3);
   --shadow-header: 0 14px 30px rgba(0, 0, 0, 0.38),
     0 6px 12px rgba(0, 0, 0, 0.26);
-  --shadow-card: 0 2px 12px rgba(16, 185, 129, 0.09);
-  --shadow-header: 0 2px 10px rgba(59, 130, 246, 0.11);
-
-  --brand-gradient: linear-gradient(90deg, #282a36 0%, #6272a4 100%);
-  --surface-gradient: linear-gradient(180deg, #282a36 0%, #44475a 100%);
-  --shadow-elevated: 0 4px 24px rgba(98, 114, 164, 0.1);
-  --shadow-card: 0 2px 12px rgba(98, 114, 164, 0.08);
-  --shadow-header: 0 2px 10px rgba(98, 114, 164, 0.09);
 
   /** primary **/
-  --ion-color-primary: #3b82f6; // Modern blue
-  --ion-color-primary-rgb: 59, 130, 246;
-  --ion-color-primary-contrast: #fff;
-  --ion-color-primary-contrast-rgb: 255, 255, 255;
-  --ion-color-primary-shade: #2563eb;
-  --ion-color-primary-tint: #60a5fa;
 
   --ion-color-primary-rgb: 189, 147, 249;
   --ion-color-primary-contrast: #282a36;
@@ -182,12 +149,6 @@ $theme-colors: (
   --ion-color-primary-tint: #c39dfb;
 
   /** secondary **/
-  --ion-color-secondary: #10b981; // Modern green
-  --ion-color-secondary-rgb: 16, 185, 129;
-  --ion-color-secondary-contrast: #fff;
-  --ion-color-secondary-contrast-rgb: 255, 255, 255;
-  --ion-color-secondary-shade: #059669;
-  --ion-color-secondary-tint: #34d399;
 
   --ion-color-secondary-rgb: 255, 121, 198;
   --ion-color-secondary-contrast: #282a36;
@@ -196,12 +157,6 @@ $theme-colors: (
   --ion-color-secondary-tint: #ff86ce;
 
   /** tertiary **/
-  --ion-color-tertiary: #f59e42; // Accent orange
-  --ion-color-tertiary-rgb: 245, 158, 66;
-  --ion-color-tertiary-contrast: #fff;
-  --ion-color-tertiary-contrast-rgb: 255, 255, 255;
-  --ion-color-tertiary-shade: #ea580c;
-  --ion-color-tertiary-tint: #fbbf24;
 
   --ion-color-tertiary-rgb: 139, 233, 253;
   --ion-color-tertiary-contrast: #282a36;
@@ -288,4 +243,68 @@ html {
 .toast-error {
   --background: var(--ion-color-danger);
   --color: var(--ion-color-light);
+}
+
+// Additional toast variants
+.toast-warning {
+  --background: var(--ion-color-warning);
+  --color: var(--ion-color-warning-contrast);
+}
+
+.toast-info {
+  --background: var(--ion-color-primary);
+  --color: var(--ion-color-primary-contrast);
+}
+
+/* =============================
+   Design Tokens (Expenses Wallet)
+   Centralized CSS variables for spacing, radius, shadows, typography
+   ============================= */
+:root {
+  /* Spacing scale */
+  --ew-space-0: 0;
+  --ew-space-1: 2px;
+  --ew-space-2: 4px;
+  --ew-space-3: 8px;
+  --ew-space-4: 12px;
+  --ew-space-5: 16px;
+  --ew-space-6: 20px;
+  --ew-space-7: 24px;
+  --ew-space-8: 32px;
+  --ew-space-9: 40px;
+  --ew-space-10: 48px;
+
+  /* Radius */
+  --ew-radius-sm: 6px;
+  --ew-radius-md: 10px;
+  --ew-radius-lg: 16px;
+  --ew-radius-xl: 22px;
+  --ew-radius-pill: 999px;
+
+  /* Shadows */
+  --ew-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --ew-shadow-md: 0 8px 20px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.06);
+  --ew-shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.12), 0 2px 10px rgba(0, 0, 0, 0.08);
+  --ew-shadow-focus: 0 0 0 3px rgba(var(--ion-color-primary-rgb), 0.35);
+
+  /* Typography scale */
+  --ew-font-xs: 0.75rem;  /* 12px */
+  --ew-font-sm: 0.875rem; /* 14px */
+  --ew-font-md: 1rem;     /* 16px */
+  --ew-font-lg: 1.125rem; /* 18px */
+  --ew-font-xl: 1.25rem;  /* 20px */
+  --ew-font-2xl: 1.5rem;  /* 24px */
+  --ew-font-3xl: 1.875rem;/* 30px */
+
+  /* Line heights */
+  --ew-leading-tight: 1.2;
+  --ew-leading-normal: 1.5;
+  --ew-leading-relaxed: 1.65;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --ew-shadow-md: 0 6px 14px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.06);
+    --ew-shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.10), 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
 }

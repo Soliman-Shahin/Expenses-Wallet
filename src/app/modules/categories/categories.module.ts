@@ -6,13 +6,8 @@ import { AddCategoryComponent, CategoriesComponent } from './components';
 import { ColorSelectorComponent, IconSelectorComponent } from './containers';
 
 @NgModule({
-  imports: [CommonModule, SharedModule, CategoriesRoutingModule],
-  declarations: [
-    CategoriesComponent,
-    AddCategoryComponent,
-    ColorSelectorComponent,
-    IconSelectorComponent,
-  ],
+  imports: [CommonModule, SharedModule, CategoriesRoutingModule, ColorSelectorComponent, IconSelectorComponent],
+  declarations: [CategoriesComponent, AddCategoryComponent],
   providers: [],
 })
 export class CategoriesModule {}

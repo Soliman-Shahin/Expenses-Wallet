@@ -1,8 +1,7 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { finalize, map, takeUntil } from 'rxjs';
+import { finalize, takeUntil } from 'rxjs';
 import { BaseComponent } from 'src/app/shared/base';
-import { Category } from '../../models';
 
 @Component({
   selector: 'app-add-category',
@@ -14,6 +13,7 @@ export class AddCategoryComponent extends BaseComponent implements OnInit {
   editMode = false;
   categoryId: string | null = null;
   animatePreview = false;
+  formSubmitted = false;
 
   constructor() {
     super();
@@ -49,20 +49,22 @@ export class AddCategoryComponent extends BaseComponent implements OnInit {
     });
   }
 
-  selectColor(color: any) {
-    const control = this.categoryForm.get('color');
-    if (control) {
-      control.setValue(color.colorCode);
-    }
+  selectColor(color: string) {
+    this.categoryForm.patchValue({ color });
     this.bumpPreview();
+    this.addHapticFeedback();
   }
 
-  selectIcon(icon: string): void {
-    const control = this.categoryForm.get('icon');
-    if (control) {
-      control.setValue(icon);
-    }
+  selectIcon(icon: string) {
+    this.categoryForm.patchValue({ icon });
     this.bumpPreview();
+    this.addHapticFeedback();
+  }
+
+  private addHapticFeedback() {
+    if ('vibrate' in navigator) {
+      navigator.vibrate(50);
+    }
   }
 
   private bumpPreview() {
@@ -83,11 +85,15 @@ export class AddCategoryComponent extends BaseComponent implements OnInit {
 
   addCategory(): void {
     this.setLoading(true);
+    this.formSubmitted = true;
     this.categoryService
       .createCategory(this.categoryForm.value)
       .pipe(
         takeUntil(this.destroy$),
-        finalize(() => this.setLoading(false))
+        finalize(() => {
+          this.setLoading(false);
+          setTimeout(() => this.formSubmitted = false, 2000);
+        })
       )
       .subscribe({
         next: () => {
@@ -95,9 +101,12 @@ export class AddCategoryComponent extends BaseComponent implements OnInit {
             'bottom',
             this.translateService.instant('CATEGORY_SUCCESSFULLY_CREATED')
           );
-          this.router.navigate(['/categories/list']);
+          setTimeout(() => {
+            this.router.navigate(['/categories/list']);
+          }, 1500);
         },
         error: (error) => {
+          this.formSubmitted = false;
           this.toastService.presentErrorToast('bottom', error.message);
         },
       });

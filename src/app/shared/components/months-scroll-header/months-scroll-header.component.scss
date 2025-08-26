@@ -1,7 +1,7 @@
 .months-scroll-container {
   display: flex;
   overflow-x: auto;
-  padding: 8px 0;
+  padding: var(--ew-space-3) 0;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
 
@@ -16,11 +16,11 @@
       border-color 160ms ease;
 
     flex: 0 0 auto;
-    padding: 10px 16px;
+    padding: var(--ew-space-3) var(--ew-space-4);
     text-align: center;
     cursor: pointer;
-    border-radius: 20px;
-    margin: 0 4px;
+    border-radius: var(--ew-radius-xl);
+    margin: 0 var(--ew-space-2);
     position: relative;
 
     /* Subtle glass for non-selected */
@@ -33,19 +33,19 @@
     border: 1px solid rgba(var(--ion-color-primary-rgb), 0.12);
 
     .month-name {
-      font-size: 0.9em;
+      font-size: var(--ew-font-sm);
       font-weight: 500;
     }
 
     .year {
-      font-size: 0.7em;
+      font-size: var(--ew-font-xs);
       opacity: 0.7;
     }
 
     &.selected {
       background-color: var(--ion-color-primary);
       color: var(--ion-color-primary-contrast);
-      box-shadow: 0 2px 12px rgba(34, 211, 238, 0.13);
+      box-shadow: var(--ew-shadow-sm);
       transform: scale(1.07);
       border-color: transparent;
 
@@ -62,7 +62,7 @@
     &:focus-visible:not(.selected) {
       background-color: rgba(var(--ion-color-primary-rgb), 0.12);
       transform: translateY(-1px) scale(1.03);
-      box-shadow: 0 2px 8px rgba(34, 211, 238, 0.1);
+      box-shadow: var(--ew-shadow-sm);
       border-color: rgba(var(--ion-color-primary-rgb), 0.24);
     }
   }

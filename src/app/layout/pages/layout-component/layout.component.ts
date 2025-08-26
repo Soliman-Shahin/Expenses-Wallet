@@ -15,6 +15,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
   isLoading = false;
   private loadingSub?: Subscription;
   isLoggedIn$!: Observable<boolean>;
+  message$!: Observable<string | null>;
 
   constructor(
     private loadingService: LoadingService,
@@ -24,6 +25,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.isLoggedIn$ = this.auth.user$.pipe(map((u) => !!u));
+    this.message$ = this.loadingService.message$;
     this.loadingSub = this.loadingService.isLoading$.subscribe((loading) => {
       this.isLoading = loading;
       this.cdr.markForCheck();

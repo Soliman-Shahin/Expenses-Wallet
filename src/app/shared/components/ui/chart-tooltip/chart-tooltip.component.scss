@@ -1,0 +1,79 @@
+:host {
+  display: block;
+  position: fixed;
+  z-index: 1000;
+  pointer-events: none;
+  transition: opacity 0.2s var(--animation-easing);
+}
+
+.tooltip-container {
+  background: rgba(var(--ion-background-color-rgb, 255, 255, 255), 0.8);
+  backdrop-filter: saturate(180%) blur(10px);
+  -webkit-backdrop-filter: saturate(180%) blur(10px);
+  color: var(--ion-text-color);
+  padding: var(--ew-space-4) var(--ew-space-5);
+  border-radius: var(--ew-radius-md);
+  box-shadow: var(--ew-shadow-md);
+  border: 1px solid rgba(var(--ion-color-medium-rgb), 0.1);
+  font-size: var(--ew-font-sm);
+  line-height: var(--ew-leading-normal);
+  opacity: 0;
+  transform-origin: center;
+  transition: opacity 0.2s var(--animation-easing), transform 0.2s var(--animation-easing);
+
+  &.tooltip-visible {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  &.tooltip-hidden {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+.tooltip-item {
+  display: flex;
+  align-items: center;
+  gap: var(--ew-space-3);
+}
+
+.tooltip-color-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--ew-radius-sm);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.tooltip-label {
+  font-weight: 500;
+  color: var(--ion-color-medium-shade);
+}
+
+.tooltip-value {
+  font-weight: 600;
+  color: var(--ion-text-color);
+  margin-inline-start: auto;
+  padding-inline-start: var(--ew-space-4);
+}
+
+/* Dark Mode */
+:host-context(body.dark) .tooltip-container {
+  background: rgba(var(--ion-background-color-rgb, 24, 24, 24), 0.8);
+  border-color: rgba(var(--ion-color-light-rgb), 0.1);
+
+  .tooltip-color-swatch {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .tooltip-label {
+    color: var(--ion-color-medium-tint);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host,
+  .tooltip-container {
+    transition: none;
+  }
+}

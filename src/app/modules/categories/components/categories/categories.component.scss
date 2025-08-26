@@ -1,85 +1,85 @@
 .category-icon {
-  height: 40px !important;
-  width: 40px !important;
-  border-radius: 50%;
+  height: var(--ew-space-9) !important; // 40px
+  width: var(--ew-space-9) !important;  // 40px
+  border-radius: var(--ew-radius-full);
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-inline-end: 0.7rem;
+  margin-inline-end: var(--ew-space-4); // ~12px
 }
 
 .no_data {
   text-align: center;
-  margin-top: 3rem;
+  margin-top: var(--ew-space-8);
 }
 
 /* Floating Add Button styles */
 :root {
   --fab-bg: var(--ion-color-primary);
   --fab-fg: var(--ion-color-primary-contrast);
-  --fab-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  --fab-shadow: var(--ew-shadow-md);
 }
 
 ion-fab .fab-add {
   --background: var(--fab-bg);
   --color: var(--fab-fg);
   box-shadow: var(--fab-shadow);
-  transition: transform 200ms ease, box-shadow 200ms ease, filter 200ms ease;
+  transition: transform var(--ew-transition-duration-medium) ease, box-shadow var(--ew-transition-duration-medium) ease, filter var(--ew-transition-duration-medium) ease;
 }
 
 ion-fab .fab-add:hover {
   transform: translateY(-2px) scale(1.03);
-  box-shadow: 0 14px 24px rgba(0, 0, 0, 0.22);
+  box-shadow: var(--ew-shadow-lg);
   filter: brightness(1.05);
 }
 
 ion-fab .fab-add:active {
   transform: translateY(0) scale(0.98);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.18);
+  box-shadow: var(--ew-shadow-sm);
 }
 
 ion-fab .fab-add:focus-visible {
   outline: 3px solid var(--ion-color-primary);
-  outline-offset: 3px;
+  outline-offset: var(--ew-space-2);
 }
 
 /* Categories list polish */
 .categories-list {
-  padding: 0.5rem 0.75rem; /* more breathing room */
+  padding: var(--ew-space-3) var(--ew-space-4); /* more breathing room */
 }
 
 .category-item {
   --background: var(--ion-card-background, var(--ion-color-step-50, #1e1e1e));
-  margin: 10px 6px;
-  border-radius: 16px;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
-  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
-  animation: cardAppear 320ms ease both;
+  margin: var(--ew-space-4) var(--ew-space-3);
+  border-radius: var(--ew-radius-lg);
+  box-shadow: var(--ew-shadow-md);
+  transition: transform var(--ew-transition-duration-fast) ease, box-shadow var(--ew-transition-duration-fast) ease, background var(--ew-transition-duration-fast) ease;
+  animation: cardAppear var(--ew-transition-duration-slow) ease both;
 }
 
 .category-item:hover {
   transform: translateY(-1px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
+  box-shadow: var(--ew-shadow-lg);
 }
 
 .category-item:active {
   transform: translateY(0);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--ew-shadow-sm);
 }
 
 .category-item .title {
-  font-weight: 600;
+  font-weight: var(--ew-font-weight-semibold);
 }
 
 .skeleton-list ion-item {
-  margin: 10px 6px;
+  margin: var(--ew-space-4) var(--ew-space-3);
 }
 
 /* Appear animation */
 @keyframes cardAppear {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(var(--ew-space-3));
   }
   to {
     opacity: 1;
@@ -88,14 +88,14 @@ ion-fab .fab-add:focus-visible {
 }
 
 /* Subtle stagger for first items */
-.categories-list ion-item.category-item:nth-child(1) { animation-delay: 20ms; }
-.categories-list ion-item.category-item:nth-child(2) { animation-delay: 40ms; }
-.categories-list ion-item.category-item:nth-child(3) { animation-delay: 60ms; }
-.categories-list ion-item.category-item:nth-child(4) { animation-delay: 80ms; }
-.categories-list ion-item.category-item:nth-child(5) { animation-delay: 100ms; }
-.categories-list ion-item.category-item:nth-child(6) { animation-delay: 120ms; }
-.categories-list ion-item.category-item:nth-child(7) { animation-delay: 140ms; }
-.categories-list ion-item.category-item:nth-child(8) { animation-delay: 160ms; }
+.categories-list ion-item.category-item:nth-child(1) { animation-delay: var(--ew-transition-duration-shortest); }
+.categories-list ion-item.category-item:nth-child(2) { animation-delay: calc(var(--ew-transition-duration-shortest) * 2); }
+.categories-list ion-item.category-item:nth-child(3) { animation-delay: calc(var(--ew-transition-duration-shortest) * 3); }
+.categories-list ion-item.category-item:nth-child(4) { animation-delay: calc(var(--ew-transition-duration-shortest) * 4); }
+.categories-list ion-item.category-item:nth-child(5) { animation-delay: calc(var(--ew-transition-duration-shortest) * 5); }
+.categories-list ion-item.category-item:nth-child(6) { animation-delay: calc(var(--ew-transition-duration-shortest) * 6); }
+.categories-list ion-item.category-item:nth-child(7) { animation-delay: calc(var(--ew-transition-duration-shortest) * 7); }
+.categories-list ion-item.category-item:nth-child(8) { animation-delay: calc(var(--ew-transition-duration-shortest) * 8); }
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {

@@ -1,36 +1,35 @@
 // Global form styles
 ion-item {
-  --background: var(--ion-color-light);
-  --border-radius: 12px;
-  --padding-start: 16px;
-  --padding-end: 16px;
+  --background: var(--ew-color-neutral-0, var(--ion-color-light));
+  --border-radius: var(--ew-radius-md, 12px);
+  --padding-start: var(--ew-space-4, 16px);
+  --padding-end: var(--ew-space-4, 16px);
   --inner-padding-start: 0; // prevent inner container from shrinking content
   --inner-padding-end: 0;   // prevent trailing gap that reduces input width
-  margin-bottom: 20px;
+  margin-bottom: var(--ew-space-5, 20px);
   --min-height: 60px;
   --highlight-height: 0;
-  --border-width: 1px;
-  --border-color: rgba(var(--ion-color-medium-rgb), 0.2);
+  --border-width: var(--ew-border-width-sm, 1px);
+  --border-color: var(--ew-color-neutral-200, rgba(var(--ion-color-medium-rgb), 0.2));
   --border-style: solid;
-  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  transition: all 0.3s ease;
+  --box-shadow: var(--ew-shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.04));
+  transition: all var(--ew-transition-duration-medium, 0.3s) var(--ew-transition-timing-function-ease-in-out, ease);
   display: flex;           // ensure slotted children can flex
   align-items: center;     // vertical centering of content
 
   // Auth form specific styles
   .login-form &,
   .signup-form & {
-    --background: var(--ion-color-light);
-    --border-radius: 10px;
+    --background: var(--ew-color-neutral-0, var(--ion-color-light));
+    --border-radius: var(--ew-radius-md, 10px);
     --min-height: 56px;
-    margin-bottom: 24px;
+    margin-bottom: var(--ew-space-6, 24px);
 
     ion-icon[slot="start"] {
-      color: var(--ion-color-medium);
-      margin-right: 12px;
-      font-size: 20px;
-      transition: color var(--transition-duration, 0.2s)
-        var(--transition-timing, ease);
+      color: var(--ew-color-neutral-500, var(--ion-color-medium));
+      margin-inline-end: var(--ew-space-3, 12px);
+      font-size: var(--ew-font-size-lg, 20px);
+      transition: color var(--ew-transition-duration-short, 0.2s) var(--ew-transition-timing-function-ease, ease);
     }
 
 /* Ensure inputs fill the full width of ion-item across the app */
@@ -84,37 +83,33 @@ ion-item ion-buttons[slot="end"] {
 }
 
     ion-label[position="floating"] {
-      margin-left: 8px;
+      margin-inline-start: 8px;
       font-weight: 500;
       color: var(--ion-color-medium);
     }
   }
 
   &.item-has-focus {
-    --border-color: var(--focus-border-color, var(--ion-color-primary));
-    --box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.1);
+    --border-color: var(--ew-color-primary-500, var(--ion-color-primary));
+    --box-shadow: var(--ew-shadow-md, 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.1));
 
     ion-icon[slot="start"] {
-      color: var(--focus-border-color, var(--ion-color-primary));
+      color: var(--ew-color-primary-500, var(--ion-color-primary));
     }
 
     ion-label[position="floating"] {
-      color: var(--focus-border-color, var(--ion-color-primary));
+      color: var(--ew-color-primary-500, var(--ion-color-primary));
     }
   }
 
   // Invalid state
   &.ion-invalid.ion-touched {
-    --background: rgba(
-      var(--error-color-rgb, var(--ion-color-danger-rgb)),
-      0.04
-    );
-    --border-color: var(--error-color, var(--ion-color-danger));
-    --box-shadow: 0 2px 8px
-      rgba(var(--error-color-rgb, var(--ion-color-danger-rgb)), 0.1);
+    --background: rgba(var(--ew-color-danger-500-rgb, var(--ion-color-danger-rgb)), 0.05);
+    --border-color: var(--ew-color-danger-500, var(--ion-color-danger));
+    --box-shadow: 0 2px 8px rgba(var(--ew-color-danger-500-rgb, var(--ion-color-danger-rgb)), 0.1);
 
     ion-icon[slot="start"] {
-      color: var(--error-color, var(--ion-color-danger));
+      color: var(--ew-color-danger-500, var(--ion-color-danger));
     }
   }
 }
@@ -126,23 +121,23 @@ ion-select,
 ion-datetime-button {
   --padding-start: 0;
   --padding-end: 0;
-  --placeholder-color: var(--input-placeholder-color, var(--ion-color-medium));
-  --placeholder-opacity: var(--input-placeholder-opacity, 0.8);
-  --color: var(--input-text-color, var(--ion-color-dark));
-  font-size: var(--input-font-size, 16px);
-  --padding-top: var(--input-padding, 8px);
-  --padding-bottom: var(--input-padding, 8px);
-  font-weight: var(--input-font-weight, 500);
+  --placeholder-color: var(--ew-color-neutral-500, var(--ion-color-medium));
+  --placeholder-opacity: 1;
+  --color: var(--ew-color-neutral-900, var(--ion-color-dark));
+  font-size: var(--ew-font-size-md, 16px);
+  --padding-top: var(--ew-space-2, 8px);
+  --padding-bottom: var(--ew-space-2, 8px);
+  font-weight: var(--ew-font-weight-medium, 500);
 
   // Auth form specific overrides
   .login-form &,
   .signup-form & {
-    --padding-top: 12px;
-    --padding-bottom: 12px;
-    margin-left: 0;
+    --padding-top: var(--ew-space-3, 12px);
+    --padding-bottom: var(--ew-space-3, 12px);
+    margin-inline-start: 0;
 
     &::part(placeholder) {
-      font-weight: 400;
+      font-weight: var(--ew-font-weight-regular, 400);
     }
   }
 }
@@ -157,27 +152,26 @@ ion-datetime-button {
 
 // Form Labels
 ion-label {
-  color: var(--ion-text-color);
-  font-size: var(--label-font-size, 14px);
-  margin: var(--label-margin, 0 0 4px 0);
-  margin-bottom: 8px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  transform-origin: left center;
+  color: var(--ew-color-neutral-700, var(--ion-text-color));
+  font-size: var(--ew-font-size-sm, 14px);
+  margin: 0 0 var(--ew-space-2, 8px) 0;
+  font-weight: var(--ew-font-weight-medium, 500);
+  transition: all var(--ew-transition-duration-medium, 0.3s) var(--ew-transition-timing-function-ease-in-out, ease);
+  transform-origin: start center;
 
   // Auth form specific styles
   .login-form &,
   .signup-form & {
-    margin-left: 8px;
+    margin-inline-start: 8px;
     font-size: 15px;
 
     &[position="floating"] {
       transform: translateY(20px) scale(1);
-      margin-left: 0;
+      margin-inline-start: 0;
 
       &.label-floating {
         transform: translateY(0) scale(0.85);
-        margin-left: 0;
+        margin-inline-start: 0;
       }
     }
   }
@@ -196,12 +190,12 @@ ion-input {
 
 // Error messages
 ion-note[slot="error"] {
-  color: var(--ion-color-danger);
-  font-size: 12px;
-  margin-top: -12px;
-  margin-bottom: 12px;
+  color: var(--ew-color-danger-500, var(--ion-color-danger));
+  font-size: var(--ew-font-size-xs, 12px);
+  margin-top: calc(-1 * var(--ew-space-3, 12px));
+  margin-bottom: var(--ew-space-3, 12px);
   display: block;
-  padding: 0 16px;
+  padding: 0 var(--ew-space-4, 16px);
 }
 
 // Floating labels
@@ -214,7 +208,7 @@ ion-note[slot="error"] {
 .item-label-floating.item-has-focus ion-label,
 .item-label-floating.item-has-value ion-label {
   transform: translateY(-50%) scale(0.8);
-  transform-origin: left top;
+  transform-origin: start top;
   color: var(--ion-color-primary);
 }
 
@@ -224,7 +218,7 @@ ion-note[slot="error"] {
   align-items: center;
 
   ion-icon {
-    margin-right: 12px;
+    margin-inline-end: 12px;
     color: var(--ion-color-medium);
     font-size: 20px;
     min-width: 20px;
@@ -245,7 +239,7 @@ ion-select {
   padding: 0;
 
   .select-icon {
-    padding-right: 8px;
+    padding-inline-end: 8px;
   }
 }
 
@@ -259,7 +253,7 @@ ion-datetime-button {
   .datetime-button {
     padding: 0;
     width: 100%;
-    text-align: left;
+    text-align: start;
     font-size: 16px;
     color: var(--ion-color-medium);
 
@@ -291,7 +285,7 @@ ion-datetime-button {
 
 // Form groups
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: var(--ew-space-5, 20px);
 
   &:last-child {
     margin-bottom: 0;
@@ -300,10 +294,10 @@ ion-datetime-button {
 
 // Form actions
 .form-actions {
-  margin-top: 32px;
+  margin-top: var(--ew-space-7, 32px);
 
   ion-button {
-    margin-bottom: 16px;
+    margin-bottom: var(--ew-space-4, 16px);
 
     &:last-child {
       margin-bottom: 0;

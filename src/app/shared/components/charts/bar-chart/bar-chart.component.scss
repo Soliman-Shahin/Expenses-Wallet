@@ -1,16 +1,16 @@
 .chart-container {
-  padding: 16px;
-  border-radius: 8px;
+  padding: var(--ew-space-5);
+  border-radius: var(--ew-radius-md);
   background-color: var(--ion-background-color, #fff);
-  box-shadow: var(--card-shadow, 0 2px 8px rgba(0, 0, 0, 0.1));
-  margin: 16px 0;
+  box-shadow: var(--ew-shadow-sm);
+  margin: var(--ew-space-5) 0;
 }
 
 .chart-title {
   margin-top: 0;
-  margin-bottom: 16px;
+  margin-bottom: var(--ew-space-5);
   color: var(--ion-text-color, #000);
-  font-size: 1.2rem;
+  font-size: var(--ew-font-xl);
   font-weight: 500;
 }
 
@@ -18,7 +18,7 @@
   display: flex;
   align-items: flex-end;
   height: 160px;
-  padding: 12px 0 8px;
+  padding: var(--ew-space-4) 0 var(--ew-space-3);
   border-bottom: 1px solid var(--ion-border-color, #ddd);
   overflow: hidden; /* contain tall bars */
   box-sizing: border-box;
@@ -39,7 +39,7 @@
   justify-content: flex-end;
   flex: 1;
   height: 100%;
-  margin: 0 4px;
+  margin: 0 var(--ew-space-2);
 }
 
 .bar-area {
@@ -67,8 +67,8 @@
 }
 
 .bar-label {
-  margin-top: 8px;
-  font-size: 0.8rem;
+  margin-top: var(--ew-space-3);
+  font-size: var(--ew-font-sm);
   text-align: center;
   color: var(--ion-text-color, #000);
   white-space: nowrap;
@@ -78,8 +78,8 @@
 }
 
 .bar-value {
-  margin-top: 4px;
-  font-size: 0.7rem;
+  margin-top: var(--ew-space-2);
+  font-size: var(--ew-font-xs);
   text-align: center;
   color: var(--ion-text-color-secondary, #666);
 }
@@ -88,7 +88,7 @@
 body.dark {
   .chart-container {
     background-color: var(--ion-background-color, #1e1e1e);
-    box-shadow: var(--card-shadow, 0 2px 8px rgba(0, 0, 0, 0.3));
+    box-shadow: var(--ew-shadow-sm);
   }
 
   .chart-title,
@@ -108,19 +108,19 @@ body.dark {
 /* Responsive design */
 @media (max-width: 768px) {
   .chart-container {
-    padding: 12px;
+    padding: var(--ew-space-4);
   }
 
   .chart-title {
-    font-size: 1.1rem;
+    font-size: var(--ew-font-lg);
   }
 
   .bar-label {
-    font-size: 0.7rem;
+    font-size: var(--ew-font-xs);
   }
 
   .bar-value {
-    font-size: 0.6rem;
+    font-size: var(--ew-font-xs);
   }
 }
 

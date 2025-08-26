@@ -2,11 +2,7 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { SharedModule } from './../shared/shared.module';
 
-import {
-  HomePageComponent,
-  TransactionsComponent,
-  ExpenseFormComponent,
-} from './components';
+import { ExpenseFormComponent } from './components';
 import { HomeRoutingModule } from './home-routing.module';
 import { IonicModule } from '@ionic/angular';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -20,6 +16,7 @@ import {
   SkeletonBlockComponent,
   EmptyStateComponent,
 } from 'src/app/shared/ui';
+import { DateRangeSelectorComponent } from 'src/app/shared/components/ui/date-range-selector/date-range-selector.component';
 
 @NgModule({
   imports: [
@@ -36,11 +33,8 @@ import {
     ActionTileComponent,
     SkeletonBlockComponent,
     EmptyStateComponent,
+    DateRangeSelectorComponent,
   ],
-  declarations: [
-    HomePageComponent,
-    TransactionsComponent,
-    ExpenseFormComponent,
-  ],
+  declarations: [ExpenseFormComponent],
 })
 export class HomePageModule {}

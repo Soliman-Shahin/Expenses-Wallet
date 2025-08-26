@@ -36,7 +36,7 @@
     <ng-container *ngIf="!user; else authenticatedView">
       <ion-grid class="welcome-container ion-padding-vertical">
         <ion-row class="ion-justify-content-center ion-align-items-center">
-          <ion-col size="12" size-md="10" size-lg="8" class="ion-text-center">
+          <ion-col size="12" size-md="12" size-lg="12" class="ion-text-center">
             <div class="welcome-illustration">
               <ion-icon name="wallet-outline" class="welcome-icon"></ion-icon>
               <div class="welcome-dots">
@@ -165,7 +165,8 @@
                 </ng-template>
 
                 <!-- Charts Section (tab: charts) -->
-                <ng-container *ngIf="activeTab === 'charts'">
+                <div *ngIf="activeTab === 'charts'" class="charts-view">
+                  <app-date-range-selector (rangeChange)="onRangeChange($event)"></app-date-range-selector>
                   <section
                     class="card-section charts-card ion-margin-vertical"
                     role="region"
@@ -230,7 +231,7 @@
                       </div>
                     </ng-template>
                   </section>
-                </ng-container>
+                </div>
 
                 <!-- Summary Section (tab: summary) -->
                 <ng-container *ngIf="activeTab === 'summary'">
@@ -283,6 +284,7 @@
                       [ctaRouterLink]="'/transactions'"
                     ></app-section-header>
                     <app-transactions
+                      #transactionsComponent
                       [limit]="5"
                       [month]="selectedMonth.month"
                       [year]="selectedMonth.year"

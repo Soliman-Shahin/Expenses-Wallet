@@ -16,6 +16,10 @@
         name="crescent"
         style="width: 48px; height: 48px"
       ></ion-spinner>
+      <!-- Optional message from LoadingService -->
+      <div class="mt-2" *ngIf="message$ | async as msg">
+        {{ msg }}
+      </div>
       <span class="visually-hidden">{{ 'COMMON.LOADING' | translate }}</span>
     </div>
   </div>

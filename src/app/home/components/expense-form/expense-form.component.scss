@@ -3,23 +3,19 @@
 :host {
   // Modern card-like form container
   .form-container {
-    padding: var(--spacing-lg);
-    border-radius: 20px;
-    box-shadow: 0 8px 32px rgba(var(--ion-color-primary-rgb), 0.09);
+    padding: var(--ew-space-7);
+    border-radius: var(--ew-radius-xl);
+    box-shadow: var(--ew-shadow-lg);
     background: var(--ion-card-background, var(--ion-color-light));
     transition: box-shadow 0.22s, background 0.18s;
 
     &:hover,
     &:focus-within,
     &:focus-visible {
-      box-shadow: 0 16px 48px rgba(var(--ion-color-primary-rgb), 0.16);
-      outline: 2px solid var(--ion-color-primary);
-      outline-offset: 2px;
+      box-shadow: var(--ew-shadow-xl);
+      outline: var(--ew-border-width-md) solid var(--ion-color-primary);
+      outline-offset: var(--ew-space-px);
     }
-  }
-  // Form container
-  .form-container {
-    padding: var(--spacing-md);
   }
 
   // Form fields
@@ -29,10 +25,10 @@
     --background: transparent;
     --border-color: var(--ion-color-light-shade);
     --highlight-color-focused: var(--ion-color-primary);
-    --highlight-height: 2px;
-    margin-bottom: var(--spacing-md);
-    border-radius: 14px;
-    box-shadow: 0 2px 10px rgba(var(--ion-color-primary-rgb), 0.07);
+    --highlight-height: var(--ew-border-width-md);
+    margin-bottom: var(--ew-space-5);
+    border-radius: var(--ew-radius-lg);
+    box-shadow: var(--ew-shadow-md);
     transition: border-color 0.22s, box-shadow 0.22s;
 
     &.item-has-focus,
@@ -40,16 +36,16 @@
     &:focus-visible {
       --highlight-background: var(--ion-color-primary);
       --border-color: var(--ion-color-primary);
-      box-shadow: 0 4px 18px rgba(var(--ion-color-primary-rgb), 0.12);
-      outline: 2px solid var(--ion-color-primary);
-      outline-offset: 2px;
+      box-shadow: var(--ew-shadow-lg);
+      outline: var(--ew-border-width-md) solid var(--ion-color-primary);
+      outline-offset: var(--ew-space-px);
     }
 
     ion-label {
       color: var(--text-secondary);
-      font-size: var(--text-sm);
-      font-weight: 600;
-      letter-spacing: 0.01em;
+      font-size: var(--ew-font-size-sm);
+      font-weight: var(--ew-font-weight-semibold);
+      letter-spacing: var(--ew-letter-spacing-tight);
     }
 
     ion-input,
@@ -58,19 +54,35 @@
       --background: transparent;
       --placeholder-opacity: 0.8;
       color: var(--text-primary);
-      font-size: var(--text-base);
-      border-radius: 10px;
+      font-size: var(--ew-font-size-base);
+      border-radius: var(--ew-radius-md);
       transition: background 0.18s;
+    }
+    
+    ion-select {
+      &::part(icon) {
+        position: absolute;
+        inset-inline-end: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        margin: 0;
+        color: var(--ion-color-step-600);
+      }
+      
+      &::part(container) {
+        padding-inline-end: 48px;
+        padding-inline-start: 0;
+      }
     }
 
     ion-checkbox,
     ion-radio {
-      --size: 22px;
+      --size: var(--ew-space-6);
       --background-checked: var(--ion-color-primary);
       --border-color: var(--ion-color-medium);
       --border-color-checked: var(--ion-color-primary);
-      margin-right: 10px;
-      border-radius: 6px;
+      margin-inline-end: var(--ew-space-2);
+      border-radius: var(--ew-radius-sm);
       transition: box-shadow 0.18s;
     }
 
@@ -80,8 +92,8 @@
       padding: 0;
       margin: 0;
       .datetime-button {
-        min-height: 2.5rem;
-        padding: var(--spacing-xxs) 0;
+        min-height: var(--ew-space-10);
+        padding: var(--ew-space-1) 0;
         color: var(--text-primary);
         font-size: var(--text-base);
       }
@@ -92,8 +104,8 @@
   --background: transparent;
   --border-color: var(--ion-color-light-shade);
   --highlight-color-focused: var(--ion-color-primary);
-  --highlight-height: 2px;
-  margin-bottom: var(--spacing-md);
+  --highlight-height: var(--ew-border-width-md);
+  margin-bottom: var(--ew-space-4);
 
   &.item-has-focus {
     --highlight-background: var(--ion-color-primary);
@@ -102,9 +114,9 @@
 
   ion-label {
     color: var(--text-secondary);
-    font-size: var(--text-sm);
-    font-weight: var(--font-weight-medium);
-    margin-bottom: var(--spacing-xxs);
+    font-size: var(--ew-font-size-sm);
+    font-weight: var(--ew-font-weight-medium);
+    margin-bottom: var(--ew-space-1);
   }
 
   ion-input,
@@ -112,15 +124,17 @@
   ion-textarea {
     --padding-start: 0;
     --padding-end: 0;
+    --padding-top: 0;
+    --padding-bottom: 0;
     --placeholder-color: var(--text-tertiary);
     --placeholder-opacity: 0.8;
     color: var(--text-primary);
-    font-size: var(--text-base);
+    font-size: var(--ew-font-size-base);
 
     &.sc-ion-input-md-h,
     &.sc-ion-textarea-md-h {
-      --padding-top: var(--spacing-xxs);
-      --padding-bottom: var(--spacing-xxs);
+      --padding-top: 0;
+      --padding-bottom: 0;
     }
   }
 
@@ -131,8 +145,8 @@
     margin: 0;
 
     .datetime-button {
-      min-height: 2.5rem;
-      padding: var(--spacing-xxs) 0;
+      min-height: var(--ew-size-10);
+      padding: var(--ew-space-1) 0;
       color: var(--text-primary);
       font-size: var(--text-base);
     }
@@ -141,29 +155,29 @@
 
 // Form actions
 .form-actions {
-  margin-top: var(--spacing-md);
+  margin-top: var(--ew-space-5);
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: var(--ew-space-5);
 
   ion-button {
-    border-radius: 16px;
-    box-shadow: 0 6px 20px rgba(var(--ion-color-primary-rgb), 0.13);
-    font-weight: 700;
-    font-size: 1.08rem;
-    letter-spacing: 0.01em;
+    border-radius: var(--ew-radius-lg);
+    box-shadow: var(--ew-shadow-lg);
+    font-weight: var(--ew-font-weight-bold);
+    font-size: var(--ew-font-size-lg);
+    letter-spacing: var(--ew-letter-spacing-tight);
     transition: box-shadow 0.22s, background 0.18s, transform 0.18s;
 
     &:hover,
     &:focus-visible {
-      box-shadow: 0 12px 32px rgba(var(--ion-color-primary-rgb), 0.18);
-      outline: 2px solid var(--ion-color-primary);
-      outline-offset: 2px;
-      transform: translateY(-2px) scale(1.015);
+      box-shadow: var(--ew-shadow-xl);
+      outline: var(--ew-border-width-md) solid var(--ion-color-primary);
+      outline-offset: var(--ew-space-px);
+      transform: translateY(calc(var(--ew-space-px) * -2)) scale(1.015);
     }
     &:active {
-      box-shadow: 0 2px 8px rgba(var(--ion-color-primary-rgb), 0.09);
-      transform: translateY(1px);
+      box-shadow: var(--ew-shadow-md);
+      transform: translateY(var(--ew-space-px));
     }
     &.ion-disabled,
     &[disabled] {
@@ -181,21 +195,21 @@
 .category-selection {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-sm);
-  margin: var(--spacing-md) 0;
+  gap: var(--ew-space-3);
+  margin: var(--ew-space-5) 0;
 
   .category-option {
-    --border-radius: var(--border-radius-md);
-    --padding-start: var(--spacing-md);
-    --padding-end: var(--spacing-md);
-    --padding-top: var(--spacing-sm);
-    --padding-bottom: var(--spacing-sm);
-    font-size: var(--text-sm);
-    font-weight: var(--font-weight-medium);
+    --border-radius: var(--ew-radius-md);
+    --padding-start: var(--ew-space-5);
+    --padding-end: var(--ew-space-5);
+    --padding-top: var(--ew-space-3);
+    --padding-bottom: var(--ew-space-3);
+    font-size: var(--ew-font-size-sm);
+    font-weight: var(--ew-font-weight-medium);
     text-transform: none;
     --box-shadow: none;
     --border-style: solid;
-    --border-width: 1px;
+    --border-width: var(--ew-border-width-sm);
     --border-color: var(--ion-color-light-shade);
     transition: all 0.2s ease;
 
@@ -206,37 +220,17 @@
     }
 
     ion-icon {
-      margin-right: var(--spacing-xxs);
+      margin-inline-end: var(--ew-space-1);
     }
   }
 }
 
-// Form actions
-.form-actions {
-  display: flex;
-  gap: var(--spacing-md);
-  margin-top: var(--spacing-xl);
-
-  ion-button {
-    --border-radius: var(--border-radius-md);
-    --padding-start: var(--spacing-lg);
-    --padding-end: var(--spacing-lg);
-    font-weight: var(--font-weight-medium);
-    flex: 1;
-
-    &[fill="outline"] {
-      --border-width: 1px;
-      --border-color: var(--ion-color-medium);
-      --color: var(--ion-color-medium);
-    }
-  }
-}
 
 // Validation messages
 .validation-message {
   color: var(--ion-color-danger);
-  font-size: var(--text-xs);
-  margin-top: calc(-1 * var(--spacing-sm));
-  margin-bottom: var(--spacing-sm);
-  padding: 0 var(--spacing-xs);
+  font-size: var(--ew-font-size-xs);
+  margin-top: calc(-1 * var(--ew-space-3));
+  margin-bottom: var(--ew-space-3);
+  padding: 0 var(--ew-space-2);
 }

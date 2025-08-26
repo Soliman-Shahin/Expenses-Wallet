@@ -1,16 +1,16 @@
 .chart-container {
-  padding: 16px;
-  border-radius: 8px;
+  padding: var(--ew-space-5);
+  border-radius: var(--ew-radius-md);
   background-color: var(--ion-background-color, #fff);
-  box-shadow: var(--card-shadow, 0 2px 8px rgba(0, 0, 0, 0.1));
-  margin: 16px 0;
+  box-shadow: var(--ew-shadow-sm);
+  margin: var(--ew-space-5) 0;
 }
 
 .chart-title {
   margin-top: 0;
-  margin-bottom: 16px;
+  margin-bottom: var(--ew-space-5);
   color: var(--ion-text-color, #000);
-  font-size: 1.2rem;
+  font-size: var(--ew-font-xl);
   font-weight: 500;
 }
 
@@ -35,14 +35,14 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  margin-top: 16px;
+  margin-top: var(--ew-space-5);
   width: 100%;
 }
 
 .legend-item {
   display: flex;
   align-items: center;
-  margin: 4px 8px;
+  margin: var(--ew-space-2) var(--ew-space-3);
   min-width: 120px;
 }
 
@@ -50,27 +50,27 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  margin-right: 8px;
+  margin-inline-end: var(--ew-space-3);
 }
 
 .legend-label {
   flex: 1;
-  font-size: 0.9rem;
+  font-size: var(--ew-font-sm);
   color: var(--ion-text-color, #000);
 }
 
 .legend-value {
-  font-size: 0.9rem;
+  font-size: var(--ew-font-sm);
   font-weight: 500;
   color: var(--ion-text-color, #000);
-  margin-left: 8px;
+  margin-inline-start: var(--ew-space-3);
 }
 
 /* Dark mode support */
 body.dark {
   .chart-container {
     background-color: var(--ion-background-color, #1e1e1e);
-    box-shadow: var(--card-shadow, 0 2px 8px rgba(0, 0, 0, 0.3));
+    box-shadow: var(--ew-shadow-sm);
   }
   
   .chart-title,
@@ -83,11 +83,11 @@ body.dark {
 /* Responsive design */
 @media (max-width: 768px) {
   .chart-container {
-    padding: 12px;
+    padding: var(--ew-space-4);
   }
   
   .chart-title {
-    font-size: 1.1rem;
+    font-size: var(--ew-font-lg);
   }
   
   .legend {
@@ -97,7 +97,7 @@ body.dark {
   
   .legend-item {
     width: 100%;
-    margin: 4px 0;
+    margin: var(--ew-space-2) 0;
   }
 }
 
@@ -112,6 +112,24 @@ body.dark {
   
   .legend-label,
   .legend-value {
-    font-size: 0.8rem;
+    font-size: var(--ew-font-xs);
+  }
+}
+
+.legend-item {
+  cursor: pointer;
+  transition: opacity 0.2s ease-in-out;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.legend-item-hidden {
+  opacity: 0.5;
+
+  .legend-label,
+  .legend-value {
+    text-decoration: line-through;
   }
 }

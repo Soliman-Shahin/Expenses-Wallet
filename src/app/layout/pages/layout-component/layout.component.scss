@@ -76,8 +76,7 @@ ion-router-outlet {
 // Tabs bar styles
 app-tabs-bar {
   position: fixed;
-  left: 0;
-  right: 0;
+  inset-inline: 0;
   bottom: 0;
   z-index: 100;
   height: var(--tabs-height);
@@ -98,7 +97,7 @@ app-tabs-bar {
 
   // Adjust content position when side menu is visible
   ion-router-outlet {
-    margin-left: var(--side-menu-width);
+    margin-inline-start: var(--side-menu-width);
     width: calc(100% - var(--side-menu-width));
     padding: var(--spacing-lg) var(--spacing-xl);
     @include rounded-lg;
@@ -109,11 +108,11 @@ app-tabs-bar {
   // Adjust tabs bar position
   app-tabs-bar {
     width: calc(100% - var(--side-menu-width));
-    left: var(--side-menu-width);
-    border-top-left-radius: 18px;
-    border-top-right-radius: 18px;
+    inset-inline-start: var(--side-menu-width);
+    border-start-start-radius: 18px;
+    border-start-end-radius: 18px;
     box-shadow: 0 -4px 24px rgba(34, 211, 238, 0.1);
-    transition: width 0.22s, left 0.22s;
+    transition: width 0.22s, inset-inline-start 0.22s;
   }
 }
 
@@ -123,15 +122,15 @@ app-tabs-bar {
     --side-menu-width: 340px;
   }
   ion-router-outlet {
-    margin-left: var(--side-menu-width);
+    margin-inline-start: var(--side-menu-width);
     width: calc(100% - var(--side-menu-width));
     padding: var(--spacing-xl) var(--spacing-xxl);
   }
   app-tabs-bar {
     width: calc(100% - var(--side-menu-width));
-    left: var(--side-menu-width);
-    border-top-left-radius: 24px;
-    border-top-right-radius: 24px;
+    inset-inline-start: var(--side-menu-width);
+    border-start-start-radius: 24px;
+    border-start-end-radius: 24px;
   }
 }
 

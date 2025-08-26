@@ -14,6 +14,7 @@
 
 /* Custom form styles */
 @import "theme/forms";
+@import "theme/input-styles.scss";
 
 /* Basic CSS for apps built with Ionic */
 @import "@ionic/angular/css/normalize.css";
@@ -283,36 +284,34 @@ ion-textarea {
   @each $i, $val in (1: 0.5rem, 2: 1rem, 3: 1.5rem, 4: 2rem) {
     .m#{$dir}-#{$i} {
       @if $dir == x {
-        margin-left: $val;
-        margin-right: $val;
+        margin-inline: $val;
       } @else if $dir == y {
         margin-top: $val;
         margin-bottom: $val;
       } @else if $dir == t {
         margin-top: $val;
       } @else if $dir == r {
-        margin-right: $val;
+        margin-inline-end: $val;
       } @else if $dir == b {
         margin-bottom: $val;
       } @else if $dir == l {
-        margin-left: $val;
+        margin-inline-start: $val;
       }
     }
     .p#{$dir}-#{$i} {
       @if $dir == x {
-        padding-left: $val;
-        padding-right: $val;
+        padding-inline: $val;
       } @else if $dir == y {
         padding-top: $val;
         padding-bottom: $val;
       } @else if $dir == t {
         padding-top: $val;
       } @else if $dir == r {
-        padding-right: $val;
+        padding-inline-end: $val;
       } @else if $dir == b {
         padding-bottom: $val;
       } @else if $dir == l {
-        padding-left: $val;
+        padding-inline-start: $val;
       }
     }
   }
@@ -628,10 +627,7 @@ ion-textarea {
 /* === Loader Overlay === */
 .custom-loader-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   width: 100vw;
   height: 100vh;
   background: rgba(var(--ion-background-color-rgb, 255, 255, 255), 0.6);

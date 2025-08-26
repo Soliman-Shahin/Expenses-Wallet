@@ -47,20 +47,20 @@
 
         <!-- Name Input -->
         <ion-item
-          lines="full"
-          class="form-item ion-margin-vertical"
+          lines="none"
+          class="modern-input-item"
           [class.ion-invalid]="
             name?.invalid && (name?.dirty || name?.touched || isSubmitted)
           "
         >
-          <ion-label class="visually-hidden">{{ 'AUTH.NAME' | translate }}</ion-label>
+          <ion-label position="stacked">{{ 'AUTH.NAME' | translate }}</ion-label>
           <ion-input
             type="text"
             [formControlName]="formFields.name"
             [placeholder]="'AUTH.NAME_PLACEHOLDER' | translate"
             autocomplete="name"
             required
-            class="form-input"
+            class="modern-input"
             [attr.aria-invalid]="name?.invalid && (name?.dirty || name?.touched || isSubmitted)"
             [attr.aria-describedby]="name?.invalid && (name?.dirty || name?.touched || isSubmitted) ? 'name-error' : null"
           ></ion-input>
@@ -86,14 +86,14 @@
 
         <!-- Email Input -->
         <ion-item
-          lines="full"
-          class="form-item"
+          lines="none"
+          class="modern-input-item"
           [class.ion-invalid]="
             emailControl?.invalid &&
             (emailControl?.dirty || emailControl?.touched || isSubmitted)
           "
         >
-          <ion-label class="visually-hidden">{{ 'AUTH.EMAIL' | translate }}</ion-label>
+          <ion-label position="stacked">{{ 'AUTH.EMAIL' | translate }}</ion-label>
           <ion-input
             type="email"
             [formControlName]="formFields.email"
@@ -101,7 +101,7 @@
             autocomplete="email"
             inputmode="email"
             required
-            class="form-input"
+            class="modern-input"
             [attr.aria-invalid]="emailControl?.invalid && (emailControl?.dirty || emailControl?.touched || isSubmitted)"
             [attr.aria-describedby]="emailControl?.invalid && (emailControl?.dirty || emailControl?.touched || isSubmitted) ? 'email-error' : null"
           ></ion-input>
@@ -120,21 +120,21 @@
 
         <!-- Password Input -->
         <ion-item
-          lines="full"
-          class="form-item"
+          lines="none"
+          class="modern-input-item"
           [class.ion-invalid]="
             passwordControl?.invalid &&
             (passwordControl?.dirty || passwordControl?.touched || isSubmitted)
           "
         >
-          <ion-label class="visually-hidden">{{ 'AUTH.PASSWORD' | translate }}</ion-label>
+          <ion-label position="stacked">{{ 'AUTH.PASSWORD' | translate }}</ion-label>
           <ion-input
             [type]="hidePassword ? 'password' : 'text'"
             [formControlName]="formFields.password"
             [placeholder]="'AUTH.PASSWORD_PLACEHOLDER' | translate"
             autocomplete="new-password"
             required
-            class="form-input"
+            class="modern-input"
             [attr.aria-invalid]="passwordControl?.invalid && (passwordControl?.dirty || passwordControl?.touched || isSubmitted)"
             [attr.aria-describedby]="passwordControl?.invalid && (passwordControl?.dirty || passwordControl?.touched || isSubmitted) ? 'password-error' : null"
           ></ion-input>
@@ -221,21 +221,21 @@
 
         <!-- Confirm Password Input -->
         <ion-item
-          lines="full"
-          class="form-item"
+          lines="none"
+          class="modern-input-item"
           [class.ion-invalid]="
             confirmPasswordControl?.invalid &&
             (confirmPasswordControl?.dirty || confirmPasswordControl?.touched || isSubmitted)
           "
         >
-          <ion-label class="visually-hidden">{{ 'AUTH.CONFIRM_PASSWORD' | translate }}</ion-label>
+          <ion-label position="stacked">{{ 'AUTH.CONFIRM_PASSWORD' | translate }}</ion-label>
           <ion-input
             [type]="hidePassword ? 'password' : 'text'"
             [formControlName]="formFields.confirmPassword"
             [placeholder]="'AUTH.CONFIRM_PASSWORD_PLACEHOLDER' | translate"
             autocomplete="new-password"
             required
-            class="form-input"
+            class="modern-input"
             [attr.aria-invalid]="confirmPasswordControl?.invalid && (confirmPasswordControl?.dirty || confirmPasswordControl?.touched || isSubmitted)"
             [attr.aria-describedby]="confirmPasswordControl?.invalid && (confirmPasswordControl?.dirty || confirmPasswordControl?.touched || isSubmitted) ? 'confirm-password-error' : null"
           ></ion-input>
@@ -309,7 +309,7 @@
           type="submit"
           expand="block"
           [disabled]="signupForm.invalid || isLoading"
-          class="ion-margin-top"
+          class="form-submit-button"
         >
           <span *ngIf="!isLoading">{{ "AUTH.SIGN_UP" | translate }}</span>
           <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>

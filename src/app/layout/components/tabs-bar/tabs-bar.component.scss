@@ -39,8 +39,7 @@
 ion-tabs {
   position: fixed;
   bottom: 0;
-  left: 0;
-  right: 0;
+  inset-inline: 0;
   z-index: 1000;
   width: 100%;
 
@@ -53,8 +52,8 @@ ion-tabs {
     --color-selected: var(--ion-color-primary);
     height: var(--tabs-height, 62px);
     padding: var(--tabs-padding, 8px 8px);
-    border-top-left-radius: 22px;
-    border-top-right-radius: 22px;
+    border-start-start-radius: 22px;
+    border-start-end-radius: 22px;
     box-shadow: 0 -6px 24px rgba(34, 211, 238, 0.13),
       0 -1px 0 rgba(0, 0, 0, 0.06) inset;
     position: relative;
@@ -86,7 +85,7 @@ ion-tabs {
       content: "";
       position: absolute;
       bottom: 0;
-      left: 50%;
+      inset-inline-start: 50%;
       transform: translateX(-50%) scaleX(0);
       width: 30%;
       height: 3px;
@@ -254,8 +253,8 @@ ion-tabs {
   // Responsive adjustments
   @media (max-width: 480px) {
     ion-tab-bar {
-      border-top-left-radius: 12px;
-      border-top-right-radius: 12px;
+      border-start-start-radius: 12px;
+      border-start-end-radius: 12px;
       height: 54px;
       padding: 4px 0;
       box-shadow: var(--shadow-elevated);
@@ -272,8 +271,8 @@ ion-tabs {
 
   @media (max-width: 768px) {
     ion-tab-bar {
-      border-top-left-radius: 16px;
-      border-top-right-radius: 16px;
+      border-start-start-radius: 16px;
+      border-start-end-radius: 16px;
       height: 58px;
       padding: 6px 0;
       box-shadow: var(--shadow-elevated);
@@ -291,8 +290,8 @@ ion-tabs {
   // Extra large screens
   @media (min-width: 1200px) {
     ion-tab-bar {
-      border-top-left-radius: 28px;
-      border-top-right-radius: 28px;
+      border-start-start-radius: 28px;
+      border-start-end-radius: 28px;
       height: 68px;
       padding: 12px 0;
       box-shadow: var(--shadow-card);

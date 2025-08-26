@@ -4,7 +4,7 @@
       (isEditMode ? "EXPENSE.UPDATE" : "EXPENSE.CREATE") | translate
     }}</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="onClose()">
+      <ion-button (click)="close()">
         {{ "COMMON.CLOSE" | translate }}
       </ion-button>
     </ion-buttons>
@@ -18,17 +18,79 @@
     class="ion-padding form-container"
     [attr.aria-busy]="submitting"
   >
+    <!-- Category -->
     <div class="form-group">
-      <ion-item class="item-label-floating">
-        <ion-label>{{ "EXPENSE.AMOUNT" | translate }}</ion-label>
+      <ion-item class="modern-input-item">
+        <ion-select
+          formControlName="category"
+          interface="action-sheet"
+          class="modern-input"
+          [attr.aria-label]="'EXPENSE.CATEGORY' | translate"
+        >
+          <ion-icon name="pricetags-outline" slot="start"></ion-icon>
+          <ion-select-option
+            *ngFor="let category of categories$ | async"
+            [value]="category._id"
+          >
+            <ion-icon name="pricetag-outline" slot="start"></ion-icon>
+            {{ category.name }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+      <ion-note
+        *ngIf="expenseForm.get('category')?.touched && expenseForm.get('category')?.errors?.['required']"
+        color="danger"
+        slot="error"
+      >
+        {{ "VALIDATION.REQUIRED" | translate }}
+      </ion-note>
+    </div>
+    <!-- Date -->
+    <div class="form-group">
+      <ion-item class="modern-input-item">
+        <div
+          class="modern-input"
+          style="width: 100%; display: flex; align-items: center"
+        >
+          <ion-icon name="calendar-outline" slot="start"></ion-icon>
+          <ion-datetime-button
+            datetime="datetime"
+            [attr.aria-label]="'EXPENSE.DATE_PLACEHOLDER' | translate"
+          >
+            <span
+              *ngIf="!expenseForm.get('date')?.value"
+              class="placeholder-text"
+            >
+              {{ "EXPENSE.SELECT_DATE" | translate }}
+            </span>
+          </ion-datetime-button>
+        </div>
+        <ion-modal [keepContentsMounted]="true">
+          <ng-template>
+            <ion-datetime
+              id="datetime"
+              formControlName="date"
+              presentation="date"
+              [min]="minDate"
+              [max]="maxDate"
+              presentation="date"
+              [attr.aria-label]="'EXPENSE.DATE' | translate"
+            ></ion-datetime>
+          </ng-template>
+        </ion-modal>
+      </ion-item>
+    </div>
+    <!-- Amount -->
+    <div class="form-group">
+      <ion-item class="modern-input-item">
         <ion-input
           type="number"
           formControlName="amount"
           inputmode="decimal"
-          class="input-with-icon"
+          class="modern-input"
           [attr.aria-label]="'EXPENSE.AMOUNT' | translate"
         >
-          <span slot="start" class="ion-padding-end">$</span>
+          <ion-icon name="cash-outline" slot="start"></ion-icon>
         </ion-input>
       </ion-item>
       <ion-note
@@ -46,13 +108,12 @@
         {{ "VALIDATION.MIN" | translate : { min: 0.01 } }}
       </ion-note>
     </div>
-
+    <!-- Description -->
     <div class="form-group">
-      <ion-item class="item-label-floating">
-        <ion-label>{{ "EXPENSE.DESCRIPTION" | translate }}</ion-label>
+      <ion-item class="modern-input-item">
         <ion-input
           formControlName="description"
-          class="input-with-icon"
+          class="modern-input"
           [attr.aria-label]="'EXPENSE.DESCRIPTION' | translate"
         >
           <ion-icon name="document-text-outline" slot="start"></ion-icon>
@@ -80,65 +141,6 @@
         {{ "VALIDATION.NO_WHITESPACE" | translate }}
       </ion-note>
     </div>
-
-    <div class="form-group">
-      <ion-item class="item-label-floating">
-        <ion-label>{{ "EXPENSE.DATE" | translate }}</ion-label>
-        <div class="input-with-icon" style="width: 100%">
-          <ion-icon name="calendar-outline" slot="start"></ion-icon>
-          <ion-datetime-button datetime="datetime" [attr.aria-label]="'EXPENSE.DATE_PLACEHOLDER' | translate">
-            <span
-              *ngIf="!expenseForm.get('date')?.value"
-              class="placeholder-text"
-            >
-              {{ "EXPENSE.SELECT_DATE" | translate }}
-            </span>
-          </ion-datetime-button>
-        </div>
-        <ion-modal [keepContentsMounted]="true">
-          <ng-template>
-            <ion-datetime
-              id="datetime"
-              formControlName="date"
-              presentation="date"
-              [min]="minDate"
-              [max]="maxDate"
-              presentation="date"
-              [attr.aria-label]="'EXPENSE.DATE' | translate"
-            ></ion-datetime>
-          </ng-template>
-        </ion-modal>
-      </ion-item>
-    </div>
-
-    <div class="form-group">
-      <ion-item class="item-label-floating">
-        <ion-label>{{ "EXPENSE.CATEGORY" | translate }}</ion-label>
-        <ion-select
-          formControlName="category"
-          interface="action-sheet"
-          class="input-with-icon"
-          [attr.aria-label]="'EXPENSE.CATEGORY' | translate"
-        >
-          <ion-icon name="pricetags-outline" slot="start"></ion-icon>
-          <ion-select-option
-            *ngFor="let category of categories$ | async"
-            [value]="category._id"
-          >
-            <ion-icon name="pricetag-outline" slot="start"></ion-icon>
-            {{ category.name }}
-          </ion-select-option>
-        </ion-select>
-      </ion-item>
-      <ion-note
-        *ngIf="expenseForm.get('category')?.touched && expenseForm.get('category')?.errors?.['required']"
-        color="danger"
-        slot="error"
-      >
-        {{ "VALIDATION.REQUIRED" | translate }}
-      </ion-note>
-    </div>
-
     <div class="form-actions">
       <ion-button
         expand="block"
@@ -146,8 +148,10 @@
         [disabled]="submitting || !expenseForm.valid"
         shape="round"
         size="large"
-        class="ion-margin-top"
-        [attr.aria-label]="(isEditMode ? 'EXPENSE.UPDATE' : 'EXPENSE.CREATE') | translate"
+        class="form-submit-button"
+        [attr.aria-label]="
+          (isEditMode ? 'EXPENSE.UPDATE' : 'EXPENSE.CREATE') | translate
+        "
       >
         <ion-icon
           slot="start"

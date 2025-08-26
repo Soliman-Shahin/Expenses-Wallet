@@ -1,39 +1,75 @@
-<ng-container *ngIf="transactions$ | async as txs">
-  <ion-list class="transactions-list" *ngIf="txs.length > 0; else empty">
-    <ion-item
-      class="transaction-item"
-      lines="none"
-      *ngFor="let t of txs; trackBy: trackById"
-    >
-      <span
-        class="category-icon"
-        [style.background]="getCategoryColor(t) || null"
-        slot="start"
-        aria-hidden="true"
-      >
-        <ion-icon size="large" [name]="getCategoryIcon(t)"></ion-icon>
+<ng-container *ngIf="state$ | async as state">
+  <!-- Skeleton while loading -->
+  <ion-list *ngIf="state.loading">
+    <ion-item lines="none" *ngFor="let s of [1, 2, 3, 4, 5]">
+      <span class="category-icon" aria-hidden="true">
+        <ion-skeleton-text
+          animated
+          style="width: 40px; height: 40px; border-radius: 50%"
+        ></ion-skeleton-text>
       </span>
       <ion-label>
-        <h3 class="ion-text-wrap transaction-title">
-          {{ getOperationName(t) }}
+        <h3>
+          <ion-skeleton-text animated style="width: 60%"></ion-skeleton-text>
         </h3>
         <p>
-          {{ getDateValue(t) | date : "mediumDate" }}
-          <span *ngIf="getCategoryName(t) as cat"> • {{ cat }}</span>
+          <ion-skeleton-text animated style="width: 40%"></ion-skeleton-text>
         </p>
       </ion-label>
-      <ion-note slot="end" color="primary">
-        {{ getAmountValue(t) | number : "1.0-0" }}
+      <ion-note slot="end">
+        <ion-skeleton-text animated style="width: 48px"></ion-skeleton-text>
       </ion-note>
     </ion-item>
   </ion-list>
-  <ng-template #empty>
-    <div class="ion-text-center ion-padding">
-      <ion-icon
-        name="receipt-outline"
-        style="font-size: 28px; opacity: 0.6"
-      ></ion-icon>
-      <p class="ion-margin-top">{{ "TRANSACTIONS.NO_RECENT" | translate }}</p>
-    </div>
-  </ng-template>
+
+  <!-- Error State -->
+  <div *ngIf="state.error" class="ion-text-center ion-padding">
+    <ion-icon name="warning-outline" style="font-size: 28px; opacity: 0.6"></ion-icon>
+    <p class="ion-margin-top">{{ 'COMMON.ERRORS.LOAD_DATA' | translate }}</p>
+  </div>
+
+  <!-- Content after loading -->
+  <ng-container *ngIf="!state.loading && !state.error">
+    <ion-list class="transactions-list" *ngIf="state.data.length > 0; else empty">
+      <ion-item
+        class="transaction-item"
+        lines="none"
+        *ngFor="let t of state.data; trackBy: trackById"
+      >
+        <span
+          class="category-icon"
+          [style.background]="getCategoryColor(t) || null"
+          slot="start"
+          aria-hidden="true"
+        >
+          <ion-icon size="large" [name]="getCategoryIcon(t)"></ion-icon>
+        </span>
+        <ion-label>
+          <h3 class="ion-text-wrap transaction-title">
+            {{ getOperationName(t) }}
+          </h3>
+          <p>
+            {{ getDateValue(t) | date : "mediumDate" }}
+            <span *ngIf="getCategoryName(t) as cat"> • {{ cat }}</span>
+          </p>
+        </ion-label>
+        <ion-note slot="end" color="primary">
+          {{ getAmountValue(t) | number : "1.0-0" }}
+        </ion-note>
+      </ion-item>
+    </ion-list>
+
+    <!-- Empty State -->
+    <ng-template #empty>
+      <div class="ion-text-center ion-padding">
+        <ion-icon
+          name="receipt-outline"
+          style="font-size: 28px; opacity: 0.6"
+        ></ion-icon>
+        <p class="ion-margin-top">
+          {{ "TRANSACTIONS.NO_RECENT" | translate }}
+        </p>
+      </div>
+    </ng-template>
+  </ng-container>
 </ng-container>

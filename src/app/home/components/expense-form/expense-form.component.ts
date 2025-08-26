@@ -136,6 +136,10 @@ export class ExpenseFormComponent extends BaseComponent implements OnInit {
   }
 
   close() {
-    this.modalCtrl?.dismiss();
+    if (this.modalCtrl) {
+      this.modalCtrl.dismiss();
+    } else if (this.onClose) {
+      this.onClose();
+    }
   }
 }

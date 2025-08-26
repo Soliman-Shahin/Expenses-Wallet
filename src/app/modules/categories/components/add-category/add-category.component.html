@@ -30,20 +30,29 @@
     <form [formGroup]="categoryForm">
       <ion-grid class="form-grid">
         <ion-row>
-          <ion-col size="10">
+          <ion-col size="12">
             <ion-item class="rounded-item" lines="full">
               <ion-input
                 formControlName="title"
-                color="primary"
-                [label]="'TITLE' | translate"
-                [placeholder]="'ENTER_TITLE' | translate"
+                [placeholder]="'CATEGORY.TITLE_PLACEHOLDER' | translate"
+                class="modern-input"
+                maxlength="50"
+                counter="true"
               ></ion-input>
+              <ion-icon
+                name="create-outline"
+                slot="start"
+              ></ion-icon>
+              <ion-icon
+                *ngIf="categoryForm.get('title')?.invalid && categoryForm.get('title')?.touched && formSubmitted"
+                name="alert-circle"
+                color="danger"
+                slot="end"
+                class="error-icon"
+              ></ion-icon>
             </ion-item>
-            <ion-note class="field-hint" color="medium">{{
-              "CATEGORY.TITLE_HINT" | translate
-            }}</ion-note>
             <ion-note
-              class="field-error"
+              class="field-error animated"
               color="danger"
               *ngIf="
                 categoryForm.get('title')?.invalid &&
@@ -51,6 +60,7 @@
                   categoryForm.get('title')?.touched)
               "
             >
+              <ion-icon name="alert-circle-outline"></ion-icon>
               {{ "VALIDATION.REQUIRED" | translate }}
             </ion-note>
           </ion-col>
@@ -67,7 +77,10 @@
           </ion-col>
           <app-color-selector
             class="color-selector"
+            [selectedColor]="categoryForm.get('color')?.value"
             (color)="selectColor($event)"
+            [attr.aria-label]="'CATEGORY.SELECT_COLOR' | translate"
+            role="radiogroup"
           />
         </ion-row>
 
@@ -82,7 +95,10 @@
           </ion-col>
           <app-icon-selector
             class="icon-selector"
+            [selectedIcon]="categoryForm.get('icon')?.value"
             (icon)="selectIcon($event)"
+            [attr.aria-label]="'CATEGORY.SELECT_ICON' | translate"
+            role="radiogroup"
           />
         </ion-row>
 
@@ -90,6 +106,8 @@
           <ion-col>
             <ion-button
               class="action-button"
+              [class.loading]="isLoading"
+              [class.success]="formSubmitted && !isLoading"
               (click)="editMode ? updateCategory() : addCategory()"
               expand="block"
               shape="round"
@@ -100,8 +118,17 @@
                 (editMode ? 'CATEGORY.UPDATE' : 'CATEGORY.CREATE') | translate
               "
             >
-              <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
-              {{ (editMode ? "UPDATE" : "CREATE") | translate }}
+              <div class="button-content">
+                <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+                <ion-icon 
+                  *ngIf="formSubmitted && !isLoading" 
+                  name="checkmark-circle" 
+                  class="success-icon">
+                </ion-icon>
+                <span class="button-text">
+                  {{ (editMode ? "UPDATE" : "CREATE") | translate }}
+                </span>
+              </div>
             </ion-button>
           </ion-col>
         </ion-row>

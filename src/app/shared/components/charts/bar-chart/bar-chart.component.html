@@ -1,0 +1,74 @@
+<div class="chart-container" [attr.aria-label]="ariaLabel">
+  <div class="chart-header">
+    <h3 *ngIf="title" class="chart-title">{{ title }}</h3>
+    <div class="chart-legend" *ngIf="showLegend">
+      <div
+        *ngFor="let item of chartData; let i = index"
+        class="legend-item"
+        (click)="toggleSeries(i)"
+        [class.inactive]="!isSeriesVisible(i)"
+        tabindex="0"
+        (keyup.enter)="toggleSeries(i)"
+        (keyup.space)="toggleSeries(i); $event.preventDefault()"
+      >
+        <div
+          class="legend-color"
+          [style.background-color]="getBarColor(i)"
+        ></div>
+        <span class="legend-label">{{
+          translateService.currentLang === "ar" ? item.nameAr : item.nameEn
+        }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-wrapper" #chartWrapper>
+    <div class="chart-bars">
+      <div
+        *ngFor="let item of chartData; let i = index"
+        class="bar-container"
+        [class.inactive]="!isSeriesVisible(i)"
+        (mouseenter)="showTooltip($event, i)"
+        (mouseleave)="hideTooltip()"
+        (focus)="showTooltip($event, i)"
+        (blur)="hideTooltip()"
+        tabindex="0"
+        role="button"
+        [attr.aria-label]="getAriaLabel(item, i)"
+      >
+        <div class="bar-area">
+          <div
+            class="bar"
+            [style.height]="getBarHeight(item.value)"
+            [style.background-color]="getBarColor(i)"
+            [attr.data-value]="item.value"
+          ></div>
+        </div>
+        <div class="bar-meta">
+          <div class="bar-label">
+            {{
+              translateService.currentLang === "ar" ? item.nameAr : item.nameEn
+            }}
+          </div>
+          <div class="bar-value">
+            {{ item.value | number : "1.0-0" }}{{ valueSuffix }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <app-chart-tooltip
+      #tooltip
+      [title]="tooltipTitle"
+      [items]="tooltipItems"
+      [visible]="isTooltipVisible"
+      [position]="tooltipPosition"
+      [x]="tooltipX"
+      [y]="tooltipY"
+      [isDarkMode]="isDarkMode"
+      [format]="tooltipFormat"
+      [borderColor]="getBarColor(activeBarIndex)"
+      [container]="chartWrapper"
+    ></app-chart-tooltip>
+  </div>
+</div>
