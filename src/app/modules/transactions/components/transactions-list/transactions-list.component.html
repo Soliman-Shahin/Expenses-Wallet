@@ -1,115 +1,90 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>{{ "TRANSACTIONS.TITLE" | translate }}</ion-title>
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/home"></ion-back-button>
-    </ion-buttons>
-    <ion-buttons slot="end">
-      <ion-button fill="clear" (click)="toggleSearch()">
-        <ion-icon name="search-outline"></ion-icon>
-      </ion-button>
-      <ion-button
-        fill="clear"
-        (click)="toggleFilters()"
-        [color]="showFilters ? 'primary' : ''"
-      >
-        <ion-icon name="filter-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-
-  <!-- Search Bar -->
-  <ion-toolbar *ngIf="showSearch">
-    <ion-searchbar
-      [(ngModel)]="searchTerm"
-      (ionInput)="onSearchChange($event)"
-      [placeholder]="'SEARCH' | translate"
-      [debounce]="300"
-      show-clear-button="focus"
-    >
-    </ion-searchbar>
-  </ion-toolbar>
-
-  <!-- Filters -->
-  <ion-toolbar *ngIf="showFilters" class="filters-toolbar">
-    <div class="filters-container">
-      <!-- Category Filter -->
-      <div class="filter-item">
-        <ion-label class="filter-label">{{
-          "TRANSACTIONS.CATEGORY" | translate
-        }}</ion-label>
-        <ion-select
-          [(ngModel)]="selectedCategory"
-          (ionChange)="onFilterChange()"
-          [placeholder]="'COMMON.ALL' | translate"
-          interface="popover"
-          class="filter-select"
-        >
-          <ion-select-option value="">{{
-            "COMMON.ALL" | translate
-          }}</ion-select-option>
-          <ion-select-option *ngFor="let cat of categories" [value]="cat._id">
-            <div class="category-option">
-              <ion-icon
-                [name]="cat.icon || 'pricetag-outline'"
-                [style.color]="cat.color"
-              ></ion-icon>
-              <span>{{ cat.title }}</span>
-            </div>
-          </ion-select-option>
-        </ion-select>
-      </div>
-
-      <!-- Type Filter -->
-      <div class="filter-item">
-        <ion-label class="filter-label">{{
-          "COMMON.TYPE" | translate
-        }}</ion-label>
-        <ion-select
-          [(ngModel)]="selectedType"
-          (ionChange)="onFilterChange()"
-          [placeholder]="'COMMON.ALL' | translate"
-          interface="popover"
-          class="filter-select"
-        >
-          <ion-select-option value="">{{
-            "COMMON.ALL" | translate
-          }}</ion-select-option>
-          <ion-select-option value="income">
-            <div class="type-option">
-              <ion-icon name="arrow-down-circle" color="success"></ion-icon>
-              <span>{{ "INCOME" | translate }}</span>
-            </div>
-          </ion-select-option>
-          <ion-select-option value="expense">
-            <div class="type-option">
-              <ion-icon name="arrow-up-circle" color="danger"></ion-icon>
-              <span>{{ "OUTCOME" | translate }}</span>
-            </div>
-          </ion-select-option>
-        </ion-select>
-      </div>
-
-      <!-- Date Range -->
-      <div class="filter-item">
-        <ion-label class="filter-label">{{
-          "TRANSACTIONS.DATE_RANGE" | translate
-        }}</ion-label>
-        <ion-button
-          fill="outline"
-          size="small"
-          (click)="openDatePicker()"
-          class="date-button"
-        >
-          <ion-icon name="calendar-outline" slot="start"></ion-icon>
-          {{ getDateRangeText() }}
+<ng-container *ngIf="true">
+  <ion-header mode="ios" class="category-ion-header">
+    <ion-toolbar>
+      <ion-title>{{ "TRANSACTIONS.TITLE" | translate }}</ion-title>
+      <ion-buttons slot="end">
+        <ion-button (click)="toggleFilters()" aria-label="Toggle filters">
+          <ion-icon
+            [name]="showFilters ? 'close-outline' : 'filter-outline'"
+          ></ion-icon>
         </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+    <ion-toolbar>
+      <ion-searchbar
+        animated="true"
+        [placeholder]="'SEARCH' | translate"
+        [debounce]="500"
+        show-clear-button="always"
+        [(ngModel)]="searchTerm"
+        (ionInput)="onSearchChange($event)"
+      ></ion-searchbar>
+    </ion-toolbar>
+    <ion-toolbar class="segment-toolbar">
+      <ion-segment [(ngModel)]="selectedType" (ionChange)="onFilterChange()">
+        <ion-segment-button value="" layout="icon-start">
+          <ion-icon name="options-outline"></ion-icon>
+          <ion-label>{{ "COMMON.ALL" | translate }}</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="expense" layout="icon-start">
+          <ion-icon name="trending-up-outline"></ion-icon>
+          <ion-label>{{ "COMMON.OUTCOME" | translate }}</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="income" layout="icon-start">
+          <ion-icon name="trending-down-outline"></ion-icon>
+          <ion-label>{{ "COMMON.INCOME" | translate }}</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </ion-toolbar>
+    <ion-toolbar *ngIf="showFilters" class="filters-toolbar filters-anim">
+      <div class="filters-container">
+        <!-- Category Filter -->
+        <div class="filter-item">
+          <ion-label class="filter-label">{{
+            "TRANSACTIONS.CATEGORY" | translate
+          }}</ion-label>
+          <ion-select
+            [(ngModel)]="selectedCategory"
+            (ionChange)="onFilterChange()"
+            [placeholder]="'COMMON.ALL' | translate"
+            interface="popover"
+            class="filter-select"
+          >
+            <ion-select-option value="">{{
+              "COMMON.ALL" | translate
+            }}</ion-select-option>
+            <ion-select-option *ngFor="let cat of categories" [value]="cat._id">
+              <div class="category-option">
+                <ion-icon
+                  [name]="cat.icon || 'pricetag-outline'"
+                  [style.color]="cat.color"
+                ></ion-icon>
+                <span>{{ cat.title }}</span>
+              </div>
+            </ion-select-option>
+          </ion-select>
+        </div>
+        <!-- Date Range Filter -->
+        <div class="filter-item">
+          <ion-label class="filter-label">{{
+            "TRANSACTIONS.DATE_RANGE" | translate
+          }}</ion-label>
+          <ion-button
+            fill="outline"
+            size="small"
+            (click)="openDatePicker()"
+            class="date-button"
+          >
+            <ion-icon name="calendar-outline" slot="start"></ion-icon>
+            {{ getDateRangeText() }}
+          </ion-button>
+        </div>
       </div>
-    </div>
-  </ion-toolbar>
-</ion-header>
+    </ion-toolbar>
+  </ion-header>
+</ng-container>
 
-<ion-content [fullscreen]="true">
+<ion-content class="ion-padding" [fullscreen]="true">
   <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
@@ -162,7 +137,13 @@
           button
           (click)="onTransactionClick(t)"
         >
-          <ion-icon size="large" [name]="getCategoryIcon(t)"></ion-icon>
+          <span
+            class="category-icon"
+            [style.background]="getCategoryColor(t)"
+            aria-hidden="true"
+          >
+            <ion-icon size="large" [name]="getCategoryIcon(t)"></ion-icon>
+          </span>
           <ion-label>
             <h3 class="ion-text-wrap transaction-title">
               {{ getOperationName(t) }}
@@ -204,14 +185,9 @@
 
     <!-- Empty State -->
     <ng-template #empty>
-      <div class="ion-text-center ion-padding">
-        <ion-icon
-          name="receipt-outline"
-          style="font-size: 28px; opacity: 0.6"
-        ></ion-icon>
-        <h3 class="ion-margin-top">
-          {{ "TRANSACTIONS.EMPTY_TITLE" | translate }}
-        </h3>
+      <div class="empty-state">
+        <ion-icon name="receipt-outline"></ion-icon>
+        <h2>{{ "TRANSACTIONS.EMPTY_TITLE" | translate }}</h2>
         <p>{{ "TRANSACTIONS.EMPTY_MESSAGE" | translate }}</p>
       </div>
     </ng-template>
