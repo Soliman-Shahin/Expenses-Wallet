@@ -3,9 +3,10 @@ import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 import { Router } from '@angular/router';
 import { ExpenseService } from 'src/app/core/services/expense.service';
 import { ProfileService } from 'src/app/modules/profile/services/profile.service';
-import { CategoryService } from 'src/app/modules/categories/services/categories.service';
 import { Expense } from 'src/app/shared/models/expense.model';
 import { BaseComponent } from 'src/app/shared/base/base.component';
+import { AlertController, ModalController, ToastController } from '@ionic/angular';
+import { ExpenseFormComponent } from 'src/app/home/components/expense-form/expense-form.component';
 
 @Component({
   selector: 'app-transactions-list',
@@ -22,8 +23,8 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
   searchTerm = '';
   selectedCategory = '';
   selectedType = '';
-  startDate: string | undefined = undefined;
-  endDate: string | undefined = undefined;
+  startDate: string | null = null;
+  endDate: string | null = null;
   today = new Date().toISOString();
 
   // UI state
@@ -34,10 +35,10 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
   private searchSubject = new Subject<string>();
 
   constructor(
-    private profileService: ProfileService,
-    protected override categoryService: CategoryService,
-    protected override expenseService: ExpenseService,
-    protected override router: Router
+    private readonly profileService: ProfileService,
+    private readonly modalController: ModalController,
+    private readonly alertController: AlertController,
+    private readonly toastController: ToastController,
   ) {
     super();
     // Setup search debouncing
@@ -50,6 +51,23 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
   }
 
   override ngOnInit() {
+    this.loadInitialData();
+  }
+
+  async openAddTransactionModal() {
+    const modal = await this.modalController.create({
+      component: ExpenseFormComponent,
+      cssClass: 'main-modal',
+    });
+    await modal.present();
+
+    const { data } = await modal.onDidDismiss();
+    if (data && data.success) {
+      this.loadTransactions(); // Refresh the list after adding a new transaction
+    }
+  }
+
+  loadInitialData() {
     this.loadUserCurrency();
     this.loadCategories();
     this.loadTransactions();
@@ -168,10 +186,37 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
   }
 
   clearDateFilter() {
-    this.startDate = undefined;
-    this.endDate = undefined;
-    this.showDatePicker = false;
-    this.loadTransactions();
+    this.startDate = null;
+    this.endDate = null;
+    // Keep the modal open for the user to select a new date range
+  }
+
+  get datePickerValue(): (string | null)[] | null {
+    if (this.startDate || this.endDate) {
+      return [this.startDate, this.endDate];
+    }
+    // Return null to have the calendar default to the current month
+    return null;
+  }
+
+  onDateChange(event: any) {
+    const dates = event.detail.value;
+    if (Array.isArray(dates)) {
+      if (dates.length === 0) {
+        this.startDate = null;
+        this.endDate = null;
+      } else {
+        // Sort the dates to ensure the first one is the start date
+        const sortedDates = dates.sort();
+        this.startDate = sortedDates[0];
+        // If only one date is selected, use it as the end date as well
+        this.endDate = sortedDates.length > 1 ? sortedDates[sortedDates.length - 1] : sortedDates[0];
+      }
+    } else if (typeof dates === 'string') {
+      // Handle the case where only a single date is emitted
+      this.startDate = dates;
+      this.endDate = dates;
+    }
   }
 
   getDateRangeText(): string {
@@ -254,5 +299,65 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
     const cat = (t as any)?.category;
     const type = (cat as any)?.type;
     return type === 'income' ? 'income' : 'expense';
+  }
+
+  onTransactionClick(item: Expense) {
+    this.onEdit(item);
+  }
+
+  async onEdit(item: Expense) {
+    const modal = await this.modalController.create({
+      component: ExpenseFormComponent,
+      componentProps: {
+        expenseId: (item as any)._id,
+      },
+      cssClass: 'main-modal',
+    });
+    await modal.present();
+
+    const { data } = await modal.onDidDismiss();
+    if (data && data.success) {
+      this.loadTransactions();
+    }
+  }
+
+  async onDelete(item: Expense) {
+    const alert = await this.alertController.create({
+      header: 'Confirm Delete',
+      message: `Are you sure you want to delete this transaction? This action cannot be undone.`,
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+        },
+        {
+          text: 'Delete',
+          role: 'destructive',
+          handler: () => {
+            this.expenseService.deleteExpense((item as any)._id).subscribe({
+              next: async () => {
+                const toast = await this.toastController.create({
+                  message: 'Transaction deleted successfully.',
+                  duration: 2000,
+                  color: 'success',
+                });
+                toast.present();
+                this.loadTransactions(); // Refresh list
+              },
+              error: async (err) => {
+                const toast = await this.toastController.create({
+                  message: 'Error deleting transaction. Please try again.',
+                  duration: 3000,
+                  color: 'danger',
+                });
+                toast.present();
+                console.error(err);
+              },
+            });
+          },
+        },
+      ],
+    });
+    await alert.present();
   }
 }

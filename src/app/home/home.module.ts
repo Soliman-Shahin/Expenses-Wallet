@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { SharedModule } from './../shared/shared.module';
+import { AddFabButtonComponent } from 'src/app/shared/ui/add-fab-button/add-fab-button.component';
 
 import { ExpenseFormComponent } from './components';
 import { HomeRoutingModule } from './home-routing.module';
@@ -21,9 +22,9 @@ import { DateRangeSelectorComponent } from 'src/app/shared/components/ui/date-ra
 @NgModule({
   imports: [
     CommonModule,
-    HomeRoutingModule,
     SharedModule,
     IonicModule,
+    HomeRoutingModule,
     ReactiveFormsModule,
     TranslateModule,
     BarChartComponent,
@@ -34,6 +35,7 @@ import { DateRangeSelectorComponent } from 'src/app/shared/components/ui/date-ra
     SkeletonBlockComponent,
     EmptyStateComponent,
     DateRangeSelectorComponent,
+    AddFabButtonComponent,
   ],
   declarations: [ExpenseFormComponent],
 })

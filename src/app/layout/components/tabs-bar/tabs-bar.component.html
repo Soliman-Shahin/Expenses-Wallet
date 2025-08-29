@@ -1,23 +1,30 @@
-<ion-tabs *ngIf="isLoggedIn$ | async">
-  <ion-tab-bar slot="bottom">
-    <ng-container *ngFor="let tab of tabs">
-      <ion-tab-button
-        *ngIf="tab.visible"
-        [routerLink]="tab.routerLink"
-        routerLinkActive="router-link-active"
-        [routerLinkActiveOptions]="
-          tab?.routerLinkActiveOptions ? tab?.routerLinkActiveOptions : {}
-        "
-        [disabled]="tab.disabled"
-        [tab]="tab.label"
-        class="animated-tab-button"
-        [attr.aria-current]="tab.routerLink === activeRoute ? 'page' : null"
-      >
-        <ion-icon [name]="tab.icon"></ion-icon>
-        <ion-label *ngIf="tab.show_label">
-          {{ tab.label ?? "" | translate }}
-        </ion-label>
-      </ion-tab-button>
-    </ng-container>
-  </ion-tab-bar>
-</ion-tabs>
+<ng-container *ngIf="vm$ | async as vm">
+  <!-- If logged in, wrap the content in ion-tabs -->
+  <ion-tabs *ngIf="vm.isLoggedIn">
+    <!-- The main content (ion-router-outlet) from layout.component.html will be projected here -->
+    <ng-content></ng-content>
+
+    <!-- The actual tab bar -->
+    <ion-tab-bar slot="bottom">
+      <ng-container *ngFor="let tab of tabs">
+        <ion-tab-button
+          *ngIf="tab.visible"
+          [routerLink]="tab.routerLink"
+          routerLinkActive="tab-selected"
+          [routerLinkActiveOptions]="{ exact: true }"
+          [tab]="tab.routerLink"
+        >
+          <ion-icon [name]="tab.icon"></ion-icon>
+          <ion-label *ngIf="tab.show_label">{{
+            tab.label ?? "" | translate
+          }}</ion-label>
+        </ion-tab-button>
+      </ng-container>
+    </ion-tab-bar>
+  </ion-tabs>
+
+  <!-- If not logged in, just show the content without tabs -->
+  <ng-container *ngIf="!vm.isLoggedIn">
+    <ng-content></ng-content>
+  </ng-container>
+</ng-container>

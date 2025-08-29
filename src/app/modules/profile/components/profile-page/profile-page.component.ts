@@ -4,7 +4,7 @@ import {
   OnInit,
   ViewChild,
   ElementRef,
-  OnDestroy,
+  inject,
 } from '@angular/core';
 import {
   AbstractControl,
@@ -15,11 +15,11 @@ import {
   Validators,
 } from '@angular/forms';
 import { ToastService } from 'src/app/shared/services/toast.service';
+import { BaseComponent } from 'src/app/shared/base/base.component';
 import { ProfileService } from '../../services/profile.service';
 import { UserProfile } from '../../models/profile.model';
-import { Subject, takeUntil } from 'rxjs';
-import { finalize } from 'rxjs/operators';
-import { LoadingService } from 'src/app/core/services/loading.service';
+import { BehaviorSubject, combineLatest, takeUntil } from 'rxjs';
+import { catchError, finalize, tap } from 'rxjs/operators';
 import { ItemReorderEventDetail } from '@ionic/angular';
 
 @Component({
@@ -28,12 +28,29 @@ import { ItemReorderEventDetail } from '@ionic/angular';
   styleUrls: ['./profile-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ProfilePageComponent implements OnInit, OnDestroy {
+export class ProfilePageComponent extends BaseComponent implements OnInit {
   personalForm!: FormGroup;
   salaryForm!: FormGroup;
   @ViewChild('avatarInput') avatarInputRef!: ElementRef<HTMLInputElement>;
   avatarUrl: string | undefined;
-  private destroy$ = new Subject<void>();
+
+  // State
+  private isLoadingProfile$ = new BehaviorSubject<boolean>(false);
+  private isLoadingPersonal$ = new BehaviorSubject<boolean>(false);
+  private isLoadingSalary$ = new BehaviorSubject<boolean>(false);
+  private isLoadingAvatar$ = new BehaviorSubject<boolean>(false);
+  private errorMessage$ = new BehaviorSubject<string | null>(null);
+
+  private readonly profileService = inject(ProfileService);
+
+  vm$ = combineLatest({
+    profile: this.profileService.profile$,
+    isLoadingProfile: this.isLoadingProfile$.asObservable(),
+    isLoadingPersonal: this.isLoadingPersonal$.asObservable(),
+    isLoadingSalary: this.isLoadingSalary$.asObservable(),
+    isLoadingAvatar: this.isLoadingAvatar$.asObservable(),
+    errorMessage: this.errorMessage$.asObservable(),
+  });
 
   currencies: string[] = [
     'USD',
@@ -51,14 +68,9 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     'TND',
   ];
 
-  constructor(
-    private fb: FormBuilder,
-    private profileService: ProfileService,
-    private toast: ToastService,
-    private loading: LoadingService
-  ) {}
 
-  ngOnInit(): void {
+  override ngOnInit(): void {
+    super.ngOnInit();
     this.personalForm = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
@@ -76,23 +88,18 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     }
 
     // Fetch latest profile from backend
-    this.loading.setLoading('profile_fetch', true);
+    this.isLoadingProfile$.next(true);
     this.profileService
       .fetchProfile()
       .pipe(
-        finalize(() => this.loading.setLoading('profile_fetch', false)),
-        takeUntil(this.destroy$)
+        finalize(() => this.isLoadingProfile$.next(false)),
+        takeUntil(this.destroy$),
+        catchError((err) => {
+          this.errorMessage$.next(err);
+          return [];
+        })
       )
-      .subscribe({
-        next: (profile) => {
-          if (!profile) {
-            // keep local cache, optionally notify
-          }
-        },
-        error: () => {
-          // handled inside service; keep UX quiet here
-        },
-      });
+      .subscribe();
 
     // Subscribe to changes for reactive UI (e.g., avatar preview updates)
     this.profileService.profile$
@@ -106,10 +113,6 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
       });
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
 
   private patchFromProfile(profile: UserProfile): void {
     this.personalForm.patchValue({
@@ -240,35 +243,43 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
   savePersonal(): void {
     if (this.personalForm.invalid) {
       this.personalForm.markAllAsTouched();
-      this.toast.presentErrorToast('top', 'PROFILE.TOASTS.PERSONAL_INVALID');
+      this.toastService.presentErrorToast('top', 'PROFILE.TOASTS.PERSONAL_INVALID');
       return;
     }
-    this.loading.setLoading('profile_save_personal', true);
+    this.isLoadingPersonal$.next(true);
+    this.errorMessage$.next(null);
     this.profileService
       .updateProfile({ ...(this.personalForm.value as Partial<UserProfile>) })
       .pipe(
-        finalize(() => this.loading.setLoading('profile_save_personal', false))
+        finalize(() => this.isLoadingPersonal$.next(false)),
+        takeUntil(this.destroy$),
+        tap((updated) => {
+          if (updated) {
+            this.toastService.presentSuccessToast(
+              'top',
+              'PROFILE.TOASTS.PERSONAL_SAVED'
+            );
+          } else {
+            this.errorMessage$.next('PROFILE.TOASTS.PERSONAL_FAILED');
+          }
+        }),
+        catchError((err) => {
+          this.errorMessage$.next(err);
+          return [];
+        })
       )
-      .subscribe((updated) => {
-        if (updated) {
-          this.toast.presentSuccessToast(
-            'top',
-            'PROFILE.TOASTS.PERSONAL_SAVED'
-          );
-        } else {
-          this.toast.presentErrorToast('top', 'PROFILE.TOASTS.PERSONAL_FAILED');
-        }
-      });
+      .subscribe();
   }
 
   saveSalary(): void {
     if (this.salaryForm.invalid) {
       this.salaryForm.markAllAsTouched();
       console.warn('Salary form invalid:', this.salaryForm.errors, this.salaryForm);
-      this.toast.presentErrorToast('top', 'PROFILE.TOASTS.SALARY_INVALID');
+      this.toastService.presentErrorToast('top', 'PROFILE.TOASTS.SALARY_INVALID');
       return;
     }
-    this.loading.setLoading('profile_save_salary', true);
+    this.isLoadingSalary$.next(true);
+    this.errorMessage$.next(null);
     const detailsRaw = this.details.getRawValue() || [];
     const salaryPayload = detailsRaw.map((d: any) => ({
       label: String(d?.label ?? 'Salary'),
@@ -285,17 +296,23 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     this.profileService
       .updateProfile(payload)
       .pipe(
-        finalize(() => this.loading.setLoading('profile_save_salary', false))
+        finalize(() => this.isLoadingSalary$.next(false)),
+        takeUntil(this.destroy$),
+        tap((updated) => {
+          if (updated) {
+            console.log('[Profile] Salary saved, backend responded:', updated);
+            this.salaryForm.markAsPristine();
+            this.toastService.presentSuccessToast('top', 'PROFILE.TOASTS.SALARY_SAVED');
+          } else {
+            this.errorMessage$.next('PROFILE.TOASTS.SALARY_FAILED');
+          }
+        }),
+        catchError((err) => {
+          this.errorMessage$.next(err);
+          return [];
+        })
       )
-      .subscribe((updated) => {
-        if (updated) {
-          console.log('[Profile] Salary saved, backend responded:', updated);
-          this.salaryForm.markAsPristine();
-          this.toast.presentSuccessToast('top', 'PROFILE.TOASTS.SALARY_SAVED');
-        } else {
-          this.toast.presentErrorToast('top', 'PROFILE.TOASTS.SALARY_FAILED');
-        }
-      });
+      .subscribe();
   }
 
   triggerAvatarFile(): void {
@@ -310,61 +327,59 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     // Validate file type
     const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     if (!validTypes.includes(file.type)) {
-      this.toast.presentErrorToast('top', 'PROFILE.TOASTS.INVALID_FILE_TYPE');
+      this.toastService.presentErrorToast('top', 'PROFILE.TOASTS.INVALID_FILE_TYPE');
       input.value = '';
       return;
     }
     
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      this.toast.presentErrorToast('top', 'PROFILE.TOASTS.FILE_TOO_LARGE');
+      this.toastService.presentErrorToast('top', 'PROFILE.TOASTS.FILE_TOO_LARGE');
       input.value = '';
       return;
     }
     
-    this.loading.setLoading('profile_avatar_upload', true);
+    this.isLoadingAvatar$.next(true);
+    this.errorMessage$.next(null);
     this.profileService
       .uploadAvatar(file)
       .pipe(
-        finalize(() => this.loading.setLoading('profile_avatar_upload', false))
-      )
-      .subscribe(async (res) => {
-        if (res) {
-          this.toast.presentSuccessToast('top', 'PROFILE.TOASTS.AVATAR_SAVED');
-          // Add a small delay to allow the UI to update before showing the animation
-          setTimeout(() => {
-            const avatarElement = document.querySelector('.avatar');
-            if (avatarElement) {
-              avatarElement.classList.add('pulse-on-change');
-              setTimeout(() => {
-                avatarElement.classList.remove('pulse-on-change');
-              }, 300);
-            }
-          }, 100);
-        } else {
-          // fallback to local store if backend fails
-          const ok = await this.profileService.setAvatar(file);
-          if (ok) {
-            this.toast.presentSuccessToast(
-              'top',
-              'PROFILE.TOASTS.AVATAR_SAVED'
-            );
-            // Add a small delay to allow the UI to update before showing the animation
-            setTimeout(() => {
-              const avatarElement = document.querySelector('.avatar');
-              if (avatarElement) {
-                avatarElement.classList.add('pulse-on-change');
-                setTimeout(() => {
-                  avatarElement.classList.remove('pulse-on-change');
-                }, 300);
-              }
-            }, 100);
+        finalize(() => this.isLoadingAvatar$.next(false)),
+        takeUntil(this.destroy$),
+        tap(async (res) => {
+          if (res) {
+            this.showAvatarSuccess();
           } else {
-            this.toast.presentErrorToast('top', 'PROFILE.TOASTS.AVATAR_FAILED');
+            // fallback to local store if backend fails
+            const ok = await this.profileService.setAvatar(file);
+            if (ok) {
+              this.showAvatarSuccess();
+            } else {
+              this.errorMessage$.next('PROFILE.TOASTS.AVATAR_FAILED');
+            }
           }
-        }
-      });
+        }),
+        catchError((err) => {
+          this.errorMessage$.next(err);
+          return [];
+        })
+      )
+      .subscribe();
     // clear selection
     input.value = '';
+  }
+
+  private showAvatarSuccess(): void {
+    this.toastService.presentSuccessToast('top', 'PROFILE.TOASTS.AVATAR_SAVED');
+    // Add a small delay to allow the UI to update before showing the animation
+    setTimeout(() => {
+      const avatarElement = document.querySelector('.avatar');
+      if (avatarElement) {
+        avatarElement.classList.add('pulse-on-change');
+        setTimeout(() => {
+          avatarElement.classList.remove('pulse-on-change');
+        }, 300);
+      }
+    }, 100);
   }
 }

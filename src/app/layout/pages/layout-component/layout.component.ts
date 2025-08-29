@@ -1,40 +1,35 @@
 import { Component } from '@angular/core';
-import { ChangeDetectorRef, OnDestroy, OnInit } from '@angular/core';
-import { LoadingService } from 'src/app/core/services/loading.service';
-import { Subscription } from 'rxjs';
-import { AuthService } from 'src/app/modules/auth/services/auth.service';
+import { OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { takeUntil } from 'rxjs/operators';
+import { BaseComponent } from 'src/app/shared/base/base.component';
 
 @Component({
   selector: 'app-layout',
   templateUrl: './layout.component.html',
   styleUrls: ['./layout.component.scss'],
 })
-export class LayoutComponent implements OnInit, OnDestroy {
-  isLoading = false;
-  private loadingSub?: Subscription;
+export class LayoutComponent
+  extends BaseComponent
+  implements OnInit
+{
   isLoggedIn$!: Observable<boolean>;
   message$!: Observable<string | null>;
 
-  constructor(
-    private loadingService: LoadingService,
-    private cdr: ChangeDetectorRef,
-    private auth: AuthService
-  ) {}
-
-  ngOnInit(): void {
-    this.isLoggedIn$ = this.auth.user$.pipe(map((u) => !!u));
-    this.message$ = this.loadingService.message$;
-    this.loadingSub = this.loadingService.isLoading$.subscribe((loading) => {
-      this.isLoading = loading;
-      this.cdr.markForCheck();
-    });
+  constructor() {
+    super();
   }
 
-  ngOnDestroy(): void {
-    if (this.loadingSub) {
-      this.loadingSub.unsubscribe();
-    }
+  override ngOnInit(): void {
+    super.ngOnInit();
+    this.isLoggedIn$ = this.authService.isLoggedIn$;
+    this.message$ = this.loadingService.message$;
+
+    this.loadingService.isLoading$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((loading) => {
+        this.setLoading(loading);
+        this.cdr.markForCheck();
+      });
   }
 }

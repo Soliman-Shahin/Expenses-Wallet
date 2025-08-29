@@ -33,6 +33,8 @@ export class AuthService {
   private userSubject = new BehaviorSubject<User | null>(null);
   public user$ = this.userSubject.asObservable();
 
+  public isLoggedIn$: Observable<boolean> = this.user$.pipe(map(user => !!user));
+
   // Store the URL to redirect to after login
   public redirectUrl: string | null = null;
 

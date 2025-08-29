@@ -1,21 +1,15 @@
 /* Balance Summary: styled like a single card row (matches .transaction-item) */
 .balance-summary {
   position: relative;
-  margin: var(--ew-space-5) var(--ew-space-3);
-  border-radius: var(--ew-radius-lg);
-  box-shadow: var(--ew-shadow-md);
-  padding: var(--ew-space-5) var(--ew-space-5) var(--ew-space-6);
-  background: var(--ion-card-background, var(--ion-color-light));
-  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
-  animation: cardAppear 320ms ease both;
+  transition: var(--ew-transition-all-fast);
+  animation: cardAppear var(--ew-transition-duration-slow) ease both;
+  box-shadow: none !important;
 
   &:hover {
     transform: translateY(calc(var(--ew-space-px) * -1));
-    box-shadow: var(--ew-shadow-lg);
   }
   &:active {
     transform: translateY(0);
-    box-shadow: var(--ew-shadow-sm);
   }
 }
 
@@ -27,7 +21,7 @@
   border: 0;
   padding: var(--ew-space-2);
   border-radius: var(--ew-radius-md);
-  color: var(--ion-color-medium);
+  color: var(--ew-text-color-tertiary);
 }
 
 .total-balance {
@@ -40,13 +34,13 @@
     font-size: var(--ew-font-3xl);
     font-weight: var(--ew-font-weight-extrabold);
     letter-spacing: var(--ew-letter-spacing-tighter);
-    color: var(--text-primary);
+    color: var(--ew-text-color-primary);
   }
   ion-badge {
     font-size: var(--ew-font-xs);
     font-weight: var(--ew-font-weight-semibold);
     border-radius: var(--ew-radius-md);
-    color: var(--text-secondary);
+    color: var(--ew-text-color-secondary);
   }
 }
 
@@ -55,15 +49,14 @@
   align-items: center;
   padding: var(--ew-space-5) var(--ew-space-3);
   border-radius: var(--ew-radius-md);
-  transition: background 0.18s, box-shadow 0.18s;
+  transition: background var(--ew-transition-duration-fast);
 
   &:hover,
-  &:focus {
-    background: rgba(var(--ion-color-secondary-rgb), 0.07);
-    box-shadow: var(--ew-shadow-sm);
+  &:focus-within {
+    background: var(--ew-item-background-color-hover);
   }
   &:active {
-    background: rgba(var(--ion-color-medium-rgb), 0.15);
+    background: var(--ew-item-background-color-active);
   }
 
   ion-icon {
@@ -77,15 +70,15 @@
     flex-direction: column;
     flex: 1;
     .label {
-      font-size: var(--ew-font-sm);
-      color: var(--text-secondary);
+      font-size: var(--ew-font-size-sm);
+      color: var(--ew-text-color-secondary);
       margin-bottom: var(--ew-space-1);
       font-weight: var(--ew-font-weight-medium);
     }
     .amount {
-      font-size: var(--ew-font-md);
+      font-size: var(--ew-font-size-md);
       font-weight: var(--ew-font-weight-semibold);
-      color: var(--text-secondary);
+      color: var(--ew-text-color-primary);
     }
   }
 }

@@ -129,9 +129,11 @@ ion-note {
   margin-bottom: var(--ew-space-10);
 
   .app-logo {
-    font-size: var(--ew-font-size-7xl);
-    color: var(--ion-color-primary);
-    margin-bottom: var(--ew-space-2);
+    width: 96px;
+    height: 96px;
+    border-radius: 20%;
+    margin-bottom: var(--ew-space-4);
+    box-shadow: var(--ew-shadow-lg);
   }
 
   .app-name {

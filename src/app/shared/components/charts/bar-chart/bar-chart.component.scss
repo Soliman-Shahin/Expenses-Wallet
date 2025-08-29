@@ -1,7 +1,7 @@
 .chart-container {
   padding: var(--ew-space-5);
   border-radius: var(--ew-radius-md);
-  background-color: var(--ion-background-color, #fff);
+  background-color: var(--ion-card-background);
   box-shadow: var(--ew-shadow-sm);
   margin: var(--ew-space-5) 0;
 }
@@ -9,9 +9,9 @@
 .chart-title {
   margin-top: 0;
   margin-bottom: var(--ew-space-5);
-  color: var(--ion-text-color, #000);
+  color: var(--ew-text-color-primary);
   font-size: var(--ew-font-xl);
-  font-weight: 500;
+  font-weight: var(--ew-font-weight-medium);
 }
 
 .chart-wrapper {
@@ -19,7 +19,7 @@
   align-items: flex-end;
   height: 160px;
   padding: var(--ew-space-4) 0 var(--ew-space-3);
-  border-bottom: 1px solid var(--ion-border-color, #ddd);
+  border-bottom: 1px solid var(--ion-border-color);
   overflow: hidden; /* contain tall bars */
   box-sizing: border-box;
 }
@@ -40,6 +40,15 @@
   flex: 1;
   height: 100%;
   margin: 0 var(--ew-space-2);
+  cursor: pointer;
+  transition: transform var(--ew-transition-duration-fast) ease-in-out;
+
+  &:hover {
+    .bar {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+  }
 }
 
 .bar-area {
@@ -62,15 +71,17 @@
   width: 70%;
   min-height: 2px;
   max-height: 70%; /* avoid touching top edge */
-  border-radius: 4px 4px 0 0;
-  transition: height 0.3s ease;
+  border-radius: var(--ew-radius-sm) var(--ew-radius-sm) 0 0;
+  transition: height var(--ew-transition-duration-medium) var(--ew-easing-standard),
+    transform var(--ew-transition-duration-fast) ease-in-out,
+    box-shadow var(--ew-transition-duration-fast) ease-in-out;
 }
 
 .bar-label {
   margin-top: var(--ew-space-3);
   font-size: var(--ew-font-sm);
   text-align: center;
-  color: var(--ion-text-color, #000);
+  color: var(--ew-text-color-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -81,29 +92,9 @@
   margin-top: var(--ew-space-2);
   font-size: var(--ew-font-xs);
   text-align: center;
-  color: var(--ion-text-color-secondary, #666);
+  color: var(--ew-text-color-muted);
 }
 
-/* Dark mode support */
-body.dark {
-  .chart-container {
-    background-color: var(--ion-background-color, #1e1e1e);
-    box-shadow: var(--ew-shadow-sm);
-  }
-
-  .chart-title,
-  .bar-label {
-    color: var(--ion-text-color, #fff);
-  }
-
-  .bar-value {
-    color: var(--ion-text-color-secondary, #aaa);
-  }
-
-  .chart-wrapper {
-    border-bottom: 1px solid var(--ion-border-color, #444);
-  }
-}
 
 /* Responsive design */
 @media (max-width: 768px) {
@@ -130,10 +121,10 @@ body.dark {
   }
 
   .bar-label {
-    font-size: 0.6rem;
+    font-size: var(--ew-font-xxs);
   }
 
   .bar-value {
-    font-size: 0.5rem;
+    font-size: var(--ew-font-xxs);
   }
 }

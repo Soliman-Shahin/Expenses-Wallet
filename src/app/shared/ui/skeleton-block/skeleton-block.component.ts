@@ -9,7 +9,8 @@ export type SkeletonVariant =
   | 'card-md'
   | 'card-lg'
   | 'card-xl'
-  | 'chart';
+  | 'chart'
+  | 'list-item-avatar';
 
 @Component({
   selector: 'app-skeleton-block',

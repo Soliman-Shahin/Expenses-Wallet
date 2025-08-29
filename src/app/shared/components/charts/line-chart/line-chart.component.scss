@@ -1,7 +1,7 @@
 .chart-container {
   padding: var(--ew-space-5);
   border-radius: var(--ew-radius-md);
-  background-color: var(--ion-background-color, #fff);
+  background-color: var(--ion-card-background);
   box-shadow: var(--ew-shadow-sm);
   margin: var(--ew-space-5) 0;
 }
@@ -9,9 +9,9 @@
 .chart-title {
   margin-top: 0;
   margin-bottom: var(--ew-space-5);
-  color: var(--ion-text-color, #000);
+  color: var(--ew-text-color-primary);
   font-size: var(--ew-font-xl);
-  font-weight: 500;
+  font-weight: var(--ew-font-weight-medium);
 }
 
 .chart-wrapper {
@@ -33,66 +33,45 @@
 }
 
 .grid-line {
-  stroke: var(--ion-border-color, #ddd);
-  stroke-width: 1;
+  stroke: var(--ew-border-color);
+  stroke-width: var(--ew-border-width-sm);
   stroke-dasharray: 2,2;
 }
 
 .axis {
-  stroke: var(--ion-text-color, #000);
-  stroke-width: 2;
+  stroke: var(--ew-text-color-secondary);
+  stroke-width: var(--ew-border-width-sm);
 }
 
 .line-path {
   fill: none;
-  stroke: #3880ff; /* primary blue */
-  stroke-width: 3;
+  stroke: var(--ion-color-primary);
+  stroke-width: var(--ew-border-width-lg);
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
 .data-point {
-  fill: #3880ff; /* primary blue */
-  stroke: #fff;
-  stroke-width: 2;
+  fill: var(--ion-color-primary);
+  stroke: var(--ion-card-background);
+  stroke-width: var(--ew-border-width-md);
+}
+
+.data-point-hover-area {
+  cursor: pointer;
 }
 
 .value-label {
-  fill: var(--ion-text-color, #000);
+  fill: var(--ew-text-color-primary);
   font-size: var(--ew-font-xs);
-  font-weight: 500;
+  font-weight: var(--ew-font-weight-medium);
 }
 
 .axis-label {
-  fill: var(--ion-text-color-secondary, #666);
+  fill: var(--ew-text-color-secondary);
   font-size: var(--ew-font-xs);
 }
 
-/* Dark mode support */
-body.dark {
-  .chart-container {
-    background-color: var(--ion-background-color, #1e1e1e);
-    box-shadow: var(--ew-shadow-sm);
-  }
-  
-  .chart-title,
-  .value-label {
-    color: var(--ion-text-color, #fff);
-    fill: var(--ion-text-color, #fff);
-  }
-  
-  .axis-label {
-    fill: var(--ion-text-color-secondary, #aaa);
-  }
-  
-  .axis {
-    stroke: var(--ion-text-color, #fff);
-  }
-  
-  .grid-line {
-    stroke: var(--ion-border-color, #444);
-  }
-}
 
 /* Responsive design */
 @media (max-width: 768px) {

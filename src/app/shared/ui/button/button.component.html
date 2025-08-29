@@ -1,0 +1,15 @@
+<ion-button
+  [fill]="fill"
+  [color]="color"
+  [size]="size"
+  [expand]="expand"
+  [shape]="shape === 'full' ? 'round' : undefined"
+  [class.full-round]="shape === 'full'"
+  [disabled]="disabled"
+  [type]="type"
+  [routerLink]="routerLink"
+  [href]="href"
+  (click)="onClick($event)"
+>
+  <ng-content></ng-content>
+</ion-button>

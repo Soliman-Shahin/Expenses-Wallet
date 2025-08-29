@@ -1,308 +1,125 @@
 @import "src/theme/variables";
 
-/* Sensible defaults in case CSS vars are not set elsewhere */
-:host {
-  --tab-transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-  --tab-hover-scale: 1.06;
-  --tab-active-scale: 1.1;
-  --tab-active-opacity: 1;
-  --tab-inactive-opacity: 0.75; /* a bit lower to make active stand out */
-  --tab-icon-size: 1.35rem;
-  --tab-label-font-size: 0.8rem;
-  --tab-label-margin: 0.1rem 0 0 0;
+ion-tab-bar {
+  --background: var(--ion-color-primary-contrast);
+  backdrop-filter: var(--ew-backdrop-filter);
+  --border: none;
+  --color: var(--ion-text-color);
+  --color-selected: var(--ion-color-primary);
+  height: var(--ew-size-16);
+  padding: var(--ew-space-2);
+  border-start-start-radius: var(--ew-radius-xl);
+  border-start-end-radius: var(--ew-radius-xl);
+  box-shadow: var(--ew-shadow-elevated);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  transition: var(--ew-transition-all-medium);
+
+  &::before {
+    display: none;
+  }
 }
 
-.animated-tab-button.router-link-active {
-  color: var(--ion-color-primary);
-  transform: scale(var(--tab-active-scale));
-  opacity: var(--tab-active-opacity);
-}
+ion-tab-button {
+  --color: var(--ew-text-color-secondary);
+  --color-selected: var(--ion-color-primary);
+  --padding-top: var(--ew-space-1);
+  --padding-bottom: var(--ew-space-2);
+  transition: all 0.3s ease-in-out;
+  opacity: 0.8;
+  border-radius: var(--ew-radius-lg);
+  position: relative;
+  overflow: visible;
 
-.animated-tab-button {
-  transition: var(--tab-transition);
-}
-
-.animated-tab-button:hover {
-  transform: scale(var(--tab-hover-scale));
-  opacity: 1;
-}
-
-.animated-tab-button ion-icon {
-  transition: var(--tab-transition);
-  font-size: var(--tab-icon-size);
-}
-
-.animated-tab-button:hover ion-icon {
-  transform: scale(var(--tab-hover-scale));
-}
-
-ion-tabs {
-  position: fixed;
-  bottom: 0;
-  inset-inline: 0;
-  z-index: 1000;
-  width: 100%;
-
-  ion-tab-bar {
-    /* Glassmorphism background driven by theme */
-    --background: rgba(var(--ion-background-color-rgb, 255, 255, 255), 0.82);
-    backdrop-filter: saturate(140%) blur(14px);
-    --border: none;
-    --color: var(--ion-text-color);
-    --color-selected: var(--ion-color-primary);
-    height: var(--tabs-height, 62px);
-    padding: var(--tabs-padding, 8px 8px);
-    border-start-start-radius: 22px;
-    border-start-end-radius: 22px;
-    box-shadow: 0 -6px 24px rgba(34, 211, 238, 0.13),
-      0 -1px 0 rgba(0, 0, 0, 0.06) inset;
-    position: relative;
-    overflow: visible;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    transition: box-shadow 0.22s, background 0.22s;
-
-    &::before {
-      display: none;
-    }
+  ion-icon {
+    font-size: var(--ew-font-size-xl);
+    transition: transform 0.3s ease-in-out;
   }
 
-  ion-tab-button {
-    --color: var(--text-tertiary);
-    --color-selected: var(--ion-color-primary);
-    --padding-top: var(--spacing-xxs);
-    --padding-bottom: var(--spacing-xs);
-    transition: var(--tab-transition);
-    opacity: var(--tab-inactive-opacity);
-    position: relative;
-    overflow: visible;
-    gap: 6px;
-    border-radius: 14px;
+  ion-label {
+    font-size: var(--ew-font-sm);
+    font-weight: var(--ew-font-weight-medium);
+    margin-top: var(--ew-space-1);
+    transition: all 0.3s ease-in-out;
+  }
 
-    // Active tab indicator
-    &::after {
-      content: "";
-      position: absolute;
-      bottom: 0;
-      inset-inline-start: 50%;
-      transform: translateX(-50%) scaleX(0);
-      width: 30%;
-      height: 3px;
-      background: var(--ion-color-primary);
-      border-radius: 3px 3px 0 0;
-      transition: var(--tab-transition);
-      opacity: 0; /* kept for fallback; hidden when selected */
-    }
+  &:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+    background: var(--ew-item-background-color-hover);
+  }
+
+  &:focus-visible {
+    outline: var(--ew-border-width-md) solid var(--ion-color-primary);
+    outline-offset: 2px;
+    background: rgba(var(--ion-color-primary-rgb), 0.18);
+    box-shadow: var(--ew-shadow-focus);
+    z-index: 2;
+  }
+
+  &.tab-selected {
+    opacity: 1;
+    transform: translateY(-4px) scale(1.05);
+    color: var(--ion-color-primary-contrast);
+    background-color: var(--ion-color-primary);
+    border-radius: var(--ew-radius-xl);
+    box-shadow: var(--ew-shadow-card);
 
     ion-icon {
-      font-size: var(--tab-icon-size);
-      transition: var(--tab-transition);
+      transform: scale(1.1);
     }
 
     ion-label {
-      font-size: var(--tab-label-font-size);
-      font-weight: var(--font-weight-medium);
-      margin: var(--tab-label-margin);
-      transition: var(--tab-transition);
+      font-weight: var(--ew-font-weight-semibold);
     }
+  }
+}
 
-    // Hover state
+/* Dark Mode Styles */
+:host-context(.dark) {
+  ion-tab-button {
     &:hover {
-      background: rgba(var(--ion-color-primary-rgb), 0.08);
-      box-shadow: 0 2px 12px rgba(var(--ion-color-primary-rgb), 0.12);
-      transform: translateY(-2px) scale(1.07);
-      transition: var(--tab-transition);
-      opacity: 1;
-
-      ion-icon {
-        transform: scale(var(--tab-hover-scale));
-        transition: var(--tab-transition);
-      }
+      background: var(--ew-item-background-color-hover);
     }
 
-    // Focus-visible state for accessibility
-    &:focus-visible {
-      outline: 2px solid var(--ion-color-primary);
-      outline-offset: 2px;
-      background: rgba(var(--ion-color-primary-rgb), 0.15);
-      box-shadow: 0 0 0 4px rgba(var(--ion-color-primary-rgb), 0.13);
-      z-index: 2;
-      transition: var(--tab-transition);
-    }
-
-    // Active state
     &.tab-selected {
-      opacity: var(--tab-active-opacity);
-      transform: translateY(-3px) scale(var(--tab-active-scale));
-      /* Use contrast color for readability over colored pill */
+      background-color: var(--ion-color-primary);
       color: var(--ion-color-primary-contrast);
-      /* Elevated pill background */
-      background: linear-gradient(
-        180deg,
-        rgba(var(--ion-color-primary-rgb), 0.16) 0%,
-        rgba(var(--ion-color-primary-rgb), 0.1) 100%
-      );
-      border: 1px solid rgba(var(--ion-color-primary-rgb), 0.3);
-      /* Outer glow ring for clearer selection */
-      box-shadow: 0 10px 26px rgba(var(--ion-color-primary-rgb), 0.18),
-        0 0 0 6px rgba(var(--ion-color-primary-rgb), 0.12),
-        0 1px 0 rgba(255, 255, 255, 0.08) inset;
-      border-radius: 16px;
-      backdrop-filter: blur(6px);
-
-      /* Hide underline when pill is active to avoid double signals */
-      &::after {
-        transition: transform 0.2s, opacity 0.2s;
-        transform: translateX(-50%) scaleX(0);
-        opacity: 0;
-      }
-
-      ion-icon {
-        transform: scale(calc(var(--tab-active-scale) + 0.03));
-        color: currentColor;
-      }
-
-      ion-label {
-        transition: color 0.18s, font-weight 0.18s;
-        font-weight: var(--font-weight-semibold);
-        color: currentColor;
-      }
     }
   }
+}
 
-  // Animation for tab indicator
-  @keyframes rippleFade {
-    0% {
-      opacity: 0.8;
-      transform: scale(0.7);
-    }
-    100% {
-      opacity: 0;
-      transform: scale(1.5);
-    }
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  ion-tab-button {
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  ion-tab-bar {
+    height: var(--ew-size-15);
+    padding: var(--ew-space-2) 0;
   }
 
-  /* Dark mode: match glassmorphism to dark palette */
-  :host-context(.dark) {
-    ion-tabs {
-      ion-tab-bar {
-        /* Translucent dark background driven by theme rgb */
-        --background: rgba(var(--ion-background-color-rgb, 24, 26, 32), 0.85);
-        /* Keep blur */
-        backdrop-filter: saturate(140%) blur(14px);
-        /* Subtle shadow upwards */
-        box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.35);
-        /* Text/icon color inherits from dark variables */
-        --color: var(--ion-text-color);
-        --color-selected: var(--ion-color-primary);
-        --border: none;
-      }
+  ion-tab-button {
+    font-size: var(--ew-font-sm);
+  }
+}
 
-      ion-tab-button {
-        /* Hover with subtle light overlay in dark */
-        &:hover {
-          background: rgba(255, 255, 255, 0.06);
-          box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Focus ring tuned for dark */
-        &:focus-visible {
-          background: rgba(var(--ion-color-primary-rgb), 0.18);
-          box-shadow: 0 0 0 4px rgba(var(--ion-color-primary-rgb), 0.18);
-        }
-
-        &.tab-selected {
-          /* Slightly stronger pill in dark for contrast */
-          background: linear-gradient(
-            180deg,
-            rgba(var(--ion-color-primary-rgb), 0.22) 0%,
-            rgba(var(--ion-color-primary-rgb), 0.16) 100%
-          );
-          border: 1px solid rgba(var(--ion-color-primary-rgb), 0.35);
-          box-shadow: 0 12px 28px rgba(var(--ion-color-primary-rgb), 0.22),
-            0 0 0 7px rgba(var(--ion-color-primary-rgb), 0.16),
-            0 1px 0 rgba(255, 255, 255, 0.06) inset;
-          color: var(--ion-color-primary-contrast);
-        }
-      }
-    }
+@media (max-width: 480px) {
+  ion-tab-bar {
+    height: var(--ew-size-14);
+    padding: var(--ew-space-1) 0;
   }
 
-  /* Reduced motion support */
-  @media (prefers-reduced-motion: reduce) {
-    ion-tab-button,
-    .animated-tab-button,
-    .animated-tab-button ion-icon {
-      transition: none !important;
-      transform: none !important;
-    }
-  }
-
-  @keyframes tabIndicator {
-    from {
-      transform: translateX(-50%) scaleX(0);
-      opacity: 0;
-    }
-    to {
-      transform: translateX(-50%) scaleX(1);
-      opacity: 1;
-    }
-  }
-
-  // Responsive adjustments
-  @media (max-width: 480px) {
-    ion-tab-bar {
-      border-start-start-radius: 12px;
-      border-start-end-radius: 12px;
-      height: 54px;
-      padding: 4px 0;
-      box-shadow: var(--shadow-elevated);
-    }
-    ion-tab-button {
-      --tab-icon-size: 1.2rem;
-      --tab-label-font-size: 0.7rem;
-      --padding-top: 0.18rem;
-      --padding-bottom: 0.18rem;
-      min-width: 52px;
-      border-radius: var(--card-border-radius, 12px);
-    }
-  }
-
-  @media (max-width: 768px) {
-    ion-tab-bar {
-      border-start-start-radius: 16px;
-      border-start-end-radius: 16px;
-      height: 58px;
-      padding: 6px 0;
-      box-shadow: var(--shadow-elevated);
-    }
-    ion-tab-button {
-      --tab-icon-size: 1.35rem;
-      --tab-label-font-size: 0.8rem;
-      --padding-top: 0.22rem;
-      --padding-bottom: 0.22rem;
-      min-width: 60px;
-      border-radius: var(--card-border-radius, 12px);
-    }
-  }
-
-  // Extra large screens
-  @media (min-width: 1200px) {
-    ion-tab-bar {
-      border-start-start-radius: 28px;
-      border-start-end-radius: 28px;
-      height: 68px;
-      padding: 12px 0;
-      box-shadow: var(--shadow-card);
-    }
-    ion-tab-button {
-      --tab-icon-size: 1.7rem;
-      --tab-label-font-size: 1rem;
-      --padding-top: 0.38rem;
-      --padding-bottom: 0.38rem;
-      min-width: 80px;
-      border-radius: 20px;
+  ion-tab-button {
+    font-size: var(--ew-font-size-xs);
+    ion-label {
+      display: none; // Hide label on very small screens to save space
     }
   }
 }

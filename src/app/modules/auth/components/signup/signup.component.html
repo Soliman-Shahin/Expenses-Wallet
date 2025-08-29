@@ -1,9 +1,10 @@
 <ion-content class="ion-padding" [fullscreen]="true">
+  <ng-container *ngIf="vm$ | async as vm">
   <div class="signup-container" style="min-height: 100%">
     <div class="signup-card">
       <!-- App Logo -->
       <div class="logo-container">
-        <ion-icon name="wallet-outline" class="app-logo"></ion-icon>
+        <img src="assets/icons/icon-192.webp" alt="App Logo" class="app-logo" />
         <h1 class="app-name">{{ 'APP_TITLE' | translate }}</h1>
       </div>
 
@@ -21,7 +22,7 @@
           fill="outline"
           class="google-btn"
           (click)="signInWithGoogle()"
-          [disabled]="isLoading"
+          [disabled]="vm.isLoading"
         >
           <ion-icon slot="start" name="logo-google"></ion-icon>
           {{ "AUTH.SIGN_UP_WITH_GOOGLE" | translate }}
@@ -40,9 +41,9 @@
         class="signup-form form-container"
       >
         <!-- Error message display -->
-        <ion-note *ngIf="errorMessage" color="danger" class="error-message">
+        <ion-note *ngIf="vm.errorMessage" color="danger" class="error-message">
           <ion-icon name="alert-circle-outline"></ion-icon>
-          {{ errorMessage }}
+          {{ vm.errorMessage }}
         </ion-note>
 
         <!-- Name Input -->
@@ -308,11 +309,11 @@
         <ion-button
           type="submit"
           expand="block"
-          [disabled]="signupForm.invalid || isLoading"
+          [disabled]="signupForm.invalid || vm.isLoading"
           class="form-submit-button"
         >
-          <span *ngIf="!isLoading">{{ "AUTH.SIGN_UP" | translate }}</span>
-          <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+          <span *ngIf="!vm.isLoading">{{ "AUTH.SIGN_UP" | translate }}</span>
+          <ion-spinner *ngIf="vm.isLoading" name="crescent"></ion-spinner>
         </ion-button>
 
         <!-- Login Link -->
@@ -331,4 +332,5 @@
       </form>
     </div>
   </div>
+  </ng-container>
 </ion-content>

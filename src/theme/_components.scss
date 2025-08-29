@@ -1,0 +1,168 @@
+// ===================================================================
+//  COMPONENT STYLES
+//  - Custom styles for global components (cards, buttons, etc.)
+//  - Overrides for Ionic components
+// ===================================================================
+
+/* Card Styles */
+ion-card,
+.card,
+.container {
+  border-radius: var(--ew-radius-xl, 18px);
+  box-shadow: var(--ew-shadow-1);
+  margin: 18px 0;
+  padding: 1.5rem 1.25rem;
+  background: var(--ion-card-background);
+  border: 1px solid var(--ion-border-color);
+  transition: box-shadow var(--ew-animation-duration-normal) var(--ew-animation-easing-standard),
+    transform var(--ew-animation-duration-normal) var(--ew-animation-easing-standard);
+  animation: fadeInUp 0.4s var(--ew-animation-easing-standard);
+
+  &:hover {
+    transform: translateY(-6px) scale(1.015);
+    box-shadow: var(--ew-shadow-2);
+  }
+}
+
+/* Button Overrides */
+ion-button {
+  --border-radius: var(--ew-radius-large, 12px);
+  --box-shadow: var(--ew-shadow-1);
+  --transition: all var(--ew-animation-duration-normal) var(--ew-animation-easing-standard);
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0.5px;
+
+  &:hover {
+    --box-shadow: var(--ew-shadow-2);
+  }
+}
+
+/* Form Elements Overrides */
+ion-item {
+  --border-radius: var(--ew-radius-large, 12px);
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --inner-padding-end: 0;
+  --background: var(--ion-item-background);
+  --min-height: 56px;
+  margin-bottom: 16px;
+  border-radius: var(--ew-radius-large, 12px);
+  box-shadow: var(--ew-shadow-1);
+  transition: all var(--ew-animation-duration-normal) var(--ew-animation-easing-standard);
+
+  &:hover {
+    box-shadow: var(--ew-shadow-2);
+  }
+}
+
+/* Custom Toast & Loader Styles */
+.custom-toast {
+  // Glow color for animation - defined here for light/dark modes
+  --ew-toast-glow-color: rgba(67, 97, 238, 0.14);
+
+  --background: var(--ew-background-color-glass);
+  --color: var(--ew-text-color-primary);
+  --border-radius: var(--ew-radius-xl);
+  --box-shadow: var(--ew-shadow-lg);
+  --padding-start: 1.25rem;
+  --padding-end: 1.25rem;
+  font-size: 1.04rem;
+  font-weight: 500;
+  border: 1px solid var(--ew-border-color);
+  backdrop-filter: blur(18px) saturate(150%);
+  z-index: 10010; // Ensure toast sits above overlays
+}
+
+.custom-loader {
+  --background: var(--ew-background-color-overlay);
+  --color: var(--ew-text-color-primary);
+  --spinner-color: var(--ion-color-primary);
+  --border-radius: var(--ew-radius-xl);
+  --box-shadow: var(--ew-shadow-xl);
+
+  .loading-wrapper {
+    padding: var(--ew-space-6);
+  }
+
+  ion-spinner {
+    width: var(--ew-size-12);
+    height: var(--ew-size-12);
+    transform: scale(1.5);
+    margin-bottom: var(--ew-space-4);
+  }
+}
+
+body.dark {
+  .custom-toast {
+    --ew-toast-glow-color: rgba(34, 211, 238, 0.16);
+  }
+}
+
+/* Keyframes for Toast & Loader */
+@keyframes toastFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toastFadeOutDown {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(24px) scale(0.95);
+  }
+}
+
+@keyframes loaderScaleIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes loaderFadeOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+@keyframes loaderPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .custom-toast,
+  .custom-toast.ion-leave-active,
+  .custom-loader,
+  .custom-loader.ion-leave-active,
+  .custom-loader ion-spinner {
+    animation: none !important;
+    transition: none !important;
+  }
+}

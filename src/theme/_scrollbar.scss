@@ -1,0 +1,26 @@
+// ===================================================================
+//  CUSTOM SCROLLBAR
+// ===================================================================
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--ew-color-gray-100);
+  border-radius: 10px;
+}
+
+body.dark ::-webkit-scrollbar-track {
+  background: var(--ew-color-gray-800);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ion-color-primary);
+  border-radius: 10px;
+
+  &:hover {
+    background: var(--ion-color-primary-shade);
+  }
+}

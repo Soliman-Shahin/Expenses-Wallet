@@ -3,4 +3,5 @@ export interface CategoryParams {
   limit: number;
   sort: string;
   q?: string;
+  type?: 'income' | 'outcome';
 }

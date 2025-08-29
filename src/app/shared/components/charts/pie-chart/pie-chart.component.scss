@@ -1,7 +1,7 @@
 .chart-container {
   padding: var(--ew-space-5);
   border-radius: var(--ew-radius-md);
-  background-color: var(--ion-background-color, #fff);
+  background-color: var(--ion-card-background);
   box-shadow: var(--ew-shadow-sm);
   margin: var(--ew-space-5) 0;
 }
@@ -9,9 +9,9 @@
 .chart-title {
   margin-top: 0;
   margin-bottom: var(--ew-space-5);
-  color: var(--ion-text-color, #000);
+  color: var(--ew-text-color-primary);
   font-size: var(--ew-font-xl);
-  font-weight: 500;
+  font-weight: var(--ew-font-weight-medium);
 }
 
 .chart-wrapper {
@@ -29,6 +29,15 @@
 .pie-chart svg {
   width: 100%;
   height: auto;
+
+  path {
+    cursor: pointer;
+    transition: opacity var(--ew-transition-duration-fast) var(--ew-easing-standard);
+
+    &:hover {
+      opacity: 0.85;
+    }
+  }
 }
 
 .legend {
@@ -49,36 +58,23 @@
 .legend-color {
   width: 12px;
   height: 12px;
-  border-radius: 50%;
+  border-radius: var(--ew-radius-full);
   margin-inline-end: var(--ew-space-3);
 }
 
 .legend-label {
   flex: 1;
   font-size: var(--ew-font-sm);
-  color: var(--ion-text-color, #000);
+  color: var(--ew-text-color-secondary);
 }
 
 .legend-value {
   font-size: var(--ew-font-sm);
-  font-weight: 500;
-  color: var(--ion-text-color, #000);
+  font-weight: var(--ew-font-weight-medium);
+  color: var(--ew-text-color-primary);
   margin-inline-start: var(--ew-space-3);
 }
 
-/* Dark mode support */
-body.dark {
-  .chart-container {
-    background-color: var(--ion-background-color, #1e1e1e);
-    box-shadow: var(--ew-shadow-sm);
-  }
-  
-  .chart-title,
-  .legend-label,
-  .legend-value {
-    color: var(--ion-text-color, #fff);
-  }
-}
 
 /* Responsive design */
 @media (max-width: 768px) {
@@ -118,15 +114,15 @@ body.dark {
 
 .legend-item {
   cursor: pointer;
-  transition: opacity 0.2s ease-in-out;
+  transition: opacity var(--ew-transition-duration-fast) var(--ew-easing-standard);
 
   &:hover {
-    opacity: 0.8;
+    opacity: var(--ew-opacity-80);
   }
 }
 
 .legend-item-hidden {
-  opacity: 0.5;
+  opacity: var(--ew-opacity-50);
 
   .legend-label,
   .legend-value {

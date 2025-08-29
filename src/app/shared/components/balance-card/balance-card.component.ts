@@ -3,7 +3,7 @@ import { Component, Input, ViewEncapsulation } from '@angular/core';
 @Component({
   selector: 'app-balance-card',
   templateUrl: './balance-card.component.html',
-  styleUrls: ['./balance-card.component.scss'],
+  styleUrls: ["./balance-card.component.scss"],
   encapsulation: ViewEncapsulation.None,
 })
 export class BalanceCardComponent {

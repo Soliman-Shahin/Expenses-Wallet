@@ -29,7 +29,7 @@
   display: flex;
   align-items: center;
   text-align: center;
-  margin: var(--spacing-md) 0;
+  margin: var(--ew-space-4) 0;
   color: var(--text-secondary);
 
   &::before,
@@ -40,23 +40,23 @@
   }
 
   &:not(:empty)::before {
-    margin-inline-end: var(--spacing-md);
+    margin-inline-end: var(--ew-space-4);
   }
 
   &:not(:empty)::after {
-    margin-inline-start: var(--spacing-md);
+    margin-inline-start: var(--ew-space-4);
   }
 }
 
 // Note Styling
 ion-note {
   ul {
-    padding-inline-start: var(--spacing-lg);
-    margin: var(--spacing-xs) 0 0 0;
+    padding-inline-start: var(--ew-space-6);
+    margin: var(--ew-space-2) 0 0 0;
   }
 
   li {
-    margin: var(--spacing-xxs) 0;
+    margin: var(--ew-space-1) 0;
     color: var(--text-tertiary);
   }
 }
@@ -67,7 +67,7 @@ ion-note {
   justify-content: center;
   align-items: center;
   min-height: 100%;
-  padding: var(--spacing-lg);
+  padding: var(--ew-space-6);
   background: var(--ion-background-color, var(--ion-color-light));
 }
 
@@ -77,9 +77,9 @@ ion-note {
   max-width: var(--ew-size-120);
   background: var(--ion-background-color, var(--ion-color-light));
   border-radius: var(--ew-radius-xl);
-  padding: var(--spacing-xl);
+  padding: var(--ew-space-7);
   box-shadow: var(--ew-shadow-lg);
-  margin: var(--spacing-lg) 0;
+  margin: var(--ew-space-6) 0;
   position: relative;
   overflow: hidden;
 }
@@ -87,12 +87,14 @@ ion-note {
 // Logo Container
 .logo-container {
   text-align: center;
-  margin-bottom: var(--spacing-xxl);
+  margin-bottom: var(--ew-space-8);
 
   .app-logo {
-    font-size: var(--ew-font-size-7xl);
-    color: var(--ion-color-primary);
-    margin-bottom: var(--spacing-xs);
+    width: 96px;
+    height: 96px;
+    border-radius: 20%;
+    margin-bottom: var(--ew-space-4);
+    box-shadow: var(--ew-shadow-lg);
   }
 
   .app-name {
@@ -108,7 +110,7 @@ ion-note {
   font-size: var(--ew-font-size-2xl);
   font-weight: var(--ew-font-weight-semibold);
   color: var(--text-primary);
-  margin-bottom: var(--spacing-xs);
+  margin-bottom: var(--ew-space-2);
   text-align: center;
 }
 
@@ -116,7 +118,7 @@ ion-note {
 .subtitle {
   color: var(--text-tertiary);
   text-align: center;
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--ew-space-6);
   font-size: var(--ew-font-size-base);
 }
 
@@ -168,7 +170,7 @@ ion-note {
 
 // Form Styles
 .signup-form {
-  margin-top: var(--spacing-lg);
+  margin-top: var(--ew-space-6);
 }
 
 .form-item {
@@ -262,12 +264,12 @@ ion-note {
 .error-message {
   color: var(--ion-color-danger);
   font-size: var(--ew-font-size-sm);
-  margin: var(--spacing-xs) 0;
+  margin: var(--ew-space-2) 0;
   display: flex;
   align-items: center;
 
   ion-icon {
-    margin-inline-end: var(--spacing-xs);
+    margin-inline-end: var(--ew-space-2);
   }
 }
 
@@ -327,12 +329,12 @@ ion-note {
 
 // Password Requirements
 .password-requirements {
-  margin: var(--spacing-sm) 0;
+  margin: var(--ew-space-3) 0;
 
   p {
     color: var(--text-secondary);
     font-size: var(--ew-font-size-sm);
-    margin-bottom: var(--spacing-xs);
+    margin-bottom: var(--ew-space-2);
   }
 
   ul {
@@ -343,14 +345,14 @@ ion-note {
     li {
       display: flex;
       align-items: center;
-      margin-bottom: var(--spacing-xxs);
+      margin-bottom: var(--ew-space-1);
       font-size: var(--ew-font-size-sm);
       color: var(--text-tertiary);
 
       &::before {
         content: "•";
         color: var(--ion-color-medium);
-        margin-inline-end: var(--spacing-xs);
+        margin-inline-end: var(--ew-space-2);
       }
 
       &.valid {

@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   ChartTooltipComponent,
@@ -40,6 +40,7 @@ interface InternalChartData extends ChartData {
                 role="img"
                 (mouseenter)="onSliceHover($event, chartData[i], slice.originalIndex)"
                 (mousemove)="onMouseMove($event)"
+                (click)="onSliceClick(chartData[i])"
               />
             </g>
           </svg>
@@ -75,6 +76,7 @@ interface InternalChartData extends ChartData {
   styleUrls: ['./pie-chart.component.scss'],
 })
 export class PieChartComponent implements OnChanges {
+  @Output() sliceClick = new EventEmitter<ChartData>();
   @Input() data: ChartData[] = [];
   @Input() title: string = '';
   @Input() ariaLabel: string = 'Pie chart';
@@ -85,7 +87,7 @@ export class PieChartComponent implements OnChanges {
 
   chartData: InternalChartData[] = [];
   slices: any[] = [];
-  strokeColor: string = '#ffffff';
+  strokeColor: string = 'var(--ion-card-background)';
 
   // Tooltip properties
   tooltipVisible = false;
@@ -226,6 +228,10 @@ export class PieChartComponent implements OnChanges {
     if (this.tooltipVisible) {
       this.updateTooltipPosition(event);
     }
+  }
+
+  onSliceClick(item: InternalChartData): void {
+    this.sliceClick.emit(item);
   }
 
   onMouseLeave() {

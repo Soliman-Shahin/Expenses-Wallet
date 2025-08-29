@@ -5,43 +5,53 @@ import {
   OnChanges,
   SimpleChanges,
   ViewEncapsulation,
-  OnDestroy,
 } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { TranslateModule } from '@ngx-translate/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import {
   BehaviorSubject,
-  Observable,
   catchError,
+  combineLatest,
   distinctUntilChanged,
+  finalize,
   map,
   of,
+  shareReplay,
   startWith,
   switchMap,
   takeUntil,
-  Subject,
-  timer,
 } from 'rxjs';
 import { Expense } from 'src/app/shared/models/expense.model';
-import { ExpenseService } from 'src/app/core/services/expense.service';
+import { BaseComponent } from 'src/app/shared/base';
+import { ProfileService } from 'src/app/modules/profile/services/profile.service';
+import { AlertController } from '@ionic/angular';
+import { ExpenseFormComponent } from '../expense-form/expense-form.component';
+import { SkeletonBlockComponent } from 'src/app/shared/ui/skeleton-block/skeleton-block.component';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, IonicModule, TranslateModule],
+  imports: [CommonModule, IonicModule, TranslateModule, SkeletonBlockComponent],
   selector: 'app-transactions',
   templateUrl: './transactions.component.html',
   styleUrls: ['./transactions.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
-export class TransactionsComponent implements OnChanges, OnDestroy {
+export class TransactionsComponent extends BaseComponent implements OnChanges {
   @Input() limit: number = 5;
   @Input() month?: number;
   @Input() year?: number;
 
-  private readonly destroy$ = new Subject<void>();
-  private readonly refreshTrigger$ = new BehaviorSubject<number>(0);
+  userCurrency = 'USD';
 
-  constructor(private readonly expenses: ExpenseService) {}
+  private readonly refreshTrigger$ = new BehaviorSubject<void>(undefined);
+
+  constructor(
+    private readonly profileService: ProfileService,
+    private readonly alertController: AlertController
+  ) {
+    super();
+  }
 
   private readonly params$ = new BehaviorSubject<{
     month?: number;
@@ -49,11 +59,14 @@ export class TransactionsComponent implements OnChanges, OnDestroy {
     limit: number;
   }>({ month: this.month, year: this.year, limit: this.limit });
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+  override ngOnInit(): void {
+    this.loadUserCurrency();
   }
 
+  loadUserCurrency() {
+    const profile = this.profileService.getProfile();
+    this.userCurrency = profile?.currency || 'USD';
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['month'] || changes['year'] || changes['limit']) {
@@ -65,72 +78,60 @@ export class TransactionsComponent implements OnChanges, OnDestroy {
     }
   }
 
-  readonly state$ = this.params$.pipe(
-    distinctUntilChanged(
-      (prev, curr) =>
-        prev.month === curr.month &&
-        prev.year === curr.year &&
-        prev.limit === curr.limit
-    ),
-    switchMap((params) =>
-      // Combine params changes with refresh trigger and periodic refresh
-      this.refreshTrigger$.pipe(
-        switchMap(() =>
-          this.expenses.getExpenses().pipe(
-            map((resp) => {
-              const arr: Expense[] = Array.isArray(resp)
-                ? resp
-                : (resp as any)?.data?.data || (resp as any)?.data || [];
+  private readonly transactions$ = combineLatest([this.params$, this.refreshTrigger$]).pipe(
+    switchMap(([params]) => {
+      this.setLoading(true);
+      return this.expenseService.getExpenses().pipe(
+        map((resp) => {
+          const arr: Expense[] = Array.isArray(resp)
+            ? resp
+            : (resp as any)?.data?.data || (resp as any)?.data || [];
 
-              const filtered = arr.filter((e) => {
-                const rawDate = (e as any)?.date || (e as any)?.createdAt;
-                if (!rawDate) return false;
-                const d = new Date(rawDate);
-                return params.month && params.year
-                  ? d.getMonth() + 1 === params.month &&
-                      d.getFullYear() === params.year
-                  : true;
-              });
+          const filtered = arr.filter((e) => {
+            const rawDate = (e as any)?.date || (e as any)?.createdAt;
+            if (!rawDate) return false;
+            const d = new Date(rawDate);
+            return params.month && params.year
+              ? d.getMonth() + 1 === params.month && d.getFullYear() === params.year
+              : true;
+          });
 
-              // Enhanced sorting: newest first (descending by date)
-              filtered.sort((a, b) => {
-                const dateA = (a as any)?.date || (a as any)?.createdAt;
-                const dateB = (b as any)?.date || (b as any)?.createdAt;
-                
-                if (!dateA && !dateB) return 0;
-                if (!dateA) return 1;
-                if (!dateB) return -1;
-                
-                const da = new Date(dateA).getTime();
-                const db = new Date(dateB).getTime();
-                
-                // If dates are invalid, sort by creation order
-                if (isNaN(da) && isNaN(db)) return 0;
-                if (isNaN(da)) return 1;
-                if (isNaN(db)) return -1;
-                
-                return db - da; // Newest first
-              });
+          filtered.sort((a, b) => {
+            const dateA = (a as any)?.date || (a as any)?.createdAt;
+            const dateB = (b as any)?.date || (b as any)?.createdAt;
+            if (!dateA && !dateB) return 0;
+            if (!dateA) return 1;
+            if (!dateB) return -1;
+            const da = new Date(dateA).getTime();
+            const db = new Date(dateB).getTime();
+            if (isNaN(da) && isNaN(db)) return 0;
+            if (isNaN(da)) return 1;
+            if (isNaN(db)) return -1;
+            return db - da;
+          });
 
-              const finalData = filtered.slice(0, Math.max(0, params.limit || 5));
-              return { loading: false, data: finalData, error: null };
-            }),
-            startWith({ loading: true, data: [], error: null }),
-            catchError((error) =>
-              of({ loading: false, data: [], error: error.message })
-            )
-          )
-        )
-      )
-    ),
-    takeUntil(this.destroy$)
+          return filtered.slice(0, Math.max(0, params.limit || 5));
+        }),
+        catchError((error) => {
+          this.handleError('Failed to load transactions', error, true);
+          return of([]);
+        }),
+        finalize(() => this.setLoading(false))
+      );
+    }),
+    shareReplay(1)
   );
+
+  readonly vm$ = combineLatest({
+    transactions: this.transactions$,
+    loading: toObservable(this.state.loading),
+    error: toObservable(this.state.error),
+  });
 
   // Method to manually refresh transactions
   refreshTransactions(): void {
-    this.refreshTrigger$.next(Date.now());
+    this.refreshTrigger$.next();
   }
-
 
   trackById(_: number, item: Expense) {
     return (item as any)?._id || (item as any)?.id || item;
@@ -170,11 +171,12 @@ export class TransactionsComponent implements OnChanges, OnDestroy {
     return 'pricetag-outline';
   }
 
-  // Category color if available
-  getCategoryColor(t: Expense): string | null {
+  // Category color if available, with a fallback
+  getCategoryColor(t: Expense): string {
     const cat = (t as any)?.category;
     const color = (cat as any)?.color;
-    return typeof color === 'string' ? color : null;
+    // Provide a fallback color to prevent template errors if color is null/undefined
+    return (typeof color === 'string' && color) ? color : 'var(--ion-color-primary)';
   }
 
   getDateValue(t: Expense): string | number | Date | null | undefined {
@@ -185,5 +187,70 @@ export class TransactionsComponent implements OnChanges, OnDestroy {
   getAmountValue(t: Expense): number | null | undefined {
     const n = Number((t as any)?.amount);
     return isNaN(n) ? 0 : n;
+  }
+
+  getCategoryType(t: Expense): 'income' | 'expense' {
+    const cat = (t as any)?.category;
+    const type = (cat as any)?.type;
+    return type === 'income' ? 'income' : 'expense';
+  }
+
+  onTransactionClick(item: Expense) {
+    this.onEdit(item);
+  }
+
+  async onAddTransaction() {
+    const modal = await this.modalCtrl.create({
+      component: ExpenseFormComponent,
+      cssClass: 'main-modal',
+    });
+    await modal.present();
+
+    const { role } = await modal.onDidDismiss();
+    if (role === 'confirm') {
+      this.refreshTransactions();
+    }
+  }
+
+  async onEdit(item: Expense) {
+    const modal = await this.modalCtrl.create({
+      component: ExpenseFormComponent,
+      componentProps: {
+        expense: item,
+      },
+      cssClass: 'main-modal',
+    });
+    await modal.present();
+
+    const { role } = await modal.onDidDismiss();
+    if (role === 'confirm') {
+      this.refreshTransactions();
+    }
+  }
+
+  async onDelete(item: Expense) {
+    const alert = await this.alertController.create({
+      header: 'Confirm Delete',
+      message: 'Are you sure you want to delete this transaction?',
+      buttons: [
+        { text: 'Cancel', role: 'cancel' },
+        {
+          text: 'Delete',
+          role: 'destructive',
+          handler: () => {
+            this.expenseService.deleteExpense((item as any)._id).subscribe({
+              next: () => {
+                this.toastService.presentSuccessToast('bottom', 'Transaction deleted');
+                this.refreshTransactions();
+              },
+              error: (err) => {
+                this.handleError('Deletion failed', err, true);
+              },
+            });
+          },
+        },
+      ],
+    });
+    await alert.present();
   }
 }

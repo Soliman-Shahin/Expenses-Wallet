@@ -1,3 +1,4 @@
+import { animate, style, transition, trigger } from '@angular/animations';
 import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -7,7 +8,9 @@ import {
   ViewChild,
   inject,
 } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { IonicModule } from '@ionic/angular';
+import { AddFabButtonComponent } from 'src/app/shared/ui/add-fab-button/add-fab-button.component';
 import { TranslateModule } from '@ngx-translate/core';
 import {
   BehaviorSubject,
@@ -54,8 +57,8 @@ const MAX_RETRY_ATTEMPTS = 3;
   styleUrls: ['./home-page.component.scss'],
   imports: [
     CommonModule,
-    SharedModule,
     IonicModule,
+    SharedModule,
     ReactiveFormsModule,
     TranslateModule,
     TransactionsComponent,
@@ -63,10 +66,22 @@ const MAX_RETRY_ATTEMPTS = 3;
     PieChartComponent,
     LineChartComponent,
     DateRangeSelectorComponent,
+    AddFabButtonComponent,
     SkeletonBlockComponent,
     SectionHeaderComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [
+    trigger('tabAnimation', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(10px)' }),
+        animate(
+          '300ms ease-out',
+          style({ opacity: 1, transform: 'translateY(0)' })
+        ),
+      ]),
+    ]),
+  ],
 })
 export class HomePageComponent
   extends BaseComponent
@@ -83,11 +98,6 @@ export class HomePageComponent
 
   // UI state
   activeTab: 'charts' | 'summary' = 'summary';
-  // Local loading flags to avoid flipping the whole page
-  isDashboardLoading = false;
-  isTransactionsLoading = false;
-  // Use global loading only for the initial load to unblock the page content
-  private _useGlobalLoadingOnce = true;
 
   // Scroll position state
   isScrolledToStart = true;
@@ -123,98 +133,84 @@ export class HomePageComponent
 
   // Auth state for UI
   protected override readonly authService = inject(AuthService);
-  isLoggedIn$ = this.authService.user$.pipe(map((u) => !!u));
-  
+
+  private readonly dashboardProfile$ = this.authService.user$.pipe(
+    switchMap((user) => {
+      if (!user) {
+        return of(null);
+      }
+      return this.dashboard.profile$.pipe(
+        switchMap((profile) => {
+          if (profile) {
+            return of(profile);
+          }
+          return this.dashboard.profile
+            .fetchProfile()
+            .pipe(catchError(() => of(null)));
+        })
+      );
+    }),
+    shareReplay(1)
+  );
+
   private readonly totalsByMonth$ = combineLatest([
     this.monthSelection$,
-    this.authService.user$.pipe(startWith(null))
+    this.dashboardProfile$,
   ]).pipe(
-    switchMap(([m, user]) => {
-      // Only fetch data if user is authenticated
-      if (!user) {
+    switchMap(([month, profile]) => {
+      if (!profile) {
         return of({ income: 0, expenses: 0, balance: 0 });
       }
-      
-      return combineLatest([
-        this.dashboard.totalsForMonth(m.month, m.year),
-        this.dashboard.profile$.pipe(
-          startWith(null),
-          switchMap(profile => {
-            // If profile is null, try to fetch it
-            if (!profile) {
-              return this.dashboard.profile.fetchProfile().pipe(
-                startWith(null),
-                catchError(() => of(null))
-              );
-            }
-            return of(profile);
-          })
-        ),
-      ]).pipe(
-        map(([t, profile]) => {
-          const base = t ?? { income: 0, expenses: 0, balance: 0 };
-          
-          // If profile is null, use transaction-based totals
-          if (!profile) {
-            return base as { income: number; expenses: number; balance: number };
-          }
-          
-          const salaryDetails = Array.isArray((profile as any)?.salary)
-            ? (profile as any).salary
+      return this.dashboard.totalsForMonth(month.month, month.year).pipe(
+        map((totals) => {
+          const base = totals ?? { income: 0, expenses: 0, balance: 0 };
+          const salaryDetails = Array.isArray(profile?.salary)
+            ? profile.salary
             : [];
           const totalSalary = salaryDetails.reduce(
-            (sum: number, item: any) => sum + (Number(item?.amount) || 0),
+            (sum, item) => sum + (Number(item?.amount) || 0),
             0
           );
-          
-          // Use salary as income if base income is 0 and we have salary data
+
           if ((base.income ?? 0) === 0 && totalSalary > 0) {
             const income = totalSalary;
             const expenses = base.expenses ?? 0;
-            return { income, expenses, balance: income - expenses } as const;
+            return { income, expenses, balance: income - expenses };
           }
-          
-          return base as { income: number; expenses: number; balance: number };
-        }),
-        switchMap((res) => {
-          if (res && (res.income !== 0 || res.expenses !== 0)) {
-            return of(res);
-          }
-          
-          return this.dashboard.totals$;
-        }),
-        catchError(() => of({ income: 0, expenses: 0, balance: 0 }))
+          return base;
+        })
       );
     }),
-    startWith({ income: 0, expenses: 0, balance: 0 } as const),
+    catchError(() => of({ income: 0, expenses: 0, balance: 0 })),
     shareReplay(1)
   );
+
   private readonly expenseByCategoryByMonth$ = combineLatest([
     this.monthSelection$,
-    this.authService.user$.pipe(startWith(null))
+    this.dashboardProfile$,
   ]).pipe(
-    switchMap(([m, user]) => {
-      if (!user) {
-        return of([] as any[]);
+    switchMap(([m, profile]) => {
+      if (!profile) {
+        return of([]);
       }
       return this.dashboard.expenseByCategoryForMonth(m.month, m.year);
     }),
-    startWith([] as any[]),
-    catchError(() => of([] as any[]))
+    catchError(() => of([])),
+    startWith([])
   );
-  
+
   private readonly monthlyExpensesByMonth$ = combineLatest([
     this.monthSelection$,
-    this.authService.user$.pipe(startWith(null))
+    this.dashboardProfile$,
   ]).pipe(
-    switchMap(([m, user]) => {
-      if (!user) {
-        return of([] as any[]);
+    switchMap(([m, profile]) => {
+      if (!profile) {
+        return of([]);
       }
       return this.dashboard.monthlyExpensesForMonth(m.month, m.year);
     }),
-    startWith([] as any[]),
-    catchError(() => of([] as any[]))
+    catchError(() => of([])),
+    startWith([])
   );
   // Derive income vs expenses for the selected month from totalsByMonth$
   private readonly incomeVsExpenseByMonth$ = this.totalsByMonth$.pipe(
@@ -233,54 +229,33 @@ export class HomePageComponent
     })
   );
 
-  readonly vm$ = combineLatest([
-    this.authService.user$.pipe(startWith(null)),
-    combineLatest({
-      profile: this.dashboard.profile$.pipe(startWith(null)),
-      incomeVsExpense: this.incomeVsExpenseByMonth$,
-      expenseByCategory: this.expenseByCategoryByMonth$,
-      monthlyExpenses: this.monthlyExpensesByMonth$,
-      totals: this.totalsByMonth$,
-    })
-  ]).pipe(
-    switchMap(([user, data]) => {
-      if (!user) {
-        return of({
-          profile: null,
-          incomeVsExpense: [],
-          expenseByCategory: [],
-          monthlyExpenses: [],
-          totals: { income: 0, expenses: 0, balance: 0 },
-          salaryDetails: [],
-          salaryBreakdown: [],
-          totalSalary: 0,
-          currency: 'USD'
-        });
-      }
-      return of(data);
-    }),
-    map((s) => {
-      const salaryDetails = Array.isArray(s.profile?.salary)
-        ? s.profile!.salary
+  readonly vm$ = combineLatest({
+    loading: toObservable(this.state.loading),
+    profile: this.dashboardProfile$.pipe(startWith(null)),
+    totals: this.totalsByMonth$,
+    incomeVsExpense: this.incomeVsExpenseByMonth$,
+    expenseByCategory: this.expenseByCategoryByMonth$,
+    monthlyExpenses: this.monthlyExpensesByMonth$,
+  }).pipe(
+    map((data) => {
+      const salaryDetails = Array.isArray(data.profile?.salary)
+        ? data.profile.salary
         : [];
       const totalSalary = salaryDetails.reduce(
-        (sum: number, item: any) => sum + (Number(item?.amount) || 0),
+        (sum, item) => sum + (Number(item?.amount) || 0),
         0
       );
-      const salaryBreakdown = salaryDetails
-        .map((d: any) => {
-          const rawName = (d?.title ?? d?.name ?? d?.label ?? '').toString();
-          const name = rawName.trim();
-          const value = Number(d?.amount) || 0;
-          return { name, value };
-        })
-        .filter((x) => x.value > 0);
+      const salaryBreakdown = salaryDetails.map((item) => ({
+        name: item.label,
+        value: item.amount,
+      }));
+
       return {
-        ...s,
+        ...data,
         salaryDetails,
-        salaryBreakdown,
         totalSalary,
-        currency: s.profile?.currency ?? this.currency,
+        salaryBreakdown,
+        currency: data.profile?.currency || 'USD',
       };
     }),
     shareReplay({ bufferSize: 1, refCount: true })
@@ -300,6 +275,7 @@ export class HomePageComponent
     // Normalize to a valid key; default to 'charts'
     const val = tab != null ? String(tab) : '';
     this.activeTab = val === 'summary' ? 'summary' : 'charts';
+    // Active tab is now managed by the component state
     try {
       localStorage.setItem('home.activeTab', this.activeTab);
     } catch {}
@@ -349,7 +325,7 @@ export class HomePageComponent
   onRangeChange(range: DateRange): void {
     this.selectedRange = range;
     // TODO: Wire up data fetching based on the new range
-    console.log('Selected range:', this.selectedRange);
+    // Future implementation will handle data fetching for the selected range.
     this.cdr.markForCheck();
   }
 
@@ -383,12 +359,8 @@ export class HomePageComponent
         tap((data: any) => {
           this.headerConfig = { ...this.headerConfig, ...data };
         }),
-        catchError((error) => {
-          console.error('Error loading route data:', error);
-          this.toastService.presentErrorToast(
-            'bottom',
-            'COMMON.ERRORS.LOAD_DATA'
-          );
+        catchError((error: any) => {
+          this.handleError('COMMON.ERRORS.LOAD_DATA', error, true);
           return of(null);
         })
       )
@@ -403,7 +375,6 @@ export class HomePageComponent
 
   onCardClick(cardName: string) {
     // Add specific click behavior for each card if needed
-    console.log(`${cardName} card clicked`);
 
     // Trigger a subtle animation
     this.cardStates[cardName] = true;
@@ -438,9 +409,8 @@ export class HomePageComponent
       });
 
       await modal.present();
-    } catch (err) {
-      console.error('Failed to open expense modal', err);
-      this.toastService?.presentErrorToast('bottom', 'COMMON.ERRORS.DEFAULT');
+    } catch (err: any) {
+      this.handleError('COMMON.ERRORS.DEFAULT', err, true);
     }
   }
 
@@ -454,17 +424,6 @@ export class HomePageComponent
       this.transactionsComponent.refreshTransactions();
     }
 
-    this.cdr.markForCheck();
-  }
-
-  /**
-   * Loads transactions for the selected month and year
-   */
-  private loadTransactionsForMonth(month: number, year: number): void {
-    this.isTransactionsLoading = true;
-    // TODO: implement real fetch; keep UI responsive without flipping whole page
-    // Example (when implementing): call service, then set isTransactionsLoading=false in finalize.
-    this.isTransactionsLoading = false;
     this.cdr.markForCheck();
   }
 }

@@ -23,6 +23,7 @@
   "INCOME": "الدخل",
   "OUTCOME": "المصروف",
   "REMAINING": "المتبقي",
+  "THEME": "الوضع",
   "HOME": {
     "TITLE": "الرئيسية",
     "GREETING": "أهلاً",
@@ -67,7 +68,9 @@
     "EXPENSES": "المصروفات",
     "REPORTS": "التقارير",
     "SETTINGS": "إعدادات",
-    "MAIN_MENU": "القائمة الرئيسية"
+    "MAIN_MENU": "القائمة الرئيسية",
+    "CHARTS": "الرسوم البيانية",
+    "TRANSACTIONS": "المعاملات"
   },
   "DASHBOARD": "الرئيسية",
   "TRANSACTIONS": {
@@ -116,8 +119,11 @@
     "CANCEL": "إلغاء",
     "UPDATE": "تحديث",
     "ADD": "إضافة",
+    "CREATE": "إنشاء",
     "SAVE": "حفظ",
-    "REMOVE": "حذف"
+    "REMOVE": "حذف",
+    "INCOME": "الدخل",
+    "OUTCOME": "المصروف"
   },
   "CATEGORY": {
     "ADD": "إضافة قسم جديد",
@@ -130,10 +136,17 @@
     "UPDATE": "تحديث",
     "DELETE": "حذف",
     "DESCRIPTION": "تفاصيل",
+    "TYPE": "النوع",
     "CONFIRM_DELETE": "هل أنت متأكد من حذف هذا القسم؟",
     "SUCCESSFULLY_ADDED": "تم إضافة القسم بنجاح.",
-    "SUCCESSFULLY_UPDATED": "تم تحديث القسم بنجاح."
+    "SUCCESSFULLY_UPDATED": "تم تحديث القسم بنجاح.",
+    "ITEM": "عنصر القسم",
+    "TITLE": "عنوان القسم",
+    "TITLE_PLACEHOLDER": "أدخل عنوان القسم",
+    "SELECT_COLOR": "اختر لونًا للقسم",
+    "SELECT_ICON": "اختر أيقونة للقسم"
   },
+  "CREATE": "إنشاء",
   "EXPENSE": {
     "CREATE": "إضافة مصروفات جديدة",
     "UPDATE": "تحديث المصروفات",
@@ -168,6 +181,12 @@
   "REPORTS": {
     "TITLE": "التقارير"
   },
+  "CHARTS": {
+    "TITLE": "الرسوم البيانية",
+    "INCOME_VS_EXPENSE": "الدخل مقابل المصروفات",
+    "EXPENSE_BY_CATEGORY": "المصروفات حسب الفئة",
+    "MONTHLY_EXPENSE_TREND": "اتجاه المصروفات الشهري"
+  },
   "CATEGORIES": {
     "INCOME": "الدخل",
     "EXPENSES": "المصروفات",
@@ -187,7 +206,8 @@
     "PASSWORD_MISSING_UPPER": "يجب أن تحتوي كلمة المرور على حرف كبير واحد على الأقل (A-Z)",
     "PASSWORD_MISSING_LOWER": "يجب أن تحتوي كلمة المرور على حرف صغير واحد على الأقل (a-z)",
     "PASSWORD_MISSING_SPECIAL": "يجب أن تحتوي كلمة المرور على حرف خاص واحد على الأقل",
-    "PASSWORDS_DO_NOT_MATCH": "كلمات المرور غير متطابقة"
+    "PASSWORDS_DO_NOT_MATCH": "كلمات المرور غير متطابقة",
+    "WHITESPACE": "لا يمكن أن يحتوي هذا الحقل على مسافات بيضاء فقط"
   },
   "NO_CATEGORIES_FOUND": "لا توجد فئات",
   "NO_CATEGORIES_MESSAGE": "لم تقم بإنشاء أي فئات بعد. قم بإنشاء فئتك الأولى للبدء.",

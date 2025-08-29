@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { finalize, takeUntil } from 'rxjs';
+import { BehaviorSubject, combineLatest, finalize, takeUntil } from 'rxjs';
 import { BaseComponent } from 'src/app/shared/base';
 
 @Component({
@@ -9,17 +9,25 @@ import { BaseComponent } from 'src/app/shared/base';
   styleUrls: ['./add-category.component.scss'],
 })
 export class AddCategoryComponent extends BaseComponent implements OnInit {
-  categoryForm: FormGroup = this.initFormGroup();
+  categoryForm!: FormGroup;
   editMode = false;
   categoryId: string | null = null;
   animatePreview = false;
   formSubmitted = false;
+
+  private readonly loading = new BehaviorSubject<boolean>(false);
+  private readonly errorMessage = new BehaviorSubject<string>('');
+  readonly vm$ = combineLatest({
+    isLoading: this.loading.asObservable(),
+    errorMessage: this.errorMessage.asObservable(),
+  });
 
   constructor() {
     super();
   }
 
   override ngOnInit() {
+    this.initFormGroup();
     this.activatedRoute.params
       .pipe(takeUntil(this.destroy$))
       .subscribe((params) => {
@@ -37,15 +45,19 @@ export class AddCategoryComponent extends BaseComponent implements OnInit {
       .subscribe(() => this.bumpPreview());
   }
 
-  private initFormGroup(): FormGroup {
-    return new FormGroup({
-      title: new FormControl('', [
-        Validators.required,
-        Validators.minLength(2),
-        Validators.pattern(/^(?!\s*$).+/), // not only whitespace
-      ]),
-      icon: new FormControl('add', Validators.required),
-      color: new FormControl('#28ba62', Validators.required),
+  private initFormGroup(category?: any): void {
+    this.categoryForm = this.fb.group({
+      title: [
+        category?.title || '',
+        [
+          Validators.required,
+          Validators.minLength(2),
+          Validators.pattern(/^(?!\s*$).+/), // not only whitespace
+        ],
+      ],
+      icon: [category?.icon || 'add', Validators.required],
+      color: [category?.color || '#28ba62', Validators.required],
+      type: [category?.type || 'outcome', Validators.required],
     });
   }
 
@@ -74,25 +86,39 @@ export class AddCategoryComponent extends BaseComponent implements OnInit {
 
   loadCategory() {
     if (this.categoryId) {
+      this.loading.next(true);
+      this.errorMessage.next('');
       this.categoryService
         .getCategory(this.categoryId)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe((category) => {
-          this.categoryForm.patchValue(category);
+        .pipe(
+          takeUntil(this.destroy$),
+          finalize(() => this.loading.next(false))
+        )
+        .subscribe({
+          next: (category) => {
+            this.initFormGroup(category);
+          },
+          error: (error) => {
+            this.errorMessage.next(error.message);
+          },
         });
     }
   }
 
   addCategory(): void {
-    this.setLoading(true);
     this.formSubmitted = true;
+    if (this.categoryForm.invalid) {
+      return;
+    }
+    this.loading.next(true);
+    this.errorMessage.next('');
     this.categoryService
       .createCategory(this.categoryForm.value)
       .pipe(
         takeUntil(this.destroy$),
         finalize(() => {
-          this.setLoading(false);
-          setTimeout(() => this.formSubmitted = false, 2000);
+          this.loading.next(false);
+          setTimeout(() => (this.formSubmitted = false), 2000);
         })
       )
       .subscribe({
@@ -107,7 +133,7 @@ export class AddCategoryComponent extends BaseComponent implements OnInit {
         },
         error: (error) => {
           this.formSubmitted = false;
-          this.toastService.presentErrorToast('bottom', error.message);
+          this.errorMessage.next(error.message);
         },
       });
   }
@@ -117,12 +143,13 @@ export class AddCategoryComponent extends BaseComponent implements OnInit {
       return;
     }
 
-    this.setLoading(true);
+    this.loading.next(true);
+    this.errorMessage.next('');
     this.categoryService
       .updateCategory(this.categoryId, this.categoryForm.value)
       .pipe(
         takeUntil(this.destroy$),
-        finalize(() => this.setLoading(false))
+        finalize(() => this.loading.next(false))
       )
       .subscribe({
         next: () => {
@@ -133,7 +160,7 @@ export class AddCategoryComponent extends BaseComponent implements OnInit {
           this.router.navigate(['/categories/list']);
         },
         error: (error) => {
-          this.toastService.presentErrorToast('bottom', error.message);
+          this.errorMessage.next(error.message);
         },
       });
   }

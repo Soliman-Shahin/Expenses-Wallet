@@ -1,0 +1,44 @@
+// ===================================================================
+//  BASE STYLES
+//  - Global Resets
+//  - Body & HTML defaults
+//  - Typography base
+// ===================================================================
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--ion-font-family);
+  background-color: var(--ion-background-color);
+  color: var(--ion-text-color);
+  line-height: 1.6;
+  transition: background-color var(--ew-animation-duration-normal) var(--ew-animation-easing-standard),
+    color var(--ew-animation-duration-normal) var(--ew-animation-easing-standard);
+}
+
+/* Base Typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--ion-text-color);
+}
+
+p {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}

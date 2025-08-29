@@ -1,6 +1,8 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { IonInput } from '@ionic/angular';
 import { FormGroup, Validators } from '@angular/forms';
-import { Observable, map } from 'rxjs';
+import { Observable, map, finalize, combineLatest } from 'rxjs';
 
 import { BaseComponent } from 'src/app/shared/base/base.component';
 import { Expense, Category } from 'src/app/shared/models';
@@ -10,22 +12,37 @@ import { Expense, Category } from 'src/app/shared/models';
   templateUrl: './expense-form.component.html',
   styleUrls: ['./expense-form.component.scss'],
 })
-export class ExpenseFormComponent extends BaseComponent implements OnInit {
+export class ExpenseFormComponent extends BaseComponent implements OnInit, AfterViewInit {
   @Input() expense?: Expense;
   @Input() onClose: () => void = () => {};
+
+  @ViewChild('amountInput') amountInput: IonInput | undefined;
 
   expenseForm!: FormGroup;
   categories$!: Observable<Category[]>;
   isEditMode = false;
   minDate = '2000-01-01';
   maxDate = '2100-12-31';
-  submitting = false;
+
+  vm$!: Observable<{ isLoading: boolean }>;
 
   override ngOnInit() {
     super.ngOnInit();
     this.isEditMode = !!this.expense;
     this.initForm();
     this.loadCategories();
+    this.vm$ = combineLatest([toObservable(this.state.loading)]).pipe(
+      map(([isLoading]) => ({
+        isLoading,
+      }))
+    );
+  }
+
+  ngAfterViewInit() {
+    // Set a timeout to ensure the modal has fully transitioned in
+    setTimeout(() => {
+      this.amountInput?.setFocus();
+    }, 400); // 400ms delay to accommodate modal animation
   }
 
   private initForm() {
@@ -88,7 +105,7 @@ export class ExpenseFormComponent extends BaseComponent implements OnInit {
     if (this.expenseForm.invalid) {
       return;
     }
-    this.submitting = true;
+    this.setLoading(true);
 
     const { description, amount, date, category } = this.expenseForm.value;
     const payload: Partial<Expense> = {
@@ -97,40 +114,24 @@ export class ExpenseFormComponent extends BaseComponent implements OnInit {
       date: new Date(date).toISOString(),
       category,
     } as any;
-    let action$: Observable<Expense>;
 
-    if (this.isEditMode) {
-      action$ = this.expenseService.updateExpense(this.expense!._id, payload);
-    } else {
-      action$ = this.expenseService.createExpense(payload);
-    }
+    const action$ = this.isEditMode
+      ? this.expenseService.updateExpense(this.expense!._id, payload)
+      : this.expenseService.createExpense(payload);
 
-    action$.subscribe({
-      next: async (response) => {
+    action$.pipe(finalize(() => this.setLoading(false))).subscribe({
+      next: (response) => {
         const message = this.isEditMode
           ? 'Expense updated successfully'
           : 'Expense created successfully';
-        const toast = await this.toastCtrl?.create({
-          message,
-          duration: 2000,
-          color: 'success',
-        });
-        toast?.present();
+        this.toastService.presentSuccessToast('bottom', message);
         this.modalCtrl?.dismiss(response, 'confirm');
-        this.submitting = false;
       },
-      error: async (error) => {
+      error: (error) => {
         const message = this.isEditMode
           ? 'Failed to update expense'
           : 'Failed to create expense';
-        const toast = await this.toastCtrl?.create({
-          message,
-          duration: 2000,
-          color: 'danger',
-        });
-        toast?.present();
-        console.error(message, error);
-        this.submitting = false;
+        this.handleError(message, error, true);
       },
     });
   }

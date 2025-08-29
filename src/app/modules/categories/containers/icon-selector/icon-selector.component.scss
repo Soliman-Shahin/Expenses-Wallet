@@ -2,13 +2,14 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
   gap: 8px;
-  padding: 16px;
-  background: var(--ion-color-step-50);
-  border: 1px solid var(--ion-color-step-150);
+  padding: 0;
+  background: transparent;
+  border: none;
   border-radius: 12px;
   margin: 8px 0;
   max-height: 300px;
   overflow-y: auto;
+  overflow-x: hidden;
   width: 100%;
   min-width: 300px;
   animation: fadeInScale 0.5s ease-out;
@@ -63,8 +64,8 @@
     content: '';
     position: absolute;
     top: 0;
-    left: 0;
-    right: 0;
+    inset-inline-start: 0;
+    inset-inline-end: 0;
     bottom: 0;
     background: radial-gradient(circle at center, var(--ion-color-primary-tint) 0%, transparent 70%);
     opacity: 0;

@@ -12,11 +12,12 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <form
+  <ng-container *ngIf="vm$ | async as vm">
+    <form
     [formGroup]="expenseForm"
     (ngSubmit)="onSubmit()"
     class="ion-padding form-container"
-    [attr.aria-busy]="submitting"
+    [attr.aria-busy]="vm.isLoading"
   >
     <!-- Category -->
     <div class="form-group">
@@ -84,6 +85,7 @@
     <div class="form-group">
       <ion-item class="modern-input-item">
         <ion-input
+          #amountInput
           type="number"
           formControlName="amount"
           inputmode="decimal"
@@ -145,7 +147,7 @@
       <ion-button
         expand="block"
         type="submit"
-        [disabled]="submitting || !expenseForm.valid"
+        [disabled]="vm.isLoading || !expenseForm.valid"
         shape="round"
         size="large"
         class="form-submit-button"
@@ -157,7 +159,7 @@
           slot="start"
           [name]="isEditMode ? 'save-outline' : 'add-circle-outline'"
         ></ion-icon>
-        <ion-spinner slot="end" *ngIf="submitting"></ion-spinner>
+        <ion-spinner slot="end" *ngIf="vm.isLoading"></ion-spinner>
         {{
           isEditMode
             ? ("COMMON.UPDATE" | translate)
@@ -178,5 +180,6 @@
         {{ "COMMON.CANCEL" | translate }}
       </ion-button>
     </div>
-  </form>
+    </form>
+  </ng-container>
 </ion-content>

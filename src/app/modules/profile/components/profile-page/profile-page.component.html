@@ -1,14 +1,19 @@
-<ion-content class="ion-padding" [fullscreen]="true">
+<ng-container *ngIf="vm$ | async as vm">
+  <ion-content class="ion-padding" [fullscreen]="true">
+    <div *ngIf="vm.errorMessage" class="error-banner ion-padding">
+      <ion-text color="danger">{{ vm.errorMessage | translate }}</ion-text>
+    </div>
   <!-- Avatar Section -->
   <section class="card avatar-card animate-in" aria-labelledby="avatar-title">
     <div class="avatar-row">
-      <div
+            <div
         class="avatar pulse-on-change"
-        [style.background-image]="avatarUrl ? 'url(' + avatarUrl + ')' : ''"
+        [style.background-image]="vm.profile?.avatarUrl ? 'url(' + vm.profile?.avatarUrl + ')' : ''"
         [attr.aria-label]="'PROFILE.AVATAR' | translate"
       >
+        <ion-spinner *ngIf="vm.isLoadingAvatar"></ion-spinner>
         <ion-icon
-          *ngIf="!avatarUrl"
+          *ngIf="!vm.profile?.avatarUrl && !vm.isLoadingAvatar"
           name="person-circle-outline"
           aria-hidden="true"
         ></ion-icon>
@@ -102,13 +107,14 @@
       ></app-ui-input>
 
       <div class="actions">
-        <ion-button
+                <ion-button
           type="submit"
           expand="block"
-          [disabled]="personalForm.invalid"
+          [disabled]="personalForm.invalid || vm.isLoadingPersonal"
           class="pulse-on-change"
         >
-          {{ "PROFILE.PERSONAL_INFO.SAVE" | translate }}
+          <ion-spinner *ngIf="vm.isLoadingPersonal" name="crescent"></ion-spinner>
+          <span *ngIf="!vm.isLoadingPersonal">{{ "PROFILE.PERSONAL_INFO.SAVE" | translate }}</span>
         </ion-button>
       </div>
     </form>
@@ -261,18 +267,20 @@
       </div>
 
       <div class="actions">
-        <ion-button
+                <ion-button
           type="button"
           expand="block"
-          [disabled]="salaryForm.invalid"
+          [disabled]="salaryForm.invalid || vm.isLoadingSalary"
           (click)="saveSalary()"
           class="pulse-on-change"
         >
-          {{ "PROFILE.SALARY.SAVE" | translate }}
+          <ion-spinner *ngIf="vm.isLoadingSalary" name="crescent"></ion-spinner>
+          <span *ngIf="!vm.isLoadingSalary">{{ "PROFILE.SALARY.SAVE" | translate }}</span>
         </ion-button>
       </div>
     </form>
   </section>
 
-  <div class="spacer"></div>
+    <div class="spacer"></div>
 </ion-content>
+</ng-container>

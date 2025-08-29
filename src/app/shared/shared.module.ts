@@ -5,12 +5,18 @@ import { RouterModule } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { TranslateModule } from '@ngx-translate/core';
 import {
-  BalanceCardComponent,
   DateTimeComponent,
   MonthsScrollHeaderComponent,
   TotalSalaryComponent,
   UserInfoComponent,
+  BalanceCardComponent,
 } from './components';
+import { CardComponent } from './ui/card/card.component';
+import { ListItemComponent } from './ui/list-item/list-item.component';
+import { EmptyStateComponent } from './ui/empty-state/empty-state.component';
+import { ChartWrapperComponent } from './ui/chart-wrapper/chart-wrapper.component';
+import { SkeletonBlockComponent } from './ui/skeleton-block/skeleton-block.component';
+import { ButtonComponent } from './ui/button/button.component';
 
 import { ThemeToggleComponent } from './components/theme-toggle/theme-toggle.component';
 
@@ -23,6 +29,12 @@ import { ThemeToggleComponent } from './components/theme-toggle/theme-toggle.com
     RouterModule.forChild([]),
     TranslateModule.forChild(),
     DatePipe,
+    CardComponent,
+    ListItemComponent,
+    EmptyStateComponent,
+    ChartWrapperComponent,
+    SkeletonBlockComponent,
+    ButtonComponent,
   ],
   exports: [
     FormsModule,
@@ -33,17 +45,23 @@ import { ThemeToggleComponent } from './components/theme-toggle/theme-toggle.com
     TranslateModule,
     DateTimeComponent,
     MonthsScrollHeaderComponent,
-    BalanceCardComponent,
     TotalSalaryComponent,
     ThemeToggleComponent,
+    BalanceCardComponent,
+    CardComponent,
+    ListItemComponent,
+    EmptyStateComponent,
+    ChartWrapperComponent,
+    SkeletonBlockComponent,
+    ButtonComponent,
   ],
   declarations: [
     UserInfoComponent,
     DateTimeComponent,
     MonthsScrollHeaderComponent,
-    BalanceCardComponent,
     TotalSalaryComponent,
     ThemeToggleComponent,
+    BalanceCardComponent,
   ],
 })
 export class SharedModule {}

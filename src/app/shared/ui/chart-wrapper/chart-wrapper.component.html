@@ -1,0 +1,23 @@
+<div class="chart-wrapper">
+  <div class="chart-header">
+    <h4 class="chart-title">{{ chartTitle }}</h4>
+  </div>
+  <div class="chart-content">
+    <ng-container *ngIf="isLoading; else chartOrError">
+      <app-skeleton-block height="250px"></app-skeleton-block>
+    </ng-container>
+
+    <ng-template #chartOrError>
+      <ng-container *ngIf="hasError; else chartContent">
+        <div class="error-state">
+          <ion-icon name="warning-outline"></ion-icon>
+          <p>{{ errorMessage }}</p>
+        </div>
+      </ng-container>
+    </ng-template>
+
+    <ng-template #chartContent>
+      <ng-content></ng-content>
+    </ng-template>
+  </div>
+</div>

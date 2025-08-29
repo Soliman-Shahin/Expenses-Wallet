@@ -1,0 +1,9 @@
+:host {
+  --border-radius: var(--ew-radius-lg);
+}
+
+.full-round {
+  --border-radius: 50%;
+  width: var(--ion-button-size, 56px);
+  height: var(--ion-button-size, 56px);
+}

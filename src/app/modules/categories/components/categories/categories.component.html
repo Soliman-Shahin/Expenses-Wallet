@@ -1,101 +1,101 @@
-<ion-content *ngIf="response$ | async as categories">
-  <ion-toolbar>
-    <ion-searchbar
-      animated="true"
-      [placeholder]="'SEARCH' | translate"
-      [debounce]="500"
-      show-clear-button="always"
-      (ionInput)="filter($event)"
+<ng-container *ngIf="vm$ | async as vm">
+  <ion-header mode="ios" class="category-ion-header">
+    <ion-toolbar>
+      <ion-title>{{ 'SIDEBAR.CATEGORIES' | translate }}</ion-title>
+    </ion-toolbar>
+    <ion-toolbar>
+      <ion-searchbar
+        animated="true"
+        [placeholder]="'SEARCH' | translate"
+        [debounce]="500"
+        show-clear-button="always"
+        (ionInput)="filter($event)"
+      ></ion-searchbar>
+    </ion-toolbar>
+    <ion-toolbar class="segment-toolbar">
+      <ion-segment value="all" (ionChange)="filterByType($event)">
+        <ion-segment-button value="all" layout="icon-start">
+          <ion-icon name="options-outline"></ion-icon>
+          <ion-label>{{ 'COMMON.ALL' | translate }}</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="outcome" layout="icon-start">
+          <ion-icon name="trending-up-outline"></ion-icon>
+          <ion-label>{{ 'COMMON.OUTCOME' | translate }}</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="income" layout="icon-start">
+          <ion-icon name="trending-down-outline"></ion-icon>
+          <ion-label>{{ 'COMMON.INCOME' | translate }}</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content class="ion-padding">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+      <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+
+    <!-- Skeleton loaders while fetching -->
+    <div *ngIf="vm.isLoading" class="skeleton-list">
+      <app-skeleton-block
+        *ngFor="let i of [1, 2, 3, 4, 5]"
+        variant="list-item-avatar"
+      ></app-skeleton-block>
+    </div>
+
+    <ion-list
+      class="categories-list"
+      *ngIf="!vm.isLoading && vm.response && vm.response.total > 0; else noData"
     >
-    </ion-searchbar>
-  </ion-toolbar>
-
-  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
-    <ion-refresher-content></ion-refresher-content>
-  </ion-refresher>
-
-  <ion-infinite-scroll (ionInfinite)="onIonInfinite($event)">
-    <ion-infinite-scroll-content>
-      <!-- Skeleton loaders while fetching -->
-      <div *ngIf="isLoadingResults" class="skeleton-list">
-        <ion-item lines="none" *ngFor="let s of [1, 2, 3, 4, 5]">
-          <ion-avatar slot="start">
-            <ion-skeleton-text
-              animated
-              style="width: 40px; height: 40px; border-radius: 50%"
-            ></ion-skeleton-text>
-          </ion-avatar>
-          <ion-label>
-            <h3>
-              <ion-skeleton-text
-                animated
-                style="width: 60%"
-              ></ion-skeleton-text>
-            </h3>
-            <p>
-              <ion-skeleton-text
-                animated
-                style="width: 40%"
-              ></ion-skeleton-text>
-            </p>
-          </ion-label>
-        </ion-item>
-      </div>
-
-      <ion-list
-        class="categories-list"
-        *ngIf="!isLoadingResults && categories.total > 0; else noData"
+      <ion-reorder-group
+        [disabled]="false"
+        (ionItemReorder)="handleReorder($any($event))"
       >
-        <ion-reorder-group
-          [disabled]="false"
-          (ionItemReorder)="handleReorder($any($event))"
+        <ion-item
+          class="category-item"
+          lines="none"
+          *ngFor="let item of vm.response.data; let index"
+          [style.--animation-order]="index"
+          detail
         >
-          <ion-item
-            class="category-item"
-            lines="none"
-            *ngFor="let item of categories.data; let index"
-            detail
+          <span
+            class="category-icon"
+            [style.background]="item.color"
+            aria-hidden="true"
           >
-            <span
-              class="category-icon"
-              [style.background]="item.color"
-              aria-hidden="true"
-            >
-              <ion-icon size="large" [name]="item.icon"></ion-icon>
-            </span>
-            <ion-label>
-              <h3 class="title">{{ item.title }}</h3>
-            </ion-label>
-            <ion-buttons slot="end">
-              <ion-button (click)="presentActionSheet(item)">
-                <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
-              </ion-button>
-            </ion-buttons>
-            <ion-reorder slot="end"></ion-reorder>
-          </ion-item>
-        </ion-reorder-group>
-      </ion-list>
-    </ion-infinite-scroll-content>
-  </ion-infinite-scroll>
+            <ion-icon size="large" [name]="item.icon"></ion-icon>
+          </span>
+          <ion-label>
+            <h3 class="title">{{ item.title }}</h3>
+          </ion-label>
+          <ion-buttons slot="end">
+            <ion-button (click)="presentActionSheet(item)">
+              <ion-icon
+                slot="icon-only"
+                name="ellipsis-vertical"
+              ></ion-icon>
+            </ion-button>
+          </ion-buttons>
+          <ion-reorder slot="end"></ion-reorder>
+        </ion-item>
+      </ion-reorder-group>
+    </ion-list>
 
-  <!-- Floating Add Button -->
-  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button
-      class="fab-add"
-      (click)="navigateToAdd()"
-      [attr.aria-label]="'CATEGORY.ADD' | translate"
+    <ion-infinite-scroll
+      [disabled]="vm.response && vm.response.data.length >= vm.response.total"
+      (ionInfinite)="onIonInfinite($event)"
     >
-      <ion-icon name="add-outline"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
-</ion-content>
+      <ion-infinite-scroll-content> </ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+
+    <!-- Shared Floating Add Button -->
+    <app-add-fab-button (fabClick)="navigateToAdd()"></app-add-fab-button>
+  </ion-content>
+</ng-container>
 
 <ng-template #noData>
   <div class="no_data">
     <ion-icon size="large" name="sad"></ion-icon>
     <p>{{ "NO_DATA" | translate }}</p>
-    <ion-button color="primary" shape="round" (click)="navigateToAdd()">
-      {{ "CATEGORY.ADD" | translate }}
-    </ion-button>
   </div>
 </ng-template>

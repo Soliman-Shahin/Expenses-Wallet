@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   ChartTooltipComponent,
@@ -18,6 +18,7 @@ interface ChartData {
   styleUrls: ['./line-chart.component.scss'],
 })
 export class LineChartComponent implements OnChanges {
+  @Output() dataPointClick = new EventEmitter<ChartData>();
   @Input() data: ChartData[] = [];
   @Input() title: string = '';
   @Input() ariaLabel: string = 'Line chart';
@@ -145,6 +146,10 @@ export class LineChartComponent implements OnChanges {
     if (this.tooltipVisible) {
       this.updateTooltipPosition(event);
     }
+  }
+
+  onDataPointClick(dataPoint: ChartData): void {
+    this.dataPointClick.emit(dataPoint);
   }
 
   onMouseLeave() {

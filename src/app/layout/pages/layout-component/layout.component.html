@@ -12,15 +12,12 @@
       aria-modal="true"
       [attr.aria-label]="'COMMON.LOADING' | translate"
     >
-      <ion-spinner
-        name="crescent"
-        style="width: 48px; height: 48px"
-      ></ion-spinner>
+      <ion-spinner name="crescent"></ion-spinner>
       <!-- Optional message from LoadingService -->
       <div class="mt-2" *ngIf="message$ | async as msg">
         {{ msg }}
       </div>
-      <span class="visually-hidden">{{ 'COMMON.LOADING' | translate }}</span>
+      <span class="visually-hidden">{{ "COMMON.LOADING" | translate }}</span>
     </div>
   </div>
   <!-- Side Menu -->

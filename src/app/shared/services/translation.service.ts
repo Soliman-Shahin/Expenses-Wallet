@@ -26,7 +26,8 @@ export class TranslationService {
       this.translateService.use(lang);
     }
 
-    // Set the document direction based on the language
+    // Set document language and direction for accessibility and styling
+    document.documentElement.lang = lang;
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
 
     // Update the currentLang property

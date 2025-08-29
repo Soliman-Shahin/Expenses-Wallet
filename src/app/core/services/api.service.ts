@@ -1,7 +1,7 @@
 import { Injectable, Injector } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { AuthService, TokenService } from 'src/app/modules/auth/services';
 
@@ -62,11 +62,14 @@ export class ApiService {
 
   get<T>(path: string, params?: HttpParams): Observable<T> {
     return this.http
-      .get<T>(`${this.baseUrl}${path}`, {
+      .get<{ data: T }>(`${this.baseUrl}${path}`, {
         headers: this.getHeaders(),
         params,
       })
-      .pipe(catchError(this.handleError));
+      .pipe(
+        map((response) => response.data),
+        catchError(this.handleError)
+      );
   }
 
   post<T>(
@@ -90,11 +93,14 @@ export class ApiService {
     });
 
     return this.http
-      .post<T>(`${this.baseUrl}${path}`, body, {
+      .post<{ data: T }>(`${this.baseUrl}${path}`, body, {
         headers: mergedHeaders,
         params: options.params,
       })
-      .pipe(catchError(this.handleError));
+      .pipe(
+        map((response) => response.data),
+        catchError(this.handleError)
+      );
   }
 
   /**
@@ -136,11 +142,14 @@ export class ApiService {
     options: { params?: HttpParams } = {}
   ): Observable<T> {
     return this.http
-      .put<T>(`${this.baseUrl}${path}`, body, {
+      .put<{ data: T }>(`${this.baseUrl}${path}`, body, {
         headers: this.getHeaders(),
         params: options.params,
       })
-      .pipe(catchError(this.handleError));
+      .pipe(
+        map((response) => response.data),
+        catchError(this.handleError)
+      );
   }
 
   delete<T>(
@@ -161,11 +170,14 @@ export class ApiService {
     options: { params?: HttpParams } = {}
   ): Observable<T> {
     return this.http
-      .patch<T>(`${this.baseUrl}${path}`, body, {
+      .patch<{ data: T }>(`${this.baseUrl}${path}`, body, {
         headers: this.getHeaders(),
         params: options.params,
       })
-      .pipe(catchError(this.handleError));
+      .pipe(
+        map((response) => response.data),
+        catchError(this.handleError)
+      );
   }
 
   // Centralized error handler

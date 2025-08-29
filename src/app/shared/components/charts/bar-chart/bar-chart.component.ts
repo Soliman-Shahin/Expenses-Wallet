@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   ChartTooltipComponent,
@@ -27,6 +27,11 @@ interface ChartData {
           <div
             *ngFor="let item of chartData; let i = index"
             class="bar-container"
+            (click)="onBarClick(item)"
+            role="button"
+            tabindex="0"
+            (keyup.enter)="onBarClick(item)"
+            (keyup.space)="onBarClick(item); $event.preventDefault()"
           >
             <div class="bar-area">
               <div
@@ -57,6 +62,7 @@ interface ChartData {
   styleUrls: ['./bar-chart.component.scss'],
 })
 export class BarChartComponent implements OnChanges {
+  @Output() barClick = new EventEmitter<ChartData>();
   @Input() data: ChartData[] = [];
   @Input() title: string = '';
   @Input() ariaLabel: string = 'Bar chart';
@@ -124,6 +130,10 @@ export class BarChartComponent implements OnChanges {
 
   onMouseLeave(): void {
     this.tooltipVisible = false;
+  }
+
+  onBarClick(item: ChartData): void {
+    this.barClick.emit(item);
   }
 
   private updateTooltipPosition(event: MouseEvent): void {

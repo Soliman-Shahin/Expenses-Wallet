@@ -31,8 +31,8 @@ export const customToastEnterAnimation = (baseEl: HTMLElement): Animation => {
     .easing('cubic-bezier(0.4, 0, 0.2, 1)')
     .fromTo(
       'box-shadow',
-      '0 0 0 0 rgba(67, 97, 238, 0)',
-      '0 8px 32px rgba(67, 97, 238, 0.14)'
+      '0 0 0 0 var(--ew-toast-glow-color)',
+      '0 8px 32px var(--ew-toast-glow-color)'
     );
 
   return new AnimationController()
@@ -66,8 +66,8 @@ export const customToastLeaveAnimation = (baseEl: HTMLElement): Animation => {
     .easing('cubic-bezier(0.4, 0, 0.2, 1)')
     .fromTo(
       'box-shadow',
-      '0 8px 32px rgba(67, 97, 238, 0.14)',
-      '0 0 0 0 rgba(67, 97, 238, 0)'
+      '0 8px 32px var(--ew-toast-glow-color)',
+      '0 0 0 0 var(--ew-toast-glow-color)'
     );
 
   return new AnimationController()

@@ -3,15 +3,15 @@
 
 // Base input variables
 :root {
-  --input-border-radius: 16px;
-  --input-padding-vertical: 16px;
-  --input-padding-horizontal: 20px;
-  --input-font-size: 16px;
-  --input-line-height: 1.5;
-  --input-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --input-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  --input-shadow-focus: 0 4px 20px rgba(var(--ion-color-primary-rgb), 0.15);
-  --input-border-width: 2px;
+  --input-border-radius: var(--ew-radius-lg);
+  --input-padding-vertical: var(--ew-space-5);
+  --input-padding-horizontal: var(--ew-space-6);
+  --input-font-size: var(--ew-font-size-base);
+  --input-line-height: var(--ew-line-height-normal);
+  --input-transition: var(--ew-transition-base);
+  --input-shadow: var(--ew-shadow-sm);
+  --input-shadow-focus: 0 4px 20px rgba(var(--ion-color-primary-rgb), 0.15); // Custom focus shadow for inputs
+  --input-border-width: var(--ew-border-width-sm);
 }
 
 // Modern input item styling
@@ -25,11 +25,11 @@
   --color: var(--ion-text-color);
   --padding-start: var(--input-padding-horizontal);
   --padding-end: var(--input-padding-horizontal);
-  --padding-top: 12px;
-  --padding-bottom: 12px;
-  --min-height: 56px;
+  --padding-top: var(--ew-space-4);
+  --padding-bottom: var(--ew-space-4);
+  --min-height: var(--ew-header-height); // 56px, good for touch targets
   
-  margin: 16px 0;
+  margin: var(--ew-space-5) 0;
   border-radius: var(--border-radius);
   border: var(--border-width) solid var(--border-color);
   background: var(--background);
@@ -44,7 +44,7 @@
   &:hover:not(.ion-focused):not(.ion-invalid) {
     --border-color: var(--ion-color-step-400);
     --background: var(--ion-background-color);
-    transform: translateY(-2px);
+    transform: translateY(calc(var(--ew-space-1) * -1));
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12), 
                 0 2px 8px rgba(0, 0, 0, 0.08),
                 inset 0 1px 0 rgba(255, 255, 255, 0.15);
@@ -55,20 +55,20 @@
   &.item-has-focus {
     --border-color: var(--ion-color-primary);
     --background: var(--ion-background-color);
-    transform: translateY(-3px);
+    transform: translateY(calc(var(--ew-border-width-md) * -1));
     box-shadow: 0 8px 32px rgba(var(--ion-color-primary-rgb), 0.25),
                 0 4px 16px rgba(0, 0, 0, 0.1),
                 inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    border: 2px solid var(--ion-color-primary);
+    border: var(--input-border-width) solid var(--ion-color-primary);
     
     &::before {
       content: '';
       position: absolute;
-      top: -2px;
-      left: -2px;
-      right: -2px;
-      bottom: -2px;
-      border-radius: calc(var(--border-radius) + 2px);
+      top: calc(var(--input-border-width) * -1);
+      inset-inline-start: calc(var(--input-border-width) * -1);
+      inset-inline-end: calc(var(--input-border-width) * -1);
+      bottom: calc(var(--input-border-width) * -1);
+      border-radius: calc(var(--border-radius) + var(--input-border-width));
       background: linear-gradient(135deg, 
         var(--ion-color-primary), 
         var(--ion-color-secondary),
@@ -88,8 +88,8 @@
       content: '';
       position: absolute;
       top: 0;
-      left: 0;
-      right: 0;
+      inset-inline-start: 0;
+      inset-inline-end: 0;
       bottom: 0;
       border-radius: var(--border-radius);
       background: linear-gradient(135deg, transparent, rgba(var(--ion-color-danger-rgb), 0.1));
@@ -106,8 +106,8 @@
       content: '';
       position: absolute;
       top: 0;
-      left: 0;
-      right: 0;
+      inset-inline-start: 0;
+      inset-inline-end: 0;
       bottom: 0;
       border-radius: var(--border-radius);
       background: linear-gradient(135deg, transparent, rgba(var(--ion-color-success-rgb), 0.05));
@@ -134,9 +134,9 @@ ion-input {
   --padding-start: 0;
   --padding-end: 0;
   
-  font-size: 17px;
+  font-size: var(--input-font-size);
   line-height: var(--input-line-height);
-  font-weight: 600;
+  font-weight: var(--ew-font-weight-semibold);
   position: relative;
   z-index: 2;
 
@@ -144,24 +144,24 @@ ion-input {
   &::placeholder {
     color: var(--placeholder-color);
     opacity: 0.7;
-    font-weight: 500;
+    font-weight: var(--ew-font-weight-medium);
     font-style: italic;
   }
 }
 
 // Label styling
 ion-label {
-  font-weight: 700;
-  font-size: 15px;
+  font-weight: var(--ew-font-weight-bold);
+  font-size: var(--ew-font-size-sm);
   color: var(--ion-color-step-700);
-  margin-bottom: 12px;
+  margin-bottom: var(--ew-space-4);
   transition: var(--input-transition);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.5px; // This can be a token if we create one
   
   .ion-focused & {
     color: var(--ion-color-primary);
-    transform: translateY(-2px);
+    transform: translateY(calc(var(--ew-space-1) * -1));
   }
   
   .ion-invalid & {
@@ -172,11 +172,11 @@ ion-label {
 // Icon styling in inputs
 ion-icon[slot="start"] {
   color: var(--ion-color-step-600);
-  font-size: 22px;
+  font-size: var(--ew-font-size-xl);
   transition: var(--input-transition);
   position: relative;
   z-index: 2;
-  margin-inline-end: 12px;
+  margin-inline-end: var(--ew-space-4);
   
   .ion-focused & {
     color: var(--ion-color-primary);
@@ -190,11 +190,11 @@ ion-icon[slot="start"] {
 
 ion-icon[slot="end"] {
   color: var(--ion-color-step-600);
-  font-size: 22px;
+  font-size: var(--ew-font-size-xl);
   transition: var(--input-transition);
   position: relative;
   z-index: 2;
-  margin-inline-start: 12px;
+  margin-inline-start: var(--ew-space-4);
   
   .ion-focused & {
     color: var(--ion-color-primary);
@@ -208,27 +208,27 @@ ion-icon[slot="end"] {
 
 // Error note styling
 ion-note[slot="error"] {
-  font-size: 12px;
-  font-weight: 500;
+  font-size: var(--ew-font-size-xs);
+  font-weight: var(--ew-font-weight-medium);
   color: var(--ion-color-danger);
-  margin-top: 8px;
+  margin-top: var(--ew-space-3);
   padding-inline-start: var(--input-padding-horizontal);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--ew-space-2);
   animation: errorSlideIn 0.3s ease-out;
   
   &::before {
     content: '⚠';
-    font-size: 14px;
+    font-size: var(--ew-font-size-sm);
   }
 }
 
 // Helper text styling
 ion-note[slot="helper"] {
-  font-size: 12px;
+  font-size: var(--ew-font-size-xs);
   color: var(--ion-color-step-500);
-  margin-top: 4px;
+  margin-top: var(--ew-space-2);
   padding-inline-start: var(--input-padding-horizontal);
   
   .counter {
@@ -250,7 +250,7 @@ ion-select {
   // Fix dropdown arrow position for LTR
   &::part(icon) {
     position: absolute;
-    inset-inline-end: 16px;
+    inset-inline-end: var(--ew-space-5);
     top: 50%;
     transform: translateY(-50%);
     margin: 0;
@@ -258,7 +258,7 @@ ion-select {
   
   // Ensure proper spacing for the arrow
   &::part(container) {
-    padding-inline-end: 48px;
+    padding-inline-end: var(--ew-space-10);
     padding-inline-start: 0;
   }
 }
@@ -269,27 +269,27 @@ ion-datetime-button {
   --background: transparent;
   
   font-size: var(--input-font-size);
-  font-weight: 500;
+  font-weight: var(--ew-font-weight-medium);
   width: 100%;
-  text-align: left;
+  text-align: start;
   position: relative;
   z-index: 2;
   
   .placeholder-text {
     color: var(--ion-color-step-400);
-    font-weight: 400;
+    font-weight: var(--ew-font-weight-regular);
   }
 }
 
 // Checkbox styling
 ion-checkbox {
-  --border-radius: 8px;
-  --border-width: 2px;
+  --border-radius: var(--ew-radius-sm);
+  --border-width: var(--ew-border-width-sm);
   --border-color: var(--ion-color-step-300);
   --background: var(--ion-color-step-50);
   --background-checked: var(--ion-color-primary);
   --checkmark-color: white;
-  --size: 20px;
+  --size: var(--ew-space-6);
   
   transition: var(--input-transition);
   
@@ -306,10 +306,10 @@ ion-button[type="submit"],
   --padding-top: var(--input-padding-vertical);
   --padding-bottom: var(--input-padding-vertical);
   
-  font-weight: 600;
+  font-weight: var(--ew-font-weight-semibold);
   font-size: var(--input-font-size);
-  height: 60px;
-  margin-top: 24px;
+  height: calc(var(--ew-header-height) + var(--ew-space-2)); // 60px
+  margin-top: var(--ew-space-7);
   position: relative;
   overflow: hidden;
   
@@ -317,15 +317,15 @@ ion-button[type="submit"],
     content: '';
     position: absolute;
     top: 0;
-    left: -100%;
+    inset-inline-start: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s;
+    background: linear-gradient(var(--shine-direction, 90deg), transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: inset-inline-start 0.5s;
   }
   
   &:hover::before {
-    left: 100%;
+    inset-inline-start: 100%;
   }
   
   &:not([disabled]):hover {
@@ -355,8 +355,8 @@ ion-button[type="submit"],
 // Glass effect variant
 .is-glass {
   --background: rgba(var(--ion-background-color-rgb), 0.8);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(var(--ew-space-4));
+  -webkit-backdrop-filter: blur(var(--ew-space-4));
   border: var(--border-width) solid rgba(var(--ion-color-primary-rgb), 0.2);
   
   &::before {
@@ -369,27 +369,27 @@ ion-button[type="submit"],
 
 // Pill shape variant
 .is-pill {
-  --border-radius: 50px;
+  --border-radius: var(--ew-radius-pill);
 }
 
 // Size variants
 .size-small {
-  --input-padding-vertical: 12px;
-  --input-font-size: 14px;
-  --min-height: 48px;
+  --input-padding-vertical: var(--ew-space-4);
+  --input-font-size: var(--ew-font-size-sm);
+  --min-height: calc(var(--ew-space-10) + var(--ew-space-3)); // 48px
 }
 
 .size-large {
-  --input-padding-vertical: 20px;
-  --input-font-size: 18px;
-  --min-height: 68px;
+  --input-padding-vertical: var(--ew-space-6);
+  --input-font-size: var(--ew-font-size-lg);
+  --min-height: calc(var(--ew-header-height) + var(--ew-space-4)); // 68px
 }
 
 // Dark mode optimizations
-@media (prefers-color-scheme: dark) {
+.dark {
   :root {
-    --input-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
-    --input-shadow-focus: 0 8px 32px rgba(var(--ion-color-primary-rgb), 0.35);
+    --input-shadow: var(--ew-shadow-sm-dark);
+    --input-shadow-focus: var(--ew-shadow-lg-dark);
   }
   
   .modern-input-item,
@@ -397,16 +397,12 @@ ion-button[type="submit"],
   .ui-form-item {
     --background: var(--ion-color-step-100);
     --border-color: var(--ion-color-step-400);
-    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15), 
-                0 1px 4px rgba(0, 0, 0, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    box-shadow: var(--ew-shadow-sm-dark);
     
     &:hover:not(.ion-focused):not(.ion-invalid) {
       --background: var(--ion-color-step-150);
       --border-color: var(--ion-color-step-500);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2), 
-                  0 2px 8px rgba(0, 0, 0, 0.15),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      box-shadow: var(--ew-shadow-md-dark);
     }
   }
 }
@@ -416,12 +412,17 @@ ion-button[type="submit"],
   .modern-input-item,
   .form-item,
   .ui-form-item {
-    --border-width: 3px;
+    --border-width: var(--ew-border-width-md);
     
     &.ion-focused {
-      --border-width: 4px;
+      --border-width: var(--ew-border-width-lg);
     }
   }
+}
+
+// RTL fixes for shimmer
+[dir="rtl"] {
+  --shine-direction: -90deg;
 }
 
 // Reduced motion

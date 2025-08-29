@@ -1,6 +1,6 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>{{ 'TRANSACTIONS.TITLE' | translate }}</ion-title>
+    <ion-title>{{ "TRANSACTIONS.TITLE" | translate }}</ion-title>
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/home"></ion-back-button>
     </ion-buttons>
@@ -8,12 +8,16 @@
       <ion-button fill="clear" (click)="toggleSearch()">
         <ion-icon name="search-outline"></ion-icon>
       </ion-button>
-      <ion-button fill="clear" (click)="toggleFilters()" [color]="showFilters ? 'primary' : ''">
+      <ion-button
+        fill="clear"
+        (click)="toggleFilters()"
+        [color]="showFilters ? 'primary' : ''"
+      >
         <ion-icon name="filter-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
-  
+
   <!-- Search Bar -->
   <ion-toolbar *ngIf="showSearch">
     <ion-searchbar
@@ -21,7 +25,8 @@
       (ionInput)="onSearchChange($event)"
       [placeholder]="'SEARCH' | translate"
       [debounce]="300"
-      show-clear-button="focus">
+      show-clear-button="focus"
+    >
     </ion-searchbar>
   </ion-toolbar>
 
@@ -30,41 +35,56 @@
     <div class="filters-container">
       <!-- Category Filter -->
       <div class="filter-item">
-        <ion-label class="filter-label">{{ 'TRANSACTIONS.CATEGORY' | translate }}</ion-label>
-        <ion-select 
-          [(ngModel)]="selectedCategory" 
+        <ion-label class="filter-label">{{
+          "TRANSACTIONS.CATEGORY" | translate
+        }}</ion-label>
+        <ion-select
+          [(ngModel)]="selectedCategory"
           (ionChange)="onFilterChange()"
           [placeholder]="'COMMON.ALL' | translate"
           interface="popover"
-          class="filter-select">
-          <ion-select-option value="">{{ 'COMMON.ALL' | translate }}</ion-select-option>
+          class="filter-select"
+        >
+          <ion-select-option value="">{{
+            "COMMON.ALL" | translate
+          }}</ion-select-option>
           <ion-select-option *ngFor="let cat of categories" [value]="cat._id">
-            <ion-icon [name]="cat.icon || 'pricetag-outline'" [style.color]="cat.color"></ion-icon>
-            {{ cat.title }}
+            <div class="category-option">
+              <ion-icon
+                [name]="cat.icon || 'pricetag-outline'"
+                [style.color]="cat.color"
+              ></ion-icon>
+              <span>{{ cat.title }}</span>
+            </div>
           </ion-select-option>
         </ion-select>
       </div>
 
       <!-- Type Filter -->
       <div class="filter-item">
-        <ion-label class="filter-label">{{ 'COMMON.TYPE' | translate }}</ion-label>
-        <ion-select 
-          [(ngModel)]="selectedType" 
+        <ion-label class="filter-label">{{
+          "COMMON.TYPE" | translate
+        }}</ion-label>
+        <ion-select
+          [(ngModel)]="selectedType"
           (ionChange)="onFilterChange()"
           [placeholder]="'COMMON.ALL' | translate"
           interface="popover"
-          class="filter-select">
-          <ion-select-option value="">{{ 'COMMON.ALL' | translate }}</ion-select-option>
+          class="filter-select"
+        >
+          <ion-select-option value="">{{
+            "COMMON.ALL" | translate
+          }}</ion-select-option>
           <ion-select-option value="income">
             <div class="type-option">
               <ion-icon name="arrow-down-circle" color="success"></ion-icon>
-              <span>{{ 'INCOME' | translate }}</span>
+              <span>{{ "INCOME" | translate }}</span>
             </div>
           </ion-select-option>
           <ion-select-option value="expense">
             <div class="type-option">
               <ion-icon name="arrow-up-circle" color="danger"></ion-icon>
-              <span>{{ 'OUTCOME' | translate }}</span>
+              <span>{{ "OUTCOME" | translate }}</span>
             </div>
           </ion-select-option>
         </ion-select>
@@ -72,8 +92,15 @@
 
       <!-- Date Range -->
       <div class="filter-item">
-        <ion-label class="filter-label">{{ 'TRANSACTIONS.DATE_RANGE' | translate }}</ion-label>
-        <ion-button fill="outline" size="small" (click)="openDatePicker()" class="date-button">
+        <ion-label class="filter-label">{{
+          "TRANSACTIONS.DATE_RANGE" | translate
+        }}</ion-label>
+        <ion-button
+          fill="outline"
+          size="small"
+          (click)="openDatePicker()"
+          class="date-button"
+        >
           <ion-icon name="calendar-outline" slot="start"></ion-icon>
           {{ getDateRangeText() }}
         </ion-button>
@@ -112,45 +139,67 @@
 
   <!-- Error State -->
   <div *ngIf="error && !isLoading" class="ion-text-center ion-padding">
-    <ion-icon name="warning-outline" style="font-size: 28px; opacity: 0.6"></ion-icon>
-    <p class="ion-margin-top">{{ 'COMMON.ERRORS.LOAD_DATA' | translate }}</p>
+    <ion-icon
+      name="warning-outline"
+      style="font-size: 28px; opacity: 0.6"
+    ></ion-icon>
+    <p class="ion-margin-top">{{ "COMMON.ERRORS.LOAD_DATA" | translate }}</p>
     <ion-button fill="outline" (click)="loadTransactions()">
-      {{ 'COMMON.RETRY' | translate }}
+      {{ "COMMON.RETRY" | translate }}
     </ion-button>
   </div>
 
   <!-- Content after loading -->
   <ng-container *ngIf="!isLoading && !error">
-    <ion-list class="transactions-list" *ngIf="transactions.length > 0; else empty">
-      <ion-item
-        class="transaction-item"
-        lines="none"
-        *ngFor="let t of transactions; trackBy: trackById"
-      >
-        <span
-          class="category-icon"
-          [style.background]="getCategoryColor(t) || null"
-          slot="start"
-          aria-hidden="true"
+    <ion-list
+      class="transactions-list"
+      *ngIf="transactions.length > 0; else empty"
+    >
+      <ion-item-sliding *ngFor="let t of transactions; trackBy: trackById">
+        <ion-item
+          class="transaction-item"
+          lines="none"
+          button
+          (click)="onTransactionClick(t)"
         >
           <ion-icon size="large" [name]="getCategoryIcon(t)"></ion-icon>
-        </span>
-        <ion-label>
-          <h3 class="ion-text-wrap transaction-title">
-            {{ getOperationName(t) }}
-          </h3>
-          <p class="transaction-meta">
-            <span class="transaction-date">{{ getDateValue(t) | date : "mediumDate" }}</span>
-            <span *ngIf="getCategoryName(t) as cat" class="transaction-category">
-              <ion-icon name="pricetag-outline"></ion-icon>
-              {{ cat }}
-            </span>
-          </p>
-        </ion-label>
-        <ion-note slot="end" [color]="getCategoryType(t) === 'income' ? 'success' : 'primary'">
-          {{ getCategoryType(t) === 'income' ? '+' : '' }}{{ getAmountValue(t) | currency : userCurrency : 'symbol' : '1.0-0' }}
-        </ion-note>
-      </ion-item>
+          <ion-label>
+            <h3 class="ion-text-wrap transaction-title">
+              {{ getOperationName(t) }}
+            </h3>
+            <p class="transaction-meta">
+              <span class="transaction-date">{{
+                getDateValue(t) | date : "mediumDate"
+              }}</span>
+              <span
+                *ngIf="getCategoryName(t) as cat"
+                class="transaction-category"
+              >
+                <ion-icon name="pricetag-outline"></ion-icon>
+                {{ cat }}
+              </span>
+            </p>
+          </ion-label>
+          <ion-note
+            slot="end"
+            [color]="getCategoryType(t) === 'income' ? 'success' : 'primary'"
+          >
+            {{ getCategoryType(t) === "income" ? "+" : ""
+            }}{{
+              getAmountValue(t) | currency : userCurrency : "symbol" : "1.0-0"
+            }}
+          </ion-note>
+        </ion-item>
+
+        <ion-item-options side="end">
+          <ion-item-option (click)="onEdit(t)">{{
+            "COMMON.EDIT" | translate
+          }}</ion-item-option>
+          <ion-item-option color="danger" (click)="onDelete(t)">{{
+            "COMMON.DELETE" | translate
+          }}</ion-item-option>
+        </ion-item-options>
+      </ion-item-sliding>
     </ion-list>
 
     <!-- Empty State -->
@@ -160,26 +209,32 @@
           name="receipt-outline"
           style="font-size: 28px; opacity: 0.6"
         ></ion-icon>
-        <h3 class="ion-margin-top">{{ 'TRANSACTIONS.EMPTY_TITLE' | translate }}</h3>
-        <p>{{ 'TRANSACTIONS.EMPTY_MESSAGE' | translate }}</p>
+        <h3 class="ion-margin-top">
+          {{ "TRANSACTIONS.EMPTY_TITLE" | translate }}
+        </h3>
+        <p>{{ "TRANSACTIONS.EMPTY_MESSAGE" | translate }}</p>
       </div>
     </ng-template>
   </ng-container>
 
   <!-- Floating Action Button -->
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button (click)="addTransaction()">
+    <ion-fab-button (click)="openAddTransactionModal()">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>
   </ion-fab>
 </ion-content>
 
 <!-- Date Range Picker Modal -->
-<ion-modal [isOpen]="showDatePicker" (willDismiss)="closeDatePicker()">
+<ion-modal
+  [isOpen]="showDatePicker"
+  (willDismiss)="closeDatePicker()"
+  cssClass="date-picker-modal"
+>
   <ng-template>
     <ion-header>
       <ion-toolbar>
-        <ion-title>{{ 'TRANSACTIONS.DATE_RANGE' | translate }}</ion-title>
+        <ion-title>{{ "TRANSACTIONS.DATE_RANGE" | translate }}</ion-title>
         <ion-buttons slot="end">
           <ion-button (click)="closeDatePicker()">
             <ion-icon name="close"></ion-icon>
@@ -187,40 +242,24 @@
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
-    <ion-content class="ion-padding">
-      <div class="date-picker-container">
-        <ion-item>
-          <ion-label position="stacked">{{ 'TRANSACTIONS.START_DATE' | translate }}</ion-label>
-          <ion-datetime 
-            [(ngModel)]="startDate" 
-            presentation="date"
-            [showDefaultButtons]="true"
-            [showClearButton]="true"
-            [preferWheel]="false"
-            locale="ar-EG">
-          </ion-datetime>
-        </ion-item>
-        
-        <ion-item>
-          <ion-label position="stacked">{{ 'TRANSACTIONS.END_DATE' | translate }}</ion-label>
-          <ion-datetime 
-            [(ngModel)]="endDate" 
-            presentation="date"
-            [showDefaultButtons]="true"
-            [showClearButton]="true"
-            [preferWheel]="false"
-            locale="ar-EG">
-          </ion-datetime>
-        </ion-item>
-      </div>
-      <div class="ion-padding-top">
-        <ion-button expand="block" (click)="applyDateFilter()">
-          {{ 'COMMON.APPLY' | translate }}
-        </ion-button>
+    <div class="ion-padding">
+      <ion-datetime
+        presentation="date"
+        [multiple]="true"
+        (ionChange)="onDateChange($event)"
+        [value]="datePickerValue"
+        [max]="today"
+      ></ion-datetime>
+      <div class="modal-actions">
         <ion-button expand="block" fill="outline" (click)="clearDateFilter()">
-          {{ 'COMMON.CLEAR' | translate }}
+          <ion-icon slot="start" name="close-circle-outline"></ion-icon>
+          {{ "COMMON.CLEAR" | translate }}
+        </ion-button>
+        <ion-button expand="block" (click)="applyDateFilter()">
+          <ion-icon slot="start" name="checkmark-circle-outline"></ion-icon>
+          {{ "COMMON.APPLY" | translate }}
         </ion-button>
       </div>
-    </ion-content>
+    </div>
   </ng-template>
 </ion-modal>

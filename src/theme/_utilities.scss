@@ -1,0 +1,95 @@
+// ===================================================================
+//  UTILITY CLASSES
+//  - Spacing, Text, Layout, etc.
+// ===================================================================
+
+// Text utilities
+.text-center {
+  text-align: center;
+}
+.full-width {
+  width: 100%;
+}
+
+// Spacing utilities (margin/padding)
+$spacing-map: (
+  "1": var(--ew-spacing-2, 0.5rem),
+  "2": var(--ew-spacing-4, 1rem),
+  "3": var(--ew-spacing-6, 1.5rem),
+  "4": var(--ew-spacing-8, 2rem)
+);
+
+@each $dir-key, $dir-props in (
+  "t": (margin-top, padding-top),
+  "r": (margin-inline-end, padding-inline-end),
+  "b": (margin-bottom, padding-bottom),
+  "l": (margin-inline-start, padding-inline-start)
+) {
+  @each $i, $val in $spacing-map {
+    .m#{$dir-key}-#{$i} { #{nth($dir-props, 1)}: $val; }
+    .p#{$dir-key}-#{$i} { #{nth($dir-props, 2)}: $val; }
+  }
+}
+
+@each $i, $val in $spacing-map {
+  .mx-#{$i} { margin-inline: $val; }
+  .my-#{$i} { margin-top: $val; margin-bottom: $val; }
+  .px-#{$i} { padding-inline: $val; }
+  .py-#{$i} { padding-top: $val; padding-bottom: $val; }
+  .gap-#{$i} { gap: $val; }
+}
+
+// Visually hidden utility for accessibility
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+// ===================================================================
+//  UTILITY MIXINS
+// ===================================================================
+
+// Shared mixins to avoid @extend build issues
+// Adjust values to your design system as needed
+
+@mixin rounded-lg {
+  /* Larger radius for surfaces/cards */
+  border-radius: var(--ew-radius-lg, 16px);
+}
+
+@mixin rounded {
+  border-radius: var(--ew-radius-md, 10px);
+}
+
+@mixin shadow {
+  /* General elevated shadow; uses CSS var if provided */
+  box-shadow: var(--ew-shadow-lg);
+}
+
+@mixin shadow-header {
+  /* Tighter shadow for header buttons; overridable via var */
+  box-shadow: var(--ew-shadow-md);
+}
+
+@mixin shadow-card {
+  /* Stronger, colorful accent shadow for interactive cards */
+  box-shadow: var(--ew-shadow-lg);
+}
+
+@mixin p-y-3 {
+  // Vertical padding utility
+  padding-top: var(--ew-space-4);
+  padding-bottom: var(--ew-space-4);
+}
+
+@mixin p-y-1 {
+  padding-top: var(--ew-space-2);
+  padding-bottom: var(--ew-space-2);
+}

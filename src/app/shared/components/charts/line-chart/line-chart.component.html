@@ -64,6 +64,7 @@
             class="data-point-hover-area"
             (mouseenter)="onDataPointHover($event, chartData[i])"
             (mousemove)="onMouseMove($event)"
+            (click)="onDataPointClick(chartData[i])"
           />
         </g>
 

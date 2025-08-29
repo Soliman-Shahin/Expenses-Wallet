@@ -1,9 +1,10 @@
 <ion-content class="ion-padding" [fullscreen]="true">
+  <ng-container *ngIf="vm$ | async as vm">
   <div class="login-container" style="min-height: 100%">
     <div class="login-card">
       <!-- App Logo -->
       <div class="logo-container">
-        <ion-icon name="wallet-outline" class="app-logo"></ion-icon>
+        <img src="assets/icons/icon-192.webp" alt="App Logo" class="app-logo" />
         <h1 class="app-name">{{ 'APP_TITLE' | translate }}</h1>
       </div>
 
@@ -21,7 +22,7 @@
           fill="outline"
           class="google-btn"
           (click)="signInWithGoogle()"
-          [disabled]="isLoading"
+          [disabled]="vm.isLoading"
         >
           <ion-icon slot="start" name="logo-google"></ion-icon>
           {{ "AUTH.CONTINUE_WITH_GOOGLE" | translate }}
@@ -31,7 +32,7 @@
           fill="outline"
           class="facebook-btn ion-margin-top"
           (click)="signInWithFacebook()"
-          [disabled]="isLoading"
+          [disabled]="vm.isLoading"
         >
           <ion-icon slot="start" name="logo-facebook"></ion-icon>
           {{ "AUTH.CONTINUE_WITH_FACEBOOK" | translate }}
@@ -50,9 +51,9 @@
         class="login-form form-container"
       >
         <!-- Error message display -->
-        <ion-note *ngIf="errorMessage" color="danger" class="error-message">
+        <ion-note *ngIf="vm.errorMessage" color="danger" class="error-message">
           <ion-icon name="alert-circle-outline"></ion-icon>
-          {{ errorMessage }}
+          {{ vm.errorMessage }}
         </ion-note>
         <ion-list>
           <!-- Email Input -->
@@ -103,16 +104,16 @@
         <ion-button
           type="submit"
           expand="block"
-          [disabled]="loginForm.invalid || isLoading"
+          [disabled]="loginForm.invalid || vm.isLoading"
           class="login-button"
-          [class.loading]="isLoading"
+          [class.loading]="vm.isLoading"
         >
           <ion-spinner
-            *ngIf="isLoading"
+            *ngIf="vm.isLoading"
             name="crescent"
             class="ion-margin-end"
           ></ion-spinner>
-          <span *ngIf="!isLoading">{{ "AUTH.SIGN_IN" | translate }}</span>
+          <span *ngIf="!vm.isLoading">{{ "AUTH.SIGN_IN" | translate }}</span>
         </ion-button>
       </form>
 
@@ -125,4 +126,5 @@
       </div>
     </div>
   </div>
+  </ng-container>
 </ion-content>

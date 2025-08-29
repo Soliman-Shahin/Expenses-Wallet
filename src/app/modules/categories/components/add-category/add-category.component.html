@@ -1,138 +1,205 @@
-<ion-header translucent>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/categories/list"></ion-back-button>
-    </ion-buttons>
-    <ion-title>{{
-      (editMode ? "CATEGORY.EDIT" : "CATEGORY.ADD") | translate
-    }}</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content class="ion-padding">
-  <!-- Live preview -->
-  <div class="preview" [class.bump]="animatePreview">
-    <span
-      class="category-icon"
-      [style.background]="categoryForm.get('color')?.value"
-    >
-      <ion-icon
-        size="large"
-        [name]="categoryForm.get('icon')?.value"
-      ></ion-icon>
-    </span>
-    <div class="preview-title">
-      {{ categoryForm.get("title")?.value || ("TITLE" | translate) }}
+<ion-content>
+  <ng-container *ngIf="vm$ | async as vm">
+    <div class="header-container">
+      <ion-back-button
+        defaultHref="/categories/list"
+        icon="arrow-back"
+        text=""
+      ></ion-back-button>
+      <h1 class="page-title">
+        {{ (editMode ? "CATEGORY.EDIT" : "CATEGORY.ADD") | translate }}
+      </h1>
     </div>
-  </div>
 
-  <ion-card class="form-card">
-    <form [formGroup]="categoryForm">
-      <ion-grid class="form-grid">
-        <ion-row>
-          <ion-col size="12">
-            <ion-item class="rounded-item" lines="full">
-              <ion-input
-                formControlName="title"
-                [placeholder]="'CATEGORY.TITLE_PLACEHOLDER' | translate"
-                class="modern-input"
-                maxlength="50"
-                counter="true"
-              ></ion-input>
-              <ion-icon
-                name="create-outline"
-                slot="start"
-              ></ion-icon>
-              <ion-icon
-                *ngIf="categoryForm.get('title')?.invalid && categoryForm.get('title')?.touched && formSubmitted"
-                name="alert-circle"
-                color="danger"
-                slot="end"
-                class="error-icon"
-              ></ion-icon>
-            </ion-item>
-            <ion-note
-              class="field-error animated"
-              color="danger"
-              *ngIf="
-                categoryForm.get('title')?.invalid &&
-                (categoryForm.get('title')?.dirty ||
-                  categoryForm.get('title')?.touched)
-              "
-            >
-              <ion-icon name="alert-circle-outline"></ion-icon>
-              {{ "VALIDATION.REQUIRED" | translate }}
-            </ion-note>
-          </ion-col>
-        </ion-row>
+    <!-- Live Preview -->
+    <div class="preview-container ion-padding" [class.bump]="animatePreview">
+      <div class="category-item-preview">
+        <div
+          class="category-icon-preview"
+          [style.background]="categoryForm.get('color')?.value"
+        >
+          <ion-icon [name]="categoryForm.get('icon')?.value"></ion-icon>
+        </div>
+        <div class="category-title-preview">
+          {{
+            categoryForm.get("title")?.value || ("CATEGORY.ITEM" | translate)
+          }}
+        </div>
+      </div>
+    </div>
 
-        <ion-row class="mt-4">
-          <ion-col size="12">
-            <div class="section-title">
-              <ion-text color="medium">{{
-                "CATEGORY.COLOR" | translate
-              }}</ion-text>
-              <div class="divider"></div>
-            </div>
-          </ion-col>
-          <app-color-selector
-            class="color-selector"
-            [selectedColor]="categoryForm.get('color')?.value"
-            (color)="selectColor($event)"
-            [attr.aria-label]="'CATEGORY.SELECT_COLOR' | translate"
-            role="radiogroup"
-          />
-        </ion-row>
-
-        <ion-row class="mt-4">
-          <ion-col size="12">
-            <div class="section-title">
-              <ion-text color="medium">{{
-                "CATEGORY.ICON" | translate
-              }}</ion-text>
-              <div class="divider"></div>
-            </div>
-          </ion-col>
-          <app-icon-selector
-            class="icon-selector"
-            [selectedIcon]="categoryForm.get('icon')?.value"
-            (icon)="selectIcon($event)"
-            [attr.aria-label]="'CATEGORY.SELECT_ICON' | translate"
-            role="radiogroup"
-          />
-        </ion-row>
-
-        <ion-row class="mt-4">
-          <ion-col>
-            <ion-button
-              class="action-button"
-              [class.loading]="isLoading"
-              [class.success]="formSubmitted && !isLoading"
-              (click)="editMode ? updateCategory() : addCategory()"
-              expand="block"
-              shape="round"
-              size="large"
-              strong
-              [disabled]="!categoryForm.valid || isLoading"
-              [attr.aria-label]="
-                (editMode ? 'CATEGORY.UPDATE' : 'CATEGORY.CREATE') | translate
-              "
-            >
-              <div class="button-content">
-                <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
-                <ion-icon 
-                  *ngIf="formSubmitted && !isLoading" 
-                  name="checkmark-circle" 
-                  class="success-icon">
-                </ion-icon>
-                <span class="button-text">
-                  {{ (editMode ? "UPDATE" : "CREATE") | translate }}
-                </span>
+    <div class="form-container ion-padding">
+      <ion-note
+        *ngIf="vm.errorMessage"
+        color="danger"
+        class="error-message ion-padding-start ion-padding-end"
+      >
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        {{ vm.errorMessage }}
+      </ion-note>
+      <form [formGroup]="categoryForm">
+        <ion-grid class="form-grid">
+          <ion-row>
+            <ion-col size="12">
+              <div class="modern-input-item">
+                <ion-label position="stacked">{{
+                  "CATEGORY.TITLE" | translate
+                }}</ion-label>
+                <div class="input-wrapper">
+                  <ion-icon name="create-outline" slot="start"></ion-icon>
+                  <ion-input
+                    type="text"
+                    formControlName="title"
+                    [placeholder]="'CATEGORY.TITLE_PLACEHOLDER' | translate"
+                    class="modern-input"
+                    maxlength="50"
+                    counter="true"
+                  ></ion-input>
+                  <ion-icon
+                    *ngIf="
+                      categoryForm.get('title')?.invalid &&
+                      categoryForm.get('title')?.touched &&
+                      formSubmitted
+                    "
+                    name="alert-circle"
+                    color="danger"
+                    slot="end"
+                    class="error-icon animated-icon"
+                  ></ion-icon>
+                </div>
+                <div class="validation-messages">
+                  <ion-note
+                    class="field-error animated"
+                    color="danger"
+                    *ngIf="
+                      categoryForm.get('title')?.hasError('required') &&
+                      (categoryForm.get('title')?.dirty ||
+                        categoryForm.get('title')?.touched)
+                    "
+                  >
+                    <ion-icon name="alert-circle-outline"></ion-icon>
+                    {{ "VALIDATION.REQUIRED" | translate }}
+                  </ion-note>
+                  <ion-note
+                    class="field-error animated"
+                    color="danger"
+                    *ngIf="
+                      categoryForm.get('title')?.hasError('minlength') &&
+                      (categoryForm.get('title')?.dirty ||
+                        categoryForm.get('title')?.touched)
+                    "
+                  >
+                    <ion-icon name="alert-circle-outline"></ion-icon>
+                    {{ "VALIDATION.MIN_LENGTH" | translate : { min: 2 } }}
+                  </ion-note>
+                  <ion-note
+                    class="field-error animated"
+                    color="danger"
+                    *ngIf="
+                      categoryForm.get('title')?.hasError('pattern') &&
+                      (categoryForm.get('title')?.dirty ||
+                        categoryForm.get('title')?.touched)
+                    "
+                  >
+                    <ion-icon name="alert-circle-outline"></ion-icon>
+                    {{ "VALIDATION.WHITESPACE" | translate }}
+                  </ion-note>
+                </div>
               </div>
-            </ion-button>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
-    </form>
-  </ion-card>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+            <ion-col size="12">
+              <div class="section-title">
+                <ion-text>{{ "CATEGORY.TYPE" | translate }}</ion-text>
+              </div>
+              <ion-segment
+                formControlName="type"
+                value="outcome"
+                class="type-segment"
+              >
+                <ion-segment-button value="outcome">
+                  <ion-icon
+                    name="arrow-up-outline"
+                    class="segment-icon"
+                  ></ion-icon>
+                  <ion-label>{{ "OUTCOME" | translate }}</ion-label>
+                </ion-segment-button>
+                <ion-segment-button value="income">
+                  <ion-icon
+                    name="arrow-down-outline"
+                    class="segment-icon"
+                  ></ion-icon>
+                  <ion-label>{{ "INCOME" | translate }}</ion-label>
+                </ion-segment-button>
+              </ion-segment>
+            </ion-col>
+          </ion-row>
+
+          <ion-row class="mt-4">
+            <ion-col size="12">
+              <div class="section-title">
+                <ion-text>{{ "CATEGORY.COLOR" | translate }}</ion-text>
+              </div>
+              <app-color-selector
+                class="color-selector"
+                [selectedColor]="categoryForm.get('color')?.value"
+                (color)="selectColor($event)"
+                [attr.aria-label]="'CATEGORY.SELECT_COLOR' | translate"
+                role="radiogroup"
+              ></app-color-selector>
+            </ion-col>
+          </ion-row>
+
+          <ion-row class="mt-4">
+            <ion-col size="12">
+              <div class="section-title">
+                <ion-text>{{ "ICON" | translate }}</ion-text>
+              </div>
+              <app-icon-selector
+                class="icon-selector"
+                [selectedIcon]="categoryForm.get('icon')?.value"
+                (icon)="selectIcon($event)"
+                [attr.aria-label]="'CATEGORY.SELECT_ICON' | translate"
+                role="radiogroup"
+              ></app-icon-selector>
+            </ion-col>
+          </ion-row>
+
+          <ion-row class="mt-4">
+            <ion-col>
+              <ion-button
+                class="action-button form-submit-button"
+                [class.loading]="vm.isLoading"
+                [class.success]="formSubmitted && !vm.isLoading"
+                (click)="editMode ? updateCategory() : addCategory()"
+                expand="block"
+                shape="round"
+                size="large"
+                [disabled]="!categoryForm.valid || vm.isLoading"
+                [attr.aria-label]="
+                  (editMode ? 'COMMON.UPDATE' : 'COMMON.CREATE') | translate
+                "
+              >
+                <ion-spinner *ngIf="vm.isLoading" name="crescent"></ion-spinner>
+                <ion-icon
+                  *ngIf="formSubmitted && !vm.isLoading"
+                  name="checkmark-done-outline"
+                  class="success-icon animated-icon"
+                >
+                </ion-icon>
+                <span
+                  *ngIf="!vm.isLoading && !(formSubmitted && !vm.isLoading)"
+                  class="button-text"
+                >
+                  {{ (editMode ? 'COMMON.UPDATE' : 'COMMON.CREATE') | translate }}
+                </span>
+              </ion-button>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </form>
+    </div>
+  </ng-container>
 </ion-content>
