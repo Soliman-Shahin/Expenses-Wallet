@@ -1,7 +1,9 @@
 :host {
   display: block;
   position: fixed;
-  z-index: 1000;
+  top: var(--tooltip-top, 0);
+  left: var(--tooltip-left, 0);
+  z-index: 9999;
   pointer-events: none;
   transition: opacity 0.2s var(--animation-easing);
 }

@@ -1,13 +1,7 @@
 import { animate, style, transition, trigger } from '@angular/animations';
+import { Injector, inject, ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Observable, defer } from 'rxjs';
 import { CommonModule } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  OnDestroy,
-  OnInit,
-  ViewChild,
-  inject,
-} from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { IonicModule } from '@ionic/angular';
 import { AddFabButtonComponent } from 'src/app/shared/ui/add-fab-button/add-fab-button.component';
@@ -25,11 +19,16 @@ import {
   tap,
 } from 'rxjs';
 
+import {
+  CHART_DATA,
+  CHART_TITLE,
+  CHART_ARIA_LABEL,
+  CHART_DESCRIPTION,
+  CHART_SHOW_LEGEND,
+  CHART_SIZE,
+} from 'src/app/shared/components/charts/chart.tokens';
 import { ExpenseFormComponent } from '../expense-form/expense-form.component';
 import { TransactionsComponent } from '../transactions/transactions.component';
-import { BarChartComponent } from 'src/app/shared/components/charts/bar-chart/bar-chart.component';
-import { PieChartComponent } from 'src/app/shared/components/charts/pie-chart/pie-chart.component';
-import { LineChartComponent } from 'src/app/shared/components/charts/line-chart/line-chart.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { formatCurrency } from 'src/app/shared/utils';
@@ -62,13 +61,11 @@ const MAX_RETRY_ATTEMPTS = 3;
     ReactiveFormsModule,
     TranslateModule,
     TransactionsComponent,
-    BarChartComponent,
-    PieChartComponent,
-    LineChartComponent,
     DateRangeSelectorComponent,
     AddFabButtonComponent,
     SkeletonBlockComponent,
     SectionHeaderComponent,
+    // Charts components are lazy-loaded
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [
@@ -83,10 +80,71 @@ const MAX_RETRY_ATTEMPTS = 3;
     ]),
   ],
 })
+
 export class HomePageComponent
   extends BaseComponent
   implements OnInit, OnDestroy
 {
+  // Lazy-loaded chart component references
+  barChartComponent: Observable<any> = defer(() => import('src/app/shared/components/charts/bar-chart/bar-chart.component').then(m => m.BarChartComponent));
+  pieChartComponent: Observable<any> = defer(() => import('src/app/shared/components/charts/pie-chart/pie-chart.component').then(m => m.PieChartComponent));
+  lineChartComponent: Observable<any> = defer(() => import('src/app/shared/components/charts/line-chart/line-chart.component').then(m => m.LineChartComponent));
+
+  private _injector = inject(Injector);
+
+  get barChartInjector() {
+    return Injector.create({
+      providers: [
+        { provide: CHART_DATA, useValue: this.latestVm?.incomeVsExpense || [] },
+        { provide: CHART_TITLE, useValue: 'HOME.INCOME_VS_EXPENSES' },
+        { provide: CHART_ARIA_LABEL, useValue: 'HOME.INCOME_VS_EXPENSES_CHART' },
+        { provide: CHART_DESCRIPTION, useValue: 'HOME.INCOME_VS_EXPENSES_DESC' }
+      ],
+      parent: this._injector
+    });
+  }
+  get pieChartInjector() {
+    return Injector.create({
+      providers: [
+        { provide: CHART_DATA, useValue: this.latestVm?.expenseByCategory || [] },
+        { provide: CHART_TITLE, useValue: 'HOME.EXPENSE_BY_CATEGORY' },
+        { provide: CHART_ARIA_LABEL, useValue: 'HOME.EXPENSE_BY_CATEGORY_CHART' },
+        { provide: CHART_SHOW_LEGEND, useValue: true },
+        { provide: CHART_SIZE, useValue: 300 }
+      ],
+      parent: this._injector
+    });
+  }
+  get lineChartInjector() {
+    return Injector.create({
+      providers: [
+        { provide: CHART_DATA, useValue: this.latestVm?.monthlyExpenses || [] },
+        { provide: CHART_TITLE, useValue: 'HOME.MONTHLY_EXPENSES' },
+        { provide: CHART_ARIA_LABEL, useValue: 'HOME.MONTHLY_EXPENSES_CHART' },
+        { provide: CHART_DESCRIPTION, useValue: 'HOME.MONTHLY_EXPENSES_DESC' }
+      ],
+      parent: this._injector
+    });
+  }
+
+  get salaryBreakdownPieChartInjector() {
+    return Injector.create({
+      providers: [
+        { provide: CHART_DATA, useValue: this.latestVm?.salaryBreakdown || [] },
+        { provide: CHART_TITLE, useValue: 'HOME.SALARY_BREAKDOWN' },
+        { provide: CHART_ARIA_LABEL, useValue: 'HOME.SALARY_BREAKDOWN_CHART' },
+        { provide: CHART_SHOW_LEGEND, useValue: false },
+        { provide: CHART_SIZE, useValue: 220 },
+      ],
+      parent: this._injector,
+    });
+  }
+
+  latestVm: any;
+
+  // Subscribe to vm$ for latest values (for injectors)
+  // (Removed duplicate ngOnInit here)
+
   @ViewChild('transactionsComponent')
   transactionsComponent?: TransactionsComponent;
   selectedMonth: MonthYear = this.getCurrentMonthYear();
@@ -248,6 +306,7 @@ export class HomePageComponent
       const salaryBreakdown = salaryDetails.map((item) => ({
         name: item.label,
         value: item.amount,
+        percentage: totalSalary > 0 ? (item.amount || 0) / totalSalary : 0,
       }));
 
       return {
@@ -291,6 +350,8 @@ export class HomePageComponent
    */
   override ngOnInit(): void {
     super.ngOnInit();
+    // Subscribe to vm$ for latest values (for injectors)
+    this.vm$.subscribe(vm => { this.latestVm = vm; });
     // Restore last selected tab
     try {
       const savedTab = localStorage.getItem('home.activeTab');

@@ -345,7 +345,7 @@
   --ew-text-color-inverted: var(--ew-color-gray-50);
 
   // --- Gradients & Effects (Dark) ---
-  --brand-gradient: linear-gradient(var(--gradient-direction), #181a20 0%, #23263a 100%);
+  --brand-gradient: linear-gradient(var(--gradient-direction), #121e2d 0%, var(--ion-color-primary) 100%);
   --surface-gradient: linear-gradient(180deg, #181a20 0%, #23263a 100%);
   --glass-background: var(--glass-background-dark);
   --glass-border: 1px solid rgba(255, 255, 255, 0.1);

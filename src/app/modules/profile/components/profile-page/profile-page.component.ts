@@ -32,7 +32,9 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
   personalForm!: FormGroup;
   salaryForm!: FormGroup;
   @ViewChild('avatarInput') avatarInputRef!: ElementRef<HTMLInputElement>;
-  avatarUrl: string | undefined;
+  avatarUrl: string | null = null;
+  isPersonalFormDirty = false;
+  isSalaryFormDirty = false;
 
   // State
   private isLoadingProfile$ = new BehaviorSubject<boolean>(false);
@@ -111,6 +113,16 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
         if (isEditing) return;
         this.patchFromProfile(profile);
       });
+
+    this.personalForm.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => (this.isPersonalFormDirty = true));
+
+    this.salaryForm.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => (this.isSalaryFormDirty = true));
+
+    this.personalForm.get('email')?.disable();
   }
 
 
@@ -132,7 +144,7 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
       arr.push(this.createDetailGroup('Salary', 0));
     }
     this.salaryForm.patchValue({ currency: profile.currency });
-    this.avatarUrl = profile.avatarUrl;
+    this.avatarUrl = profile.avatarUrl ?? null;
   }
 
   // Salary details helpers

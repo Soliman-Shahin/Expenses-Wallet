@@ -3,20 +3,6 @@
   vertical-align: sub;
 }
 
-// Make the container list transparent and remove default paddings
-.login-form ion-list {
-  background: transparent !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  --ion-item-background: transparent;
-}
-
-// Ensure the whole form area has no extra background blocks
-.login-form.form-container,
-.login-form .form-container {
-  background: transparent !important;
-}
-
 // Prefix icon chip inside inputs
 .prefix-icon {
   background: rgba(255, 255, 255, 0.06);
@@ -32,12 +18,23 @@
   --color: var(--ion-color-primary);
   text-decoration: none;
   font-weight: var(--ew-font-weight-medium);
+  margin: 0;
 }
 
 // Make the main submit button feel clickable without being flashy
-.login-button {
-  --border-radius: var(--ew-radius-lg);
+.auth-submit-button {
+  --border-radius: var(--ew-radius-xl);
+  --box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.25);
   height: var(--ew-size-12);
+  font-weight: var(--ew-font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease-in-out;
+
+  &:hover {
+    --box-shadow: 0 8px 20px rgba(var(--ion-color-primary-rgb), 0.3);
+    transform: translateY(-2px);
+  }
 }
 
 .text-success {
@@ -49,14 +46,19 @@
   display: flex;
   align-items: center;
   text-align: center;
-  margin: var(--ew-space-4) 0;
-  color: var(--text-secondary);
+  margin: var(--ew-space-6) 0;
+  color: var(--ion-color-medium-shade);
 
-  &::before,
-  &::after {
-    content: "";
+  .divider-line {
     flex: 1;
-    border-bottom: var(--ew-border-width-sm) solid var(--ion-color-medium);
+    height: 1px;
+    background-color: var(--ion-color-step-200, #e0e0e0);
+  }
+
+  .divider-text {
+    margin: 0 var(--ew-space-3);
+    font-weight: var(--ew-font-weight-medium);
+    font-size: var(--ew-font-size-sm);
   }
 
   &:not(:empty)::before {
@@ -80,7 +82,8 @@
     transition: color 0.15s ease;
     cursor: pointer;
 
-    &:hover, &:focus {
+    &:hover,
+    &:focus {
       color: var(--ion-color-primary);
       outline: none;
     }
@@ -115,10 +118,19 @@ ion-note {
 .signup-card,
 .login-card {
   width: 100%;
-  max-width: 480px;
-  background: var(--ion-background-color, var(--ion-color-light));
-  border-radius: var(--card-border-radius, var(--ew-radius-xl));
-  padding: var(--ew-space-8);
+  max-width: 420px;
+  margin: auto;
+  padding: var(--ew-space-6) var(--ew-space-5);
+  background: var(--ion-card-background);
+  border-radius: var(--ew-radius-xl);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid transparent;
+
+  @media (prefers-color-scheme: light) {
+    border-color: var(--ion-color-step-200, #e0e0e0);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+  }
   box-shadow: var(--card-box-shadow, var(--ew-shadow-lg));
   margin: var(--ew-space-6) 0;
 }
@@ -162,26 +174,21 @@ ion-note {
 }
 
 // Social Buttons
-.social-signup-buttons,
 .social-login-buttons {
-  margin: var(--ew-space-6) 0;
+  display: grid;
+  row-gap: 1rem;
 
   ion-button {
-    --border-radius: var(--ew-radius-lg);
+    --border-radius: var(--ew-radius-xl);
     --border-style: solid;
     --border-width: var(--ew-border-width-sm);
-    --border-color: var(--ion-color-light-shade);
     --padding-top: var(--ew-space-4);
     --padding-bottom: var(--ew-space-4);
-    --background: var(--ion-color-light);
-    --color: var(--ion-color-dark);
-    --background-hover: var(--ion-color-light-shade);
-    --background-activated: var(--ion-color-light-shade);
     font-weight: var(--ew-font-weight-medium);
     text-transform: none;
     height: var(--ew-size-12);
     margin: 0;
-    transition: all 0.3s ease;
+    transition: all var(--ew-transition-duration-medium) ease;
 
     ion-icon {
       font-size: var(--ew-font-size-xl);
@@ -189,7 +196,7 @@ ion-note {
     }
 
     &:hover {
-      transform: translateY(calc(var(--ew-space-px) * -1));
+      transform: translateY(var(--ew-space-px-negative));
       --box-shadow: var(--ew-shadow-md);
     }
 
@@ -197,33 +204,39 @@ ion-note {
       transform: translateY(var(--ew-space-px));
       --box-shadow: none;
     }
-  }
 
-  .google-btn {
-    --color: var(--ion-text-color);
+    &.google-btn {
+      --border-color: #e0e0e0;
+      --color: #444;
+      --background: #fff;
+      --background-hover: #f5f5f5;
 
-    ion-icon {
-      color: var(--ion-text-color);
+      ion-icon {
+        color: #db4437; // Google brand red
+      }
+    }
+
+    &.facebook-btn {
+      --border-color: #1877f2;
+      --color: #1877f2;
+      --background: transparent;
+      --background-hover: rgba(24, 119, 242, 0.05);
+
+      ion-icon {
+        color: #1877f2;
+      }
     }
   }
-
-  .facebook-btn {
-    --color: var(--ion-text-color);
-  }
-}
-
-// Form Styles
-.signup-form,
-.login-form {
-  margin-top: var(--ew-space-6);
 }
 
 .form-item {
   // Lighter background (more transparent) per user's preference
   --background: rgba(255, 255, 255, 0.03);
   --border-radius: var(--ew-radius-xl);
-  --padding-start: var(--ew-space-4); // tighter start padding so icon sticks to edge
-  --padding-end: var(--ew-space-4);   // symmetric end padding
+  --padding-start: var(
+    --ew-space-4
+  ); // tighter start padding so icon sticks to edge
+  --padding-end: var(--ew-space-4); // symmetric end padding
   --min-height: var(--ew-size-15);
   margin-bottom: var(--ew-space-4);
   border: var(--ew-border-width-sm) solid transparent; // remove visible border to avoid double-box look
@@ -233,7 +246,7 @@ ion-note {
   --inner-padding-top: 0;
   --inner-padding-bottom: 0;
   --inner-padding-start: 0; // remove inner start padding so icon hugs the edge
-  --inner-padding-end: 0;   // remove inner end padding so end icon hugs the edge
+  --inner-padding-end: 0; // remove inner end padding so end icon hugs the edge
   --highlight-color-focused: transparent;
   --highlight-color-invalid: transparent;
   --highlight-color-valid: transparent;
@@ -244,7 +257,8 @@ ion-note {
   &.ion-invalid {
     // keep border subtle; indicate invalid via soft glow instead of harsh red border
     border-color: transparent;
-    box-shadow: 0 0 0 var(--ew-border-width-md) color-mix(in srgb, var(--ion-color-danger) 14%, transparent);
+    box-shadow: 0 0 0 var(--ew-border-width-md)
+      color-mix(in srgb, var(--ion-color-danger) 14%, transparent);
     --highlight-color-invalid: transparent;
 
     // Kill native invalid red outline inside the shadow DOM
@@ -266,7 +280,8 @@ ion-note {
   // Focus ring and subtle elevation when the input is focused
   &:focus-within {
     border-color: transparent;
-    box-shadow: 0 0 0 var(--ew-border-width-md) color-mix(in srgb, var(--ion-color-primary) 18%, transparent);
+    box-shadow: 0 0 0 var(--ew-border-width-md)
+      color-mix(in srgb, var(--ion-color-primary) 18%, transparent);
     --background: rgba(255, 255, 255, 0.05);
   }
 
@@ -288,7 +303,7 @@ ion-note {
     --padding-top: var(--ew-space-3);
     --padding-bottom: var(--ew-space-3);
     --padding-start: 0; // text starts right after icon
-    --padding-end: 0;   // text ends right before end icon
+    --padding-end: 0; // text ends right before end icon
     --background: transparent; // kill any inner filled bg
     --border-width: 0;
     --border-color: transparent;
@@ -299,9 +314,9 @@ ion-note {
     --placeholder-opacity: 0.9;
     font-size: var(--ew-font-size-base);
     caret-color: var(--ion-color-primary);
-    flex: 1 1 auto;       // fill remaining space inside ion-item
+    flex: 1 1 auto; // fill remaining space inside ion-item
     width: 100%;
-    min-width: 0;         // allow flexbox to shrink properly
+    min-width: 0; // allow flexbox to shrink properly
   }
 
   // Ensure the native input element itself has no default background/margins
@@ -358,27 +373,25 @@ ion-note {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: var(--ew-space-5) 0 var(--ew-space-6);
+  margin-bottom: var(--ew-space-6);
+  flex-wrap: nowrap;
+  gap: var(--ew-space-4);
+}
 
-  .ion-margin-vertical {
-    --min-height: auto;
-    --padding-start: 0;
-    --inner-padding-end: 0;
-    --inner-border-width: 0;
-    --background: transparent;
+.remember-me-label {
+  display: flex;
+  align-items: center;
+  gap: var(--ew-space-3);
+  font-size: var(--ew-font-size-sm);
+  white-space: nowrap;
+  color: var(--text-secondary);
 
-    ion-checkbox {
-      --size: var(--ew-size-5);
-      --background-checked: var(--ion-color-primary);
-      --border-color: var(--ion-color-medium);
-      --border-color-checked: var(--ion-color-primary);
-      margin-inline-end: var(--ew-space-2);
-    }
-
-    ion-label {
-      font-size: var(--ew-font-size-sm);
-      color: var(--ion-color-medium);
-    }
+  ion-checkbox {
+    --size: 20px;
+    --background-checked: var(--ion-color-primary);
+    --border-color: var(--ion-color-medium);
+    --border-color-checked: var(--ion-color-primary);
+    margin: 0;
   }
 }
 
@@ -392,5 +405,23 @@ ion-note {
 
   ion-icon {
     margin-inline-end: var(--ew-space-2);
+  }
+}
+
+// signup Link
+.signup-link-container {
+  margin-top: var(--ew-space-6);
+  font-size: var(--ew-font-size-sm);
+  color: var(--ion-color-medium);
+
+  .signup-link {
+    color: var(--ion-color-primary);
+    font-weight: var(--ew-font-weight-medium);
+    text-decoration: none;
+    margin-inline-start: var(--ew-space-1);
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }

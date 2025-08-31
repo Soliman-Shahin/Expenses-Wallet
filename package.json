@@ -43,6 +43,7 @@
     "ngx-cookie-service": "^18.0.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
+    "web-vitals": "^5.1.0",
     "zone.js": "~0.14.10"
   },
   "devDependencies": {
@@ -73,6 +74,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "source-map-explorer": "^2.5.3",
     "typescript": "~5.5.4"
   },
   "description": "Expenses Wallet Mobile App",

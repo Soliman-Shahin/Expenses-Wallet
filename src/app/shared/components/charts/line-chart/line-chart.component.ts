@@ -1,9 +1,8 @@
-import { Component, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
+import { Component, Input, OnInit, inject, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  ChartTooltipComponent,
-  TooltipData,
-} from '../../ui/chart-tooltip/chart-tooltip.component';
+import { TranslateModule } from '@ngx-translate/core';
+import { ChartTooltipComponent, TooltipData } from '../../ui/chart-tooltip/chart-tooltip.component';
+import { CHART_DATA, CHART_TITLE, CHART_ARIA_LABEL, CHART_DESCRIPTION } from '../chart.tokens';
 
 interface ChartData {
   name: string;
@@ -13,16 +12,16 @@ interface ChartData {
 @Component({
   selector: 'app-line-chart',
   standalone: true,
-  imports: [CommonModule, ChartTooltipComponent],
+  imports: [CommonModule, ChartTooltipComponent, TranslateModule],
   templateUrl: './line-chart.component.html',
   styleUrls: ['./line-chart.component.scss'],
 })
-export class LineChartComponent implements OnChanges {
+export class LineChartComponent implements OnInit, OnChanges {
   @Output() dataPointClick = new EventEmitter<ChartData>();
-  @Input() data: ChartData[] = [];
-  @Input() title: string = '';
-  @Input() ariaLabel: string = 'Line chart';
-  @Input() chartDescription: string = 'Line chart visualization';
+  @Input() data: ChartData[] = inject(CHART_DATA, { optional: true }) || [];
+  @Input() title: string = inject(CHART_TITLE, { optional: true }) || '';
+  @Input() ariaLabel: string = inject(CHART_ARIA_LABEL, { optional: true }) || 'Line chart';
+  @Input() chartDescription: string = inject(CHART_DESCRIPTION, { optional: true }) || 'Line chart showing data';
 
   chartData: ChartData[] = [];
   chartWidth: number = 400;
@@ -39,11 +38,19 @@ export class LineChartComponent implements OnChanges {
   tooltipTop = '0px';
   tooltipInlineOffset = '0px';
 
+  ngOnInit(): void {
+    this.processData();
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['data'] && this.data) {
-      this.chartData = [...this.data];
-      this.generateChart();
+    if (changes['data']) {
+      this.processData();
     }
+  }
+
+  private processData(): void {
+    this.chartData = [...this.data];
+    this.generateChart();
   }
 
   private generateChart(): void {

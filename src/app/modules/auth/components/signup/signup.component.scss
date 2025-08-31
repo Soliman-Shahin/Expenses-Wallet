@@ -29,22 +29,19 @@
   display: flex;
   align-items: center;
   text-align: center;
-  margin: var(--ew-space-4) 0;
-  color: var(--text-secondary);
+  margin: var(--ew-space-6) 0;
+  color: var(--ion-color-medium-shade);
 
-  &::before,
-  &::after {
-    content: "";
+  .divider-line {
     flex: 1;
-    border-bottom: var(--ew-border-width-sm) solid var(--ion-color-medium);
+    height: 1px;
+    background-color: var(--ion-color-step-200, #e0e0e0);
   }
 
-  &:not(:empty)::before {
-    margin-inline-end: var(--ew-space-4);
-  }
-
-  &:not(:empty)::after {
-    margin-inline-start: var(--ew-space-4);
+  .divider-text {
+    margin: 0 var(--ew-space-3);
+    font-weight: var(--ew-font-weight-medium);
+    font-size: var(--ew-font-size-sm);
   }
 }
 
@@ -74,20 +71,27 @@ ion-note {
 // Signup Card
 .signup-card {
   width: 100%;
-  max-width: var(--ew-size-120);
-  background: var(--ion-background-color, var(--ion-color-light));
+  max-width: 420px;
+  margin: auto;
+  padding: var(--ew-space-6) var(--ew-space-5);
+  background: var(--ion-card-background);
   border-radius: var(--ew-radius-xl);
-  padding: var(--ew-space-7);
-  box-shadow: var(--ew-shadow-lg);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid transparent;
+
+  @media (prefers-color-scheme: light) {
+    border-color: var(--ion-color-step-200, #e0e0e0);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+  }
+  box-shadow: var(--card-box-shadow, var(--ew-shadow-lg));
   margin: var(--ew-space-6) 0;
-  position: relative;
-  overflow: hidden;
 }
 
 // Logo Container
 .logo-container {
   text-align: center;
-  margin-bottom: var(--ew-space-8);
+  margin-bottom: var(--ew-space-10);
 
   .app-logo {
     width: 96px;
@@ -124,19 +128,15 @@ ion-note {
 
 // Social Buttons
 .social-signup-buttons {
-  margin: var(--ew-space-6) 0;
+  display: grid;
+  row-gap: 1rem;
 
   ion-button {
     --border-radius: var(--ew-radius-xl);
     --border-style: solid;
     --border-width: var(--ew-border-width-sm);
-    --border-color: var(--ion-color-light-shade);
     --padding-top: var(--ew-space-4);
     --padding-bottom: var(--ew-space-4);
-    --background: var(--ion-color-light);
-    --color: var(--ion-color-dark);
-    --background-hover: var(--ion-color-light-shade);
-    --background-activated: var(--ion-color-light-shade);
     font-weight: var(--ew-font-weight-medium);
     text-transform: none;
     height: var(--ew-size-12);
@@ -157,76 +157,166 @@ ion-note {
       transform: translateY(var(--ew-space-px));
       --box-shadow: none;
     }
-  }
 
-  .google-btn {
-    --color: var(--ion-text-color);
+    &.google-btn {
+      --border-color: #e0e0e0;
+      --color: #444;
+      --background: #fff;
+      --background-hover: #f5f5f5;
 
-    ion-icon {
-      color: var(--ion-text-color);
+      ion-icon {
+        color: #db4437; // Google brand red
+      }
+    }
+
+    &.facebook-btn {
+      --border-color: #1877f2;
+      --color: #1877f2;
+      --background: transparent;
+      --background-hover: rgba(24, 119, 242, 0.05);
+
+      ion-icon {
+        color: #1877f2;
+      }
     }
   }
 }
 
-// Form Styles
-.signup-form {
-  margin-top: var(--ew-space-6);
-}
-
 .form-item {
-  --background: var(--ion-color-light);
+  // Lighter background (more transparent) per user's preference
+  --background: rgba(255, 255, 255, 0.03);
   --border-radius: var(--ew-radius-xl);
-  --padding-start: var(--ew-space-4);
-  --padding-end: var(--ew-space-2);
-  --min-height: var(--ew-size-14);
+  --padding-start: var(
+    --ew-space-4
+  ); // tighter start padding so icon sticks to edge
+  --padding-end: var(--ew-space-4); // symmetric end padding
+  --min-height: var(--ew-size-15);
   margin-bottom: var(--ew-space-4);
-  border: var(--ew-border-width-sm) solid var(--ion-color-light-shade);
-  box-shadow: var(--ew-shadow-sm);
-  transition: border-color var(--ew-transition-duration-fast), box-shadow var(--ew-transition-duration-fast);
+  border: var(--ew-border-width-sm) solid transparent; // remove visible border to avoid double-box look
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  overflow: hidden; // clip children to the same capsule
+  --inner-border-width: 0;
+  --inner-padding-top: 0;
+  --inner-padding-bottom: 0;
+  --inner-padding-start: 0; // remove inner start padding so icon hugs the edge
+  --inner-padding-end: 0; // remove inner end padding so end icon hugs the edge
+  --highlight-color-focused: transparent;
+  --highlight-color-invalid: transparent;
+  --highlight-color-valid: transparent;
+  --box-shadow: none;
+  --ripple-color: transparent;
+  --background: rgba(255, 255, 255, 0.02);
 
   &.ion-invalid {
-    border-color: var(--ion-color-danger);
-    box-shadow: var(--ew-shadow-sm-danger);
+    // keep border subtle; indicate invalid via soft glow instead of harsh red border
+    border-color: transparent;
+    box-shadow: 0 0 0 var(--ew-border-width-md)
+      color-mix(in srgb, var(--ion-color-danger) 14%, transparent);
+    --highlight-color-invalid: transparent;
+
+    // Kill native invalid red outline inside the shadow DOM
+    ion-input::part(native) {
+      box-shadow: none !important;
+      outline: none !important;
+    }
+    ion-input::part(container) {
+      box-shadow: none !important;
+      border: 0 !important;
+    }
   }
 
+  // Keep valid border neutral to avoid flashing green frames
   &.ion-valid {
-    border-color: var(--ion-color-success);
-    box-shadow: var(--ew-shadow-sm-success);
+    border-color: var(--ion-color-light-shade);
   }
 
-  &:focus-within, &:focus-visible {
-    border-color: var(--ion-color-primary);
-    box-shadow: var(--ew-shadow-md-primary);
-    outline: var(--ew-border-width-md) solid var(--ion-color-primary);
-    outline-offset: var(--ew-space-0-5);
+  // Focus ring and subtle elevation when the input is focused
+  &:focus-within {
+    border-color: transparent;
+    box-shadow: 0 0 0 var(--ew-border-width-md)
+      color-mix(in srgb, var(--ion-color-primary) 18%, transparent);
+    --background: rgba(255, 255, 255, 0.05);
   }
 
   ion-icon {
     color: var(--ion-color-medium);
     font-size: var(--ew-font-size-xl);
-    margin-inline-end: var(--ew-space-3);
+    margin-inline-end: var(--ew-space-2); // reduce gap between icon and text
+    background: transparent !important;
+  }
+
+  // Icons are now inside ion-input via slots; style them too
+  ion-input ion-icon[slot="start"] {
+    color: var(--ion-color-medium);
+    margin-inline-end: var(--ew-space-2);
+    font-size: var(--ew-font-size-xl);
   }
 
   ion-input {
-    --padding-top: var(--ew-space-2);
-    --padding-bottom: var(--ew-space-2);
-    font-size: var(--ew-font-size-lg);
-    background: transparent;
-    color: var(--text-primary);
-    border-radius: var(--ew-radius-lg);
-    transition: background var(--ew-transition-duration-fast);
+    --padding-top: var(--ew-space-3);
+    --padding-bottom: var(--ew-space-3);
+    --padding-start: 0; // text starts right after icon
+    --padding-end: 0; // text ends right before end icon
+    --background: transparent; // kill any inner filled bg
+    --border-width: 0;
+    --border-color: transparent;
+    --border-radius: 0;
+    --box-shadow: none;
+    --color: var(--ion-text-color);
+    --placeholder-color: var(--ion-color-medium);
+    --placeholder-opacity: 0.9;
+    font-size: var(--ew-font-size-base);
+    caret-color: var(--ion-color-primary);
+    flex: 1 1 auto; // fill remaining space inside ion-item
+    width: 100%;
+    min-width: 0; // allow flexbox to shrink properly
+  }
+
+  // Ensure the native input element itself has no default background/margins
+  ion-input::part(native) {
+    background: transparent !important;
+    border: 0 !important;
+    outline: none;
+    padding: var(--ew-space-3) 0 !important; // vertical only; horizontal handled by item paddings
+    box-shadow: none !important;
+    width: 100% !important;
+  }
+
+  // Remove any inner container pill/background from ion-input
+  ion-input::part(container) {
+    background: transparent !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: 0 !important;
+    width: 100% !important;
+  }
+
+  // Also ensure the ion-item surface itself is the capsule (no inner box)
+  &::part(native) {
+    background: var(--background);
+    border-radius: var(--border-radius);
+    padding-inline-start: var(--padding-start);
+    padding-inline-end: var(--padding-end);
+    min-height: var(--min-height);
   }
 
   ion-button {
-    --padding-start: var(--ew-space-2);
-    --padding-end: var(--ew-space-2);
+    // Make the end-eye icon feel part of the input (no separate chip/button look)
+    --padding-start: 0;
+    --padding-end: 0;
+    --background: transparent;
+    --box-shadow: none;
     --ripple-color: transparent;
-    border-radius: var(--ew-radius-xl);
-    transition: box-shadow var(--ew-transition-duration-fast), background var(--ew-transition-duration-fast);
+    height: var(--ew-size-8);
+    min-height: var(--ew-size-8);
+    min-width: var(--ew-size-8);
+    color: var(--ion-color-medium);
 
     ion-icon {
       margin-inline-end: 0;
       color: var(--ion-color-medium);
+      font-size: var(--ew-font-size-2xl);
     }
   }
 }
@@ -236,26 +326,34 @@ ion-note {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: var(--ew-space-5) 0 var(--ew-space-6);
+  margin: var(--ew-space-6) 0;
+  flex-wrap: nowrap;
+  gap: var(--ew-space-4);
 
-  .ion-margin-vertical {
-    --min-height: auto;
-    --padding-start: 0;
-    --inner-padding-end: 0;
-    --inner-border-width: 0;
-    --background: transparent;
+  .terms-label {
+    display: flex;
+  align-items: center;
+  gap: var(--ew-space-3);
+  font-size: var(--ew-font-size-sm);
+  white-space: nowrap;
+  color: var(--text-secondary);
 
     ion-checkbox {
-      --size: var(--ew-size-4-5);
+      --size: 20px;
       --background-checked: var(--ion-color-primary);
       --border-color: var(--ion-color-medium);
       --border-color-checked: var(--ion-color-primary);
-      margin-inline-end: var(--ew-space-2);
+      margin: 0;
     }
 
-    ion-label {
-      font-size: var(--ew-font-size-sm);
-      color: var(--ion-color-medium);
+    a {
+      color: var(--ion-color-primary);
+      text-decoration: none;
+      font-weight: 500;
+
+      &:hover {
+        text-decoration: underline;
+      }
     }
   }
 }
@@ -276,51 +374,52 @@ ion-note {
 // Password Strength Meter
 .password-strength {
   margin: var(--ew-space-4) 0;
-  
+
   .strength-meter {
     height: var(--ew-size-1-5);
     background: var(--ion-color-light-shade);
     border-radius: var(--ew-radius-sm);
     overflow: hidden;
     position: relative;
-    
+
     .strength-meter-fill {
       height: 100%;
       width: 0;
-      transition: width var(--ew-transition-duration-medium) ease, background var(--ew-transition-duration-medium) ease;
+      transition: width var(--ew-transition-duration-medium) ease,
+        background var(--ew-transition-duration-medium) ease;
       border-radius: var(--ew-radius-sm);
-      
+
       &.weak {
         background: var(--ion-color-danger);
         width: 33%;
       }
-      
+
       &.medium {
         background: var(--ion-color-warning);
         width: 66%;
       }
-      
+
       &.strong {
         background: var(--ion-color-success);
         width: 100%;
       }
     }
   }
-  
+
   .strength-text {
     margin-top: var(--ew-space-2);
     font-size: var(--ew-font-size-sm);
     color: var(--text-secondary);
     text-align: end;
-    
+
     &.weak {
       color: var(--ion-color-danger);
     }
-    
+
     &.medium {
       color: var(--ion-color-warning);
     }
-    
+
     &.strong {
       color: var(--ion-color-success);
     }
@@ -329,49 +428,19 @@ ion-note {
 
 // Password Requirements
 .password-requirements {
-  margin: var(--ew-space-3) 0;
-
-  p {
-    color: var(--text-secondary);
-    font-size: var(--ew-font-size-sm);
-    margin-bottom: var(--ew-space-2);
-  }
+  font-size: 0.8rem;
+  color: var(--ion-color-medium);
+  margin: var(--ew-space-5) 0 var(--ew-space-6);
 
   ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+    padding-inline-start: 20px;
+    margin-top: 5px;
+  }
 
-    li {
-      display: flex;
-      align-items: center;
-      margin-bottom: var(--ew-space-1);
-      font-size: var(--ew-font-size-sm);
-      color: var(--text-tertiary);
-
-      &::before {
-        content: "•";
-        color: var(--ion-color-medium);
-        margin-inline-end: var(--ew-space-2);
-      }
-
-      &.valid {
-        color: var(--ion-color-success);
-
-        &::before {
-          content: "✓";
-          color: var(--ion-color-success);
-        }
-      }
-      
-      &.text-success {
-        color: var(--ion-color-success);
-
-        &::before {
-          content: "✓";
-          color: var(--ion-color-success);
-        }
-      }
+  li {
+    transition: color 0.3s ease;
+    &.valid {
+      color: var(--ion-color-success);
     }
   }
 }
@@ -381,13 +450,13 @@ ion-note {
   margin-top: var(--ew-space-6);
   font-size: var(--ew-font-size-sm);
   color: var(--ion-color-medium);
-  
+
   .login-link {
     color: var(--ion-color-primary);
     font-weight: var(--ew-font-weight-medium);
     text-decoration: none;
     margin-inline-start: var(--ew-space-1);
-    
+
     &:hover {
       text-decoration: underline;
     }
@@ -396,32 +465,43 @@ ion-note {
 
 // Responsive Adjustments
 @media (max-width: 576px) {
-  .signup-card {
-    padding: var(--ew-space-6) var(--ew-space-4);
-    margin: var(--ew-space-4);
-  }
-  
   .logo-container {
     .app-logo {
       font-size: var(--ew-font-size-6xl);
     }
-    
+
     .app-name {
       font-size: var(--ew-font-size-2xl);
     }
   }
-  
+
   .welcome-text {
     font-size: var(--ew-font-size-2xl);
   }
-  
+
   .form-options {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--ew-space-3);
-    
+
     .ion-margin-vertical {
       align-self: flex-start;
     }
+  }
+}
+
+.auth-submit-button {
+  --border-radius: var(--ew-radius-xl);
+  --box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.25);
+  height: var(--ew-size-12);
+  font-weight: var(--ew-font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease-in-out;
+  margin-top: 1.5rem;
+
+  &:hover {
+    --box-shadow: 0 8px 20px rgba(var(--ion-color-primary-rgb), 0.3);
+    transform: translateY(-2px);
   }
 }

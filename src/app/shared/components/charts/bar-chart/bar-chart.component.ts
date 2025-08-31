@@ -1,9 +1,8 @@
-import { Component, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, inject, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  ChartTooltipComponent,
-  TooltipData,
-} from '../../ui/chart-tooltip/chart-tooltip.component';
+import { TranslateModule } from '@ngx-translate/core';
+import { ChartTooltipComponent, TooltipData } from '../../ui/chart-tooltip/chart-tooltip.component';
+import { CHART_DATA, CHART_TITLE, CHART_ARIA_LABEL, CHART_DESCRIPTION } from '../chart.tokens';
 
 interface ChartData {
   name: string;
@@ -13,10 +12,10 @@ interface ChartData {
 @Component({
   selector: 'app-bar-chart',
   standalone: true,
-  imports: [CommonModule, ChartTooltipComponent],
+  imports: [CommonModule, ChartTooltipComponent, TranslateModule],
   template: `
     <div class="chart-container" [attr.aria-label]="ariaLabel">
-      <h3 *ngIf="title" class="chart-title">{{ title }}</h3>
+      <h3 *ngIf="title" class="chart-title">{{ title | translate }}</h3>
       <div
         class="chart-wrapper"
         role="img"
@@ -61,13 +60,13 @@ interface ChartData {
   `,
   styleUrls: ['./bar-chart.component.scss'],
 })
-export class BarChartComponent implements OnChanges {
+export class BarChartComponent implements OnInit, OnChanges {
   @Output() barClick = new EventEmitter<ChartData>();
-  @Input() data: ChartData[] = [];
-  @Input() title: string = '';
-  @Input() ariaLabel: string = 'Bar chart';
-  @Input() chartDescription: string = 'Bar chart visualization';
-  @Input() containerHeight: string = '200px';
+  @Input() data: ChartData[] = inject(CHART_DATA, { optional: true }) || [];
+  @Input() title: string = inject(CHART_TITLE, { optional: true }) || '';
+  @Input() ariaLabel: string = inject(CHART_ARIA_LABEL, { optional: true }) || 'Bar chart';
+  @Input() chartDescription: string = inject(CHART_DESCRIPTION, { optional: true }) || 'Bar chart showing data';
+  containerHeight: string = '200px';
 
   chartData: ChartData[] = [];
   maxValue: number = 0;
@@ -78,11 +77,19 @@ export class BarChartComponent implements OnChanges {
   tooltipTop = '0px';
   tooltipInlineOffset = '0px';
 
+  ngOnInit(): void {
+    this.processData();
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['data'] && this.data) {
-      this.chartData = [...this.data];
-      this.calculateMaxValue();
+    if (changes['data']) {
+      this.processData();
     }
+  }
+
+  private processData(): void {
+    this.chartData = [...this.data];
+    this.calculateMaxValue();
   }
 
   private calculateMaxValue(): void {

@@ -5,19 +5,19 @@ export const MENU_ITEMS: MenuItem[] = [
   {
     title: 'SIDEBAR.HOME',
     icon: 'home-outline',
-    link: `/${APP_ROUTES.HOME}`,
+    link: APP_ROUTES.BASE + APP_ROUTES.HOME,
     requiresAuth: false,
   },
   {
     title: 'SIDEBAR.CATEGORIES',
     icon: 'pricetags-outline',
-    link: `/${APP_ROUTES.CATEGORIES.INDEX}/${APP_ROUTES.CATEGORIES.LIST}`,
+    link: APP_ROUTES.BASE + APP_ROUTES.CATEGORIES.INDEX,
     requiresAuth: true,
   },
   {
     title: 'SIDEBAR.TRANSACTIONS',
     icon: 'swap-horizontal-outline',
-    link: `/${APP_ROUTES.TRANSACTIONS.INDEX}`,
+    link: APP_ROUTES.BASE + APP_ROUTES.TRANSACTIONS.INDEX,
     requiresAuth: true,
   },
 ];

@@ -309,7 +309,7 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
     const modal = await this.modalController.create({
       component: ExpenseFormComponent,
       componentProps: {
-        expenseId: (item as any)._id,
+        expense: item,
       },
       cssClass: 'main-modal',
     });

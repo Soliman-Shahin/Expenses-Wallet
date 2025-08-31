@@ -241,6 +241,7 @@
     "SERVER_ERROR": "Server error. Please try again later.",
     "LOGIN_ERROR": "An error occurred during login. Please try again.",
     "GOOGLE": "Google sign in",
+    "OR": "or",
     "FB": "Facebook sign in",
     "PHONE": "Login by phone number",
     "CHANGE_PASSWORD": "Change password",
@@ -262,6 +263,7 @@
     "CONFIRM_PASSWORD_PLACEHOLDER": "Confirm your password",
     "OR_SIGN_UP_WITH": "Or sign up with",
     "GOOGLE_SIGNUP_COMING_SOON": "Google sign up coming soon!",
+    "FACEBOOK_SIGNUP_COMING_SOON": "Facebook sign up coming soon!",
     "I_AGREE_TO": "I agree to the",
     "CREATE_ACCOUNT": "Create account",
     "SIGN_UP_TO_CONTINUE": "Sign up to continue to your account",
@@ -272,7 +274,13 @@
     "PASSWORD_REQUIREMENTS": "Password must contain:",
     "PASSWORD_UPPERCASE": "At least one uppercase letter (A-Z)",
     "PASSWORD_LOWERCASE": "At least one lowercase letter (a-z)",
-    "PASSWORD_NUMBER": "At least one number (0-9)"
+    "PASSWORD_NUMBER": "At least one number (0-9)",
+    "PASSWORD_MIN_LENGTH": "At least 8 characters long",
+    "PASSWORD_GOOD": "Password strength: Good",
+    "PASSWORD_TOO_SHORT": "Password too short",
+    "PASSWORD_WEAK": "Password too weak",
+    "I_AGREE_TO_THE": "I agree to the",
+    "TERMS_AND_CONDITIONS": "Terms & Conditions"
   },
   "PROFILE": {
     "TITLE": "Profile",
@@ -288,7 +296,7 @@
       "EMAIL": "Email",
       "EMAIL_PLACEHOLDER": "example@email.com",
       "PHONE": "Phone (optional)",
-      "PHONE_PLACEHOLDER": "05xxxxxxxx",
+      "PHONE_PLACEHOLDER": "01xxxxxxxxx",
       "SAVE": "Save info"
     },
     "SALARY": {
@@ -315,5 +323,12 @@
       "INVALID_FILE_TYPE": "Please select a valid image file (JPEG, PNG, GIF, or WebP)",
       "FILE_TOO_LARGE": "File size exceeds 5MB limit. Please select a smaller image."
     }
+  },
+  "CONFIRM": {
+    "DELETE_HEADER": "Are you sure you want to delete this item?",
+    "DELETE_MESSAGE": "This action cannot be undone."
+  },
+  "TOAST": {
+    "DELETE_SUCCESS": "Item deleted successfully."
   }
 }

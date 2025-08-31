@@ -3,7 +3,7 @@
 
 // Base input variables
 :root {
-  --input-border-radius: var(--ew-radius-lg);
+  --input-border-radius: 16px;
   --input-padding-vertical: var(--ew-space-5);
   --input-padding-horizontal: var(--ew-space-6);
   --input-font-size: var(--ew-font-size-base);
@@ -20,34 +20,32 @@
 .ui-form-item {
   --border-radius: var(--input-border-radius);
   --border-width: var(--input-border-width);
-  --border-color: var(--ion-color-step-300);
-  --background: var(--ion-background-color);
+  --border-color: transparent;
+  --background: var(--ion-color-step-100);
   --color: var(--ion-text-color);
   --padding-start: var(--input-padding-horizontal);
   --padding-end: var(--input-padding-horizontal);
   --padding-top: var(--ew-space-4);
   --padding-bottom: var(--ew-space-4);
-  --min-height: var(--ew-header-height); // 56px, good for touch targets
+  --min-height: 48px; // Was 56px
   
   margin: var(--ew-space-5) 0;
   border-radius: var(--border-radius);
   border: var(--border-width) solid var(--border-color);
   background: var(--background);
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08), 
-              0 1px 4px rgba(0, 0, 0, 0.04),
-              inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.04),
+              0 1px 4px rgba(0, 0, 0, 0.02);
   transition: var(--input-transition);
   overflow: hidden;
   position: relative;
 
   // Hover state
   &:hover:not(.ion-focused):not(.ion-invalid) {
-    --border-color: var(--ion-color-step-400);
-    --background: var(--ion-background-color);
+    --border-color: transparent;
+    --background: var(--ion-color-step-150);
     transform: translateY(calc(var(--ew-space-1) * -1));
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12), 
-                0 2px 8px rgba(0, 0, 0, 0.08),
-                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08),
+                0 2px 8px rgba(0, 0, 0, 0.04);
   }
 
   // Focus state
@@ -56,26 +54,9 @@
     --border-color: var(--ion-color-primary);
     --background: var(--ion-background-color);
     transform: translateY(calc(var(--ew-border-width-md) * -1));
-    box-shadow: 0 8px 32px rgba(var(--ion-color-primary-rgb), 0.25),
-                0 4px 16px rgba(0, 0, 0, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(var(--ion-color-primary-rgb), 0.2),
+                0 4px 16px rgba(0, 0, 0, 0.08);
     border: var(--input-border-width) solid var(--ion-color-primary);
-    
-    &::before {
-      content: '';
-      position: absolute;
-      top: calc(var(--input-border-width) * -1);
-      inset-inline-start: calc(var(--input-border-width) * -1);
-      inset-inline-end: calc(var(--input-border-width) * -1);
-      bottom: calc(var(--input-border-width) * -1);
-      border-radius: calc(var(--border-radius) + var(--input-border-width));
-      background: linear-gradient(135deg, 
-        var(--ion-color-primary), 
-        var(--ion-color-secondary),
-        var(--ion-color-tertiary));
-      z-index: -1;
-      opacity: 0.8;
-    }
   }
 
   // Invalid state
@@ -83,37 +64,11 @@
     --border-color: var(--ion-color-danger);
     --background: rgba(var(--ion-color-danger-rgb), 0.05);
     animation: inputShake 0.4s ease-in-out;
-    
-    &::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      inset-inline-start: 0;
-      inset-inline-end: 0;
-      bottom: 0;
-      border-radius: var(--border-radius);
-      background: linear-gradient(135deg, transparent, rgba(var(--ion-color-danger-rgb), 0.1));
-      pointer-events: none;
-      z-index: 1;
-    }
   }
 
   // Touched state
-  &.ion-touched:not(.ion-invalid) {
+  &.ion-touched.ion-valid {
     --border-color: var(--ion-color-success);
-    
-    &::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      inset-inline-start: 0;
-      inset-inline-end: 0;
-      bottom: 0;
-      border-radius: var(--border-radius);
-      background: linear-gradient(135deg, transparent, rgba(var(--ion-color-success-rgb), 0.05));
-      pointer-events: none;
-      z-index: 1;
-    }
   }
 
   // Remove default ionic styling
@@ -132,7 +87,9 @@ ion-input {
   --color: var(--ion-text-color);
   --placeholder-color: var(--ion-color-step-500);
   --padding-start: 0;
-  --padding-end: 0;
+  --inner-padding-end: 16px;
+  --min-height: 54px;
+  --padding-bottom: 8px;
   
   font-size: var(--input-font-size);
   line-height: var(--input-line-height);
@@ -150,23 +107,16 @@ ion-input {
 }
 
 // Label styling
-ion-label {
+.form-group > ion-label {
   font-weight: var(--ew-font-weight-bold);
   font-size: var(--ew-font-size-sm);
   color: var(--ion-color-step-700);
-  margin-bottom: var(--ew-space-4);
+  margin-bottom: var(--ew-space-3);
   transition: var(--input-transition);
   text-transform: uppercase;
-  letter-spacing: 0.5px; // This can be a token if we create one
-  
-  .ion-focused & {
-    color: var(--ion-color-primary);
-    transform: translateY(calc(var(--ew-space-1) * -1));
-  }
-  
-  .ion-invalid & {
-    color: var(--ion-color-danger);
-  }
+  letter-spacing: 0.5px;
+  display: block;
+  padding-inline-start: var(--ew-space-2);
 }
 
 // Icon styling in inputs
@@ -180,7 +130,7 @@ ion-icon[slot="start"] {
   
   .ion-focused & {
     color: var(--ion-color-primary);
-    transform: scale(1.15);
+    transform: scale(1.1);
   }
   
   .ion-invalid & {
@@ -198,7 +148,7 @@ ion-icon[slot="end"] {
   
   .ion-focused & {
     color: var(--ion-color-primary);
-    transform: scale(1.15);
+    transform: scale(1.1);
   }
   
   .ion-invalid & {
@@ -334,6 +284,48 @@ ion-button[type="submit"],
   }
 }
 
+// Animation for form submission
+@keyframes form-submit-animation {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.form-submit-button.submitting {
+  animation: form-submit-animation 0.5s ease-in-out;
+}
+
+// Modern Searchbar
+.modern-searchbar {
+  --background: var(--ion-color-light-tint);
+  --box-shadow: none;
+  --border-radius: 16px;
+  padding: 8px;
+
+  .searchbar-input-container {
+    .searchbar-input {
+      box-shadow: var(--input-shadow-sm);
+      border: 1px solid transparent;
+      transition: all 0.3s ease-in-out;
+    }
+  }
+
+  &.searchbar-has-focus {
+    .searchbar-input-container {
+      .searchbar-input {
+        border-color: var(--ion-color-primary);
+        box-shadow: var(--input-shadow-focus-sm);
+      }
+    }
+  }
+}
+
 // Animations
 @keyframes inputShake {
   0%, 100% { transform: translateX(0); }
@@ -358,13 +350,6 @@ ion-button[type="submit"],
   backdrop-filter: blur(var(--ew-space-4));
   -webkit-backdrop-filter: blur(var(--ew-space-4));
   border: var(--border-width) solid rgba(var(--ion-color-primary-rgb), 0.2);
-  
-  &::before {
-    background: linear-gradient(135deg, 
-      rgba(255, 255, 255, 0.1), 
-      rgba(255, 255, 255, 0.05)
-    );
-  }
 }
 
 // Pill shape variant
@@ -387,22 +372,17 @@ ion-button[type="submit"],
 
 // Dark mode optimizations
 .dark {
-  :root {
-    --input-shadow: var(--ew-shadow-sm-dark);
-    --input-shadow-focus: var(--ew-shadow-lg-dark);
-  }
-  
   .modern-input-item,
   .form-item,
   .ui-form-item {
-    --background: var(--ion-color-step-100);
-    --border-color: var(--ion-color-step-400);
-    box-shadow: var(--ew-shadow-sm-dark);
+    --background: var(--ion-color-step-150);
+    --border-color: transparent;
+    box-shadow: none;
     
     &:hover:not(.ion-focused):not(.ion-invalid) {
-      --background: var(--ion-color-step-150);
-      --border-color: var(--ion-color-step-500);
-      box-shadow: var(--ew-shadow-md-dark);
+      --background: var(--ion-color-step-200);
+      --border-color: transparent;
+      box-shadow: none;
     }
   }
 }

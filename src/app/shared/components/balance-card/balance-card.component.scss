@@ -15,7 +15,6 @@
 
 .toggle-visibility {
   position: absolute;
-  top: var(--ew-space-4);
   inset-inline-end: var(--ew-space-4);
   background: transparent;
   border: 0;
@@ -47,7 +46,6 @@
 .balance-item {
   display: flex;
   align-items: center;
-  padding: var(--ew-space-5) var(--ew-space-3);
   border-radius: var(--ew-radius-md);
   transition: background var(--ew-transition-duration-fast);
 

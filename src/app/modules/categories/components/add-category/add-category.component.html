@@ -41,71 +41,13 @@
         <ion-grid class="form-grid">
           <ion-row>
             <ion-col size="12">
-              <div class="modern-input-item">
-                <ion-label position="stacked">{{
-                  "CATEGORY.TITLE" | translate
-                }}</ion-label>
-                <div class="input-wrapper">
-                  <ion-icon name="create-outline" slot="start"></ion-icon>
-                  <ion-input
-                    type="text"
-                    formControlName="title"
-                    [placeholder]="'CATEGORY.TITLE_PLACEHOLDER' | translate"
-                    class="modern-input"
-                    maxlength="50"
-                    counter="true"
-                  ></ion-input>
-                  <ion-icon
-                    *ngIf="
-                      categoryForm.get('title')?.invalid &&
-                      categoryForm.get('title')?.touched &&
-                      formSubmitted
-                    "
-                    name="alert-circle"
-                    color="danger"
-                    slot="end"
-                    class="error-icon animated-icon"
-                  ></ion-icon>
-                </div>
-                <div class="validation-messages">
-                  <ion-note
-                    class="field-error animated"
-                    color="danger"
-                    *ngIf="
-                      categoryForm.get('title')?.hasError('required') &&
-                      (categoryForm.get('title')?.dirty ||
-                        categoryForm.get('title')?.touched)
-                    "
-                  >
-                    <ion-icon name="alert-circle-outline"></ion-icon>
-                    {{ "VALIDATION.REQUIRED" | translate }}
-                  </ion-note>
-                  <ion-note
-                    class="field-error animated"
-                    color="danger"
-                    *ngIf="
-                      categoryForm.get('title')?.hasError('minlength') &&
-                      (categoryForm.get('title')?.dirty ||
-                        categoryForm.get('title')?.touched)
-                    "
-                  >
-                    <ion-icon name="alert-circle-outline"></ion-icon>
-                    {{ "VALIDATION.MIN_LENGTH" | translate : { min: 2 } }}
-                  </ion-note>
-                  <ion-note
-                    class="field-error animated"
-                    color="danger"
-                    *ngIf="
-                      categoryForm.get('title')?.hasError('pattern') &&
-                      (categoryForm.get('title')?.dirty ||
-                        categoryForm.get('title')?.touched)
-                    "
-                  >
-                    <ion-icon name="alert-circle-outline"></ion-icon>
-                    {{ "VALIDATION.WHITESPACE" | translate }}
-                  </ion-note>
-                </div>
-              </div>
+              <app-ui-input
+                formControlName="title"
+                [label]="'CATEGORY.TITLE' | translate"
+                [placeholder]="'CATEGORY.TITLE_PLACEHOLDER' | translate"
+                startIcon="create-outline"
+                [maxLength]="50"
+              ></app-ui-input>
             </ion-col>
           </ion-row>
 

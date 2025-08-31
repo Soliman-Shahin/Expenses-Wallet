@@ -212,7 +212,13 @@
   "NO_CATEGORIES_FOUND": "لا توجد فئات",
   "NO_CATEGORIES_MESSAGE": "لم تقم بإنشاء أي فئات بعد. قم بإنشاء فئتك الأولى للبدء.",
   "ADD_CATEGORY": "إضافة فئة",
-
+  "CONFIRM": {
+    "DELETE_HEADER": "هل أنت متأكد أنك تريد حذف هذا العنصر؟",
+    "DELETE_MESSAGE": "لا يمكن التراجع عن هذا الإجراء."
+  },
+  "TOAST": {
+    "DELETE_SUCCESS": "تم حذف العنصر بنجاح."
+  },
   "AUTH": {
     "SIGN_IN": "تسجيل الدخول",
     "SIGN_UP": "إنشاء حساب جديد",
@@ -270,7 +276,13 @@
     "PASSWORD_REQUIREMENTS": "يجب أن تحتوي كلمة المرور على:",
     "PASSWORD_UPPERCASE": "حرف كبير واحد على الأقل (A-Z)",
     "PASSWORD_LOWERCASE": "حرف صغير واحد على الأقل (a-z)",
-    "PASSWORD_NUMBER": "رقم واحد على الأقل (0-9)"
+    "PASSWORD_NUMBER": "رقم واحد على الأقل (0-9)",
+    "PASSWORD_MIN_LENGTH": "كلمة المرور يجب أن تكون 8 أحرف على الأقل",
+    "PASSWORD_GOOD": "قوة كلمة المرور: جيدة",
+    "PASSWORD_TOO_SHORT": "كلمة المرور قصيرة جداً",
+    "PASSWORD_WEAK": "كلمة المرور ضعيفة جداً",
+    "I_AGREE_TO_THE": "أوافق على",
+    "TERMS_AND_CONDITIONS": "الشروط والأحكام"
   },
   "PROFILE": {
     "TITLE": "الملف الشخصي",
@@ -286,7 +298,7 @@
       "EMAIL": "البريد الإلكتروني",
       "EMAIL_PLACEHOLDER": "example@email.com",
       "PHONE": "رقم الهاتف (اختياري)",
-      "PHONE_PLACEHOLDER": "05xxxxxxxx",
+      "PHONE_PLACEHOLDER": "01xxxxxxxxx",
       "SAVE": "حفظ البيانات"
     },
     "SALARY": {

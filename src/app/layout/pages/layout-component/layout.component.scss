@@ -81,9 +81,8 @@ ion-router-outlet {
 
   // Adjust content position when side menu is visible
   ion-router-outlet {
-    margin-inline-start: var(--side-menu-width);
-    width: calc(100% - var(--side-menu-width));
-    padding: var(--spacing-lg) var(--spacing-xl);
+    margin: 0 !important;
+    width: 100% !important;
     @include rounded-lg;
     @include shadow;
     transition: margin 0.22s, width 0.22s, padding 0.22s;

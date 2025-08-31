@@ -559,3 +559,23 @@ ion-header {
     }
   }
 }
+
+ion-item-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ew-radius-lg);
+  margin: var(--ew-space-1);
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  height: 80%;
+  &:hover {
+    transform: scale(1.05);
+    background-color: var(--ion-color-primary-tint);
+  }
+}
+
+ion-item-option[color="danger"] {
+  &:hover {
+    background-color: var(--ion-color-danger-tint);
+  }
+}

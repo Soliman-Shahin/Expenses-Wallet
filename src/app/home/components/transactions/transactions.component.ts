@@ -7,7 +7,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import {
   BehaviorSubject,
@@ -28,6 +28,7 @@ import { ProfileService } from 'src/app/modules/profile/services/profile.service
 import { AlertController } from '@ionic/angular';
 import { ExpenseFormComponent } from '../expense-form/expense-form.component';
 import { SkeletonBlockComponent } from 'src/app/shared/ui/skeleton-block/skeleton-block.component';
+import { ToastController } from '@ionic/angular';
 
 @Component({
   standalone: true,
@@ -43,6 +44,9 @@ export class TransactionsComponent extends BaseComponent implements OnChanges {
   @Input() year?: number;
 
   userCurrency = 'USD';
+
+  // UI state for popover menu per transaction
+  popoverStates: { [id: string]: boolean } = {};
 
   private readonly refreshTrigger$ = new BehaviorSubject<void>(undefined);
 
@@ -78,7 +82,10 @@ export class TransactionsComponent extends BaseComponent implements OnChanges {
     }
   }
 
-  private readonly transactions$ = combineLatest([this.params$, this.refreshTrigger$]).pipe(
+  private readonly transactions$ = combineLatest([
+    this.params$,
+    this.refreshTrigger$,
+  ]).pipe(
     switchMap(([params]) => {
       this.setLoading(true);
       return this.expenseService.getExpenses().pipe(
@@ -92,7 +99,8 @@ export class TransactionsComponent extends BaseComponent implements OnChanges {
             if (!rawDate) return false;
             const d = new Date(rawDate);
             return params.month && params.year
-              ? d.getMonth() + 1 === params.month && d.getFullYear() === params.year
+              ? d.getMonth() + 1 === params.month &&
+                  d.getFullYear() === params.year
               : true;
           });
 
@@ -172,11 +180,29 @@ export class TransactionsComponent extends BaseComponent implements OnChanges {
   }
 
   // Category color if available, with a fallback
+  // Helper to check if popover is open for a transaction
+  isPopoverOpen(id: string): boolean {
+    return !!this.popoverStates[id];
+  }
+
+  // Open popover for a transaction
+  openPopover(id: string, event: Event) {
+    event.stopPropagation();
+    this.popoverStates = { ...this.popoverStates, [id]: true };
+  }
+
+  // Close popover for a transaction
+  closePopover(id: string) {
+    this.popoverStates = { ...this.popoverStates, [id]: false };
+  }
+
   getCategoryColor(t: Expense): string {
     const cat = (t as any)?.category;
     const color = (cat as any)?.color;
     // Provide a fallback color to prevent template errors if color is null/undefined
-    return (typeof color === 'string' && color) ? color : 'var(--ion-color-primary)';
+    return typeof color === 'string' && color
+      ? color
+      : 'var(--ion-color-primary)';
   }
 
   getDateValue(t: Expense): string | number | Date | null | undefined {
@@ -230,21 +256,31 @@ export class TransactionsComponent extends BaseComponent implements OnChanges {
 
   async onDelete(item: Expense) {
     const alert = await this.alertController.create({
-      header: 'Confirm Delete',
-      message: 'Are you sure you want to delete this transaction?',
+      header: this.translateService.instant('CONFIRM.DELETE_HEADER'),
+      message: this.translateService.instant('CONFIRM.DELETE_MESSAGE'),
       buttons: [
-        { text: 'Cancel', role: 'cancel' },
         {
-          text: 'Delete',
+          text: this.translateService.instant('COMMON.CANCEL'),
+          role: 'cancel',
+        },
+        {
+          text: this.translateService.instant('COMMON.DELETE'),
           role: 'destructive',
           handler: () => {
             this.expenseService.deleteExpense((item as any)._id).subscribe({
-              next: () => {
-                this.toastService.presentSuccessToast('bottom', 'Transaction deleted');
-                this.refreshTransactions();
+              next: async () => {
+                this.toastService.presentSuccessToast(
+                  'bottom',
+                  'Transaction deleted successfully'
+                );
+                this.onAddTransaction(); // Refresh list
               },
-              error: (err) => {
-                this.handleError('Deletion failed', err, true);
+              error: async (err) => {
+                this.toastService.presentErrorToast(
+                  'bottom',
+                  'Error deleting transaction. Please try again.'
+                );
+                console.error(err);
               },
             });
           },

@@ -1,10 +1,9 @@
 <div
-  *ngIf="visible && data"
+  *ngIf="data && visible"
   class="tooltip-container"
-  [class.tooltip-visible]="visible"
-  [class.tooltip-hidden]="!visible"
-  [style.top]="top"
-  [style.inset-inline-start]="inlineOffset"
+  [class.visible]="visible"
+  [style.--tooltip-top]="top"
+  [style.--tooltip-left]="inlineOffset"
   role="tooltip"
   [attr.aria-hidden]="!visible"
 >

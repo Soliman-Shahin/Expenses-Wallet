@@ -1,9 +1,28 @@
-import { Component, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
+import {
+  Component,
+  Input,
+  OnChanges,
+  SimpleChanges,
+  Output,
+  EventEmitter,
+  inject,
+  OnInit,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
 import {
   ChartTooltipComponent,
   TooltipData,
 } from '../../ui/chart-tooltip/chart-tooltip.component';
+import {
+  CHART_DATA,
+  CHART_TITLE,
+  CHART_ARIA_LABEL,
+  CHART_DESCRIPTION,
+  CHART_SHOW_LEGEND,
+  CHART_SIZE,
+  CHART_STROKE_WIDTH,
+} from '../chart.tokens';
 
 interface ChartData {
   name: string;
@@ -17,10 +36,10 @@ interface InternalChartData extends ChartData {
 @Component({
   selector: 'app-pie-chart',
   standalone: true,
-  imports: [CommonModule, ChartTooltipComponent],
+  imports: [CommonModule, ChartTooltipComponent, TranslateModule],
   template: `
     <div class="chart-container" [attr.aria-label]="ariaLabel">
-      <h3 *ngIf="title" class="chart-title">{{ title }}</h3>
+      <h3 *ngIf="title" class="chart-title">{{ title | translate }}</h3>
       <div
         class="chart-wrapper"
         role="img"
@@ -45,23 +64,10 @@ interface InternalChartData extends ChartData {
             </g>
           </svg>
         </div>
-        <div class="legend" *ngIf="showLegend">
-          <div
-            *ngFor="let item of chartData; let i = index"
-            class="legend-item"
-            [class.legend-item-hidden]="!item.visible"
-            (click)="toggleSliceVisibility(i)"
-            tabindex="0"
-            (keydown.enter)="toggleSliceVisibility(i)"
-            role="button"
-            [attr.aria-pressed]="!item.visible"
-          >
-            <div
-              class="legend-color"
-              [style.background-color]="getColor(i)"
-            ></div>
-            <div class="legend-label">{{ item.name || '—' }}</div>
-            <div class="legend-value">{{ item.value | number : '1.0-0' }}</div>
+        <div *ngIf="showLegend" class="legend">
+          <div *ngFor="let item of legendData" class="legend-item">
+            <span class="legend-color" [style.background-color]="item.color"></span>
+            <span class="legend-label">{{ item.label }}</span>
           </div>
         </div>
       </div>
@@ -75,19 +81,24 @@ interface InternalChartData extends ChartData {
   `,
   styleUrls: ['./pie-chart.component.scss'],
 })
-export class PieChartComponent implements OnChanges {
+export class PieChartComponent implements OnInit, OnChanges {
   @Output() sliceClick = new EventEmitter<ChartData>();
-  @Input() data: ChartData[] = [];
-  @Input() title: string = '';
-  @Input() ariaLabel: string = 'Pie chart';
-  @Input() chartDescription: string = 'Pie chart visualization';
-  @Input() showLegend: boolean = true;
-  @Input() size: number = 200;
-  @Input() strokeWidth: number = 2;
+
+  // Data can be provided via @Input for standalone use, or via DI when used with ngComponentOutlet.
+  @Input() data: ChartData[] = inject(CHART_DATA, { optional: true }) || [];
+  @Input() title: string = inject(CHART_TITLE, { optional: true }) || '';
+  @Input() ariaLabel: string =
+    inject(CHART_ARIA_LABEL, { optional: true }) || 'Pie chart';
+  @Input() chartDescription: string =
+    inject(CHART_DESCRIPTION, { optional: true }) || 'Pie chart visualization';
+  @Input() showLegend: boolean = inject(CHART_SHOW_LEGEND, { optional: true }) ?? true;
+  @Input() size: number = inject(CHART_SIZE, { optional: true }) || 200;
+  @Input() strokeWidth: number = inject(CHART_STROKE_WIDTH, { optional: true }) || 2;
 
   chartData: InternalChartData[] = [];
-  slices: any[] = [];
-  strokeColor: string = 'var(--ion-card-background)';
+  slices: { path: string; color: string; label: string; originalIndex: number }[] = [];
+  legendData: { label: string; color: string }[] = [];
+  strokeColor: string = 'var(--ion-background-color, #ffffff)';
 
   // Tooltip properties
   tooltipVisible = false;
@@ -95,11 +106,25 @@ export class PieChartComponent implements OnChanges {
   tooltipTop = '0px';
   tooltipInlineOffset = '0px';
 
+  ngOnInit(): void {
+    this.processData();
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data'] && this.data) {
-      this.chartData = this.data.map((item) => ({ ...item, visible: true }));
-      this.generateSlices();
+      this.processData();
     }
+  }
+
+  private processData(): void {
+    if (!this.data) {
+      this.chartData = [];
+      this.slices = [];
+      this.legendData = [];
+      return;
+    }
+    this.chartData = this.data.map((item) => ({ ...item, visible: true }));
+    this.generateSlices();
   }
 
   private generateSlices(): void {
@@ -107,6 +132,7 @@ export class PieChartComponent implements OnChanges {
     const total = visibleData.reduce((sum, item) => sum + item.value, 0);
     if (total === 0) {
       this.slices = [];
+      this.legendData = [];
       return;
     }
 
@@ -118,7 +144,7 @@ export class PieChartComponent implements OnChanges {
           path: '',
           color: 'transparent',
           label: '',
-          value: 0,
+          originalIndex: dataIndex,
         };
       }
       dataIndex++;
@@ -133,13 +159,17 @@ export class PieChartComponent implements OnChanges {
         label: `${item.name && item.name.trim() ? item.name : '—'}: ${
           item.value
         }`,
-        value: item.value,
         originalIndex: dataIndex,
       };
 
       startAngle = endAngle;
       return slice;
     });
+
+    this.legendData = this.chartData.map((item, index) => ({
+      label: item.name,
+      color: this.getColor(index),
+    }));
   }
 
   getViewBox(): string {
@@ -214,35 +244,35 @@ export class PieChartComponent implements OnChanges {
   }
 
   // Tooltip event handlers
-  onSliceHover(event: MouseEvent, item: InternalChartData, index: number) {
+  onSliceHover(event: MouseEvent, data: ChartData, index: number): void {
     this.tooltipData = {
-      label: item.name,
-      value: item.value,
+      label: data.name,
+      value: data.value,
       color: this.getColor(index),
     };
     this.tooltipVisible = true;
     this.updateTooltipPosition(event);
   }
 
-  onMouseMove(event: MouseEvent) {
+  onMouseMove(event: MouseEvent): void {
     if (this.tooltipVisible) {
       this.updateTooltipPosition(event);
     }
   }
 
-  onSliceClick(item: InternalChartData): void {
-    this.sliceClick.emit(item);
-  }
-
-  onMouseLeave() {
+  onMouseLeave(): void {
     this.tooltipVisible = false;
   }
 
-  private updateTooltipPosition(event: MouseEvent) {
+  private updateTooltipPosition(event: MouseEvent): void {
     const offsetX = 15;
     const offsetY = 15;
     this.tooltipInlineOffset = `${event.clientX + offsetX}px`;
     this.tooltipTop = `${event.clientY + offsetY}px`;
+  }
+
+  onSliceClick(data: ChartData): void {
+    this.sliceClick.emit(data);
   }
 
   toggleSliceVisibility(index: number): void {

@@ -11,12 +11,14 @@ import {
   UserInfoComponent,
   BalanceCardComponent,
 } from './components';
-import { CardComponent } from './ui/card/card.component';
-import { ListItemComponent } from './ui/list-item/list-item.component';
-import { EmptyStateComponent } from './ui/empty-state/empty-state.component';
-import { ChartWrapperComponent } from './ui/chart-wrapper/chart-wrapper.component';
 import { SkeletonBlockComponent } from './ui/skeleton-block/skeleton-block.component';
-import { ButtonComponent } from './ui/button/button.component';
+import {
+  CardComponent,
+  ListItemComponent,
+  EmptyStateComponent,
+  ChartWrapperComponent,
+  ButtonComponent
+} from './ui-library';
 
 import { ThemeToggleComponent } from './components/theme-toggle/theme-toggle.component';
 

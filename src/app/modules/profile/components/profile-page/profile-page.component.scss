@@ -128,6 +128,10 @@ ion-content {
   transform: translateY(-2px);
 }
 
+.avatar-actions .actions ion-button:active {
+  animation: button-press 0.2s ease-out forwards;
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -149,6 +153,8 @@ ion-content {
 
 .salary-detail-row {
   --min-height: var(--ew-size-14);
+  --inner-padding-end: 0;
+  --inner-border-width: 0;
   border-radius: var(--ew-radius-lg);
   background: color-mix(
     in srgb,
@@ -161,7 +167,19 @@ ion-content {
   box-shadow: var(--ew-shadow-sm);
   border: var(--ew-border-width-sm) solid
     color-mix(in srgb, var(--ion-text-color) 8%, transparent);
+
+  ion-reorder {
+    margin-inline-end: 8px;
+    color: var(--ion-color-medium);
+    transition: color 0.2s ease, transform 0.2s ease;
+
+    &:hover {
+      color: var(--ion-color-primary);
+      transform: scale(1.1);
+    }
+  }
 }
+
 .salary-detail-row:hover {
   background: color-mix(
     in srgb,
@@ -190,12 +208,38 @@ ion-content {
   min-width: 0;
 }
 .salary-detail-row .row-content .inline-actions {
+  grid-column: 1 / -1;
   display: flex;
   justify-content: flex-end;
-  gap: var(--ew-space-3);
-  justify-self: end;
-  overflow: visible;
+  margin-top: 16px;
 }
+
+// New Responsive Grid Layout
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+
+  // On tablets and larger screens, use a two-column layout
+  @media (min-width: 992px) {
+    grid-template-columns: minmax(300px, 1fr) 2fr;
+    align-items: flex-start; // Align items to the top of their grid cell
+  }
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px; // Consistent spacing between cards in a column
+  width: 100%;
+}
+
+
+// Remove spacer style
+.spacer {
+  display: none;
+}
+
 .salary-detail-row .row-content .field app-ui-input,
 .salary-detail-row .row-content .field ion-input,
 .salary-detail-row .row-content .field ion-item {
@@ -262,13 +306,16 @@ ion-content {
 
 .total-row {
   display: flex;
-  justify-content: flex-start;
-  margin: var(--ew-space-7) 0 var(--ew-space-4);
-}
-.total-row ion-badge {
-  max-width: 100%;
-  white-space: normal;
-  line-height: var(--ew-size-30);
+  justify-content: flex-end;
+  margin-top: 24px;
+
+  ion-badge {
+    font-size: 1.2em;
+    font-weight: 600;
+    padding: 14px 20px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.3);
+  }
 }
 
 .field label {
@@ -281,7 +328,6 @@ ion-content {
 .select-item {
   /* tighten paddings on the container item */
   --inner-padding-end: var(--ew-space-3);
-  --inner-padding-start: var(--ew-space-3);
   --padding-top: var(--ew-space-2);
   --padding-bottom: var(--ew-space-2);
   --padding-start: 0;
@@ -437,7 +483,7 @@ ion-content {
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(var(--ew-space-2));
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -460,11 +506,21 @@ ion-content {
 @keyframes slideInUp {
   from {
     opacity: 0;
-    transform: translateY(var(--ew-space-7));
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes button-press {
+  from {
+    transform: translateY(-2px) scale(1);
+  }
+  to {
+    transform: translateY(0) scale(0.98);
+    box-shadow: var(--ew-shadow-sm);
   }
 }
 

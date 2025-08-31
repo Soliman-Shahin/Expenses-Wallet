@@ -22,18 +22,15 @@
       class="transactions-list list-fade-in"
       *ngIf="vm.transactions.length > 0; else empty"
     >
-      <ion-item-sliding *ngFor="let t of vm.transactions; trackBy: trackById; let i = index"
-        [style.--animation-order]="i"
-      >
-        <ion-item
-          class="transaction-item"
-          lines="none"
-          button
-          (click)="onTransactionClick(t)"
-        >
-          <div class="category-icon" [style.background]="getCategoryColor(t)">
-            <ion-icon [name]="getCategoryIcon(t)"></ion-icon>
-          </div>
+      <ion-item-sliding *ngFor="let t of vm.transactions; trackBy: trackById">
+        <ion-item class="transaction-item" lines="none" button>
+          <span
+            class="category-icon"
+            [style.background]="getCategoryColor(t)"
+            aria-hidden="true"
+          >
+            <ion-icon size="large" [name]="getCategoryIcon(t)"></ion-icon>
+          </span>
           <ion-label>
             <h3 class="ion-text-wrap transaction-title">
               {{ getOperationName(t) }}
@@ -51,26 +48,25 @@
               </span>
             </p>
           </ion-label>
-          <div
+          <ion-note
             slot="end"
-            class="transaction-amount"
-            [ngClass]="{
-              'is-income': getCategoryType(t) === 'income',
-              'is-expense': getCategoryType(t) !== 'income'
-            }"
+            [color]="getCategoryType(t) === 'income' ? 'success' : 'primary'"
           >
-            {{ getCategoryType(t) === "income" ? "+" : "-" }}
-            {{ getAmountValue(t) | currency : userCurrency : "symbol" : "1.0-0" }}
-          </div>
+            {{ getCategoryType(t) === "income" ? "+" : ""
+            }}{{
+              getAmountValue(t) | currency : userCurrency : "symbol" : "1.0-0"
+            }}
+          </ion-note>
         </ion-item>
-
         <ion-item-options side="end">
-          <ion-item-option (click)="onEdit(t)">{{
-            "COMMON.EDIT" | translate
-          }}</ion-item-option>
-          <ion-item-option color="danger" (click)="onDelete(t)">{{
-            "COMMON.DELETE" | translate
-          }}</ion-item-option>
+          <ion-item-option (click)="onEdit(t)">
+            <ion-icon slot="start" name="create-outline"></ion-icon>
+            Edit
+          </ion-item-option>
+          <ion-item-option color="danger" (click)="onDelete(t)">
+            <ion-icon slot="start" name="trash-outline"></ion-icon>
+            Delete
+          </ion-item-option>
         </ion-item-options>
       </ion-item-sliding>
     </ion-list>
@@ -79,11 +75,23 @@
     <ng-template #empty>
       <div class="empty-state ion-text-center ion-padding">
         <div class="empty-state-icon-wrapper">
-          <img src="assets/icons/icon-192.webp" alt="App Logo" class="empty-state-icon" />
+          <img
+            src="assets/icons/icon-192.webp"
+            alt="App Logo"
+            class="empty-state-icon"
+          />
         </div>
-        <h3 class="empty-state-title">{{ "TRANSACTIONS.NO_RECENT" | translate }}</h3>
-        <p class="empty-state-subtitle">{{ "TRANSACTIONS.ADD_FIRST" | translate }}</p>
-        <ion-button fill="clear" (click)="onAddTransaction()" class="add-transaction-button">
+        <h3 class="empty-state-title">
+          {{ "TRANSACTIONS.NO_RECENT" | translate }}
+        </h3>
+        <p class="empty-state-subtitle">
+          {{ "TRANSACTIONS.ADD_FIRST" | translate }}
+        </p>
+        <ion-button
+          fill="clear"
+          (click)="onAddTransaction()"
+          class="add-transaction-button"
+        >
           <ion-icon slot="start" name="add-circle-outline"></ion-icon>
           {{ "TRANSACTIONS.ADD_NEW" | translate }}
         </ion-button>

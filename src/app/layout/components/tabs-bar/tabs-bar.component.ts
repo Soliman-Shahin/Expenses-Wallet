@@ -36,6 +36,12 @@ export class TabsBarComponent extends BaseComponent implements OnInit {
     super();
   }
 
+  navigateTab(link: string, event: Event) {
+    event.preventDefault();
+    console.log('Tab click:', link);
+    this.router.navigateByUrl(link, { replaceUrl: false });
+  }
+
   override ngOnInit(): void {
     super.ngOnInit();
   }

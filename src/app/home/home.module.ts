@@ -8,9 +8,6 @@ import { HomeRoutingModule } from './home-routing.module';
 import { IonicModule } from '@ionic/angular';
 import { ReactiveFormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
-import { BarChartComponent } from 'src/app/shared/components/charts';
-import { PieChartComponent } from 'src/app/shared/components/charts';
-import { LineChartComponent } from 'src/app/shared/components/charts';
 import {
   SectionHeaderComponent,
   ActionTileComponent,
@@ -27,9 +24,6 @@ import { DateRangeSelectorComponent } from 'src/app/shared/components/ui/date-ra
     HomeRoutingModule,
     ReactiveFormsModule,
     TranslateModule,
-    BarChartComponent,
-    PieChartComponent,
-    LineChartComponent,
     SectionHeaderComponent,
     ActionTileComponent,
     SkeletonBlockComponent,

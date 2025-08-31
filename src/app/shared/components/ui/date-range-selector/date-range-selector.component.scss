@@ -1,9 +1,9 @@
 .date-range-selector {
   display: flex;
   gap: var(--ew-space-2);
-  background-color: var(--ion-color-light-tint);
+  background-color: var(--ion-card-background);
   padding: var(--ew-space-2);
-  border-radius: var(--ew-radius-lg);
+  border-radius: var(--ew-radius-pill);
 
   button {
     flex: 1;
@@ -12,7 +12,7 @@
     background-color: transparent;
     color: var(--ion-color-medium-shade);
     font-weight: var(--ew-font-weight-semibold);
-    border-radius: var(--ew-radius-md);
+    border-radius: var(--ew-radius-pill);
     cursor: pointer;
     transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
 

@@ -9,10 +9,9 @@
       <ng-container *ngFor="let tab of tabs">
         <ion-tab-button
           *ngIf="tab.visible"
-          [routerLink]="tab.routerLink"
+          (click)="navigateTab(tab.routerLink, $event)"
           routerLinkActive="tab-selected"
           [routerLinkActiveOptions]="{ exact: true }"
-          [tab]="tab.routerLink"
         >
           <ion-icon [name]="tab.icon"></ion-icon>
           <ion-label *ngIf="tab.show_label">{{

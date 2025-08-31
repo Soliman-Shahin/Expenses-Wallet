@@ -5,6 +5,7 @@
     </ion-toolbar>
     <ion-toolbar>
       <ion-searchbar
+        class="modern-searchbar"
         animated="true"
         [placeholder]="'SEARCH' | translate"
         [debounce]="500"
@@ -38,7 +39,7 @@
     <!-- Skeleton loaders while fetching -->
     <div *ngIf="vm.isLoading" class="skeleton-list">
       <app-skeleton-block
-        *ngFor="let i of [1, 2, 3, 4, 5]"
+        *ngFor="let i of [1, 2, 3, 4, 5, 6]"
         variant="list-item-avatar"
       ></app-skeleton-block>
     </div>

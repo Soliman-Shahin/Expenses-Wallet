@@ -18,9 +18,11 @@
     (ngSubmit)="onSubmit()"
     class="ion-padding form-container"
     [attr.aria-busy]="vm.isLoading"
+    #formContainer
   >
     <!-- Category -->
     <div class="form-group">
+      <ion-label>{{ 'EXPENSE.CATEGORY' | translate }}</ion-label>
       <ion-item class="modern-input-item">
         <ion-select
           formControlName="category"
@@ -48,6 +50,7 @@
     </div>
     <!-- Date -->
     <div class="form-group">
+      <ion-label>{{ 'EXPENSE.DATE' | translate }}</ion-label>
       <ion-item class="modern-input-item">
         <div
           class="modern-input"
@@ -83,6 +86,7 @@
     </div>
     <!-- Amount -->
     <div class="form-group">
+      <ion-label>{{ 'EXPENSE.AMOUNT' | translate }}</ion-label>
       <ion-item class="modern-input-item">
         <ion-input
           #amountInput
@@ -112,6 +116,7 @@
     </div>
     <!-- Description -->
     <div class="form-group">
+      <ion-label>{{ 'EXPENSE.DESCRIPTION' | translate }}</ion-label>
       <ion-item class="modern-input-item">
         <ion-input
           formControlName="description"

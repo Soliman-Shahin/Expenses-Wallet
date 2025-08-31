@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, Input, OnInit, ViewChild, OnDestroy, ElementRef } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { IonInput } from '@ionic/angular';
 import { FormGroup, Validators } from '@angular/forms';
@@ -6,17 +6,20 @@ import { Observable, map, finalize, combineLatest } from 'rxjs';
 
 import { BaseComponent } from 'src/app/shared/base/base.component';
 import { Expense, Category } from 'src/app/shared/models';
+import { trapFocus, releaseFocus } from 'src/app/shared/utils/focus-trap';
 
 @Component({
   selector: 'app-expense-form',
   templateUrl: './expense-form.component.html',
   styleUrls: ['./expense-form.component.scss'],
 })
-export class ExpenseFormComponent extends BaseComponent implements OnInit, AfterViewInit {
+
+export class ExpenseFormComponent extends BaseComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() expense?: Expense;
   @Input() onClose: () => void = () => {};
 
   @ViewChild('amountInput') amountInput: IonInput | undefined;
+  @ViewChild('formContainer', { read: ElementRef }) formContainerRef!: ElementRef<HTMLElement>;
 
   expenseForm!: FormGroup;
   categories$!: Observable<Category[]>;
@@ -24,24 +27,25 @@ export class ExpenseFormComponent extends BaseComponent implements OnInit, After
   minDate = '2000-01-01';
   maxDate = '2100-12-31';
 
-  vm$!: Observable<{ isLoading: boolean }>;
+
+  vm$ = combineLatest([toObservable(this.state.loading)]).pipe(
+    map(([isLoading]) => ({ isLoading }))
+  );
 
   override ngOnInit() {
     super.ngOnInit();
     this.isEditMode = !!this.expense;
     this.initForm();
     this.loadCategories();
-    this.vm$ = combineLatest([toObservable(this.state.loading)]).pipe(
-      map(([isLoading]) => ({
-        isLoading,
-      }))
-    );
   }
 
   ngAfterViewInit() {
     // Set a timeout to ensure the modal has fully transitioned in
     setTimeout(() => {
       this.amountInput?.setFocus();
+      if (this.formContainerRef?.nativeElement) {
+        trapFocus(this.formContainerRef.nativeElement.closest('ion-modal, .main-modal, .modal-wrapper') || this.formContainerRef.nativeElement);
+      }
     }, 400); // 400ms delay to accommodate modal animation
   }
 
@@ -94,6 +98,7 @@ export class ExpenseFormComponent extends BaseComponent implements OnInit, After
   }
 
   onCancel() {
+    releaseFocus();
     if (this.modalCtrl) {
       this.modalCtrl.dismiss();
     } else if (this.onClose) {
@@ -137,6 +142,7 @@ export class ExpenseFormComponent extends BaseComponent implements OnInit, After
   }
 
   close() {
+    releaseFocus();
     if (this.modalCtrl) {
       this.modalCtrl.dismiss();
     } else if (this.onClose) {

@@ -1,11 +1,11 @@
 <ion-content
   [class.rtl]="currentLang === 'ar'"
   [dir]="currentLang === 'ar' ? 'rtl' : 'ltr'"
-  [scrollY]="!((vm$ | async)?.loading)"
+  [scrollY]="!(vm$ | async)?.loading"
   [scrollX]="false"
   [fullscreen]="true"
 >
-<ng-container *ngIf="vm$ | async as vm">
+  <ng-container *ngIf="vm$ | async as vm">
     <!-- Loading State with Skeleton -->
     <ng-container *ngIf="vm.loading; else content">
       <div class="skeleton-container ion-padding">
@@ -18,94 +18,113 @@
 
     <!-- Main Content -->
     <ng-template #content>
-    <!-- Error State -->
-    <div *ngIf="state.error()" class="error-state ion-padding ion-text-center">
-      <ion-icon name="warning-outline" class="error-icon"></ion-icon>
-      <p class="ion-margin-top">{{ state.error() }}</p>
-      <ion-button
-        fill="clear"
-        (click)="retry()"
-        [attr.aria-label]="'COMMON.RETRY' | translate"
-        class="retry-button"
+      <!-- Error State -->
+      <div
+        *ngIf="state.error()"
+        class="error-state ion-padding ion-text-center"
       >
-        <ion-icon slot="start" name="refresh-outline"></ion-icon>
-        {{ "COMMON.RETRY" | translate }}
-      </ion-button>
-    </div>
+        <ion-icon name="warning-outline" class="error-icon"></ion-icon>
+        <p class="ion-margin-top">{{ state.error() }}</p>
+        <ion-button
+          fill="clear"
+          (click)="retry()"
+          [attr.aria-label]="'COMMON.RETRY' | translate"
+          class="retry-button"
+        >
+          <ion-icon slot="start" name="refresh-outline"></ion-icon>
+          {{ "COMMON.RETRY" | translate }}
+        </ion-button>
+      </div>
 
-    <!-- Welcome State -->
-    <ng-container *ngIf="!user; else authenticatedView">
-      <ion-grid class="welcome-container ion-padding-vertical">
-        <ion-row class="ion-justify-content-center ion-align-items-center">
-          <ion-col size="12" size-md="12" size-lg="12" class="ion-text-center">
-            <div class="welcome-illustration">
-              <img src="assets/icons/icon-192.webp" alt="App Logo" class="welcome-icon" />
-              <div class="welcome-dots">
-                <span
-                  *ngFor="let dot of [1, 2, 3, 4, 5]; trackBy: trackByIndex"
-                ></span>
-              </div>
-            </div>
-
-            <h1
-              class="welcome-title"
-              [attr.aria-label]="'HOME.WELCOME_TITLE' | translate"
+      <!-- Welcome State -->
+      <ng-container *ngIf="!user; else authenticatedView">
+        <ion-grid class="welcome-container ion-padding-vertical">
+          <ion-row class="ion-justify-content-center ion-align-items-center">
+            <ion-col
+              size="12"
+              size-md="12"
+              size-lg="12"
+              class="ion-text-center"
             >
-              {{ "HOME.WELCOME_TITLE" | translate }}
-            </h1>
-            <p
-              class="welcome-message"
-              [attr.aria-label]="'HOME.WELCOME_MESSAGE' | translate"
-            >
-              {{ "HOME.WELCOME_MESSAGE" | translate }}
-            </p>
-            <div class="welcome-actions ion-padding-horizontal ion-margin-top">
-              <ion-button
-                routerLink="/auth/login"
-                expand="block"
-                class="ion-margin-bottom"
-                [attr.aria-label]="'AUTH.SIGN_IN' | translate"
-                shape="round"
-                size="large"
-              >
-                {{ "AUTH.SIGN_IN" | translate }}
-              </ion-button>
-              <ion-button
-                routerLink="/auth/signup"
-                fill="outline"
-                expand="block"
-                [attr.aria-label]="'AUTH.SIGN_UP' | translate"
-                shape="round"
-                size="large"
-              >
-                {{ "AUTH.SIGN_UP" | translate }}
-              </ion-button>
-            </div>
+              <div class="welcome-illustration">
+                <img
+                  src="assets/icons/icon-192.webp"
+                  alt="App Logo"
+                  class="welcome-icon"
+                />
+                <div class="welcome-dots">
+                  <span
+                    *ngFor="let dot of [1, 2, 3, 4, 5]; trackBy: trackByIndex"
+                  ></span>
+                </div>
+              </div>
 
-            <div class="features-preview ion-padding-top">
-              <div class="feature-item">
-                <ion-icon name="analytics-outline"></ion-icon>
-                <span>{{ "HOME.FEATURES.TRACKING" | translate }}</span>
+              <h1
+                class="welcome-title"
+                [attr.aria-label]="'HOME.WELCOME_TITLE' | translate"
+              >
+                {{ "HOME.WELCOME_TITLE" | translate }}
+              </h1>
+              <p
+                class="welcome-message"
+                [attr.aria-label]="'HOME.WELCOME_MESSAGE' | translate"
+              >
+                {{ "HOME.WELCOME_MESSAGE" | translate }}
+              </p>
+              <div
+                class="welcome-actions ion-padding-horizontal ion-margin-top"
+              >
+                <ion-button
+                  routerLink="/auth/login"
+                  expand="block"
+                  class="ion-margin-bottom"
+                  [attr.aria-label]="'AUTH.SIGN_IN' | translate"
+                  shape="round"
+                  size="large"
+                >
+                  {{ "AUTH.SIGN_IN" | translate }}
+                </ion-button>
+                <ion-button
+                  routerLink="/auth/signup"
+                  fill="outline"
+                  expand="block"
+                  [attr.aria-label]="'AUTH.SIGN_UP' | translate"
+                  shape="round"
+                  size="large"
+                >
+                  {{ "AUTH.SIGN_UP" | translate }}
+                </ion-button>
               </div>
-              <div class="feature-item">
-                <ion-icon name="calendar-outline"></ion-icon>
-                <span>{{ "HOME.FEATURES.BUDGETING" | translate }}</span>
-              </div>
-              <div class="feature-item">
-                <ion-icon name="stats-chart-outline"></ion-icon>
-                <span>{{ "HOME.FEATURES.INSIGHTS" | translate }}</span>
-              </div>
-            </div>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
-    </ng-container>
 
-    <!-- Authenticated Content -->
-    <ng-template #authenticatedView>
-      <ion-grid class="authenticated-content">
+              <div class="features-preview ion-padding-top">
+                <div class="feature-item">
+                  <ion-icon name="analytics-outline"></ion-icon>
+                  <span>{{ "HOME.FEATURES.TRACKING" | translate }}</span>
+                </div>
+                <div class="feature-item">
+                  <ion-icon name="calendar-outline"></ion-icon>
+                  <span>{{ "HOME.FEATURES.BUDGETING" | translate }}</span>
+                </div>
+                <div class="feature-item">
+                  <ion-icon name="stats-chart-outline"></ion-icon>
+                  <span>{{ "HOME.FEATURES.INSIGHTS" | translate }}</span>
+                </div>
+              </div>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ng-container>
+
+      <!-- Authenticated Content -->
+      <ng-template #authenticatedView>
+        <ion-grid class="authenticated-content">
           <ion-row>
-            <ion-col size="12" size-md="10" size-lg="8" class="ion-margin-auto">
+            <ion-col
+              size="12"
+              size-md="12"
+              size-lg="12"
+              class="ion-margin-auto"
+            >
               <!-- Welcome Header -->
               <div
                 class="welcome-header ion-padding-horizontal ion-padding-bottom"
@@ -137,20 +156,29 @@
               ></app-months-scroll-header>
 
               <!-- Tabs -->
-              <ion-segment
-                [value]="activeTab"
-                (ionChange)="setActiveTab($event.detail.value)"
-                class="home-tabs ion-margin-horizontal"
-                role="tablist"
-                [attr.aria-label]="'HOME.SECTIONS' | translate"
-              >
-                <ion-segment-button value="summary">
-                  <ion-label>{{ "HOME.TABS.SUMMARY" | translate }}</ion-label>
-                </ion-segment-button>
-                <ion-segment-button value="charts">
-                  <ion-label>{{ "HOME.TABS.CHARTS" | translate }}</ion-label>
-                </ion-segment-button>
-              </ion-segment>
+              <div class="ion-padding">
+                <ion-segment
+                  [value]="activeTab"
+                  (ionChange)="setActiveTab($event.detail.value)"
+                  class="home-tabs"
+                  [ngClass]="{
+                    'summary-active': activeTab === 'summary',
+                    'charts-active': activeTab === 'charts'
+                  }"
+                  role="tablist"
+                  [attr.aria-label]="'HOME.SECTIONS' | translate"
+                >
+                  <ion-segment-button value="summary" layout="icon-start">
+                    <ion-icon name="document-text-outline"></ion-icon>
+                    <ion-label>{{ "HOME.TABS.SUMMARY" | translate }}</ion-label>
+                  </ion-segment-button>
+                  <ion-segment-button value="charts" layout="icon-start">
+                    <ion-icon name="pie-chart-outline"></ion-icon>
+                    <ion-label>{{ "HOME.TABS.CHARTS" | translate }}</ion-label>
+                  </ion-segment-button>
+                  <div class="sliding-indicator"></div>
+                </ion-segment>
+              </div>
 
               <!-- Summary skeleton template used across summary sections -->
               <ng-template #summarySkeleton>
@@ -177,44 +205,142 @@
                       [title]="'HOME.CHARTS' | translate"
                     ></app-section-header>
 
-                    <ng-container
-                      *ngIf="!vm.loading; else chartsSkeleton"
-                    >
-                      <!-- Income vs Expenses Bar Chart -->
-                      <app-bar-chart
-                        *ngIf="vm.incomeVsExpense.length > 0"
-                        [data]="vm.incomeVsExpense"
-                        [title]="'HOME.INCOME_VS_EXPENSES' | translate"
-                        [ariaLabel]="
-                          'HOME.INCOME_VS_EXPENSES_CHART' | translate
-                        "
-                        [chartDescription]="
-                          'HOME.INCOME_VS_EXPENSES_DESC' | translate
-                        "
-                      ></app-bar-chart>
+                    <ng-container *ngIf="!vm.loading; else chartsSkeleton">
+                      <!-- Income vs Expenses Bar Chart (Lazy) -->
+                      <ng-container *ngIf="vm.incomeVsExpense.length > 0">
+                        <ng-container
+                          *ngIf="
+                            barChartComponent | async as BarChartComponent;
+                            else barChartLoading
+                          "
+                        >
+                          <ng-container
+                            *ngComponentOutlet="
+                              BarChartComponent;
+                              injector: barChartInjector
+                            "
+                          ></ng-container>
+                        </ng-container>
+                        <ng-template #barChartLoading>
+                          <app-skeleton-block
+                            variant="chart"
+                          ></app-skeleton-block>
+                        </ng-template>
+                      </ng-container>
 
-                      <!-- Expense by Category Pie Chart -->
-                      <app-pie-chart
-                        *ngIf="vm.expenseByCategory.length > 0"
-                        [data]="vm.expenseByCategory"
-                        [title]="'HOME.EXPENSE_BY_CATEGORY' | translate"
-                        [ariaLabel]="
-                          'HOME.EXPENSE_BY_CATEGORY_CHART' | translate
-                        "
-                        [showLegend]="true"
-                        [size]="300"
-                      ></app-pie-chart>
+                      <!-- Expense by Category Pie Chart (Lazy) -->
+                      <ng-container *ngIf="vm.expenseByCategory.length > 0">
+                        <ng-container
+                          *ngIf="
+                            pieChartComponent | async as PieChartComponent;
+                            else pieChartLoading
+                          "
+                        >
+                          <ng-container
+                            *ngComponentOutlet="
+                              PieChartComponent;
+                              injector: pieChartInjector
+                            "
+                          ></ng-container>
+                        </ng-container>
+                        <ng-template #pieChartLoading>
+                          <app-skeleton-block
+                            variant="chart"
+                          ></app-skeleton-block>
+                        </ng-template>
+                      </ng-container>
 
-                      <!-- Monthly Expenses Line Chart -->
-                      <app-line-chart
-                        *ngIf="vm.monthlyExpenses.length > 0"
-                        [data]="vm.monthlyExpenses"
-                        [title]="'HOME.MONTHLY_EXPENSES' | translate"
-                        [ariaLabel]="'HOME.MONTHLY_EXPENSES_CHART' | translate"
-                        [chartDescription]="
-                          'HOME.MONTHLY_EXPENSES_DESC' | translate
-                        "
-                      ></app-line-chart>
+                      <!-- Monthly Expenses Line Chart (Lazy) -->
+                      <ng-container *ngIf="vm.monthlyExpenses.length > 0">
+                        <ng-container
+                          *ngIf="
+                            lineChartComponent | async as LineChartComponent;
+                            else lineChartLoading
+                          "
+                        >
+                          <ng-container
+                            *ngComponentOutlet="
+                              LineChartComponent;
+                              injector: lineChartInjector
+                            "
+                          ></ng-container>
+                        </ng-container>
+                        <ng-template #lineChartLoading>
+                          <app-skeleton-block
+                            variant="chart"
+                          ></app-skeleton-block>
+                        </ng-template>
+                      </ng-container>
+
+                      <!-- Salary Breakdown Section -->
+                      <ng-container *ngIf="vm.totalSalary > 0">
+                        <!-- Salary Pie Chart -->
+                        <div class="salary-chart-container">
+                          <!-- chart -->
+                          <ng-container
+                            *ngIf="
+                              pieChartComponent | async as PieChartComponent;
+                              else pieChartLoading
+                            "
+                          >
+                            <ng-container
+                              *ngComponentOutlet="
+                                PieChartComponent;
+                                injector: salaryBreakdownPieChartInjector
+                              "
+                            ></ng-container>
+                          </ng-container>
+                          <ng-template #pieChartLoading>
+                            <app-skeleton-block
+                              variant="chart"
+                            ></app-skeleton-block>
+                          </ng-template>
+                          <!-- Detailed Salary List -->
+                          <div class="salary-list ion-padding-top">
+                            <div
+                              *ngFor="
+                                let item of vm.salaryBreakdown;
+                                trackBy: trackByIndex
+                              "
+                              class="salary-item"
+                              [attr.aria-label]="
+                                item.name +
+                                ': ' +
+                                formatAmount(item.value) +
+                                ' (' +
+                                (item.percentage | percent : '1.0-0') +
+                                ')'
+                              "
+                            >
+                              <div class="item-details">
+                                <ion-icon
+                                  name="briefcase-outline"
+                                  class="item-icon"
+                                ></ion-icon>
+                                <div class="item-info">
+                                  <span class="salary-source">{{
+                                    item.name
+                                  }}</span>
+                                  <span class="salary-amount">{{
+                                    formatAmount(item.value)
+                                  }}</span>
+                                </div>
+                              </div>
+                              <div class="item-progress">
+                                <span class="progress-percentage">{{
+                                  item.percentage | percent : "1.0-0"
+                                }}</span>
+                                <div class="progress-bar-container">
+                                  <div
+                                    class="progress-bar"
+                                    [style.width]="item.percentage | percent"
+                                  ></div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </ng-container>
                     </ng-container>
                     <ng-template #chartsSkeleton>
                       <div class="chart-skeleton ion-margin-vertical">
@@ -261,28 +387,6 @@
                     ></app-balance-card>
                   </section>
 
-                  <!-- Salary Breakdown Section -->
-                  <section
-                    *ngIf="vm.totalSalary > 0"
-                    class="card-section salary-card ion-margin-vertical"
-                    role="region"
-                    [attr.aria-label]="'HOME.SALARY_BREAKDOWN' | translate"
-                  >
-                    <app-section-header
-                      icon="cash-outline"
-                      [title]="'HOME.SALARY_BREAKDOWN' | translate"
-                    ></app-section-header>
-                    <div class="salary-list ion-padding-horizontal ion-padding-bottom">
-                      <div
-                        *ngFor="let item of vm.salaryBreakdown; trackBy: trackByIndex"
-                        class="salary-item"
-                      >
-                        <span class="salary-source">{{ item.name }}</span>
-                        <span class="salary-amount">{{ formatAmount(item.value) }}</span>
-                      </div>
-                    </div>
-                  </section>
-
                   <!-- Recent Transactions -->
                   <section
                     class="card-section transactions-card ion-margin-vertical"
@@ -308,10 +412,10 @@
               </ng-container>
             </ion-col>
           </ion-row>
-      </ion-grid>
+        </ion-grid>
+      </ng-template>
     </ng-template>
-  </ng-template>
-</ng-container>
+  </ng-container>
 </ion-content>
 
 <app-add-fab-button

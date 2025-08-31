@@ -1,12 +1,18 @@
 /* Match the category icon style used in Categories list */
 .category-icon {
-  height: var(--ew-space-9) !important; // 40px
-  width: var(--ew-space-9) !important; // 40px
+  height: 44px !important;
+  width: 44px !important;
+  min-width: 44px !important;
   border-radius: var(--ew-radius-full);
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-inline-end: var(--ew-space-4); // 12px
+  margin-inline-end: var(--ew-space-3);
+  color: white;
+  flex-shrink: 0;
+  ion-icon {
+    font-size: 24px;
+  }
 }
 
 /* Optional: tweak ion-item spacing for tighter layout */
@@ -17,18 +23,31 @@ ion-item {
 
 /* Match Categories list spacing */
 .transactions-list {
-  padding: var(--ew-space-3) var(--ew-space-4); /* same as .categories-list */
+  background: transparent;
 }
 
 .transaction-item {
-  --background: var(--ion-card-background, var(--ion-color-step-50));
-  margin: var(--ew-space-4) var(--ew-space-3); /* same as .category-item */
-  border-radius: var(--ew-radius-lg);
-  box-shadow: var(--ew-shadow-md);
-  transition: transform var(--ew-transition-duration-fast) ease, box-shadow var(--ew-transition-duration-fast) ease, background var(--ew-transition-duration-fast) ease;
-  animation: cardAppear var(--ew-transition-duration-medium) ease both;
-  ion-note {
-    font-size: var(--ew-font-size-xs);
+  --background: var(--ion-item-background);
+  --border-radius: var(--ew-radius-lg);
+  --padding-start: var(--ew-space-3);
+  --inner-padding-end: var(--ew-space-3);
+  margin: 0 var(--ew-space-2) var(--ew-space-2);
+  box-shadow: var(--ew-shadow-sm);
+  transition: var(--ew-transition-base);
+  animation: cardAppear var(--ew-transition-duration-slow) ease both;
+  align-items: center;
+  min-height: 64px;
+  &:hover {
+    transform: translateY(calc(var(--ew-space-px) * -1));
+    box-shadow: var(--ew-shadow-lg);
+  }
+  &:active {
+    transform: translateY(0);
+    box-shadow: var(--ew-shadow-sm);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    animation: none !important;
+    transition: none !important;
   }
 }
 
@@ -45,21 +64,65 @@ ion-item {
   margin: 0;
   font-size: var(--ew-font-size-xs);
   color: var(--ion-color-medium);
-
   .transaction-date {
-    font-size: var(--ew-font-size-2xs);
     display: flex;
     align-items: center;
   }
-
   .transaction-category {
     display: flex;
     align-items: center;
     gap: var(--ew-space-1);
-
     ion-icon {
       font-size: var(--ew-font-size-xs);
     }
+  }
+}
+
+ion-item-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ew-radius-lg);
+  margin: var(--ew-space-1);
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  height: 80%;
+  &:hover {
+    transform: scale(1.05);
+    background-color: var(--ion-color-primary-tint);
+  }
+}
+
+ion-item-option[color="danger"] {
+  &:hover {
+    background-color: var(--ion-color-danger-tint);
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: calc(100vh - 300px);
+  text-align: center;
+  padding: var(--ew-space-6);
+  ion-icon {
+    font-size: var(--ew-size-20);
+    color: var(--ew-text-color-muted);
+    margin-bottom: var(--ew-space-4);
+  }
+  h2 {
+    font-family: var(--ew-font-family-heading);
+    font-weight: var(--ew-font-weight-bold);
+    font-size: var(--ew-font-size-xl);
+    color: var(--ew-text-color-primary);
+    margin-bottom: var(--ew-space-2);
+  }
+  p {
+    font-family: var(--ew-font-family-base);
+    color: var(--ew-text-color-secondary);
+    max-width: 320px;
+    margin-bottom: var(--ew-space-6);
   }
 }
 
@@ -76,7 +139,6 @@ ion-item {
     color: var(--ion-color-danger);
   }
 }
-
 
 .transaction-item:hover {
   transform: translateY(calc(var(--ew-border-width-md) * -1));

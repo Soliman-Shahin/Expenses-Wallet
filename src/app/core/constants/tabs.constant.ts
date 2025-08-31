@@ -20,11 +20,7 @@ export const TABS_MENU_ITEMS: Tab[] = [
     order: 1,
     label: 'SIDEBAR.CATEGORIES',
     show_label: false,
-    routerLink:
-      `${APP_ROUTES.BASE}${APP_ROUTES.CATEGORIES.INDEX}${APP_ROUTES.BASE}${APP_ROUTES.CATEGORIES.LIST}`.replace(
-        '//',
-        '/'
-      ),
+    routerLink: APP_ROUTES.BASE + APP_ROUTES.CATEGORIES.INDEX,
     routerLinkActiveOptions: { exact: true },
     icon: 'list',
     visible: true,
@@ -37,11 +33,7 @@ export const TABS_MENU_ITEMS: Tab[] = [
     order: 2,
     label: 'SIDEBAR.EXPENSES',
     show_label: false,
-    routerLink:
-      `${APP_ROUTES.BASE}${APP_ROUTES.TRANSACTIONS.INDEX}${APP_ROUTES.BASE}${APP_ROUTES.TRANSACTIONS.LIST}`.replace(
-        '//',
-        '/'
-      ),
+    routerLink: APP_ROUTES.BASE + APP_ROUTES.TRANSACTIONS.INDEX,
     routerLinkActiveOptions: { exact: true },
     icon: 'receipt',
     visible: true,
@@ -53,11 +45,7 @@ export const TABS_MENU_ITEMS: Tab[] = [
     order: 3,
     label: 'SIDEBAR.SETTINGS',
     show_label: false,
-    routerLink:
-      `${APP_ROUTES.BASE}${APP_ROUTES.SETTINGS.INDEX}${APP_ROUTES.BASE}${APP_ROUTES.SETTINGS.LIST}`.replace(
-        '//',
-        '/'
-      ),
+    routerLink: APP_ROUTES.BASE + APP_ROUTES.SETTINGS.INDEX,
     routerLinkActiveOptions: { exact: true },
     icon: 'settings',
     visible: true,
