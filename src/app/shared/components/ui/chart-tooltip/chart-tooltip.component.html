@@ -1,9 +1,6 @@
 <div
-  *ngIf="data && visible"
+  *ngIf="data"
   class="tooltip-container"
-  [class.visible]="visible"
-  [style.--tooltip-top]="top"
-  [style.--tooltip-left]="inlineOffset"
   role="tooltip"
   [attr.aria-hidden]="!visible"
 >
@@ -13,7 +10,7 @@
       class="tooltip-color-swatch"
       [style.backgroundColor]="data.color"
     ></span>
-    <span class="tooltip-label">{{ data.label }}:</span>
+    <span class="tooltip-label">{{ data.label | translate }}:</span>
     <span class="tooltip-value">{{ data.value | number : '1.0-2' }}</span>
   </div>
 </div>

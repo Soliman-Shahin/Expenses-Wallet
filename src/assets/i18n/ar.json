@@ -34,8 +34,6 @@
     "SECTIONS": "أقسام الرئيسية",
     "BALANCE_SUMMARY": "ملخص الرصيد",
     "MONTHLY_SUMMARY": "الملخص الشهري",
-    "INCOME": "الدخل",
-    "EXPENSES": "المصروفات",
     "TOTAL_SALARY": "إجمالي الراتب",
     "SHOW_BALANCE": "إظهار الرصيد",
     "HIDE_BALANCE": "إخفاء الرصيد",
@@ -60,7 +58,11 @@
     "MONTHLY_EXPENSES_CHART": "مخطط خطي يوضح اتجاه المصروفات الشهرية",
     "MONTHLY_EXPENSES_DESC": "اتجاه المصروفات على مدى الأشهر الستة الماضية",
     "SALARY_BREAKDOWN": "تفصيل الراتب",
-    "SALARY_BREAKDOWN_CHART": "مخطط دائري يوضح تكوين الراتب"
+    "SALARY_BREAKDOWN_CHART": "مخطط دائري يوضح تكوين الراتب",
+    "RECENT_TRANSACTIONS": "أحدث المعاملات",
+    "MONTHLY_SUMMARY_DESC": "ملخص لنشاطك المالي للشهر المحدد.",
+    "INCOME": "الدخل",
+    "EXPENSES": "المصروفات"
   },
   "SIDEBAR": {
     "HOME": "الرئيسية",
@@ -69,7 +71,6 @@
     "REPORTS": "التقارير",
     "SETTINGS": "إعدادات",
     "MAIN_MENU": "القائمة الرئيسية",
-    "CHARTS": "الرسوم البيانية",
     "TRANSACTIONS": "المعاملات"
   },
   "DASHBOARD": "الرئيسية",
@@ -87,7 +88,8 @@
     "EMPTY_MESSAGE": "ابدأ بتتبع مصروفاتك ودخلك لرؤيتها هنا.",
     "DATE_RANGE": "نطاق التاريخ",
     "START_DATE": "تاريخ البداية",
-    "END_DATE": "تاريخ النهاية"
+    "END_DATE": "تاريخ النهاية",
+    "ADD_NEW": "إضافة معاملة جديدة"
   },
   "ABOUT": "حول التطبيق",
   "LOGIN": "تسجيل الدخول",

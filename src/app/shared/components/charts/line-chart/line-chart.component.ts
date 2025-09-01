@@ -36,7 +36,7 @@ export class LineChartComponent implements OnInit, OnChanges {
   tooltipVisible = false;
   tooltipData: TooltipData | null = null;
   tooltipTop = '0px';
-  tooltipInlineOffset = '0px';
+  tooltipLeft = '0px';
 
   ngOnInit(): void {
     this.processData();
@@ -166,7 +166,7 @@ export class LineChartComponent implements OnInit, OnChanges {
   private updateTooltipPosition(event: MouseEvent) {
     const offsetX = 15;
     const offsetY = 15;
-    this.tooltipInlineOffset = `${event.clientX + offsetX}px`;
+    this.tooltipLeft = `${event.clientX + offsetX}px`;
     this.tooltipTop = `${event.clientY + offsetY}px`;
   }
 }

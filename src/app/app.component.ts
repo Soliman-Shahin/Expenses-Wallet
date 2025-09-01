@@ -1,6 +1,7 @@
-import { Component, NgZone, OnInit } from '@angular/core';
+import { Component, NgZone, OnInit, inject } from '@angular/core';
 import { App } from '@capacitor/app';
 import { BaseComponent } from './shared/base/base.component';
+import { DirectionService } from './core/services/direction.service';
 
 @Component({
   selector: 'app-root',
@@ -15,6 +16,8 @@ export class AppComponent extends BaseComponent implements OnInit {
   override ngOnInit(): void {
     super.ngOnInit();
     this.themeService.initTheme();
+    // Eagerly initialize the direction service to set the initial direction
+    inject(DirectionService);
 
     // Handle OAuth deep link redirects on native (Android/iOS)
     App.addListener('appUrlOpen', (event: { url: string }) => {

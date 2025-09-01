@@ -76,7 +76,7 @@ interface InternalChartData extends ChartData {
       [data]="tooltipData"
       [visible]="tooltipVisible"
       [top]="tooltipTop"
-      [inlineOffset]="tooltipInlineOffset"
+      [left]="tooltipLeft"
     ></app-chart-tooltip>
   `,
   styleUrls: ['./pie-chart.component.scss'],
@@ -104,7 +104,7 @@ export class PieChartComponent implements OnInit, OnChanges {
   tooltipVisible = false;
   tooltipData: TooltipData | null = null;
   tooltipTop = '0px';
-  tooltipInlineOffset = '0px';
+  tooltipLeft = '0px';
 
   ngOnInit(): void {
     this.processData();
@@ -267,7 +267,7 @@ export class PieChartComponent implements OnInit, OnChanges {
   private updateTooltipPosition(event: MouseEvent): void {
     const offsetX = 15;
     const offsetY = 15;
-    this.tooltipInlineOffset = `${event.clientX + offsetX}px`;
+    this.tooltipLeft = `${event.clientX + offsetX}px`;
     this.tooltipTop = `${event.clientY + offsetY}px`;
   }
 

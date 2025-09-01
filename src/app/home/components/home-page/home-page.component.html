@@ -207,73 +207,80 @@
 
                     <ng-container *ngIf="!vm.loading; else chartsSkeleton">
                       <!-- Income vs Expenses Bar Chart (Lazy) -->
-                      <ng-container *ngIf="vm.incomeVsExpense.length > 0">
-                        <ng-container
-                          *ngIf="
-                            barChartComponent | async as BarChartComponent;
-                            else barChartLoading
-                          "
-                        >
+                      <div (click)="$event.stopPropagation()">
+                        <ng-container *ngIf="vm.incomeVsExpense.length > 0">
                           <ng-container
-                            *ngComponentOutlet="
-                              BarChartComponent;
-                              injector: barChartInjector
+                            *ngIf="
+                              barChartComponent | async as BarChartComponent;
+                              else barChartLoading
                             "
-                          ></ng-container>
+                          >
+                            <ng-container
+                              *ngComponentOutlet="
+                                BarChartComponent;
+                                injector: barChartInjector
+                              "
+                            ></ng-container>
+                          </ng-container>
+                          <ng-template #barChartLoading>
+                            <app-skeleton-block
+                              variant="chart"
+                            ></app-skeleton-block>
+                          </ng-template>
                         </ng-container>
-                        <ng-template #barChartLoading>
-                          <app-skeleton-block
-                            variant="chart"
-                          ></app-skeleton-block>
-                        </ng-template>
-                      </ng-container>
+                      </div>
 
                       <!-- Expense by Category Pie Chart (Lazy) -->
-                      <ng-container *ngIf="vm.expenseByCategory.length > 0">
-                        <ng-container
-                          *ngIf="
-                            pieChartComponent | async as PieChartComponent;
-                            else pieChartLoading
-                          "
-                        >
+                      <div (click)="$event.stopPropagation()">
+                        <ng-container *ngIf="vm.expenseByCategory.length > 0">
                           <ng-container
-                            *ngComponentOutlet="
-                              PieChartComponent;
-                              injector: pieChartInjector
+                            *ngIf="
+                              pieChartComponent | async as PieChartComponent;
+                              else pieChartLoading
                             "
-                          ></ng-container>
+                          >
+                            <ng-container
+                              *ngComponentOutlet="
+                                PieChartComponent;
+                                injector: pieChartInjector
+                              "
+                            ></ng-container>
+                          </ng-container>
+                          <ng-template #pieChartLoading>
+                            <app-skeleton-block
+                              variant="chart"
+                            ></app-skeleton-block>
+                          </ng-template>
                         </ng-container>
-                        <ng-template #pieChartLoading>
-                          <app-skeleton-block
-                            variant="chart"
-                          ></app-skeleton-block>
-                        </ng-template>
-                      </ng-container>
+                      </div>
 
                       <!-- Monthly Expenses Line Chart (Lazy) -->
-                      <ng-container *ngIf="vm.monthlyExpenses.length > 0">
-                        <ng-container
-                          *ngIf="
-                            lineChartComponent | async as LineChartComponent;
-                            else lineChartLoading
-                          "
-                        >
+                      <div (click)="$event.stopPropagation()">
+                        <ng-container *ngIf="vm.monthlyExpenses.length > 0">
                           <ng-container
-                            *ngComponentOutlet="
-                              LineChartComponent;
-                              injector: lineChartInjector
+                            *ngIf="
+                              lineChartComponent | async as LineChartComponent;
+                              else lineChartLoading
                             "
-                          ></ng-container>
+                          >
+                            <ng-container
+                              *ngComponentOutlet="
+                                LineChartComponent;
+                                injector: lineChartInjector
+                              "
+                            ></ng-container>
+                          </ng-container>
+                          <ng-template #lineChartLoading>
+                            <app-skeleton-block
+                              variant="chart"
+                            ></app-skeleton-block>
+                          </ng-template>
                         </ng-container>
-                        <ng-template #lineChartLoading>
-                          <app-skeleton-block
-                            variant="chart"
-                          ></app-skeleton-block>
-                        </ng-template>
-                      </ng-container>
+                      </div>
 
                       <!-- Salary Breakdown Section -->
-                      <ng-container *ngIf="vm.totalSalary > 0">
+                      <div (click)="$event.stopPropagation()">
+                        <ng-container *ngIf="vm.totalSalary > 0">
                         <!-- Salary Pie Chart -->
                         <div class="salary-chart-container">
                           <!-- chart -->
@@ -341,6 +348,7 @@
                           </div>
                         </div>
                       </ng-container>
+                      </div>
                     </ng-container>
                     <ng-template #chartsSkeleton>
                       <div class="chart-skeleton ion-margin-vertical">

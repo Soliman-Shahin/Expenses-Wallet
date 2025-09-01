@@ -57,7 +57,10 @@
     "MONTHLY_EXPENSES_CHART": "Line chart showing monthly expense trends",
     "MONTHLY_EXPENSES_DESC": "Trend of expenses over the past six months",
     "SALARY_BREAKDOWN": "Salary breakdown",
-    "SALARY_BREAKDOWN_CHART": "Pie chart showing salary composition"
+    "SALARY_BREAKDOWN_CHART": "Pie chart showing salary composition",
+    "RECENT_TRANSACTIONS": "Recent Transactions",
+    "INCOME": "Income",
+    "EXPENSES": "Expenses"
   },
   "SIDEBAR": {
     "HOME": "Home",
@@ -84,7 +87,8 @@
     "EMPTY_MESSAGE": "Start tracking your expenses and income to see them here.",
     "DATE_RANGE": "Date range",
     "START_DATE": "Start date",
-    "END_DATE": "End date"
+    "END_DATE": "End date",
+    "ADD_NEW": "Add new transaction"
   },
   "ABOUT": "About",
   "LOGIN": "Login",

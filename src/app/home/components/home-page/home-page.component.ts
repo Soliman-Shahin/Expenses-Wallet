@@ -1,4 +1,5 @@
 import { animate, style, transition, trigger } from '@angular/animations';
+import { createInjectors } from './create-injectors';
 import { Injector, inject, ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Observable, defer } from 'rxjs';
 import { CommonModule } from '@angular/common';
@@ -92,53 +93,10 @@ export class HomePageComponent
 
   private _injector = inject(Injector);
 
-  get barChartInjector() {
-    return Injector.create({
-      providers: [
-        { provide: CHART_DATA, useValue: this.latestVm?.incomeVsExpense || [] },
-        { provide: CHART_TITLE, useValue: 'HOME.INCOME_VS_EXPENSES' },
-        { provide: CHART_ARIA_LABEL, useValue: 'HOME.INCOME_VS_EXPENSES_CHART' },
-        { provide: CHART_DESCRIPTION, useValue: 'HOME.INCOME_VS_EXPENSES_DESC' }
-      ],
-      parent: this._injector
-    });
-  }
-  get pieChartInjector() {
-    return Injector.create({
-      providers: [
-        { provide: CHART_DATA, useValue: this.latestVm?.expenseByCategory || [] },
-        { provide: CHART_TITLE, useValue: 'HOME.EXPENSE_BY_CATEGORY' },
-        { provide: CHART_ARIA_LABEL, useValue: 'HOME.EXPENSE_BY_CATEGORY_CHART' },
-        { provide: CHART_SHOW_LEGEND, useValue: true },
-        { provide: CHART_SIZE, useValue: 300 }
-      ],
-      parent: this._injector
-    });
-  }
-  get lineChartInjector() {
-    return Injector.create({
-      providers: [
-        { provide: CHART_DATA, useValue: this.latestVm?.monthlyExpenses || [] },
-        { provide: CHART_TITLE, useValue: 'HOME.MONTHLY_EXPENSES' },
-        { provide: CHART_ARIA_LABEL, useValue: 'HOME.MONTHLY_EXPENSES_CHART' },
-        { provide: CHART_DESCRIPTION, useValue: 'HOME.MONTHLY_EXPENSES_DESC' }
-      ],
-      parent: this._injector
-    });
-  }
-
-  get salaryBreakdownPieChartInjector() {
-    return Injector.create({
-      providers: [
-        { provide: CHART_DATA, useValue: this.latestVm?.salaryBreakdown || [] },
-        { provide: CHART_TITLE, useValue: 'HOME.SALARY_BREAKDOWN' },
-        { provide: CHART_ARIA_LABEL, useValue: 'HOME.SALARY_BREAKDOWN_CHART' },
-        { provide: CHART_SHOW_LEGEND, useValue: false },
-        { provide: CHART_SIZE, useValue: 220 },
-      ],
-      parent: this._injector,
-    });
-  }
+  barChartInjector!: Injector;
+  pieChartInjector!: Injector;
+  lineChartInjector!: Injector;
+  salaryBreakdownPieChartInjector!: Injector;
 
   latestVm: any;
 
@@ -188,6 +146,8 @@ export class HomePageComponent
   );
 
   private readonly dashboard = inject(DashboardFacade);
+
+  createInjectors = createInjectors;
 
   // Auth state for UI
   protected override readonly authService = inject(AuthService);
@@ -271,16 +231,18 @@ export class HomePageComponent
     startWith([])
   );
   // Derive income vs expenses for the selected month from totalsByMonth$
-  private readonly incomeVsExpenseByMonth$ = this.totalsByMonth$.pipe(
-    map((t) => {
-      const lang = this.translateService.currentLang;
+  private readonly incomeVsExpenseByMonth$ = combineLatest([
+    this.totalsByMonth$,
+    this.translateService.onLangChange.pipe(startWith({ lang: this.translateService.currentLang }))
+  ]).pipe(
+    map(([t, langEvent]) => {
       return [
         {
-          name: lang === 'ar' ? 'دخل' : 'Income',
+          name: 'HOME.INCOME',
           value: t.income,
         },
         {
-          name: lang === 'ar' ? 'مصروفات' : 'Expenses',
+          name: 'HOME.EXPENSES',
           value: t.expenses,
         },
       ];
@@ -351,7 +313,11 @@ export class HomePageComponent
   override ngOnInit(): void {
     super.ngOnInit();
     // Subscribe to vm$ for latest values (for injectors)
-    this.vm$.subscribe(vm => { this.latestVm = vm; });
+    this.vm$.pipe(takeUntil(this.destroy$)).subscribe(vm => {
+      this.latestVm = vm;
+      this.createInjectors(vm);
+      this.cdr.markForCheck();
+    });
     // Restore last selected tab
     try {
       const savedTab = localStorage.getItem('home.activeTab');
