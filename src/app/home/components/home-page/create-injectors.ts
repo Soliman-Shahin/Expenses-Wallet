@@ -35,7 +35,7 @@ export function createInjectors(this: HomePageComponent, vm: any): void {
         useValue: 'HOME.EXPENSE_BY_CATEGORY_CHART',
       },
       { provide: CHART_SHOW_LEGEND, useValue: true },
-      { provide: CHART_SIZE, useValue: 300 },
+      { provide: CHART_SIZE, useValue: 250 },
     ],
     parent: this['_injector'],
   });
@@ -65,7 +65,7 @@ export function createInjectors(this: HomePageComponent, vm: any): void {
         useValue: 'HOME.SALARY_BREAKDOWN_CHART',
       },
       { provide: CHART_SHOW_LEGEND, useValue: false },
-      { provide: CHART_SIZE, useValue: 220 },
+      { provide: CHART_SIZE, useValue: 250 },
     ],
     parent: this['_injector'],
   });

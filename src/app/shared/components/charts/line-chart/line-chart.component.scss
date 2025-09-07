@@ -1,105 +1,162 @@
+:host {
+  --line-color: var(--ion-color-primary);
+  --line-width: 3px;
+  --point-radius: 5px;
+  --point-hover-radius: 8px;
+  --grid-color: var(--ion-color-step-200, #e0e0e0);
+}
+
 .chart-container {
   padding: var(--ew-space-5);
-  border-radius: var(--ew-radius-md);
+  border-radius: var(--ew-radius-xl);
   background-color: var(--ion-card-background);
-  box-shadow: var(--ew-shadow-sm);
+  box-shadow: var(--ew-shadow-lg);
   margin: var(--ew-space-5) 0;
+  transition: all var(--ew-transition-duration-medium) var(--ew-easing-standard);
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--ew-shadow-xl);
+  }
 }
 
 .chart-title {
-  margin-top: 0;
-  margin-bottom: var(--ew-space-5);
+  margin: 0 0 var(--ew-space-5) 0;
   color: var(--ew-text-color-primary);
   font-size: var(--ew-font-xl);
-  font-weight: var(--ew-font-weight-medium);
+  font-weight: var(--ew-font-weight-bold);
 }
 
 .chart-wrapper {
-  display: flex;
-  justify-content: center;
+  position: relative;
   width: 100%;
-}
-
-.line-chart {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: auto;
+  overflow-x: auto; // For responsive scrolling
+  -webkit-overflow-scrolling: touch;
 }
 
 .line-chart svg {
+  display: block;
   width: 100%;
+  min-width: 500px; // Ensure there's enough space for labels
   height: auto;
-  min-width: 400px;
+  overflow: visible; // Allow hover effects to exceed svg bounds
 }
 
 .grid-line {
-  stroke: var(--ew-border-color);
-  stroke-width: var(--ew-border-width-sm);
-  stroke-dasharray: 2,2;
+  stroke: var(--grid-color);
+  stroke-width: 1px;
+  stroke-dasharray: 3, 3;
 }
 
-.axis {
-  stroke: var(--ew-text-color-secondary);
-  stroke-width: var(--ew-border-width-sm);
+.axis-line {
+  stroke: var(--grid-color);
+  stroke-width: 2px;
 }
 
 .line-path {
   fill: none;
-  stroke: var(--ion-color-primary);
-  stroke-width: var(--ew-border-width-lg);
+  stroke: var(--line-color);
+  stroke-width: var(--line-width);
   stroke-linecap: round;
   stroke-linejoin: round;
+  transition: opacity var(--ew-transition-duration-fast) ease-in-out;
+}
+
+.area-path {
+  fill: url(#line-gradient);
+  opacity: 0.2;
+  transition: opacity var(--ew-transition-duration-fast) ease-in-out;
+}
+
+.gradient-start {
+  stop-color: var(--line-color);
+  stop-opacity: 0.4;
+}
+
+.gradient-end {
+  stop-color: var(--line-color);
+  stop-opacity: 0;
+}
+
+.data-points-group.dimmed {
+  .line-path,
+  .area-path {
+    opacity: 0.25;
+  }
+  .data-point {
+    opacity: 0.4;
+  }
 }
 
 .data-point {
-  fill: var(--ion-color-primary);
+  fill: var(--line-color);
   stroke: var(--ion-card-background);
-  stroke-width: var(--ew-border-width-md);
+  stroke-width: 2px;
+  r: var(--point-radius);
+  transition: all var(--ew-transition-duration-fast) var(--ew-easing-standard);
+  opacity: 1;
+
+  &.active {
+    r: var(--point-hover-radius);
+    stroke-width: 3px;
+    opacity: 1;
+    filter: drop-shadow(0 0 8px rgba(var(--ion-color-primary-rgb), 0.7));
+  }
 }
 
 .data-point-hover-area {
-  cursor: pointer;
+  cursor: crosshair;
+  fill: transparent;
+}
+
+.axis-label,
+.value-label {
+  fill: var(--ew-text-color-secondary);
+  font-size: var(--ew-font-sm);
+  font-weight: var(--ew-font-weight-medium);
+  text-anchor: middle;
 }
 
 .value-label {
   fill: var(--ew-text-color-primary);
-  font-size: var(--ew-font-xs);
-  font-weight: var(--ew-font-weight-medium);
+  font-weight: var(--ew-font-weight-bold);
+  transition: opacity var(--ew-transition-duration-fast) ease-in-out;
 }
 
-.axis-label {
-  fill: var(--ew-text-color-secondary);
-  font-size: var(--ew-font-xs);
+.tracker-line {
+  stroke: var(--line-color);
+  stroke-width: 1px;
+  stroke-dasharray: 4, 4;
+  pointer-events: none;
+  transition: opacity var(--ew-transition-duration-fast) ease-in-out;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .chart-container,
+  .line-path,
+  .area-path,
+  .data-point {
+    transition: none;
+  }
+}
 
-/* Responsive design */
 @media (max-width: 768px) {
   .chart-container {
-    padding: var(--ew-space-4);
+    padding: var(--ew-space-3);
   }
-  
-  .chart-title {
-    font-size: var(--ew-font-lg);
-  }
-  
-  .value-label,
+
   .axis-label {
-    font-size: var(--ew-font-xs);
+    font-size: 12px; // Increase size
+    font-weight: var(--ew-font-weight-semibold); // Make it bolder
   }
-  
+
+  .value-label {
+    font-size: 16px; // Make the active value label even larger
+    font-weight: var(--ew-font-weight-bold);
+  }
+
   .line-chart svg {
-    min-width: 300px;
+    min-width: 400px; // Adjust min-width for smaller screens
   }
 }
 
-@media (max-width: 480px) {
-  .line-chart svg {
-    min-width: 250px;
-  }
-  
-  .value-label,
-  .axis-label {
-    font-size: var(--ew-font-xs);
-  }
-}

@@ -7,6 +7,11 @@ import {
   EventEmitter,
   inject,
   OnInit,
+  OnDestroy,
+  HostBinding,
+  ElementRef,
+  ViewChild,
+  ChangeDetectorRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
@@ -18,15 +23,14 @@ import {
   CHART_DATA,
   CHART_TITLE,
   CHART_ARIA_LABEL,
-  CHART_DESCRIPTION,
   CHART_SHOW_LEGEND,
   CHART_SIZE,
-  CHART_STROKE_WIDTH,
 } from '../chart.tokens';
 
 interface ChartData {
   name: string;
   value: number;
+  [key: string]: any;
 }
 
 interface InternalChartData extends ChartData {
@@ -37,182 +41,233 @@ interface InternalChartData extends ChartData {
   selector: 'app-pie-chart',
   standalone: true,
   imports: [CommonModule, ChartTooltipComponent, TranslateModule],
-  template: `
-    <div class="chart-container" [attr.aria-label]="ariaLabel">
-      <h3 *ngIf="title" class="chart-title">{{ title | translate }}</h3>
-      <div
-        class="chart-wrapper"
-        role="img"
-        [attr.aria-label]="chartDescription"
-        (mouseleave)="onMouseLeave()"
-      >
-        <div class="pie-chart">
-          <svg [attr.viewBox]="getViewBox()" xmlns="http://www.w3.org/2000/svg">
-            <g [attr.transform]="getTransform()">
-              <path
-                *ngFor="let slice of slices; let i = index"
-                [attr.d]="slice.path"
-                [attr.fill]="slice.color"
-                [attr.stroke]="strokeColor"
-                [attr.stroke-width]="strokeWidth"
-                [attr.aria-label]="slice.label"
-                role="img"
-                (mouseenter)="onSliceHover($event, chartData[i], slice.originalIndex)"
-                (mousemove)="onMouseMove($event)"
-                (click)="onSliceClick(chartData[i])"
-              />
-            </g>
-          </svg>
-        </div>
-        <div *ngIf="showLegend" class="legend">
-          <div *ngFor="let item of legendData" class="legend-item">
-            <span class="legend-color" [style.background-color]="item.color"></span>
-            <span class="legend-label">{{ item.label }}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-    <app-chart-tooltip
-      [data]="tooltipData"
-      [visible]="tooltipVisible"
-      [top]="tooltipTop"
-      [left]="tooltipLeft"
-    ></app-chart-tooltip>
-  `,
+  templateUrl: './pie-chart.component.html',
   styleUrls: ['./pie-chart.component.scss'],
 })
-export class PieChartComponent implements OnInit, OnChanges {
+export class PieChartComponent implements OnInit, OnChanges, OnDestroy {
   @Output() sliceClick = new EventEmitter<ChartData>();
 
-  // Data can be provided via @Input for standalone use, or via DI when used with ngComponentOutlet.
   @Input() data: ChartData[] = inject(CHART_DATA, { optional: true }) || [];
   @Input() title: string = inject(CHART_TITLE, { optional: true }) || '';
   @Input() ariaLabel: string =
     inject(CHART_ARIA_LABEL, { optional: true }) || 'Pie chart';
-  @Input() chartDescription: string =
-    inject(CHART_DESCRIPTION, { optional: true }) || 'Pie chart visualization';
-  @Input() showLegend: boolean = inject(CHART_SHOW_LEGEND, { optional: true }) ?? true;
-  @Input() size: number = inject(CHART_SIZE, { optional: true }) || 200;
-  @Input() strokeWidth: number = inject(CHART_STROKE_WIDTH, { optional: true }) || 2;
+  @Input() showLegend: boolean =
+    inject(CHART_SHOW_LEGEND, { optional: true }) ?? true;
+  @Input() size: number = inject(CHART_SIZE, { optional: true }) || 300;
+  @Input() donutWidth: number = 40;
+  @Input() centerLabelDefault: string = 'PROFILE.SALARY.TOTAL';
+  @Input() centerSubtitleDefault: string = '';
+  @Input() animationDuration = 800; // in ms
+
+  @HostBinding('style.--chart-size') get chartSize() {
+    return `${this.size}px`;
+  }
+  @HostBinding('style.--donut-width') get donutWidthStyle() {
+    return `${this.donutWidth}px`;
+  }
+
+  @ViewChild('chartWrapper', { static: true })
+  chartWrapper!: ElementRef<HTMLDivElement>;
 
   chartData: InternalChartData[] = [];
-  slices: { path: string; color: string; label: string; originalIndex: number }[] = [];
-  legendData: { label: string; color: string }[] = [];
-  strokeColor: string = 'var(--ion-background-color, #ffffff)';
+  slices: {
+    path: string;
+    color: string;
+    originalIndex: number;
+    percentage: number;
+  }[] = [];
+  legendData: { label: string; color: string; visible: boolean }[] = [];
+  strokeColor: string = 'transparent';
+  centerLabel: string | null = null;
+  centerSubtitle: string | null = null;
+  totalValue: number = 0;
 
-  // Tooltip properties
+  private colors: string[] = [
+    'var(--ion-color-primary)',
+    'var(--ion-color-secondary)',
+    'var(--ion-color-tertiary)',
+    'var(--ion-color-success)',
+    'var(--ion-color-warning)',
+    'var(--ion-color-danger)',
+    'var(--ion-color-light)',
+    'var(--ion-color-medium)',
+  ];
+
   tooltipVisible = false;
   tooltipData: TooltipData | null = null;
-  tooltipTop = '0px';
-  tooltipLeft = '0px';
+  tooltipX = 0;
+  tooltipY = 0;
+
+  private animationFrameId: number | null = null;
+  private cdr = inject(ChangeDetectorRef);
 
   ngOnInit(): void {
-    this.processData();
+    this.updateChart(true);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['data'] && this.data) {
-      this.processData();
+    if (changes['data'] || changes['size'] || changes['donutWidth']) {
+      this.updateChart(true);
     }
   }
 
-  private processData(): void {
+  ngOnDestroy(): void {
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+    }
+  }
+
+  private updateChart(animate = false): void {
     if (!this.data) {
       this.chartData = [];
       this.slices = [];
       this.legendData = [];
       return;
     }
-    this.chartData = this.data.map((item) => ({ ...item, visible: true }));
-    this.generateSlices();
+
+    if (this.chartData.length !== this.data.length) {
+      this.chartData = this.data.map((item) => ({ ...item, visible: true }));
+    }
+
+    this.totalValue = this.chartData
+      .filter((d) => d.visible)
+      .reduce((sum, item) => sum + item.value, 0);
+    this.updateCenterText();
+    this.updateLegend();
+
+    if (animate && this.animationDuration > 0) {
+      this.animateChart();
+    } else {
+      this.generateSlices(1); // Draw final state immediately
+    }
   }
 
-  private generateSlices(): void {
+  private animateChart(): void {
+    if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
+
+    const startTime = performance.now();
+    const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+
+    const animate = (currentTime: number) => {
+      const elapsedTime = currentTime - startTime;
+      let progress = elapsedTime / this.animationDuration;
+      if (progress > 1) progress = 1;
+
+      this.generateSlices(easeOutCubic(progress));
+
+      this.cdr.detectChanges();
+
+      if (progress < 1) {
+        this.animationFrameId = requestAnimationFrame(animate);
+      } else {
+        this.animationFrameId = null;
+      }
+    };
+
+    this.animationFrameId = requestAnimationFrame(animate);
+  }
+
+  private generateSlices(progress: number): void {
     const visibleData = this.chartData.filter((item) => item.visible);
-    const total = visibleData.reduce((sum, item) => sum + item.value, 0);
-    if (total === 0) {
+    const currentTotal = visibleData.reduce((sum, item) => sum + item.value, 0);
+
+    if (currentTotal === 0) {
       this.slices = [];
-      this.legendData = [];
       return;
     }
 
-    let startAngle = 0;
-    let dataIndex = -1;
-    this.slices = this.chartData.map((item) => {
+    let startAngle = -90;
+    const radius = this.size / 2;
+    const innerRadius = radius - this.donutWidth;
+
+    this.slices = this.chartData.map((item, index) => {
       if (!item.visible) {
         return {
           path: '',
           color: 'transparent',
-          label: '',
-          originalIndex: dataIndex,
+          originalIndex: index,
+          percentage: 0,
         };
       }
-      dataIndex++;
-      const sliceAngle = (item.value / total) * 360;
-      const endAngle = startAngle + sliceAngle;
 
-      const path = this.describeArc(100, 100, 80, startAngle, endAngle);
+      const sliceAngle = (item.value / currentTotal) * 360;
+      const endAngle = startAngle + sliceAngle * progress; // Animate the angle
+
+      const finalEndAngle =
+        sliceAngle >= 359.99 ? startAngle + 359.99 * progress : endAngle;
+
+      const path = this.describeArc(
+        radius,
+        radius,
+        innerRadius,
+        this.donutWidth,
+        startAngle,
+        finalEndAngle
+      );
 
       const slice = {
         path: path,
-        color: this.getColor(dataIndex),
-        label: `${item.name && item.name.trim() ? item.name : '—'}: ${
-          item.value
-        }`,
-        originalIndex: dataIndex,
+        color: this.getColor(index),
+        originalIndex: index,
+        percentage: (item.value / currentTotal) * 100,
       };
 
-      startAngle = endAngle;
+      startAngle += sliceAngle;
       return slice;
     });
+  }
 
+  private updateLegend(): void {
     this.legendData = this.chartData.map((item, index) => ({
       label: item.name,
       color: this.getColor(index),
+      visible: item.visible,
     }));
   }
 
-  getViewBox(): string {
-    return `0 0 ${this.size} ${this.size}`;
-  }
-
-  getTransform(): string {
-    const scale = this.size / 200;
-    return `scale(${scale})`;
-  }
-
-  // Function to create SVG path for a pie slice
   private describeArc(
     x: number,
     y: number,
-    radius: number,
+    innerRadius: number,
+    donutWidth: number,
     startAngle: number,
     endAngle: number
   ): string {
-    const start = this.polarToCartesian(x, y, radius, endAngle);
-    const end = this.polarToCartesian(x, y, radius, startAngle);
+    if (endAngle - startAngle === 0) return '';
+    const outerRadius = innerRadius + donutWidth;
+
+    const startOuter = this.polarToCartesian(x, y, outerRadius, endAngle);
+    const endOuter = this.polarToCartesian(x, y, outerRadius, startAngle);
+    const startInner = this.polarToCartesian(x, y, innerRadius, endAngle);
+    const endInner = this.polarToCartesian(x, y, innerRadius, startAngle);
 
     const largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1';
 
-    const d = [
+    return [
       'M',
-      x,
-      y,
-      'L',
-      start.x,
-      start.y,
+      startOuter.x,
+      startOuter.y,
       'A',
-      radius,
-      radius,
+      outerRadius,
+      outerRadius,
       0,
       largeArcFlag,
       0,
-      end.x,
-      end.y,
+      endOuter.x,
+      endOuter.y,
+      'L',
+      endInner.x,
+      endInner.y,
+      'A',
+      innerRadius,
+      innerRadius,
+      0,
+      largeArcFlag,
+      1,
+      startInner.x,
+      startInner.y,
       'Z',
     ].join(' ');
-
-    return d;
   }
 
   private polarToCartesian(
@@ -221,62 +276,112 @@ export class PieChartComponent implements OnInit, OnChanges {
     radius: number,
     angleInDegrees: number
   ) {
-    const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180.0;
-
+    const angleInRadians = (angleInDegrees * Math.PI) / 180.0;
     return {
       x: centerX + radius * Math.cos(angleInRadians),
       y: centerY + radius * Math.sin(angleInRadians),
     };
   }
 
+  getViewBox(): string {
+    const margin = 8; // Margin for shadow
+    return `${-margin} ${-margin} ${this.size + margin * 2} ${
+      this.size + margin * 2
+    }`;
+  }
+
+  getTransform(): string {
+    return '';
+  }
+
   getColor(index: number): string {
-    const colors = [
-      'var(--ion-color-primary)',
-      'var(--ion-color-secondary)',
-      'var(--ion-color-tertiary)',
-      'var(--ion-color-success)',
-      'var(--ion-color-warning)',
-      'var(--ion-color-danger)',
-      'var(--ion-color-light)',
-      'var(--ion-color-medium)',
-    ];
-    return colors[index % colors.length];
+    return this.colors[index % this.colors.length];
   }
 
-  // Tooltip event handlers
-  onSliceHover(event: MouseEvent, data: ChartData, index: number): void {
-    this.tooltipData = {
-      label: data.name,
-      value: data.value,
-      color: this.getColor(index),
-    };
-    this.tooltipVisible = true;
-    this.updateTooltipPosition(event);
+  getAriaLabel(slice: any, index: number): string {
+    if (slice.originalIndex < 0 || slice.originalIndex >= this.chartData.length)
+      return '';
+    const item = this.chartData[slice.originalIndex];
+    return `${
+      item.name
+    }: ${item.value.toLocaleString()} (${slice.percentage.toFixed(1)}%)`;
   }
 
-  onMouseMove(event: MouseEvent): void {
-    if (this.tooltipVisible) {
-      this.updateTooltipPosition(event);
+  toggleSeries(toggledItem: { label: string; visible: boolean }): void {
+    const itemIndex = this.chartData.findIndex(
+      (item) => item.name === toggledItem.label
+    );
+    if (itemIndex > -1) {
+      this.chartData[itemIndex].visible = !this.chartData[itemIndex].visible;
+      this.updateChart(true);
     }
   }
 
-  onMouseLeave(): void {
+  onSliceHover(index: number): void {
+    if (this.animationFrameId) return; // Disable hover during animation
+    const sliceData = this.chartData[this.slices[index].originalIndex];
+    if (!sliceData || !sliceData.visible) return;
+
+    this.centerLabel = sliceData.name;
+    this.centerSubtitle = sliceData.value.toLocaleString();
+    this.showTooltip(index);
+  }
+
+  onSliceLeave(): void {
+    if (this.animationFrameId) return;
+    this.updateCenterText();
+    this.hideTooltip();
+  }
+
+  private updateCenterText(): void {
+    this.centerLabel = this.centerLabelDefault;
+    this.centerSubtitle =
+      this.totalValue > 0 ? this.totalValue.toLocaleString() : '';
+  }
+
+  showTooltip(index: number): void {
+    const sliceData = this.chartData[this.slices[index].originalIndex];
+    if (!sliceData || !sliceData.visible) return;
+
+    this.tooltipVisible = true;
+    this.tooltipData = {
+      label: sliceData.name,
+      value: sliceData.value,
+      color: this.slices[index].color,
+    };
+
+    const angle = this.getSliceCenterAngle(this.slices[index].originalIndex);
+    const radius = this.size / 2;
+    const pos = this.polarToCartesian(radius, radius, radius * 0.7, angle);
+
+    const chartRect = this.chartWrapper.nativeElement.getBoundingClientRect();
+    this.tooltipX =
+      pos.x + chartRect.left - this.chartWrapper.nativeElement.offsetLeft;
+    this.tooltipY =
+      pos.y + chartRect.top - this.chartWrapper.nativeElement.offsetTop;
+  }
+
+  hideTooltip(): void {
     this.tooltipVisible = false;
   }
 
-  private updateTooltipPosition(event: MouseEvent): void {
-    const offsetX = 15;
-    const offsetY = 15;
-    this.tooltipLeft = `${event.clientX + offsetX}px`;
-    this.tooltipTop = `${event.clientY + offsetY}px`;
+  private getSliceCenterAngle(originalIndex: number): number {
+    const visibleData = this.chartData.filter((d) => d.visible);
+    const total = visibleData.reduce((sum, item) => sum + item.value, 0);
+    if (total === 0) return -90;
+
+    let startAngle = -90;
+    for (const item of visibleData) {
+      const sliceAngle = (item.value / total) * 360;
+      if (this.chartData[originalIndex] === item) {
+        return startAngle + sliceAngle / 2;
+      }
+      startAngle += sliceAngle;
+    }
+    return -90;
   }
 
   onSliceClick(data: ChartData): void {
     this.sliceClick.emit(data);
-  }
-
-  toggleSliceVisibility(index: number): void {
-    this.chartData[index].visible = !this.chartData[index].visible;
-    this.generateSlices();
   }
 }

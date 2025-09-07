@@ -1,103 +1,106 @@
 <div class="chart-container" [attr.aria-label]="ariaLabel">
   <h3 *ngIf="title" class="chart-title">{{ title | translate }}</h3>
-  <div
-    class="chart-wrapper"
-    role="img"
-    [attr.aria-label]="chartDescription"
-    (mouseleave)="onMouseLeave()"
-  >
+  <div class="chart-wrapper" #chartWrapper>
     <div class="line-chart">
-      <svg [attr.viewBox]="getViewBox()" xmlns="http://www.w3.org/2000/svg">
-        <!-- Grid lines -->
+      <svg
+        [attr.viewBox]="getViewBox()"
+        (mousemove)="onMouseMove($event)"
+        (mouseleave)="onMouseLeave()"
+        (touchmove)="onMouseMove($event)"
+        (touchend)="onMouseLeave()"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <linearGradient id="line-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" class="gradient-start" />
+            <stop offset="100%" class="gradient-end" />
+          </linearGradient>
+        </defs>
+
+        <!-- Grid and Axis -->
         <g class="grid-lines">
-          <line
-            *ngFor="let line of gridLines"
-            [attr.x1]="line.x1"
-            [attr.y1]="line.y1"
-            [attr.x2]="line.x2"
-            [attr.y2]="line.y2"
-            class="grid-line"
-          />
+          <line *ngFor="let line of gridLines" [attr.x1]="line.x1" [attr.y1]="line.y1" [attr.x2]="line.x2" [attr.y2]="line.y2" class="grid-line" />
+        </g>
+        <g class="axis-lines">
+          <line [attr.x1]="padding.left" [attr.y1]="chartHeight - padding.bottom" [attr.x2]="chartWidth - padding.right" [attr.y2]="chartHeight - padding.bottom" class="axis-line" />
         </g>
 
-        <!-- Axes -->
-        <line
-          [attr.x1]="padding"
-          [attr.y1]="chartHeight - padding"
-          [attr.x2]="chartWidth - padding"
-          [attr.y2]="chartHeight - padding"
-          class="axis"
-        />
-        <line
-          [attr.x1]="padding"
-          [attr.y1]="padding"
-          [attr.x2]="padding"
-          [attr.y2]="chartHeight - padding"
-          class="axis"
-        />
+        <!-- Chart Data -->
+        <g class="data-points-group" [class.dimmed]="activePointIndex !== null">
+          <path [attr.d]="areaPath" class="area-path" />
+          <path [attr.d]="linePath" class="line-path" />
+          <g *ngFor="let point of dataPoints; let i = index">
+            <circle
+              [attr.cx]="point.x"
+              [attr.cy]="point.y"
+              class="data-point"
+              [class.active]="i === activePointIndex"
+            />
+          </g>
+        </g>
 
-        <!-- Line path -->
-        <path
-          [attr.d]="linePath"
-          class="line-path"
-          [attr.aria-label]="'Line chart showing trends over time'"
-          role="img"
-        />
-
-        <!-- Data points with hover area -->
-        <g *ngFor="let point of dataPoints; let i = index">
-          <circle
-            [attr.cx]="point.x"
-            [attr.cy]="point.y"
-            r="4"
-            class="data-point"
-            [attr.aria-label]="chartData[i].name + ': ' + chartData[i].value"
-            role="img"
+        <!-- Hover/Active Elements -->
+        <g class="interactive-elements">
+          <!-- Vertical tracker line -->
+          <line
+            *ngIf="activePointIndex !== null"
+            class="tracker-line"
+            [attr.x1]="dataPoints[activePointIndex].x"
+            [attr.y1]="padding.top"
+            [attr.x2]="dataPoints[activePointIndex].x"
+            [attr.y2]="chartHeight - padding.bottom"
           />
-          <!-- Hoverable area for tooltip -->
+          <!-- Active point (rendered on top) -->
+          <circle
+            *ngIf="activePointIndex !== null"
+            [attr.cx]="dataPoints[activePointIndex].x"
+            [attr.cy]="dataPoints[activePointIndex].y"
+            class="data-point active"
+          />
+          <!-- Value labels for active points -->
+          <text
+            *ngIf="activePointIndex !== null"
+            [attr.x]="dataPoints[activePointIndex].x"
+            [attr.y]="dataPoints[activePointIndex].y - 15"
+            class="value-label"
+            [style.fontSize.px]="dynamicValueLabelFontSize"
+          >
+            {{ chartData[activePointIndex].value | number : '1.0-0' }}
+          </text>
+        </g>
+
+        <!-- Axis Labels -->
+        <g class="axis-labels">
+          <text *ngFor="let label of yAxisLabels" [attr.x]="label.x" [attr.y]="label.y" class="axis-label" [attr.text-anchor]="label.anchor" dominant-baseline="middle" [style.fontSize.px]="dynamicAxisLabelFontSize">
+            {{ label.value }}
+          </text>
+          <text *ngFor="let label of xAxisLabels" [attr.x]="label.x" [attr.y]="chartHeight - padding.bottom + 20" class="axis-label" [style.fontSize.px]="dynamicAxisLabelFontSize">
+            {{ label.value }}
+          </text>
+        </g>
+
+        <!-- Invisible hover areas for better UX -->
+        <g class="hover-areas">
           <rect
-            [attr.x]="point.x - 10"
-            [attr.y]="point.y - 10"
-            width="20"
-            height="20"
-            fill="transparent"
+            *ngFor="let p of dataPoints; let i = index"
+            [attr.x]="p.x - (pointXStep / 2)"
+            [attr.y]="0"
+            [attr.width]="pointXStep"
+            [attr.height]="chartHeight"
             class="data-point-hover-area"
-            (mouseenter)="onDataPointHover($event, chartData[i])"
-            (mousemove)="onMouseMove($event)"
             (click)="onDataPointClick(chartData[i])"
           />
         </g>
-
-        <!-- Value labels -->
-        <text
-          *ngFor="let point of dataPoints; let i = index"
-          [attr.x]="point.x"
-          [attr.y]="point.y - 10"
-          class="value-label"
-          text-anchor="middle"
-        >
-          {{ chartData[i].value | number : '1.0-0' }}
-        </text>
-
-        <!-- X-axis labels -->
-        <text
-          *ngFor="let point of dataPoints; let i = index"
-          [attr.x]="point.x"
-          [attr.y]="chartHeight - padding + 20"
-          class="axis-label"
-          text-anchor="middle"
-        >
-          {{ chartData[i].name }}
-        </text>
       </svg>
     </div>
   </div>
 </div>
 
 <app-chart-tooltip
+  #tooltip
   [data]="tooltipData"
   [visible]="tooltipVisible"
-  [top]="tooltipTop"
-  [left]="tooltipLeft"
+  [x]="tooltipX"
+  [y]="tooltipY"
 ></app-chart-tooltip>
 

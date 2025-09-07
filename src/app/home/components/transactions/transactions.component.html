@@ -23,7 +23,7 @@
       *ngIf="vm.transactions.length > 0; else empty"
     >
       <ion-item-sliding *ngFor="let t of vm.transactions; trackBy: trackById">
-        <ion-item class="transaction-item" lines="none" button>
+        <ion-item class="transaction-item item-card" lines="none" button>
           <span
             class="category-icon"
             [style.background]="getCategoryColor(t)"

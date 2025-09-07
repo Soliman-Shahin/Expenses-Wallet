@@ -1,30 +1,19 @@
 // Global form styles
 ion-item {
-  --background: var(--ew-color-neutral-0, var(--ion-color-light));
-  --border-radius: var(--ew-radius-md, 12px);
-  --padding-start: 16px !important;
-  --padding-end: 16px !important;
-  --inner-padding-start: 0 !important;
-  --inner-padding-end: 0 !important;
-  --padding-top: 0 !important;
-  --padding-bottom: 0 !important;
+  // In form contexts, we want a slightly different margin and to ensure it behaves like a flex container
+  display: flex;
+  align-items: center;
+  // Let the global style handle margin, but override for forms if needed
   margin-bottom: var(--ew-space-5, 20px);
-  min-height: 48px !important;
-  height: 48px !important;
+  // Remove the bottom border line for form items specifically
   --highlight-height: 0;
-  --border-width: var(--ew-border-width-sm, 1px);
-  --border-color: var(--ew-color-neutral-200, rgba(var(--ion-color-medium-rgb), 0.2));
-  --border-style: solid;
-  --box-shadow: var(--ew-shadow-sm, 0 2px 8px rgba(0, 0, 0, 0.04));
-  transition: all var(--ew-transition-duration-medium, 0.3s) var(--ew-transition-timing-function-ease-in-out, ease);
-  display: flex;           // ensure slotted children can flex
-  align-items: center;     // vertical centering of content
+  // Use transparent background to adopt the host's styled background
+  --background: transparent;
 
   // Auth form specific styles
   .login-form &,
   .signup-form & {
-    --background: var(--ew-color-neutral-0, var(--ion-color-light));
-    --border-radius: var(--ew-radius-md, 10px);
+    --border-radius: var(--ew-radius-lg, 16px);
     --min-height: 48px;
     margin-bottom: var(--ew-space-6, 24px);
 
@@ -36,14 +25,6 @@ ion-item {
     }
 
 /* Ensure inputs fill the full width of ion-item across the app */
-ion-item::part(native) {
-  display: flex;
-  align-items: center;
-  padding: 0 !important;
-  margin: 0 !important;
-  min-height: 48px !important;
-  height: 48px !important;
-}
 
 ion-item ion-input,
 ion-item ion-textarea,

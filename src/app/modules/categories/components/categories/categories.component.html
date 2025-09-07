@@ -1,7 +1,7 @@
 <ng-container *ngIf="vm$ | async as vm">
   <ion-header mode="ios" class="category-ion-header">
     <ion-toolbar>
-      <ion-title>{{ 'SIDEBAR.CATEGORIES' | translate }}</ion-title>
+      <ion-title>{{ "SIDEBAR.CATEGORIES" | translate }}</ion-title>
     </ion-toolbar>
     <ion-toolbar>
       <ion-searchbar
@@ -17,15 +17,15 @@
       <ion-segment value="all" (ionChange)="filterByType($event)">
         <ion-segment-button value="all" layout="icon-start">
           <ion-icon name="options-outline"></ion-icon>
-          <ion-label>{{ 'COMMON.ALL' | translate }}</ion-label>
+          <ion-label>{{ "COMMON.ALL" | translate }}</ion-label>
         </ion-segment-button>
         <ion-segment-button value="outcome" layout="icon-start">
           <ion-icon name="trending-up-outline"></ion-icon>
-          <ion-label>{{ 'COMMON.OUTCOME' | translate }}</ion-label>
+          <ion-label>{{ "COMMON.OUTCOME" | translate }}</ion-label>
         </ion-segment-button>
         <ion-segment-button value="income" layout="icon-start">
           <ion-icon name="trending-down-outline"></ion-icon>
-          <ion-label>{{ 'COMMON.INCOME' | translate }}</ion-label>
+          <ion-label>{{ "COMMON.INCOME" | translate }}</ion-label>
         </ion-segment-button>
       </ion-segment>
     </ion-toolbar>
@@ -53,7 +53,7 @@
         (ionItemReorder)="handleReorder($any($event))"
       >
         <ion-item
-          class="category-item"
+          class="category-item item-card"
           lines="none"
           *ngFor="let item of vm.response.data; let index"
           [style.--animation-order]="index"
@@ -71,10 +71,7 @@
           </ion-label>
           <ion-buttons slot="end">
             <ion-button (click)="presentActionSheet(item)">
-              <ion-icon
-                slot="icon-only"
-                name="ellipsis-vertical"
-              ></ion-icon>
+              <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
             </ion-button>
           </ion-buttons>
           <ion-reorder slot="end"></ion-reorder>
@@ -88,11 +85,11 @@
     >
       <ion-infinite-scroll-content> </ion-infinite-scroll-content>
     </ion-infinite-scroll>
-
-    <!-- Shared Floating Add Button -->
-    <app-add-fab-button (fabClick)="navigateToAdd()"></app-add-fab-button>
   </ion-content>
 </ng-container>
+
+<!-- Shared Floating Add Button -->
+<app-add-fab-button (fabClick)="navigateToAdd()"></app-add-fab-button>
 
 <ng-template #noData>
   <div class="no_data">

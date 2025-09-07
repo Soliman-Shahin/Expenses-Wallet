@@ -1,15 +1,7 @@
 :host {
-  // This ensures the component doesn't introduce an extra element in the DOM,
-  // allowing the ion-fab to be positioned correctly by its parent.
   display: contents;
 }
 
-// The parent ion-fab container needs a high z-index to float above content.
-ion-fab {
-  z-index: var(--ew-z-index-fab);
-}
-
-// The actual FAB button with all the styling.
 .fab-add {
   // Use CSS variables for easy theming and consistency.
   --background: var(--ion-color-primary);

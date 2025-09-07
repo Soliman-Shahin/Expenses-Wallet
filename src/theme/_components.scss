@@ -38,21 +38,39 @@ ion-button {
   }
 }
 
-/* Form Elements Overrides */
-ion-item {
-  --border-radius: var(--ew-radius-large, 12px);
-  --padding-start: 16px;
-  --padding-end: 16px;
-  --inner-padding-end: 0;
-  --background: var(--ion-item-background);
-  --min-height: 56px;
-  margin-bottom: 16px;
-  border-radius: var(--ew-radius-large, 12px);
-  box-shadow: var(--ew-shadow-1);
-  transition: all var(--ew-animation-duration-normal) var(--ew-animation-easing-standard);
+/* For list items that should appear as individual cards */
+.item-card {
+  --background: var(--ion-item-background, var(--ion-color-light));
+  --border-radius: var(--ew-radius-xl, 16px);
+  --padding-start: var(--ew-space-4, 16px);
+  --inner-padding-end: var(--ew-space-4, 16px);
+  --min-height: 72px;
+  margin: 0 var(--ew-space-4, 16px) var(--ew-space-3, 12px);
+  box-shadow: var(--ew-shadow-sm);
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
 
   &:hover {
-    box-shadow: var(--ew-shadow-2);
+    transform: translateY(-2px);
+    box-shadow: var(--ew-shadow-md);
+  }
+}
+
+/* For ion-item used as a container for form inputs */
+.form-input-item {
+  --background: var(--ion-item-background, var(--ion-color-light));
+  --border-radius: var(--ew-radius-large, 12px);
+  --min-height: 52px;
+  --padding-start: var(--ew-space-3, 12px);
+  --inner-padding-end: var(--ew-space-3, 12px);
+  margin-bottom: var(--ew-space-4, 16px);
+  box-shadow: var(--ew-shadow-sm);
+  border: 1px solid var(--ion-border-color);
+  border-radius: var(--ew-radius-lg);
+  transition: box-shadow 0.2s ease-out, border-color 0.2s ease-out;
+
+  &.item-has-focus {
+    border-color: var(--ion-color-primary);
+    box-shadow: var(--ew-shadow-md);
   }
 }
 

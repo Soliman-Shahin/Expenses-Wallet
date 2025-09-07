@@ -2,6 +2,7 @@ import { Component, NgZone, OnInit, inject } from '@angular/core';
 import { App } from '@capacitor/app';
 import { BaseComponent } from './shared/base/base.component';
 import { DirectionService } from './core/services/direction.service';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-root',
@@ -9,15 +10,18 @@ import { DirectionService } from './core/services/direction.service';
   styleUrls: ['app.component.scss'],
 })
 export class AppComponent extends BaseComponent implements OnInit {
-  constructor(private zone: NgZone) {
+  constructor(
+    private zone: NgZone,
+    private translate: TranslateService,
+    private directionService: DirectionService // Eagerly initialize the direction service
+  ) {
     super();
+    this.translate.setDefaultLang('en');
   }
 
   override ngOnInit(): void {
     super.ngOnInit();
     this.themeService.initTheme();
-    // Eagerly initialize the direction service to set the initial direction
-    inject(DirectionService);
 
     // Handle OAuth deep link redirects on native (Android/iOS)
     App.addListener('appUrlOpen', (event: { url: string }) => {

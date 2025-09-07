@@ -75,6 +75,7 @@
       border-radius: var(--ew-radius-lg);
 
       ion-item {
+        --min-height: 48px;
         --padding-start: var(--ew-space-6);
         --inner-padding-end: var(--ew-space-6);
         --background: transparent;

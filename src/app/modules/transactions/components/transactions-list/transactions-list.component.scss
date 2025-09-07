@@ -9,11 +9,6 @@
   margin-inline-end: var(--ew-space-4); // 12px
 }
 
-/* Optional: tweak ion-item spacing for tighter layout */
-ion-item {
-  --inner-padding-start: var(--ew-space-3); // 8px
-  --inner-padding-end: var(--ew-space-3); // 8px
-}
 
 /* Match Categories list spacing */
 .transactions-list {
@@ -22,26 +17,10 @@ ion-item {
 }
 
 .transaction-item {
-  --background: var(--ion-item-background);
-  --border-radius: var(--ew-radius-lg);
-  --padding-start: var(--ew-space-3);
-  --inner-padding-end: var(--ew-space-3);
-  margin: 0 var(--ew-space-2) var(--ew-space-2);
-  box-shadow: var(--ew-shadow-sm);
-  transition: var(--ew-transition-base);
+  // The global ion-item style now handles the card look and feel.
+  // We can add specific tweaks here if needed.
   animation: cardAppear var(--ew-transition-duration-slow) ease both;
-  display: flex;
-  align-items: center;
-  min-height: 64px;
 
-  &:hover {
-    transform: translateY(calc(var(--ew-space-px) * -1));
-    box-shadow: var(--ew-shadow-lg);
-  }
-  &:active {
-    transform: translateY(0);
-    box-shadow: var(--ew-shadow-sm);
-  }
   @media (prefers-reduced-motion: reduce) {
     animation: none !important;
     transition: none !important;
@@ -123,15 +102,6 @@ ion-item {
   }
 }
 
-.transaction-item:hover {
-  transform: translateY(calc(var(--ew-space-px) * -1));
-  box-shadow: var(--ew-shadow-lg);
-}
-
-.transaction-item:active {
-  transform: translateY(0);
-  box-shadow: var(--ew-shadow-sm);
-}
 
 @keyframes cardAppear {
   from {

@@ -81,8 +81,8 @@ export class BarChartComponent implements OnInit, OnChanges, OnDestroy {
   // Tooltip properties
   tooltipVisible = false;
   tooltipData: TooltipData | null = null;
-  tooltipTop = '0px';
-  tooltipLeft = '0px';
+  tooltipX = 0;
+  tooltipY = 0;
 
   private directionSub!: Subscription;
   private translate = inject(TranslateService);
@@ -184,12 +184,21 @@ export class BarChartComponent implements OnInit, OnChanges, OnDestroy {
       color: this.getBarColor(index),
     };
     this.tooltipVisible = true;
-    this.updateTooltipPosition(event);
+    if (event instanceof MouseEvent) {
+      this.tooltipX = event.clientX;
+      this.tooltipY = event.clientY;
+    } else {
+      const target = event.target as HTMLElement;
+      const rect = target.getBoundingClientRect();
+      this.tooltipX = rect.left + rect.width / 2;
+      this.tooltipY = rect.top;
+    }
   }
 
   onMouseMove(event: MouseEvent): void {
     if (this.tooltipVisible) {
-      this.updateTooltipPosition(event);
+      this.tooltipX = event.clientX;
+      this.tooltipY = event.clientY;
     }
   }
 
@@ -201,18 +210,4 @@ export class BarChartComponent implements OnInit, OnChanges, OnDestroy {
     this.barClick.emit(item);
   }
 
-  private updateTooltipPosition(event: MouseEvent | FocusEvent): void {
-    const offsetX = 10;
-    const offsetY = 10;
-
-    if (event instanceof MouseEvent) {
-      this.tooltipLeft = `${event.clientX + offsetX}px`;
-      this.tooltipTop = `${event.clientY + offsetY}px`;
-    } else {
-      const target = event.target as HTMLElement;
-      const rect = target.getBoundingClientRect();
-      this.tooltipLeft = `${rect.right + offsetX}px`;
-      this.tooltipTop = `${rect.top}px`;
-    }
-  }
 }

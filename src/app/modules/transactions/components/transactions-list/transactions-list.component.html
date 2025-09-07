@@ -118,7 +118,7 @@
       *ngIf="transactions.length > 0; else empty"
     >
       <ion-item-sliding *ngFor="let t of transactions; trackBy: trackById">
-        <ion-item class="transaction-item" lines="none" button>
+        <ion-item class="transaction-item item-card" lines="none" button>
           <span
             class="category-icon"
             [style.background]="getCategoryColor(t)"
@@ -176,14 +176,10 @@
       </div>
     </ng-template>
   </ng-container>
-
-  <!-- Floating Action Button -->
-  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button (click)="openAddTransactionModal()">
-      <ion-icon name="add"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
 </ion-content>
+
+<!-- Floating Action Button -->
+<app-add-fab-button (fabClick)="openAddTransactionModal()"></app-add-fab-button>
 
 <!-- Date Range Picker Modal -->
 <ion-modal
