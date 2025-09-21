@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { IonicModule } from '@ionic/angular';
 import { AddFabButtonComponent } from 'src/app/shared/ui/add-fab-button/add-fab-button.component';
+import { SyncStatusComponent } from 'src/app/shared/components/sync-status/sync-status.component';
 import { TranslateModule } from '@ngx-translate/core';
 import {
   BehaviorSubject,

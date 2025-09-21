@@ -25,11 +25,13 @@ export const APP_ROUTES = {
   SETTINGS: {
     INDEX: 'settings',
     LIST: 'list',
-    CREATE: 'create',
+    SYNC: 'sync',
+    CONFLICTS: 'conflicts',
   },
   PROFILE: {
     INDEX: 'profile',
   },
+
   __get: (key: string) => `${key}`.replace(':', ''),
 } as const;
 

@@ -45,6 +45,13 @@ export const routes: Routes = [
     canLoad: [AuthGuardService],
   },
   {
+    path: APP_ROUTES.SETTINGS.INDEX,
+    loadChildren: () =>
+      import('./modules/settings/settings.module').then((m) => m.SettingsModule),
+    canActivate: [AuthGuard],
+    canLoad: [AuthGuardService],
+  },
+  {
     path: '**',
     redirectTo: '',
     pathMatch: 'full',
