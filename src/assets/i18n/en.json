@@ -139,7 +139,8 @@
     "SAVE": "Save",
     "REMOVE": "Remove",
     "INCOME": "Income",
-    "OUTCOME": "Outcome"
+    "OUTCOME": "Outcome",
+    "DELETE": "Delete"
   },
   "CATEGORY": {
     "ADD": "Add new category",
@@ -168,9 +169,11 @@
     "DATE": "Date",
     "AMOUNT": "Amount",
     "AMOUNT_PLACEHOLDER": "Enter amount",
+    "CATEGORY": "Category",
     "SELECT_CATEGORY": "Select category",
     "NOTES": "Notes",
     "DETAILS": "Expense details",
+    "DESCRIPTION": "Description",
     "DESCRIPTION_PLACEHOLDER": "Enter description",
     "DATE_PLACEHOLDER": "Select date",
     "EXPENSE": "Expense",
@@ -179,7 +182,16 @@
     "SUCCESSFULLY_UPDATED": "Expense successfully updated!",
     "SUCCESSFULLY_DELETED": "Expense deleted!",
     "EDIT": "Edit expense",
-    "DELETE": "Delete expense"
+    "DELETE": "Delete expense",
+    "CREATE_TITLE": "Create Transaction",
+    "UPDATE_TITLE": "Update Transaction",
+    "DELETE_CONFIRM_MSG": "Are you sure you want to delete this transaction? This action cannot be undone.",
+    "DELETE_SUCCESS": "Transaction deleted successfully.",
+    "DELETE_ERROR": "Failed to delete transaction.",
+    "UPDATE_SUCCESS": "Transaction updated successfully.",
+    "CREATE_SUCCESS": "Transaction created successfully.",
+    "UPDATE_ERROR": "Failed to update transaction.",
+    "CREATE_ERROR": "Failed to create transaction."
   },
   "SETTINGS": {
     "GENERAL": "General settings",

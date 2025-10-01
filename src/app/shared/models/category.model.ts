@@ -1,6 +1,8 @@
 export interface Category {
   _id: string;
-  name: string;
-  type: 'income' | 'expense';
+  title: string;
+  type: 'income' | 'outcome';
   user: string; // User ID
+  icon?: string;
+  color?: string;
 }

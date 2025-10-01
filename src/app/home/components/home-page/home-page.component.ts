@@ -1,6 +1,14 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 import { createInjectors } from './create-injectors';
-import { Injector, inject, ChangeDetectionStrategy, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  Injector,
+  inject,
+  ChangeDetectionStrategy,
+  Component,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { Observable, defer } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { toObservable } from '@angular/core/rxjs-interop';
@@ -20,15 +28,6 @@ import {
   takeUntil,
   tap,
 } from 'rxjs';
-
-import {
-  CHART_DATA,
-  CHART_TITLE,
-  CHART_ARIA_LABEL,
-  CHART_DESCRIPTION,
-  CHART_SHOW_LEGEND,
-  CHART_SIZE,
-} from 'src/app/shared/components/charts/chart.tokens';
 import { ExpenseFormComponent } from '../expense-form/expense-form.component';
 import { TransactionsComponent } from '../transactions/transactions.component';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -47,9 +46,7 @@ import {
 import { User } from 'src/app/modules/auth/models';
 import { AuthService } from 'src/app/modules/auth/services/auth.service';
 import { DashboardFacade } from 'src/app/shared/facades';
-
-// Constants
-const MAX_RETRY_ATTEMPTS = 3;
+import { Expense } from 'src/app/shared/models';
 
 @Component({
   standalone: true,
@@ -82,15 +79,26 @@ const MAX_RETRY_ATTEMPTS = 3;
     ]),
   ],
 })
-
 export class HomePageComponent
   extends BaseComponent
   implements OnInit, OnDestroy
 {
   // Lazy-loaded chart component references
-  barChartComponent: Observable<any> = defer(() => import('src/app/shared/components/charts/bar-chart/bar-chart.component').then(m => m.BarChartComponent));
-  pieChartComponent: Observable<any> = defer(() => import('src/app/shared/components/charts/pie-chart/pie-chart.component').then(m => m.PieChartComponent));
-  lineChartComponent: Observable<any> = defer(() => import('src/app/shared/components/charts/line-chart/line-chart.component').then(m => m.LineChartComponent));
+  barChartComponent: Observable<any> = defer(() =>
+    import(
+      'src/app/shared/components/charts/bar-chart/bar-chart.component'
+    ).then((m) => m.BarChartComponent)
+  );
+  pieChartComponent: Observable<any> = defer(() =>
+    import(
+      'src/app/shared/components/charts/pie-chart/pie-chart.component'
+    ).then((m) => m.PieChartComponent)
+  );
+  lineChartComponent: Observable<any> = defer(() =>
+    import(
+      'src/app/shared/components/charts/line-chart/line-chart.component'
+    ).then((m) => m.LineChartComponent)
+  );
 
   private _injector = inject(Injector);
 
@@ -110,7 +118,7 @@ export class HomePageComponent
   currentDate: Date = new Date();
   // Keep simple fallbacks where needed
   percentageChange: number | null = null;
-  selectedRange: DateRange = '6m';
+  selectedRange: DateRange = '1m';
   currency: string = 'USD';
 
   // UI state
@@ -234,7 +242,9 @@ export class HomePageComponent
   // Derive income vs expenses for the selected month from totalsByMonth$
   private readonly incomeVsExpenseByMonth$ = combineLatest([
     this.totalsByMonth$,
-    this.translateService.onLangChange.pipe(startWith({ lang: this.translateService.currentLang }))
+    this.translateService.onLangChange.pipe(
+      startWith({ lang: this.translateService.currentLang })
+    ),
   ]).pipe(
     map(([t, langEvent]) => {
       return [
@@ -314,7 +324,7 @@ export class HomePageComponent
   override ngOnInit(): void {
     super.ngOnInit();
     // Subscribe to vm$ for latest values (for injectors)
-    this.vm$.pipe(takeUntil(this.destroy$)).subscribe(vm => {
+    this.vm$.pipe(takeUntil(this.destroy$)).subscribe((vm) => {
       this.latestVm = vm;
       this.createInjectors(vm);
       this.cdr.markForCheck();
@@ -415,14 +425,14 @@ export class HomePageComponent
   }
 
   // FAB: open expense form modal
-  async openExpenseModal(): Promise<void> {
+  async openExpenseModal(expense?: Expense): Promise<void> {
     try {
       const modal = await this.modalCtrl.create({
         component: ExpenseFormComponent,
-        componentProps: {
-          month: this.selectedMonth.month,
-          year: this.selectedMonth.year,
-        },
+        componentProps: { expense, onClose: () => modal.dismiss() },
+        initialBreakpoint: 0.9,
+        breakpoints: [0, 0.9, 1],
+        backdropDismiss: false,
         presentingElement: document.querySelector('ion-router-outlet') as
           | HTMLElement
           | undefined,

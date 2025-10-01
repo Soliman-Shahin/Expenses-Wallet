@@ -113,7 +113,7 @@ export class DashboardFacade {
         const byId = new Map<string, { name: string; type?: string }>();
         categories.forEach((c) =>
           byId.set(c._id, {
-            name: (c as any).title || c.name,
+            name: (c as any).title || c.title,
             type: (c as any).type,
           })
         );
@@ -136,7 +136,7 @@ export class DashboardFacade {
             let catType: string | undefined;
             if (e.category && typeof e.category === 'object') {
               name =
-                (e.category as any).title || (e.category as any).name || name;
+                (e.category as any).title || (e.category as any).title || name;
               catType = (e.category as any).type;
             } else if (typeof e.category === 'string') {
               const meta = byId.get(e.category);
