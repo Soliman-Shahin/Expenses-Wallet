@@ -60,14 +60,31 @@ export class ApiService {
     return new HttpHeaders(this.getHeadersObject());
   }
 
-  get<T>(path: string, params?: HttpParams): Observable<T> {
+  get<T>(path: string, params?: any): Observable<T> {
+    // Convert params object to HttpParams if needed
+    let httpParams: HttpParams | undefined;
+    if (params) {
+      httpParams = new HttpParams();
+      Object.keys(params).forEach(key => {
+        if (params[key] !== undefined && params[key] !== null) {
+          httpParams = httpParams!.append(key, String(params[key]));
+        }
+      });
+    }
+
     return this.http
-      .get<{ data: T }>(`${this.baseUrl}${path}`, {
+      .get<any>(`${this.baseUrl}${path}`, {
         headers: this.getHeaders(),
-        params,
+        params: httpParams,
       })
       .pipe(
-        map((response) => response.data),
+        map((response) => {
+          // Handle both {data: T} and direct response formats
+          if (response && response.data !== undefined) {
+            return response.data;
+          }
+          return response;
+        }),
         catchError(this.handleError)
       );
   }
@@ -93,12 +110,18 @@ export class ApiService {
     });
 
     return this.http
-      .post<{ data: T }>(`${this.baseUrl}${path}`, body, {
+      .post<any>(`${this.baseUrl}${path}`, body, {
         headers: mergedHeaders,
         params: options.params,
       })
       .pipe(
-        map((response) => response.data),
+        map((response) => {
+          // Handle both {data: T} and direct response formats
+          if (response && response.data !== undefined) {
+            return response.data;
+          }
+          return response;
+        }),
         catchError(this.handleError)
       );
   }
@@ -142,12 +165,18 @@ export class ApiService {
     options: { params?: HttpParams } = {}
   ): Observable<T> {
     return this.http
-      .put<{ data: T }>(`${this.baseUrl}${path}`, body, {
+      .put<any>(`${this.baseUrl}${path}`, body, {
         headers: this.getHeaders(),
         params: options.params,
       })
       .pipe(
-        map((response) => response.data),
+        map((response) => {
+          // Handle both {data: T} and direct response formats
+          if (response && response.data !== undefined) {
+            return response.data;
+          }
+          return response;
+        }),
         catchError(this.handleError)
       );
   }

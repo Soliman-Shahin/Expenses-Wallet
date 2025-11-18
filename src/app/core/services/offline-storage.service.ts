@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { StorageService } from 'src/app/modules/auth/services/storage.service';
 import { SyncEntity, SyncStatus, OfflineData, SyncOperation, SyncQueue } from 'src/app/shared/models/sync.model';
 import { Observable, BehaviorSubject, from, of } from 'rxjs';
-import { map, catchError, tap } from 'rxjs/operators';
+import { map, catchError, tap, switchMap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -72,7 +72,66 @@ export class OfflineStorageService {
   }
 
   getEntities<T extends SyncEntity>(entityType: string): Observable<T[]> {
-    return from(this.getEntitiesSync<T>(entityType));
+    return from(this.getEntitiesSync<T>(entityType)).pipe(
+      map(entities => entities.filter(e => !e._isDeleted)) // Filter out deleted items
+    );
+  }
+
+  /**
+   * Replace all entities of a specific type (used during sync pull)
+   */
+  replaceEntities<T extends SyncEntity>(entityType: string, entities: T[]): Observable<boolean> {
+    return from(this.setEntities(entityType, entities)).pipe(
+      map(() => true),
+      catchError(error => {
+        console.error(`Error replacing ${entityType} entities:`, error);
+        return of(false);
+      })
+    );
+  }
+
+  /**
+   * Merge entities from server with local entities
+   */
+  mergeEntities<T extends SyncEntity>(entityType: string, serverEntities: T[]): Observable<boolean> {
+    return this.getEntities<T>(entityType).pipe(
+      switchMap((localEntities: T[]) => {
+        const merged = [...localEntities];
+        
+        serverEntities.forEach(serverEntity => {
+          const localIndex = merged.findIndex(e => e._id === serverEntity._id);
+          
+          // Handle deleted items from server
+          if (serverEntity._isDeleted) {
+            if (localIndex >= 0) {
+              // Remove deleted item from local storage
+              merged.splice(localIndex, 1);
+            }
+            // If not found locally, ignore (already deleted)
+            return;
+          }
+          
+          if (localIndex >= 0) {
+            // Update existing entity if server version is newer
+            const localEntity = merged[localIndex];
+            const serverTime = new Date(serverEntity._lastModified).getTime();
+            const localTime = new Date(localEntity._lastModified).getTime();
+            
+            if (serverTime >= localTime) {
+              merged[localIndex] = { ...serverEntity, _syncStatus: SyncStatus.SYNCED };
+            }
+          } else {
+            // Add new entity from server
+            merged.push({ ...serverEntity, _syncStatus: SyncStatus.SYNCED });
+          }
+        });
+        
+        return from(this.setEntities(entityType, merged)).pipe(
+          map(() => true),
+          catchError(() => of(false))
+        );
+      })
+    );
   }
 
   private async getEntitiesSync<T extends SyncEntity>(entityType: string): Promise<T[]> {
@@ -215,26 +274,41 @@ export class OfflineStorageService {
   }
 
   private setEntities<T>(entityType: string, entities: T[]): Promise<void> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       try {
         const key = this.getStorageKey(entityType);
         this.storageService.set(key, entities);
         resolve();
       } catch (error) {
-        reject(error);
+        console.error(`Error setting ${entityType} entities:`, error);
+        resolve(); // Resolve anyway to prevent blocking
       }
     });
   }
 
   private loadSyncQueue(): void {
-    const queue = this.storageService.get<SyncQueue>(this.STORAGE_KEYS.SYNC_QUEUE);
-    if (queue) {
-      this.syncQueueSubject.next(queue);
+    try {
+      const queue = this.storageService.get<SyncQueue>(this.STORAGE_KEYS.SYNC_QUEUE);
+      if (queue) {
+        // Convert date strings back to Date objects
+        queue.operations = queue.operations.map(op => ({
+          ...op,
+          timestamp: new Date(op.timestamp)
+        }));
+        queue.lastProcessed = new Date(queue.lastProcessed);
+        this.syncQueueSubject.next(queue);
+      }
+    } catch (error) {
+      console.error('Error loading sync queue:', error);
     }
   }
 
   private saveSyncQueue(queue: SyncQueue): void {
-    this.storageService.set(this.STORAGE_KEYS.SYNC_QUEUE, queue);
+    try {
+      this.storageService.set(this.STORAGE_KEYS.SYNC_QUEUE, queue);
+    } catch (error) {
+      console.error('Error saving sync queue:', error);
+    }
   }
 
   private generateId(): string {

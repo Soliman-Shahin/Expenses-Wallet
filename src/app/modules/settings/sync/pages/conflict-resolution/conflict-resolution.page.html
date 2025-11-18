@@ -1,0 +1,121 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-back-button defaultHref="/settings/sync"></ion-back-button>
+        </ion-buttons>
+        <ion-title>{{ 'SYNC.CONFLICT_RESOLUTION' | translate }}</ion-title>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content>
+    <!-- No Conflicts Message -->
+    <div *ngIf="conflicts.length === 0" class="no-conflicts">
+        <ion-icon name="checkmark-circle" color="success"></ion-icon>
+        <h2>{{ 'SYNC.NO_CONFLICTS' | translate }}</h2>
+        <p>{{ 'SYNC.NO_CONFLICTS_DESC' | translate }}</p>
+    </div>
+
+    <!-- Conflicts List -->
+    <div *ngIf="conflicts.length > 0">
+        <ion-card *ngFor="let conflict of conflicts; trackBy: trackByConflictId" class="conflict-card">
+            <ion-card-header>
+                <ion-card-title>
+                    <ion-icon [name]="getEntityIcon(conflict.entityType)" color="warning"></ion-icon>
+                    {{ getEntityTitle(conflict) }}
+                </ion-card-title>
+                <ion-card-subtitle>
+                    {{ 'SYNC.CONFLICT_DETECTED' | translate }}: {{ formatDate(conflict.timestamp) }}
+                </ion-card-subtitle>
+            </ion-card-header>
+
+            <ion-card-content>
+                <!-- Conflict Details -->
+                <div class="conflict-details">
+                    <div class="data-comparison">
+                        <!-- Local Data -->
+                        <div class="data-section local-data">
+                            <h4>
+                                <ion-icon name="phone-portrait" color="primary"></ion-icon>
+                                {{ 'SYNC.LOCAL_VERSION' | translate }}
+                            </h4>
+                            <div class="data-content">
+                                <pre>{{ formatData(conflict.localData) }}</pre>
+                            </div>
+                            <ion-button fill="outline" color="primary" size="small"
+                                (click)="selectResolution(conflict, 'local')">
+                                {{ 'SYNC.USE_THIS' | translate }}
+                            </ion-button>
+                        </div>
+
+                        <!-- Server Data -->
+                        <div class="data-section server-data">
+                            <h4>
+                                <ion-icon name="cloud" color="secondary"></ion-icon>
+                                {{ 'SYNC.SERVER_VERSION' | translate }}
+                            </h4>
+                            <div class="data-content">
+                                <pre>{{ formatData(conflict.serverData) }}</pre>
+                            </div>
+                            <ion-button fill="outline" color="secondary" size="small"
+                                (click)="selectResolution(conflict, 'server')">
+                                {{ 'SYNC.USE_THIS' | translate }}
+                            </ion-button>
+                        </div>
+                    </div>
+
+                    <!-- Merge Option -->
+                    <div class="merge-option" *ngIf="canMerge(conflict)">
+                        <h4>
+                            <ion-icon name="git-merge" color="tertiary"></ion-icon>
+                            {{ 'SYNC.MERGE_OPTION' | translate }}
+                        </h4>
+                        <p>{{ 'SYNC.MERGE_DESC' | translate }}</p>
+                        <ion-button fill="outline" color="tertiary" size="small" (click)="showMergeDialog(conflict)">
+                            {{ 'SYNC.MERGE_DATA' | translate }}
+                        </ion-button>
+                    </div>
+                </div>
+
+                <!-- Resolution Actions -->
+                <div class="resolution-actions">
+                    <ion-button fill="solid" color="success" (click)="resolveConflict(conflict, 'local')">
+                        <ion-icon name="checkmark" slot="start"></ion-icon>
+                        {{ 'SYNC.RESOLVE_LOCAL' | translate }}
+                    </ion-button>
+
+                    <ion-button fill="solid" color="secondary" (click)="resolveConflict(conflict, 'server')">
+                        <ion-icon name="cloud-done" slot="start"></ion-icon>
+                        {{ 'SYNC.RESOLVE_SERVER' | translate }}
+                    </ion-button>
+
+                    <ion-button *ngIf="canMerge(conflict)" fill="solid" color="tertiary"
+                        (click)="resolveConflict(conflict, 'merge')">
+                        <ion-icon name="git-merge" slot="start"></ion-icon>
+                        {{ 'SYNC.RESOLVE_MERGE' | translate }}
+                    </ion-button>
+                </div>
+            </ion-card-content>
+        </ion-card>
+
+        <!-- Bulk Actions -->
+        <ion-card class="bulk-actions">
+            <ion-card-header>
+                <ion-card-title>{{ 'SYNC.BULK_ACTIONS' | translate }}</ion-card-title>
+            </ion-card-header>
+
+            <ion-card-content>
+                <div class="bulk-buttons">
+                    <ion-button fill="outline" color="primary" (click)="resolveAllConflicts('local')">
+                        <ion-icon name="phone-portrait" slot="start"></ion-icon>
+                        {{ 'SYNC.USE_ALL_LOCAL' | translate }}
+                    </ion-button>
+
+                    <ion-button fill="outline" color="secondary" (click)="resolveAllConflicts('server')">
+                        <ion-icon name="cloud" slot="start"></ion-icon>
+                        {{ 'SYNC.USE_ALL_SERVER' | translate }}
+                    </ion-button>
+                </div>
+            </ion-card-content>
+        </ion-card>
+    </div>
+</ion-content>

@@ -36,7 +36,7 @@ export class SyncService {
 
   private syncConfig: SyncConfig = {
     autoSync: true,
-    syncInterval: 30000, // 30 seconds
+    syncInterval: 300000, // 5 minutes (300000ms) - optimized for battery and data usage
     maxRetries: 3,
     conflictResolution: 'prompt',
     batchSize: 10,
@@ -73,6 +73,78 @@ export class SyncService {
     this.initializeAutoSync();
   }
 
+  // ==================== SYNC API ENDPOINTS ====================
+
+  /**
+   * Pull data from server sync API
+   */
+  pullFromServer(params: {
+    lastSyncTime?: string;
+    entityType?: 'expense' | 'category' | 'user';
+    limit?: number;
+    offset?: number;
+  } = {}): Observable<any> {
+    return this.apiService.get<any>(
+      `/sync/pull`,
+      this.buildHttpParams(params)
+    );
+  }
+
+  /**
+   * Push local changes to server sync API
+   */
+  pushToServer(entities: any[]): Observable<any> {
+    return this.apiService.post<any>(`/sync/push`, { entities });
+  }
+
+  /**
+   * Bulk sync to server
+   */
+  bulkSyncToServer(entities: any[]): Observable<any> {
+    return this.apiService.post<any>(`/sync/bulk`, { entities });
+  }
+
+  /**
+   * Get conflicts from server
+   */
+  getConflictsFromServer(): Observable<any[]> {
+    return this.apiService.get<any[]>(`/sync/conflicts`);
+  }
+
+  /**
+   * Resolve conflict on server
+   */
+  resolveConflictOnServer(conflict: {
+    entityId: string;
+    entityType: string;
+    resolution: 'local' | 'server' | 'merge';
+    mergedData?: any;
+  }): Observable<any> {
+    return this.apiService.post<any>(`/sync/conflicts/resolve`, conflict);
+  }
+
+  /**
+   * Get sync metadata from server
+   */
+  getSyncMetadataFromServer(): Observable<any> {
+    return this.apiService.get<any>(`/sync/metadata`);
+  }
+
+  /**
+   * Update sync metadata on server
+   */
+  updateSyncMetadataOnServer(metadata: any): Observable<any> {
+    return this.apiService.put<any>(`/sync/metadata`, metadata);
+  }
+
+  /**
+   * Helper to build HttpParams from object
+   */
+  private buildHttpParams(params: any): any {
+    // Angular HttpParams is not imported here, so just return params as is for ApiService
+    return params;
+  }
+
   // ==================== INITIALIZATION ====================
 
   private initializeNetworkMonitoring(): void {
@@ -104,81 +176,160 @@ export class SyncService {
 
   // ==================== MAIN SYNC METHODS ====================
 
+  /**
+   * مزامنة كل شيء: Pull ثم Push (Best Practice)
+   */
   syncAll(): Observable<boolean> {
     if (this.syncInProgress) {
+      console.log('Sync already in progress, skipping...');
+      return of(false);
+    }
+
+    if (!this.isOnline) {
+      console.log('Device is offline, skipping sync...');
       return of(false);
     }
 
     this.syncInProgress = true;
     this.updateSyncMetadata({ isSyncing: true });
-    this.updateSyncProgress({ 
-      current: 0, 
-      total: 0, 
-      percentage: 0, 
+    this.updateSyncProgress({
+      current: 0,
+      total: 0,
+      percentage: 0,
       currentOperation: 'Starting sync...',
       isComplete: false,
       errors: []
     });
 
-    return this.offlineStorage.getPendingOperations().pipe(
-      switchMap(operations => {
-        if (operations.length === 0) {
-          this.completeSync();
-          return of(true);
+    console.log('Starting full sync...');
+
+    // 1. Pull latest data from server
+    return this.pullFromServer({
+      lastSyncTime: this.syncMetadataSubject.value.lastSyncTime?.toISOString?.() || undefined
+    }).pipe(
+      switchMap((pullResult: any) => {
+        console.log('Pull result:', pullResult);
+        
+        // تحديث الداتا المحلية بناءً على رد السيرفر
+        if (pullResult?.entities && Array.isArray(pullResult.entities)) {
+          // دمج كل نوع من الـ entities
+          const expenseEntities = pullResult.entities.filter((e: any) => e._entityType === 'expense');
+          const categoryEntities = pullResult.entities.filter((e: any) => e._entityType === 'category');
+          
+          if (expenseEntities.length > 0) {
+            this.offlineStorage.mergeEntities('expense', expenseEntities).subscribe();
+          }
+          if (categoryEntities.length > 0) {
+            this.offlineStorage.mergeEntities('category', categoryEntities).subscribe();
+          }
         }
-
-        this.updateSyncProgress({ 
-          total: operations.length,
-          currentOperation: `Syncing ${operations.length} operations...`
-        });
-
-        return this.syncOperations(operations);
+        
+        if (pullResult?.conflicts && Array.isArray(pullResult.conflicts)) {
+          this.updateSyncMetadata({ conflictCount: pullResult.conflicts.length });
+        }
+        
+        // 2. Push local pending operations to server
+        return this.offlineStorage.getPendingOperations().pipe(
+          switchMap(operations => {
+            console.log('Pending operations:', operations.length);
+            
+            if (!operations.length) {
+              this.completeSync();
+              return of(true);
+            }
+            
+            // تحويل العمليات لصيغة مناسبة للسيرفر
+            const entitiesToPush = operations.map(op => ({
+              _id: op.entityId,
+              _entityType: op.entityType,
+              _lastModified: op.timestamp,
+              _version: 1,
+              _isDeleted: op.type === 'DELETE',
+              ...op.data
+            }));
+            
+            // دفع كل العمليات دفعة واحدة
+            return this.pushToServer(entitiesToPush).pipe(
+              tap((pushResult: any) => {
+                console.log('Push result:', pushResult);
+                
+                // إذا فيه تعارضات أو أخطاء
+                if (pushResult?.conflicts?.length) {
+                  this.updateSyncMetadata({ conflictCount: pushResult.conflicts.length });
+                }
+                
+                // إزالة العمليات من الـ queue إذا نجحت
+                if (pushResult?.success) {
+                  operations.forEach(op => this.offlineStorage.removeFromSyncQueue(op.id));
+                }
+              }),
+              map((pushResult: any) => !!pushResult?.success),
+              catchError(error => {
+                console.error('Sync push error:', error);
+                this.updateSyncProgress({ errors: [error.message || 'Sync push error'] });
+                return of(false);
+              })
+            );
+          })
+        );
       }),
       tap(() => this.completeSync()),
       catchError(error => {
         console.error('Sync error:', error);
-        this.updateSyncProgress({
-          errors: [error.message || 'Unknown sync error']
-        });
+        this.updateSyncProgress({ errors: [error.message || 'Unknown sync error'] });
         this.completeSync();
         return of(false);
       }),
       finalize(() => {
         this.syncInProgress = false;
         this.updateSyncMetadata({ isSyncing: false });
+        console.log('Sync completed');
       })
     );
   }
 
+  /**
+   * مزامنة مجموعة عمليات دفعة واحدة (Bulk)
+   */
   private syncOperations(operations: SyncOperation[]): Observable<boolean> {
-    return from(operations).pipe(
-      concatMap(operation => this.syncOperation(operation)),
-      map(() => true),
+    if (!operations.length) return of(true);
+    return this.bulkSyncToServer(operations).pipe(
+      tap((result: any) => {
+        if (result?.success) {
+          operations.forEach(op => this.offlineStorage.removeFromSyncQueue(op.id));
+        }
+        if (result?.results) {
+          const conflicts = result.results.filter((r: any) => r.conflict);
+          if (conflicts.length) {
+            this.updateSyncMetadata({ conflictCount: conflicts.length });
+          }
+        }
+      }),
+      map((result: any) => !!result?.success),
       catchError(error => {
-        console.error('Operation sync error:', error);
+        this.updateSyncProgress({ errors: [error.message || 'Bulk sync error'] });
         return of(false);
       })
     );
   }
 
+  /**
+   * مزامنة عملية واحدة (تستخدم فقط في حالات خاصة)
+   */
   private syncOperation(operation: SyncOperation): Observable<boolean> {
-    this.updateSyncProgress({
-      currentOperation: `${operation.type} ${operation.entityType}`
-    });
-
-    const syncMethod = this.getSyncMethod(operation.type);
-    return syncMethod(operation).pipe(
-      tap(() => {
-        this.offlineStorage.removeFromSyncQueue(operation.id);
-        // Use syncMetadata$ observable to get the latest value and update accordingly
-        this.syncMetadata$.pipe(take(1)).subscribe(currentMeta => {
-          this.updateSyncMetadata({
-            pendingCount: (currentMeta?.pendingCount ?? 1) - 1
-          });
-        });
+    // هنا يمكن استخدام pushToServer لعملية واحدة أو bulkSyncToServer لمجموعة
+    return this.pushToServer([operation]).pipe(
+      tap((result: any) => {
+        if (result?.success) {
+          this.offlineStorage.removeFromSyncQueue(operation.id);
+        }
+        if (result?.conflicts?.length) {
+          this.updateSyncMetadata({ conflictCount: result.conflicts.length });
+        }
       }),
+      map((result: any) => !!result?.success),
       catchError(error => {
-        this.handleSyncError(operation, error);
+        this.updateSyncProgress({ errors: [error.message || 'Sync operation error'] });
         return of(false);
       })
     );
@@ -342,16 +493,19 @@ export class SyncService {
   }
 
   private completeSync(): void {
+    const now = new Date();
     this.updateSyncMetadata({
-      ...this.syncMetadataSubject.value,
-      lastSyncTime: new Date(),
+      lastSyncTime: now,
       isSyncing: false
     });
 
     this.updateSyncProgress({
       isComplete: true,
-      currentOperation: 'Sync completed'
+      currentOperation: 'Sync completed',
+      percentage: 100
     });
+    
+    console.log('Sync metadata updated:', this.syncMetadataSubject.value);
   }
 
   private updateSyncMetadata(updates: Partial<SyncMetadata>): void {
