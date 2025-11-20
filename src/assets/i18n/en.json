@@ -201,7 +201,8 @@
     "CURRENCY": "Currency",
     "UI": "Mode",
     "BIOMETRIC": "Biometric Authentication",
-    "BIOMETRIC_DESC": "Use fingerprint or face ID to unlock app"
+    "BIOMETRIC_DESC": "Use fingerprint or face ID to unlock app",
+    "BACKUP": "Backup & Restore"
   },
   "BUDGET": {
     "TITLE": "Budget"
@@ -479,5 +480,47 @@
     "SYNC_OPERATION_FAILED": "Sync operation failed. Please try again.",
     "SYNC_INVALID_DATA": "Sync data is invalid.",
     "SYNC_RATE_LIMIT": "Too many sync requests. Please try again later."
+  },
+  "ONBOARDING": {
+    "WELCOME_TITLE": "Welcome to Expenses Wallet!",
+    "WELCOME_DESC": "Your perfect app for managing personal expenses easily and securely",
+    "EXPENSES_TITLE": "Track Your Expenses",
+    "EXPENSES_DESC": "Record all your daily expenses and categorize them easily to know where your money goes",
+    "CATEGORIES_TITLE": "Organize by Categories",
+    "CATEGORIES_DESC": "Create custom categories for your expenses (Food, Transport, Entertainment, etc.)",
+    "ANALYTICS_TITLE": "Smart Analytics",
+    "ANALYTICS_DESC": "Get clear insights into your spending habits through charts and statistics",
+    "BACKUP_TITLE": "Secure Backup",
+    "BACKUP_DESC": "Keep your data safe with the ability to create encrypted backups",
+    "OFFLINE_TITLE": "Works Offline",
+    "OFFLINE_DESC": "Use the app anytime even without internet connection, and it will sync automatically",
+    "NEXT": "Next",
+    "START": "Start Now",
+    "SKIP": "Skip"
+  },
+  "BACKUP": {
+    "TITLE": "Backup & Restore",
+    "SUBTITLE": "Keep your data safe and restore it anytime",
+    "CREATE_NEW": "New Backup",
+    "CREATE_DESC": "Create a full backup now",
+    "RESTORE": "Restore",
+    "RESTORE_DESC": "Restore data from external file",
+    "HISTORY": "Backup History",
+    "NO_HISTORY": "No previous backups",
+    "ENCRYPTED": "Encrypted",
+    "ITEMS": "items",
+    "CREATE_ALERT_TITLE": "Create Backup",
+    "CREATE_ALERT_MSG": "Do you want to encrypt the backup with a password?",
+    "PASSWORD_PLACEHOLDER": "Password (Optional)",
+    "DECRYPT_ALERT_TITLE": "Decrypt Backup",
+    "DECRYPT_ALERT_MSG": "This backup is encrypted. Please enter the password.",
+    "RESTORE_CONFIRM_TITLE": "Confirm Restore",
+    "RESTORE_CONFIRM_MSG": "Current data will be replaced by backup data. Are you sure?",
+    "SUCCESS_CREATE": "Backup created and exported successfully",
+    "SUCCESS_RESTORE": "Data restored successfully",
+    "FAILED_CREATE": "Failed to create backup",
+    "FAILED_RESTORE": "Failed to restore data",
+    "INVALID_FILE": "Invalid file",
+    "WRONG_PASSWORD": "Incorrect password or corrupted file"
   }
 }

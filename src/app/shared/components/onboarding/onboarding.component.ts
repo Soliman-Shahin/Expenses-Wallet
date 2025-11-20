@@ -28,7 +28,8 @@ export class OnboardingComponent implements OnInit {
   }
 
   get isLastStep(): boolean {
-    return this.currentStepIndex === this.steps.length - 1;
+    const stepsLength = this.steps ? this.steps.length : 0;
+    return this.currentStepIndex === stepsLength - 1;
   }
 
   onScroll(event: any) {
