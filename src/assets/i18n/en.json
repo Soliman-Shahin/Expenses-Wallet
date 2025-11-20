@@ -199,7 +199,9 @@
     "PROFILE": "Account settings",
     "LANGUAGE": "Language",
     "CURRENCY": "Currency",
-    "UI": "Mode"
+    "UI": "Mode",
+    "BIOMETRIC": "Biometric Authentication",
+    "BIOMETRIC_DESC": "Use fingerprint or face ID to unlock app"
   },
   "BUDGET": {
     "TITLE": "Budget"

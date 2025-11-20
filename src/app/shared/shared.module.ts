@@ -10,6 +10,8 @@ import {
   TotalSalaryComponent,
   UserInfoComponent,
   BalanceCardComponent,
+  OnboardingComponent,
+  BackupRestoreComponent,
 } from './components';
 import { SkeletonBlockComponent } from './ui/skeleton-block/skeleton-block.component';
 import {
@@ -17,7 +19,7 @@ import {
   ListItemComponent,
   EmptyStateComponent,
   ChartWrapperComponent,
-  ButtonComponent
+  ButtonComponent,
 } from './ui-library';
 
 import { ThemeToggleComponent } from './components/theme-toggle/theme-toggle.component';
@@ -56,6 +58,8 @@ import { ThemeToggleComponent } from './components/theme-toggle/theme-toggle.com
     ChartWrapperComponent,
     SkeletonBlockComponent,
     ButtonComponent,
+    OnboardingComponent,
+    BackupRestoreComponent,
   ],
   declarations: [
     UserInfoComponent,
@@ -64,6 +68,8 @@ import { ThemeToggleComponent } from './components/theme-toggle/theme-toggle.com
     TotalSalaryComponent,
     ThemeToggleComponent,
     BalanceCardComponent,
+    OnboardingComponent,
+    BackupRestoreComponent,
   ],
 })
 export class SharedModule {}

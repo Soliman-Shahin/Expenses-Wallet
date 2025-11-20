@@ -57,5 +57,7 @@
     <string>Production</string>
     <key>IonUpdateMethod</key>
     <string>background</string>
+    <key>NSFaceIDUsageDescription</key>
+    <string>Use Face ID to unlock the app</string>
   </dict>
 </plist>

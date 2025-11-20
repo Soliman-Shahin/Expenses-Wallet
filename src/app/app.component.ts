@@ -3,6 +3,8 @@ import { App } from '@capacitor/app';
 import { BaseComponent } from './shared/base/base.component';
 import { DirectionService } from './core/services/direction.service';
 import { TranslateService } from '@ngx-translate/core';
+import { OnboardingService } from './core/services/onboarding.service';
+import { BiometricService } from './core/services/biometric.service';
 
 @Component({
   selector: 'app-root',
@@ -10,10 +12,14 @@ import { TranslateService } from '@ngx-translate/core';
   styleUrls: ['app.component.scss'],
 })
 export class AppComponent extends BaseComponent implements OnInit {
+  isLocked = false;
+
   constructor(
     private zone: NgZone,
     private translate: TranslateService,
-    private directionService: DirectionService // Eagerly initialize the direction service
+    private directionService: DirectionService,
+    public onboardingService: OnboardingService,
+    private biometricService: BiometricService
   ) {
     super();
     this.translate.setDefaultLang('en');
@@ -22,6 +28,14 @@ export class AppComponent extends BaseComponent implements OnInit {
   override ngOnInit(): void {
     super.ngOnInit();
     this.themeService.initTheme();
+
+    // Check biometric on startup
+    this.checkBiometric();
+
+    // Check on resume
+    App.addListener('resume', () => {
+      this.checkBiometric();
+    });
 
     // Handle OAuth deep link redirects on native (Android/iOS)
     App.addListener('appUrlOpen', (event: { url: string }) => {
@@ -48,5 +62,19 @@ export class AppComponent extends BaseComponent implements OnInit {
     });
   }
 
-
+  async checkBiometric() {
+    if (
+      this.biometricService.isEnabled &&
+      (await this.biometricService.isAvailable())
+    ) {
+      this.isLocked = true;
+      // Small delay to ensure UI updates
+      setTimeout(async () => {
+        const authenticated = await this.biometricService.verifyIdentity();
+        if (authenticated) {
+          this.isLocked = false;
+        }
+      }, 100);
+    }
+  }
 }

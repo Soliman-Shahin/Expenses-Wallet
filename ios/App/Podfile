@@ -18,6 +18,7 @@ def capacitor_pods
   pod 'CapacitorNetwork', :path => '../../node_modules/@capacitor/network'
   pod 'CapacitorStatusBar', :path => '../../node_modules/@capacitor/status-bar'
   pod 'CodetrixStudioCapacitorGoogleAuth', :path => '../../node_modules/@codetrix-studio/capacitor-google-auth'
+  pod 'CapgoCapacitorNativeBiometric', :path => '../../node_modules/@capgo/capacitor-native-biometric'
   pod 'CordovaPlugins', :path => '../capacitor-cordova-ios-plugins'
 end
 

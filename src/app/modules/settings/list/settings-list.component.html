@@ -1,9 +1,29 @@
 <ion-header mode="ios" class="settings-ion-header">
-    <ion-toolbar>
-        <ion-title>{{ "SIDEBAR.SETTINGS" | translate }}</ion-title>
-    </ion-toolbar>
+  <ion-toolbar>
+    <ion-title>{{ "SIDEBAR.SETTINGS" | translate }}</ion-title>
+  </ion-toolbar>
 </ion-header>
 <ion-content class="ion-padding">
-    <!-- Sync Status Component -->
-    <app-sync-status></app-sync-status>
+  <!-- Sync Status Component -->
+  <app-sync-status></app-sync-status>
+
+  <!-- Biometric Settings -->
+  <ion-list *ngIf="biometricAvailable" inset="true" class="settings-list">
+    <ion-item lines="none">
+      <ion-icon
+        slot="start"
+        name="finger-print-outline"
+        color="primary"
+      ></ion-icon>
+      <ion-label>
+        <h2>{{ "SETTINGS.BIOMETRIC" | translate }}</h2>
+        <p>{{ "SETTINGS.BIOMETRIC_DESC" | translate }}</p>
+      </ion-label>
+      <ion-toggle
+        slot="end"
+        [checked]="biometricEnabled"
+        (ionChange)="toggleBiometric($event)"
+      ></ion-toggle>
+    </ion-item>
+  </ion-list>
 </ion-content>

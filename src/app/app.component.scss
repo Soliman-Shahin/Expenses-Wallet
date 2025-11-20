@@ -40,3 +40,37 @@ ion-tab-bar {
     }
   }
 }
+
+.lock-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--ion-background-color);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  .lock-content {
+    padding: 2rem;
+
+    ion-icon {
+      font-size: 4rem;
+      color: var(--ion-color-primary);
+      margin-bottom: 1rem;
+    }
+
+    h2 {
+      margin: 0 0 0.5rem;
+      color: var(--ion-text-color);
+    }
+
+    p {
+      margin: 0 0 2rem;
+      color: var(--ion-text-color-step-400);
+    }
+  }
+}

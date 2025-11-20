@@ -1,0 +1,80 @@
+<div class="backup-container">
+  <div class="header-section">
+    <h2>النسخ الاحتياطي والاستعادة</h2>
+    <p>احتفظ ببياناتك آمنة واستعدها في أي وقت</p>
+  </div>
+
+  <div class="actions-grid">
+    <div class="action-card create" (click)="createBackup()">
+      <div class="icon-box">
+        <ion-icon name="cloud-upload-outline"></ion-icon>
+      </div>
+      <h3>نسخة جديدة</h3>
+      <p>إنشاء نسخة احتياطية كاملة الآن</p>
+    </div>
+
+    <div class="action-card restore" (click)="triggerImport()">
+      <div class="icon-box">
+        <ion-icon name="cloud-download-outline"></ion-icon>
+      </div>
+      <h3>استعادة</h3>
+      <p>استعادة البيانات من ملف خارجي</p>
+      <input
+        type="file"
+        #fileInput
+        (change)="onFileSelected($event)"
+        accept=".json"
+        style="display: none"
+      />
+    </div>
+  </div>
+
+  <div class="history-section">
+    <div class="section-title">
+      <h3>سجل النسخ الاحتياطية</h3>
+      <span class="badge" *ngIf="backupHistory.length > 0">{{
+        backupHistory.length
+      }}</span>
+    </div>
+
+    <div class="empty-state" *ngIf="backupHistory.length === 0">
+      <ion-icon name="time-outline"></ion-icon>
+      <p>لا توجد نسخ احتياطية سابقة</p>
+    </div>
+
+    <div class="history-list" *ngIf="backupHistory.length > 0">
+      <div class="history-item" *ngFor="let backup of backupHistory">
+        <div class="item-icon">
+          <ion-icon name="document-text-outline"></ion-icon>
+        </div>
+
+        <div class="item-details">
+          <h4>{{ backup.name }}</h4>
+          <div class="meta">
+            <span class="date">{{ backup.timestamp | date : "medium" }}</span>
+            <span class="separator">•</span>
+            <span class="size">{{ formatSize(backup.size) }}</span>
+          </div>
+          <div class="tags">
+            <span class="tag encrypted" *ngIf="backup.encrypted">
+              <ion-icon name="lock-closed-outline"></ion-icon> مشفر
+            </span>
+            <span class="tag items">{{ backup.itemCount }} عنصر</span>
+          </div>
+        </div>
+
+        <div class="item-actions">
+          <button class="btn-icon" (click)="shareBackup(backup)">
+            <ion-icon name="share-social-outline"></ion-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" *ngIf="isLoading">
+  <div class="spinner"></div>
+  <p>{{ loadingMessage }}</p>
+</div>
