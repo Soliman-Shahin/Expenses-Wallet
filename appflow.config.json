@@ -1,5 +1,8 @@
 {
-  "npm": {
-    "command": "npm install --include=optional --legacy-peer-deps"
+  "android": {
+    "buildCommand": "npm install --include=optional --legacy-peer-deps"
+  },
+  "web": {
+    "buildCommand": "npm install --include=optional --legacy-peer-deps"
   }
 }
