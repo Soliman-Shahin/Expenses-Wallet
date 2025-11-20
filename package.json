@@ -80,6 +80,9 @@
     "typescript": "~5.5.4"
   },
   "description": "Expenses Wallet Mobile App",
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.53.3"
+  },
   "overrides": {
     "@angular-eslint/builder": "18.4.3",
     "@angular-eslint/eslint-plugin": "18.4.3",
