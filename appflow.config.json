@@ -1,0 +1,5 @@
+{
+  "npm": {
+    "command": "npm install --include=optional --legacy-peer-deps"
+  }
+}
