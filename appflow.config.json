@@ -3,13 +3,16 @@
   "name": "Expenses Wallet",
   "android": {
     "buildCommand": "npm install --include=optional --legacy-peer-deps",
-    "package": "com.shahin.expenseswallet"
+    "package": "com.shahin.expenseswallet",
+    "dependencies": []
   },
   "ios": {
     "buildCommand": "npm install --include=optional --legacy-peer-deps",
-    "package": "com.shahin.expenseswallet"
+    "package": "com.shahin.expenseswallet",
+    "dependencies": []
   },
   "web": {
-    "buildCommand": "npm install --include=optional --legacy-peer-deps"
+    "buildCommand": "npm install --include=optional --legacy-peer-deps",
+    "dependencies": []
   }
 }
