@@ -21,54 +21,55 @@ ion-item {
       color: var(--ew-color-neutral-500, var(--ion-color-medium));
       margin-inline-end: var(--ew-space-3, 12px);
       font-size: var(--ew-font-size-lg, 20px);
-      transition: color var(--ew-transition-duration-short, 0.2s) var(--ew-transition-timing-function-ease, ease);
+      transition: color var(--ew-transition-duration-short, 0.2s)
+        var(--ew-transition-timing-function-ease, ease);
     }
 
-/* Ensure inputs fill the full width of ion-item across the app */
+    /* Ensure inputs fill the full width of ion-item across the app */
 
-ion-item ion-input,
-ion-item ion-textarea,
-ion-item ion-select,
-ion-item ion-datetime-button {
-  display: flex !important;
-  align-items: center !important;
-  flex: 1 1 auto !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important; /* allow shrinking inside flex */
-}
+    ion-item ion-input,
+    ion-item ion-textarea,
+    ion-item ion-select,
+    ion-item ion-datetime-button {
+      display: flex !important;
+      align-items: center !important;
+      flex: 1 1 auto !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important; /* allow shrinking inside flex */
+    }
 
-/* Fallback: make any middle child (not slotted start/end) flex to fill */
-ion-item > *:not([slot="start"]):not([slot="end"]) {
-  flex: 1 1 auto !important;
-  min-width: 0 !important;
-}
+    /* Fallback: make any middle child (not slotted start/end) flex to fill */
+    ion-item > *:not([slot="start"]):not([slot="end"]) {
+      flex: 1 1 auto !important;
+      min-width: 0 !important;
+    }
 
-/* Common slotted companions should not block input growth */
-ion-item ion-icon[slot="start"],
-ion-item ion-icon[slot="end"],
-ion-item ion-button[slot="end"],
-ion-item ion-buttons[slot="end"] {
-  flex: 0 0 auto;
-}
+    /* Common slotted companions should not block input growth */
+    ion-item ion-icon[slot="start"],
+    ion-item ion-icon[slot="end"],
+    ion-item ion-button[slot="end"],
+    ion-item ion-buttons[slot="end"] {
+      flex: 0 0 auto;
+    }
 
-/* Make ion-input internal parts expand as well */
-ion-item ion-input::part(container),
-ion-item ion-input::part(native) {
-  display: flex !important;
-  align-items: center !important;
-  width: 100% !important;
-}
+    /* Make ion-input internal parts expand as well */
+    ion-item ion-input::part(container),
+    ion-item ion-input::part(native) {
+      display: flex !important;
+      align-items: center !important;
+      width: 100% !important;
+    }
 
-/* Labels/icons should not flex-grow; keep them intrinsic so input can grow */
-ion-item ion-label,
-ion-item ion-icon[slot="start"],
-ion-item ion-icon[slot="end"],
-ion-item ion-button[slot="end"],
-ion-item ion-buttons[slot="end"] {
-  flex: 0 0 auto !important;
-  max-width: none !important;
-}
+    /* Labels/icons should not flex-grow; keep them intrinsic so input can grow */
+    ion-item ion-label,
+    ion-item ion-icon[slot="start"],
+    ion-item ion-icon[slot="end"],
+    ion-item ion-button[slot="end"],
+    ion-item ion-buttons[slot="end"] {
+      flex: 0 0 auto !important;
+      max-width: none !important;
+    }
 
     ion-label[position="floating"] {
       margin-inline-start: 8px;
@@ -79,7 +80,10 @@ ion-item ion-buttons[slot="end"] {
 
   &.item-has-focus {
     --border-color: var(--ew-color-primary-500, var(--ion-color-primary));
-    --box-shadow: var(--ew-shadow-md, 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.1));
+    --box-shadow: var(
+      --ew-shadow-md,
+      0 4px 12px rgba(var(--ion-color-primary-rgb), 0.1)
+    );
 
     ion-icon[slot="start"] {
       color: var(--ew-color-primary-500, var(--ion-color-primary));
@@ -92,9 +96,13 @@ ion-item ion-buttons[slot="end"] {
 
   // Invalid state
   &.ion-invalid.ion-touched {
-    --background: rgba(var(--ew-color-danger-500-rgb, var(--ion-color-danger-rgb)), 0.05);
+    --background: rgba(
+      var(--ew-color-danger-500-rgb, var(--ion-color-danger-rgb)),
+      0.05
+    );
     --border-color: var(--ew-color-danger-500, var(--ion-color-danger));
-    --box-shadow: 0 2px 8px rgba(var(--ew-color-danger-500-rgb, var(--ion-color-danger-rgb)), 0.1);
+    --box-shadow: 0 2px 8px
+      rgba(var(--ew-color-danger-500-rgb, var(--ion-color-danger-rgb)), 0.1);
 
     ion-icon[slot="start"] {
       color: var(--ew-color-danger-500, var(--ion-color-danger));
@@ -135,7 +143,8 @@ ion-datetime-button {
 .signup-form .form-item.ion-invalid.ion-touched {
   --background: transparent;
   --border-color: transparent;
-  --box-shadow: 0 0 0 2px color-mix(in srgb, var(--ion-color-danger) 14%, transparent);
+  --box-shadow: 0 0 0 2px
+    color-mix(in srgb, var(--ion-color-danger) 14%, transparent);
 }
 
 // Form Labels
@@ -144,7 +153,8 @@ ion-label {
   font-size: var(--ew-font-size-sm, 14px);
   margin: 0 0 var(--ew-space-2, 8px) 0;
   font-weight: var(--ew-font-weight-medium, 500);
-  transition: all var(--ew-transition-duration-medium, 0.3s) var(--ew-transition-timing-function-ease-in-out, ease);
+  transition: all var(--ew-transition-duration-medium, 0.3s)
+    var(--ew-transition-timing-function-ease-in-out, ease);
   transform-origin: start center;
 
   // Auth form specific styles
@@ -290,5 +300,260 @@ ion-datetime-button {
     &:last-child {
       margin-bottom: 0;
     }
+  }
+}
+
+// ===================================================================
+//  ADVANCED FORM FEATURES (v2.1)
+// ===================================================================
+
+/* Success State for Inputs */
+ion-item.ion-valid.ion-touched {
+  ion-icon[slot="start"] {
+    color: var(--ion-color-success);
+    animation: bounceIn 0.4s var(--ew-animation-easing-bounce);
+  }
+
+  &::after {
+    content: "✓";
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ion-color-success);
+    font-weight: bold;
+    font-size: 18px;
+    animation: bounceIn 0.3s var(--ew-animation-easing-bounce);
+  }
+}
+
+/* Loading State for Inputs */
+ion-input.loading,
+ion-textarea.loading,
+ion-select.loading {
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--shimmer-gradient);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+}
+
+/* Character Counter */
+.input-wrapper {
+  position: relative;
+
+  .input-counter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    padding: 4px var(--ew-space-4);
+    margin-top: -8px;
+    margin-bottom: var(--ew-space-3);
+
+    &.counter-warning {
+      color: var(--ion-color-warning);
+    }
+
+    &.counter-danger {
+      color: var(--ion-color-danger);
+      font-weight: var(--font-weight-semibold);
+    }
+  }
+}
+
+/* Input Groups */
+.input-group {
+  display: flex;
+  align-items: stretch;
+  margin-bottom: var(--ew-space-4);
+
+  ion-input,
+  ion-select,
+  ion-button {
+    margin-bottom: 0;
+  }
+
+  ion-input,
+  ion-select {
+    flex: 1;
+    border-radius: 0;
+
+    &:first-child {
+      border-radius: var(--ew-radius-md) 0 0 var(--ew-radius-md);
+    }
+
+    &:last-child {
+      border-radius: 0 var(--ew-radius-md) var(--ew-radius-md) 0;
+    }
+  }
+
+  .input-group-text {
+    display: flex;
+    align-items: center;
+    padding: 0 var(--ew-space-4);
+    background: var(--ew-color-gray-100);
+    border: 1px solid var(--ew-input-border-color);
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    white-space: nowrap;
+
+    &:first-child {
+      border-radius: var(--ew-radius-md) 0 0 var(--ew-radius-md);
+      border-right: none;
+    }
+
+    &:last-child {
+      border-radius: 0 var(--ew-radius-md) var(--ew-radius-md) 0;
+      border-left: none;
+    }
+  }
+}
+
+/* Floating Label Enhanced */
+.floating-label-wrapper {
+  position: relative;
+  margin-bottom: var(--ew-space-5);
+
+  ion-input,
+  ion-textarea {
+    padding-top: 1.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  ion-label {
+    position: absolute;
+    top: 1rem;
+    left: var(--ew-space-4);
+    transition: all var(--ew-duration-base) var(--ew-ease-in-out);
+    pointer-events: none;
+    color: var(--text-muted);
+
+    &.label-floating {
+      top: 0.25rem;
+      font-size: var(--text-xs);
+      color: var(--ion-color-primary);
+    }
+  }
+}
+
+/* Form Validation Animations */
+@keyframes inputShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+ion-item.ion-invalid.ion-touched {
+  animation: inputShake 0.3s ease-in-out;
+}
+
+/* Checkbox & Radio Custom Styles */
+ion-checkbox,
+ion-radio {
+  --size: 20px;
+  --border-radius: var(--ew-radius-xs);
+
+  &::part(container) {
+    border-width: 2px;
+    transition: all var(--ew-duration-short) var(--ew-ease-in-out);
+  }
+
+  &.checkbox-checked::part(container),
+  &.radio-checked::part(container) {
+    animation: bounceIn 0.3s var(--ew-animation-easing-bounce);
+  }
+}
+
+/* Toggle Custom Styles */
+ion-toggle {
+  --handle-width: 20px;
+  --handle-height: 20px;
+  --handle-spacing: 2px;
+
+  &::part(track) {
+    transition: background var(--ew-duration-base) var(--ew-ease-in-out);
+  }
+
+  &::part(handle) {
+    transition: transform var(--ew-duration-base)
+      var(--ew-animation-easing-spring);
+  }
+}
+
+/* Form Layout Utilities */
+.form-row {
+  display: flex;
+  gap: var(--ew-space-4);
+  margin-bottom: var(--ew-space-5);
+
+  .form-col {
+    flex: 1;
+
+    &.col-auto {
+      flex: 0 0 auto;
+    }
+
+    &.col-2 {
+      flex: 0 0 16.666%;
+    }
+
+    &.col-3 {
+      flex: 0 0 25%;
+    }
+
+    &.col-4 {
+      flex: 0 0 33.333%;
+    }
+
+    &.col-6 {
+      flex: 0 0 50%;
+    }
+
+    &.col-8 {
+      flex: 0 0 66.666%;
+    }
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+
+    .form-col {
+      flex: 1 1 100%;
+    }
+  }
+}
+
+/* Input Prefix/Suffix */
+.input-affix {
+  display: flex;
+  align-items: center;
+  gap: var(--ew-space-2);
+
+  .input-prefix,
+  .input-suffix {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    white-space: nowrap;
+  }
+
+  ion-input {
+    flex: 1;
   }
 }

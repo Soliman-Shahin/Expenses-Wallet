@@ -266,6 +266,82 @@
   --ew-input-placeholder-color: var(--ew-color-gray-500);
   --ew-input-focus-border-color: var(--ion-color-primary);
   --ew-input-focus-shadow: var(--ew-shadow-focus);
+
+  // ===================================================================
+  // === EXTENDED DESIGN TOKENS (v2.1)
+  // ===================================================================
+
+  // --- Color Opacity Variants ---
+  --primary-alpha-10: rgba(var(--ion-color-primary-rgb), 0.1);
+  --primary-alpha-20: rgba(var(--ion-color-primary-rgb), 0.2);
+  --primary-alpha-30: rgba(var(--ion-color-primary-rgb), 0.3);
+  --primary-alpha-50: rgba(var(--ion-color-primary-rgb), 0.5);
+  --primary-alpha-80: rgba(var(--ion-color-primary-rgb), 0.8);
+
+  --secondary-alpha-10: rgba(var(--ion-color-secondary-rgb), 0.1);
+  --secondary-alpha-20: rgba(var(--ion-color-secondary-rgb), 0.2);
+  --secondary-alpha-50: rgba(var(--ion-color-secondary-rgb), 0.5);
+
+  --success-alpha-10: rgba(var(--ion-color-success-rgb), 0.1);
+  --success-alpha-20: rgba(var(--ion-color-success-rgb), 0.2);
+
+  --danger-alpha-10: rgba(var(--ion-color-danger-rgb), 0.1);
+  --danger-alpha-20: rgba(var(--ion-color-danger-rgb), 0.2);
+
+  --warning-alpha-10: rgba(var(--ion-color-warning-rgb), 0.1);
+  --warning-alpha-20: rgba(var(--ion-color-warning-rgb), 0.2);
+
+  // --- Advanced Gradient Presets ---
+  --gradient-primary-secondary: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-secondary) 100%);
+  --gradient-primary-tertiary: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-tertiary) 100%);
+  --gradient-success: linear-gradient(135deg, #20bf6b 0%, #34d399 100%);
+  --gradient-danger: linear-gradient(135deg, #eb3b5a 0%, #ff4757 100%);
+  --gradient-warning: linear-gradient(135deg, #f7b731 0%, #facc15 100%);
+  --gradient-purple: linear-gradient(135deg, #a55eea 0%, #8854d0 100%);
+  --gradient-ocean: linear-gradient(135deg, #3867d6 0%, #0fb9b1 100%);
+  --gradient-sunset: linear-gradient(135deg, #fa8231 0%, #eb3b5a 100%);
+  --gradient-radial-primary: radial-gradient(circle, var(--ion-color-primary), var(--ion-color-primary-shade));
+
+  // --- Semantic Transaction Colors ---
+  --color-income: var(--ion-color-success);
+  --color-income-rgb: var(--ion-color-success-rgb);
+  --color-expense: var(--ion-color-danger);
+  --color-expense-rgb: var(--ion-color-danger-rgb);
+  --color-investment: var(--ion-color-tertiary);
+  --color-investment-rgb: var(--ion-color-tertiary-rgb);
+  --color-savings: #8854d0;
+  --color-savings-rgb: 136, 84, 208;
+
+  // --- Missing Shadow Variables (for component compatibility) ---
+  --ew-shadow-1: var(--ew-shadow-sm);
+  --ew-shadow-2: var(--ew-shadow-md);
+  --ew-shadow-3: var(--ew-shadow-lg);
+  --ew-shadow-4: var(--ew-shadow-xl);
+
+  // --- Animation Duration Variables (standardized names) ---
+  --ew-animation-duration-instant: 100ms;
+  --ew-animation-duration-fast: var(--ew-duration-short);
+  --ew-animation-duration-normal: var(--ew-duration-base);
+  --ew-animation-duration-slow: var(--ew-duration-long);
+  --ew-animation-duration-slower: 600ms;
+
+  // --- Animation Easing (standardized names) ---
+  --ew-animation-easing-standard: var(--ew-ease-in-out);
+  --ew-animation-easing-emphasized: cubic-bezier(0.4, 0, 0.2, 1);
+  --ew-animation-easing-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ew-animation-easing-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  // --- Background Patterns & Overlays ---
+  --ew-overlay-light: rgba(0, 0, 0, 0.5);
+  --ew-overlay-dark: rgba(0, 0, 0, 0.7);
+  --ew-overlay-blur: rgba(255, 255, 255, 0.1);
+
+  // --- Shimmer Effect ---
+  --shimmer-gradient: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.2) 50%, 
+    transparent 100%);
+
 }
 
 // ===================================================================
@@ -291,7 +367,7 @@
   --ion-color-tertiary-rgb: 57, 197, 254;
   --ion-color-tertiary-contrast: #0d1117;
   --ion-color-tertiary-contrast-rgb: 13, 17, 23;
-  --ion-color-tertiary-shade: #32ad-de;
+  --ion-color-tertiary-shade: #32adde;
   --ion-color-tertiary-tint: #4cc9fe;
 
   // --- Status Colors (Neon Noir Dark Theme) ---
