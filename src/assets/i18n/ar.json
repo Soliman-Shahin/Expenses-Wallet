@@ -126,7 +126,8 @@
     "REMOVE": "حذف",
     "INCOME": "الدخل",
     "OUTCOME": "المصروف",
-    "DELETE": "حذف"
+    "DELETE": "حذف",
+    "SAVINGS": "الإدخار"
   },
   "CATEGORY": {
     "ADD": "إضافة قسم جديد",

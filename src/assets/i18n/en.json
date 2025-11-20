@@ -140,7 +140,8 @@
     "REMOVE": "Remove",
     "INCOME": "Income",
     "OUTCOME": "Outcome",
-    "DELETE": "Delete"
+    "DELETE": "Delete",
+    "SAVINGS": "Savings"
   },
   "CATEGORY": {
     "ADD": "Add new category",

@@ -209,5 +209,4 @@ export class BarChartComponent implements OnInit, OnChanges, OnDestroy {
   onBarClick(item: ChartData): void {
     this.barClick.emit(item);
   }
-
 }

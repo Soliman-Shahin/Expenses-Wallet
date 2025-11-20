@@ -19,10 +19,23 @@
 
         <!-- Grid and Axis -->
         <g class="grid-lines">
-          <line *ngFor="let line of gridLines" [attr.x1]="line.x1" [attr.y1]="line.y1" [attr.x2]="line.x2" [attr.y2]="line.y2" class="grid-line" />
+          <line
+            *ngFor="let line of gridLines"
+            [attr.x1]="line.x1"
+            [attr.y1]="line.y1"
+            [attr.x2]="line.x2"
+            [attr.y2]="line.y2"
+            class="grid-line"
+          />
         </g>
         <g class="axis-lines">
-          <line [attr.x1]="padding.left" [attr.y1]="chartHeight - padding.bottom" [attr.x2]="chartWidth - padding.right" [attr.y2]="chartHeight - padding.bottom" class="axis-line" />
+          <line
+            [attr.x1]="padding.left"
+            [attr.y1]="chartHeight - padding.bottom"
+            [attr.x2]="chartWidth - padding.right"
+            [attr.y2]="chartHeight - padding.bottom"
+            class="axis-line"
+          />
         </g>
 
         <!-- Chart Data -->
@@ -65,16 +78,30 @@
             class="value-label"
             [style.fontSize.px]="dynamicValueLabelFontSize"
           >
-            {{ chartData[activePointIndex].value | number : '1.0-0' }}
+            {{ chartData[activePointIndex].value | number : "1.0-0" }}
           </text>
         </g>
 
         <!-- Axis Labels -->
         <g class="axis-labels">
-          <text *ngFor="let label of yAxisLabels" [attr.x]="label.x" [attr.y]="label.y" class="axis-label" [attr.text-anchor]="label.anchor" dominant-baseline="middle" [style.fontSize.px]="dynamicAxisLabelFontSize">
+          <text
+            *ngFor="let label of yAxisLabels"
+            [attr.x]="label.x"
+            [attr.y]="label.y"
+            class="axis-label"
+            [attr.text-anchor]="label.anchor"
+            dominant-baseline="middle"
+            [style.fontSize.px]="dynamicAxisLabelFontSize"
+          >
             {{ label.value }}
           </text>
-          <text *ngFor="let label of xAxisLabels" [attr.x]="label.x" [attr.y]="chartHeight - padding.bottom + 20" class="axis-label" [style.fontSize.px]="dynamicAxisLabelFontSize">
+          <text
+            *ngFor="let label of xAxisLabels"
+            [attr.x]="label.x"
+            [attr.y]="chartHeight - padding.bottom + 20"
+            class="axis-label"
+            [style.fontSize.px]="dynamicAxisLabelFontSize"
+          >
             {{ label.value }}
           </text>
         </g>
@@ -83,7 +110,7 @@
         <g class="hover-areas">
           <rect
             *ngFor="let p of dataPoints; let i = index"
-            [attr.x]="p.x - (pointXStep / 2)"
+            [attr.x]="p.x - pointXStep / 2"
             [attr.y]="0"
             [attr.width]="pointXStep"
             [attr.height]="chartHeight"
@@ -103,4 +130,3 @@
   [x]="tooltipX"
   [y]="tooltipY"
 ></app-chart-tooltip>
-

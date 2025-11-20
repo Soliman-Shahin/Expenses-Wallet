@@ -1,33 +1,72 @@
-.user-info-card {
-  animation: fadeIn 0.6s cubic-bezier(0.33, 1, 0.68, 1);
+/* User Info Container */
+.user-info-container {
+  padding: var(--ew-space-3);
   border-radius: var(--ew-radius-lg);
-  box-shadow: var(--ew-shadow-sm);
-  background: var(--ion-background-color);
-  padding: var(--ew-space-6) var(--ew-space-5);
-  display: flex;
-  align-items: center;
-  gap: var(--ew-space-5);
-  transition: box-shadow 0.18s, background 0.18s, transform 0.18s;
+  transition: var(--ew-transition-base);
 
-  .avatar {
-    border-radius: 50%;
-    box-shadow: var(--ew-shadow-sm);
-    overflow: hidden;
+  &:hover {
+    background: var(--primary-alpha-10);
+    transform: translateX(4px);
   }
 
-  &:hover, &:focus-visible {
-    box-shadow: var(--ew-shadow-md);
-    background: rgba(var(--ion-color-primary-rgb), 0.04);
-    transform: scale(1.025);
-    transition: box-shadow 0.14s, background 0.14s, transform 0.14s;
+  &:active {
+    transform: scale(0.98);
   }
 }
 
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
+/* Avatar - using theme component */
+.avatar {
+  transition: var(--ew-transition-base);
+
+  &:hover {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: var(--ew-shadow-lg);
   }
-  100% {
-    opacity: 1;
+}
+
+/* User Details */
+.user-details {
+  min-width: 0; // Allow text truncation
+
+  .user-name {
+    color: var(--ew-text-color-primary);
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .user-email {
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* Verification Icon */
+ion-icon[name="checkmark-circle"] {
+  font-size: 16px;
+  animation: bounceIn 0.5s var(--ew-ease-in-out);
+}
+
+/* Skeleton Loader */
+.user-info-skeleton {
+  padding: var(--ew-space-3);
+  opacity: 0.7;
+}
+
+/* Accessibility */
+.user-info-container:focus-visible {
+  outline: 2px solid var(--ion-color-primary);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .user-info-container,
+  .avatar,
+  ion-icon {
+    animation: none !important;
+    transition: none !important;
   }
 }

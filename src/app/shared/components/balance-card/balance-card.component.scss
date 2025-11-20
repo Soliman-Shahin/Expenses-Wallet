@@ -1,13 +1,16 @@
 /* Balance Summary: styled like a single card row (matches .transaction-item) */
 .balance-summary {
   position: relative;
-  transition: var(--ew-transition-all-fast);
-  animation: cardAppear var(--ew-transition-duration-slow) ease both;
+  transition: var(--ew-transition-base);
+  animation: cardAppear var(--ew-duration-long) var(--ew-ease-in-out) both;
   box-shadow: none !important;
+  cursor: pointer;
 
   &:hover {
-    transform: translateY(calc(var(--ew-space-px) * -1));
+    transform: translateY(-2px);
+    box-shadow: var(--ew-shadow-md) !important;
   }
+
   &:active {
     transform: translateY(0);
   }
@@ -16,75 +19,186 @@
 .toggle-visibility {
   position: absolute;
   inset-inline-end: var(--ew-space-4);
-  background: transparent;
-  border: 0;
+  top: var(--ew-space-4);
+  background: var(--glass-background);
+  backdrop-filter: blur(10px);
+  border: var(--glass-border);
   padding: var(--ew-space-2);
-  border-radius: var(--ew-radius-md);
-  color: var(--ew-text-color-tertiary);
+  border-radius: var(--ew-radius-full);
+  color: var(--ion-color-primary);
+  z-index: 10;
+  transition: var(--ew-transition-base);
+
+  &:hover {
+    background: var(--primary-alpha-10);
+    transform: scale(1.1) rotate(5deg);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  ion-icon {
+    font-size: 20px;
+    display: block;
+  }
 }
 
 .total-balance {
   display: flex;
   align-items: center;
   gap: var(--ew-space-4);
-  margin-bottom: var(--ew-space-4);
+  margin-bottom: var(--ew-space-5);
+  flex-wrap: wrap;
 
   .amount {
-    font-size: var(--ew-font-3xl);
-    font-weight: var(--ew-font-weight-extrabold);
-    letter-spacing: var(--ew-letter-spacing-tighter);
-    color: var(--ew-text-color-primary);
+    font-size: var(--ew-font-size-3xl);
+    font-weight: var(--ew-font-weight-bold);
+    letter-spacing: var(--tracking-tight);
+    background: var(--brand-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: fadeIn var(--ew-duration-base) var(--ew-ease-in-out);
   }
+
   ion-badge {
-    font-size: var(--ew-font-xs);
+    font-size: var(--ew-font-size-xs);
     font-weight: var(--ew-font-weight-semibold);
-    border-radius: var(--ew-radius-md);
-    color: var(--ew-text-color-secondary);
+    border-radius: var(--ew-radius-pill);
+    padding: 4px 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+
+    ion-icon {
+      font-size: 12px;
+    }
   }
 }
 
 .balance-item {
   display: flex;
   align-items: center;
-  border-radius: var(--ew-radius-md);
-  transition: background var(--ew-transition-duration-fast);
+  gap: var(--ew-space-3);
+  padding: var(--ew-space-3);
+  border-radius: var(--ew-radius-lg);
+  transition: var(--ew-transition-base);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--shimmer-gradient);
+    opacity: 0;
+    transition: opacity var(--ew-duration-base);
+  }
 
   &:hover,
   &:focus-within {
-    background: var(--ew-item-background-color-hover);
+    background: var(--primary-alpha-10);
+    transform: translateY(-2px);
+
+    &::before {
+      opacity: 0.1;
+      animation: shimmer 2s infinite;
+    }
   }
+
   &:active {
-    background: var(--ew-item-background-color-active);
+    transform: scale(0.98);
   }
 
   ion-icon {
-    font-size: var(--ew-font-size-4xl);
-    margin-inline-end: var(--ew-space-4);
-    color: var(--ion-color-secondary);
+    font-size: var(--ew-size-10);
+    flex-shrink: 0;
+    transition: transform var(--ew-duration-base) var(--ew-ease-in-out);
+  }
+
+  &.income {
+    ion-icon {
+      color: var(--color-income);
+
+      &:hover {
+        transform: translateY(-2px);
+      }
+    }
+  }
+
+  &.expenses {
+    ion-icon {
+      color: var(--color-expense);
+
+      &:hover {
+        transform: translateY(2px);
+      }
+    }
+  }
+
+  &.savings {
+    background: var(--glass-background);
+    backdrop-filter: blur(10px);
+    border: var(--glass-border);
+    padding: var(--ew-space-4);
+
+    &.positive {
+      background: var(--success-alpha-10);
+      border-color: var(--ion-color-success);
+    }
+
+    &.negative {
+      background: var(--warning-alpha-10);
+      border-color: var(--ion-color-warning);
+    }
+
+    ion-icon {
+      font-size: var(--ew-size-12);
+    }
   }
 
   .item-details {
     display: flex;
     flex-direction: column;
     flex: 1;
+    gap: var(--ew-space-1);
+
     .label {
       font-size: var(--ew-font-size-sm);
       color: var(--ew-text-color-secondary);
-      margin-bottom: var(--ew-space-1);
       font-weight: var(--ew-font-weight-medium);
+      text-transform: uppercase;
+      letter-spacing: var(--tracking-wide);
     }
+
     .amount {
-      font-size: var(--ew-font-size-md);
+      font-size: var(--ew-font-size-lg);
       font-weight: var(--ew-font-weight-semibold);
       color: var(--ew-text-color-primary);
+      letter-spacing: var(--tracking-tight);
     }
   }
 }
 
+/* Divider */
+.divider {
+  &.divider-gradient {
+    height: 2px;
+    background: var(--brand-gradient);
+    border-radius: var(--ew-radius-pill);
+    opacity: 0.3;
+  }
+}
+
+/* Animations */
 @keyframes cardAppear {
   from {
     opacity: 0;
-    transform: translateY(var(--ew-space-2));
+    transform: translateY(var(--ew-space-4));
   }
   to {
     opacity: 1;
@@ -92,9 +206,49 @@
   }
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Accessibility */
 @media (prefers-reduced-motion: reduce) {
-  .balance-summary {
+  .balance-summary,
+  .balance-item,
+  .total-balance .amount,
+  .toggle-visibility {
     animation: none !important;
     transition: none !important;
+  }
+}
+
+/* Dark mode adjustments */
+body.dark {
+  .total-balance .amount {
+    background: var(--gradient-primary-secondary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .toggle-visibility {
+    background: var(--glass-background-dark);
+    border-color: var(--ew-color-gray-300);
+  }
+
+  .balance-item.savings {
+    background: var(--ew-color-gray-200);
+
+    &.positive {
+      background: var(--success-alpha-20);
+    }
+
+    &.negative {
+      background: var(--warning-alpha-20);
+    }
   }
 }

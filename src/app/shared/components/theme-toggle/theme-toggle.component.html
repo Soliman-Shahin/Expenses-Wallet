@@ -1,16 +1,26 @@
 <ion-button
   fill="clear"
-  class="theme-toggle"
+  class="theme-toggle transition-all"
   (click)="toggleTheme()"
-  [attr.aria-label]="(isDarkMode ? 'LIGHT_MODE' : 'DARK_MODE') | translate"
+  [attr.aria-label]="themeLabel() | translate"
+  [attr.title]="themeLabel() | translate"
   aria-live="polite"
   role="switch"
-  [attr.aria-checked]="isDarkMode"
+  [attr.aria-checked]="isDarkMode()"
 >
   <ion-icon
-    [name]="isDarkMode ? 'sunny-outline' : 'moon-outline'"
+    [name]="themeIcon()"
     slot="icon-only"
     class="theme-icon"
-    [class.dark]="isDarkMode"
+    [class.dark]="isDarkMode()"
+    [class.is-animating]="isAnimating()"
+    [class]="getIconAnimationClass()"
   ></ion-icon>
+
+  <!-- Glow effect -->
+  <span
+    class="icon-glow"
+    [class.active]="isAnimating()"
+    [class.dark-glow]="isDarkMode()"
+  ></span>
 </ion-button>

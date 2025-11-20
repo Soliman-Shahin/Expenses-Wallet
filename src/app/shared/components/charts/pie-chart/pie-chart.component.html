@@ -30,8 +30,12 @@
     </div>
 
     <div class="chart-center" *ngIf="centerLabel || centerSubtitle">
-      <div class="center-label" *ngIf="centerLabel">{{ centerLabel | translate}}</div>
-      <div class="center-subtitle" *ngIf="centerSubtitle">{{ centerSubtitle | translate}}</div>
+      <div class="center-label" *ngIf="centerLabel">
+        {{ centerLabel | translate }}
+      </div>
+      <div class="center-subtitle" *ngIf="centerSubtitle">
+        {{ centerSubtitle | translate }}
+      </div>
     </div>
 
     <app-chart-tooltip
