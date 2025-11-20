@@ -69,7 +69,7 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
     'DZD',
     'TND',
   ];
-
+  private nextDetailId = 0;
 
   override ngOnInit(): void {
     super.ngOnInit();
@@ -125,7 +125,6 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
     this.personalForm.get('email')?.disable();
   }
 
-
   private patchFromProfile(profile: UserProfile): void {
     this.personalForm.patchValue({
       username: profile.username,
@@ -154,6 +153,7 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
 
   private createDetailGroup(label: string = '', amount: number = 0) {
     const group = this.fb.group({
+      id: [`detail-${this.nextDetailId++}`],
       label: [label, [Validators.required, Validators.maxLength(50)]],
       amount: [amount, [Validators.required, Validators.min(0)]],
     });
@@ -174,8 +174,11 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
     this.details.updateValueAndValidity();
   }
 
-  removeDetail(index: number): void {
-    if (this.details.length > 1) {
+  removeDetail(id: string | null | undefined): void {
+    const index = this.details.controls.findIndex(
+      (ctrl) => ctrl.get('id')?.value === id
+    );
+    if (index > -1 && this.details.length > 1) {
       this.details.removeAt(index);
       this.details.updateValueAndValidity();
     }
@@ -199,15 +202,15 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
     while (this.details.length) {
       this.details.removeAt(0);
     }
-    reordered.forEach(ctrl => this.details.push(ctrl));
+    reordered.forEach((ctrl) => this.details.push(ctrl));
 
     this.details.updateValueAndValidity();
     this.salaryForm.markAsDirty();
     event.detail.complete(true);
   }
 
-  trackByIndex(index: number): number {
-    return index;
+  trackByIndex(index: number, control: AbstractControl): string {
+    return control.get('id')?.value || index.toString();
   }
 
   // Validator to prevent duplicate labels (case-insensitive, trimmed)
@@ -248,14 +251,58 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
 
   // Total salary computed from details
   get totalSalary(): number {
-    const values = (this.details.value || []) as Array<{ label: string; amount: number }>;
+    const values = (this.details.value || []) as Array<{
+      label: string;
+      amount: number;
+    }>;
     return values.reduce((sum, d) => sum + (Number(d?.amount) || 0), 0);
+  }
+
+  // Calculate profile completion percentage
+  get profileCompletion(): number {
+    const profile = this.profileService.getProfile();
+    if (!profile) return 0;
+
+    let completedFields = 0;
+    let totalFields = 5;
+
+    // Check if fields are completed
+    if (profile.username && profile.username.trim().length > 0)
+      completedFields++;
+    if (profile.email && profile.email.trim().length > 0) completedFields++;
+    if (profile.phone && profile.phone.trim().length > 0) completedFields++;
+    if (profile.avatarUrl && profile.avatarUrl.trim().length > 0)
+      completedFields++;
+    if (
+      profile.salary &&
+      profile.salary.length > 0 &&
+      profile.salary[0].amount > 0
+    )
+      completedFields++;
+
+    return Math.round((completedFields / totalFields) * 100);
+  }
+
+  // Get member since date
+  getMemberSince(): string {
+    const profile = this.profileService.getProfile();
+    if (!profile || !profile.createdAt) {
+      return '2024';
+    }
+
+    const date = new Date(profile.createdAt);
+    const year = date.getFullYear();
+    const month = date.toLocaleString('default', { month: 'short' });
+    return `${month} ${year}`;
   }
 
   savePersonal(): void {
     if (this.personalForm.invalid) {
       this.personalForm.markAllAsTouched();
-      this.toastService.presentErrorToast('top', 'PROFILE.TOASTS.PERSONAL_INVALID');
+      this.toastService.presentErrorToast(
+        'top',
+        'PROFILE.TOASTS.PERSONAL_INVALID'
+      );
       return;
     }
     this.isLoadingPersonal$.next(true);
@@ -286,8 +333,15 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
   saveSalary(): void {
     if (this.salaryForm.invalid) {
       this.salaryForm.markAllAsTouched();
-      console.warn('Salary form invalid:', this.salaryForm.errors, this.salaryForm);
-      this.toastService.presentErrorToast('top', 'PROFILE.TOASTS.SALARY_INVALID');
+      console.warn(
+        'Salary form invalid:',
+        this.salaryForm.errors,
+        this.salaryForm
+      );
+      this.toastService.presentErrorToast(
+        'top',
+        'PROFILE.TOASTS.SALARY_INVALID'
+      );
       return;
     }
     this.isLoadingSalary$.next(true);
@@ -314,7 +368,10 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
           if (updated) {
             console.log('[Profile] Salary saved, backend responded:', updated);
             this.salaryForm.markAsPristine();
-            this.toastService.presentSuccessToast('top', 'PROFILE.TOASTS.SALARY_SAVED');
+            this.toastService.presentSuccessToast(
+              'top',
+              'PROFILE.TOASTS.SALARY_SAVED'
+            );
           } else {
             this.errorMessage$.next('PROFILE.TOASTS.SALARY_FAILED');
           }
@@ -335,22 +392,28 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     const file = input.files && input.files[0];
     if (!file) return;
-    
+
     // Validate file type
     const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     if (!validTypes.includes(file.type)) {
-      this.toastService.presentErrorToast('top', 'PROFILE.TOASTS.INVALID_FILE_TYPE');
+      this.toastService.presentErrorToast(
+        'top',
+        'PROFILE.TOASTS.INVALID_FILE_TYPE'
+      );
       input.value = '';
       return;
     }
-    
+
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      this.toastService.presentErrorToast('top', 'PROFILE.TOASTS.FILE_TOO_LARGE');
+      this.toastService.presentErrorToast(
+        'top',
+        'PROFILE.TOASTS.FILE_TOO_LARGE'
+      );
       input.value = '';
       return;
     }
-    
+
     this.isLoadingAvatar$.next(true);
     this.errorMessage$.next(null);
     this.profileService

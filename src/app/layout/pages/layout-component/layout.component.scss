@@ -138,3 +138,71 @@ ion-router-outlet {
     }
   }
 }
+
+// Global loader overlay styling
+.custom-loader-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 2000;
+  pointer-events: auto;
+  animation: loaderOverlayFadeIn 220ms ease-out;
+}
+
+.custom-loader {
+  min-width: 180px;
+  max-width: 260px;
+  padding: 16px 20px;
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.9);
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.45);
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #e5e7eb;
+  text-align: center;
+  animation: loaderScaleIn 220ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  ion-spinner {
+    --color: var(--ion-color-primary);
+    transform-origin: center;
+  }
+}
+
+@keyframes loaderOverlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes loaderScaleIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .custom-loader-overlay {
+    animation: none !important;
+  }
+
+  .custom-loader {
+    animation: none !important;
+  }
+}

@@ -112,16 +112,25 @@ export class LoginComponent extends BaseComponent implements OnInit {
       )
       .subscribe({
         next: (res) => {
+          // If backend explicitly indicates failure, treat as error
+          if (res && res.success === false) {
+            const backendMessage: string | undefined = res?.error?.message;
+            const message =
+              backendMessage ||
+              this.translateService.instant('AUTH.LOGIN_ERROR');
+            this.errorMessage.next(message);
+            this.toastService.presentErrorToast('bottom', message);
+            return;
+          }
+
           this.toastService.presentSuccessToast(
             'bottom',
             this.translateService.instant('AUTH.LOGIN_SUCCESS')
           );
-          if (res && !res.success) {
-            this.toastService.presentErrorToast('bottom', res.error?.message);
-          }
         },
         error: (error) => {
-          const backendMessage: string | undefined = error?.error?.message;
+          const backendMessage: string | undefined =
+            error?.error?.error?.message || error?.error?.message;
           let fallbackKey = 'AUTH.LOGIN_ERROR';
 
           if (error?.status === 401) {

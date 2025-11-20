@@ -125,7 +125,7 @@ export class AddCategoryComponent extends BaseComponent implements OnInit {
         next: () => {
           this.toastService.presentSuccessToast(
             'bottom',
-            this.translateService.instant('CATEGORY_SUCCESSFULLY_CREATED')
+            this.translateService.instant('CATEGORY.SUCCESSFULLY_ADDED')
           );
           setTimeout(() => {
             this.router.navigate(['/categories/list']);
@@ -155,7 +155,7 @@ export class AddCategoryComponent extends BaseComponent implements OnInit {
         next: () => {
           this.toastService.presentSuccessToast(
             'bottom',
-            this.translateService.instant('CATEGORY_SUCCESSFULLY_UPDATED')
+            this.translateService.instant('CATEGORY.SUCCESSFULLY_UPDATED')
           );
           this.router.navigate(['/categories/list']);
         },

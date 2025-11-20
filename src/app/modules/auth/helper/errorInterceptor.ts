@@ -35,7 +35,7 @@ export class ErrorInterceptor implements HttpInterceptor {
           return throwError(() => error);
         } else {
           // otherwise, throw the error as usual
-          return throwError(error);
+          return throwError(() => error);
         }
       })
     );

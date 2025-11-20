@@ -306,7 +306,7 @@
     "EDIT_AVATAR": "Edit photo",
     "PERSONAL_INFO": {
       "TITLE": "Personal information",
-      "SUBTITLE": "Edit your name, email, and phone number",
+      "SUBTITLE": "Edit your name and phone number",
       "FULL_NAME": "Full name",
       "FULL_NAME_PLACEHOLDER": "Enter your full name",
       "EMAIL": "Email",
@@ -329,15 +329,40 @@
       "DUPLICATE_LABELS": "Duplicate labels are not allowed. Please use unique labels.",
       "TOTAL": "Total"
     },
+    "SUMMARY": {
+      "TITLE": "Account overview",
+      "TOTAL_SALARY": "Total salary",
+      "SALARY_ITEMS": "Salary items"
+    },
+    "SECURITY": {
+      "TITLE": "Account security",
+      "SUBTITLE": "Keep your account safe across all your devices.",
+      "POINTS": {
+        "KEEP_DEVICE_SECURE": "Keep your device and browser up to date.",
+        "AVOID_SHARING_CREDENTIALS": "Never share your password or verification codes.",
+        "LOGOUT_SHARED_DEVICES": "Log out from shared or public devices after use."
+      }
+    },
     "TOASTS": {
       "PERSONAL_INVALID": "Please fill in personal information correctly",
       "PERSONAL_SAVED": "Personal information saved",
+      "PERSONAL_FAILED": "Failed to save personal information",
       "SALARY_INVALID": "Please enter salary amount and currency",
       "SALARY_SAVED": "Salary and currency saved",
+      "SALARY_FAILED": "Failed to save salary",
       "AVATAR_SAVED": "Profile photo updated",
       "AVATAR_FAILED": "Failed to update profile photo",
       "INVALID_FILE_TYPE": "Please select a valid image file (JPEG, PNG, GIF, or WebP)",
       "FILE_TOO_LARGE": "File size exceeds 5MB limit. Please select a smaller image."
+    },
+    "COMPLETION": {
+      "TITLE": "Profile Completion",
+      "SUBTITLE": "Complete your profile to get the most out of the app"
+    },
+    "STATS": {
+      "INCOME_SOURCES": "Income Sources",
+      "TOTAL_INCOME": "Total Income",
+      "MEMBER_SINCE": "Member Since"
     }
   },
   "CONFIRM": {
@@ -437,5 +462,19 @@
     "CATEGORY_CONFLICT": "Category conflict",
     "USER_CONFLICT": "User conflict",
     "UNKNOWN_CONFLICT": "Unknown conflict"
+  },
+  "ERROR_CODES": {
+    "AUTH_MISSING_OR_INVALID_HEADER": "Authentication header is missing or invalid.",
+    "AUTH_NO_TOKEN": "You are not authenticated. Please sign in to continue.",
+    "AUTH_INVALID_PAYLOAD": "Authentication token is invalid.",
+    "AUTH_INVALID_TOKEN": "Your session has expired or is invalid. Please sign in again.",
+    "SESSION_INVALID": "Your session has expired or is invalid. Please sign in again.",
+    "VALIDATION_ERROR": "Some fields are invalid. Please review your input.",
+    "SYNC_USER_ID_REQUIRED": "Unable to identify the user for sync.",
+    "SYNC_ENTITIES_REQUIRED": "No data was provided to sync.",
+    "SYNC_CONFLICT_INVALID_INPUT": "Conflict resolution request is invalid.",
+    "SYNC_OPERATION_FAILED": "Sync operation failed. Please try again.",
+    "SYNC_INVALID_DATA": "Sync data is invalid.",
+    "SYNC_RATE_LIMIT": "Too many sync requests. Please try again later."
   }
 }

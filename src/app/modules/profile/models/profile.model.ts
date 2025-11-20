@@ -7,4 +7,5 @@ export interface UserProfile {
   salary: SalaryDetail[];
   currency: string;
   avatarUrl?: string;
+  createdAt?: string;
 }

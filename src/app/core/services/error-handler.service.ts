@@ -93,38 +93,59 @@ export class ErrorHandlerService implements ErrorHandler {
       return;
     }
 
-    let errorMessage = 'errors.server_error';
+    let message: string | null = null;
 
-    if (error.error instanceof ErrorEvent) {
-      // Client-side error
-      errorMessage = 'errors.client_error';
-    } else {
-      // Server-side error
-      switch (error.status) {
-        case 400:
-          errorMessage = 'errors.bad_request';
-          break;
-        case 401:
-          errorMessage = 'errors.unauthorized';
-          // Handle unauthorized (e.g., redirect to login)
-          break;
-        case 403:
-          errorMessage = 'errors.forbidden';
-          break;
-        case 404:
-          errorMessage = 'errors.not_found';
-          break;
-        case 429:
-          errorMessage = 'errors.too_many_requests';
-          break;
-        case 500:
-          errorMessage = 'errors.server_error';
-          break;
-        default:
-          errorMessage = 'errors.unknown_error';
+    // Prefer backend API error payload when available
+    const backendPayload = error.error as any;
+    if (backendPayload) {
+      const backendError = backendPayload.error || backendPayload;
+      const code = typeof backendError?.code === 'string' ? backendError.code : null;
+
+      // 1) If we have an error code, try to map it to a translation key
+      if (code) {
+        message = `ERROR_CODES.${code}`;
+      } else if (
+        typeof backendError?.message === 'string' &&
+        backendError.message.trim()
+      ) {
+        // 2) Otherwise, if backend sent a message, use it directly
+        message = backendError.message.trim();
       }
     }
 
-    await this.showError(errorMessage);
+    // 3) Fallback to status-based translation keys when no backend info is present
+    if (!message) {
+      if (error.error instanceof ErrorEvent) {
+        // Client-side error
+        message = 'errors.client_error';
+      } else {
+        // Server-side error
+        switch (error.status) {
+          case 400:
+            message = 'errors.bad_request';
+            break;
+          case 401:
+            message = 'errors.unauthorized';
+            // Handle unauthorized (e.g., redirect to login)
+            break;
+          case 403:
+            message = 'errors.forbidden';
+            break;
+          case 404:
+            message = 'errors.not_found';
+            break;
+          case 429:
+            message = 'errors.too_many_requests';
+            break;
+          case 500:
+            message = 'errors.server_error';
+            break;
+          default:
+            message = 'errors.unknown_error';
+        }
+      }
+    }
+
+    await this.showError(message ?? 'errors.server_error', error);
   }
 }
