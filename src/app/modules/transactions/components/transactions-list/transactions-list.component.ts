@@ -274,9 +274,9 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
     const cat = (t as any)?.category;
     const icon = (cat as any)?.icon || (cat as any)?.iconName;
     if (icon && typeof icon === 'string') return icon;
-    const type = (cat as any)?.type as 'income' | 'expense' | undefined;
+    const type = (cat as any)?.type as 'income' | 'outcome' | undefined;
     if (type === 'income') return 'arrow-down-circle-outline';
-    if (type === 'expense') return 'arrow-up-circle-outline';
+    if (type === 'outcome') return 'arrow-up-circle-outline';
     return 'pricetag-outline';
   }
 
@@ -296,10 +296,10 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
     return isNaN(n) ? 0 : n;
   }
 
-  getCategoryType(t: Expense): 'income' | 'expense' {
+  getCategoryType(t: Expense): 'income' | 'outcome' {
     const cat = (t as any)?.category;
     const type = (cat as any)?.type;
-    return type === 'income' ? 'income' : 'expense';
+    return type === 'income' ? 'income' : 'outcome';
   }
 
   onTransactionClick(item: Expense) {
