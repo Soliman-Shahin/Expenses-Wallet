@@ -4,24 +4,25 @@ import {
   OnboardingService,
   OnboardingStep,
 } from 'src/app/core/services/onboarding.service';
+import { BaseComponent } from '../../base/base.component';
 
 @Component({
   selector: 'app-onboarding',
   templateUrl: './onboarding.component.html',
   styleUrls: ['./onboarding.component.scss'],
 })
-export class OnboardingComponent implements OnInit {
+export class OnboardingComponent extends BaseComponent implements OnInit {
   @ViewChild('slidesContainer') slidesContainer!: ElementRef;
 
   steps: OnboardingStep[] = [];
   currentStepIndex = 0;
 
-  constructor(
-    private onboardingService: OnboardingService,
-    private router: Router
-  ) {}
+  constructor(private onboardingService: OnboardingService) {
+    super();
+  }
 
-  ngOnInit() {
+  override ngOnInit() {
+    super.ngOnInit();
     const state = this.onboardingService.getCurrentState();
     this.steps = state.steps;
     this.currentStepIndex = state.currentStep;
@@ -100,5 +101,9 @@ export class OnboardingComponent implements OnInit {
         });
       }
     }
+  }
+
+  toggleLanguage() {
+    this.changeLanguage(); // Using BaseComponent method
   }
 }

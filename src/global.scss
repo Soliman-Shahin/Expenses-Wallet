@@ -40,11 +40,12 @@
 
 // 5. Custom SCSS Partials
 // -------------------------------------------------------------------
-@import "theme/base";          // Base styles, resets, typography
-@import "theme/rtl";           // RTL-specific adjustments
-@import "theme/scrollbar";     // Custom scrollbar styling
-@import "theme/components";    // Custom component styles (cards, buttons)
-@import "theme/animations";    // Animation keyframes and classes
-@import "theme/_utilities";    // Utility classes (spacing, etc.)
-@import "theme/forms";         // General form styles
-@import "theme/input-styles";  // Modern input-specific styles
+@import "theme/base"; // Base styles, resets, typography
+@import "theme/rtl"; // RTL-specific adjustments
+@import "theme/scrollbar"; // Custom scrollbar styling
+@import "theme/components"; // Custom component styles (cards, buttons)
+@import "theme/animations"; // Animation keyframes and classes
+@import "theme/_utilities"; // Utility classes (spacing, etc.)
+@import "theme/forms"; // General form styles
+@import "theme/input-styles"; // Modern input-specific styles
+@import "theme/components/alert"; // Unified alert styles

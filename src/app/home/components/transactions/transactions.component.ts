@@ -25,7 +25,6 @@ import {
 import { Expense } from 'src/app/shared/models/expense.model';
 import { BaseComponent } from 'src/app/shared/base';
 import { ProfileService } from 'src/app/modules/profile/services/profile.service';
-import { AlertController } from '@ionic/angular';
 import { ExpenseFormComponent } from '../expense-form/expense-form.component';
 import { SkeletonBlockComponent } from 'src/app/shared/ui/skeleton-block/skeleton-block.component';
 import { ToastController } from '@ionic/angular';
@@ -50,10 +49,7 @@ export class TransactionsComponent extends BaseComponent implements OnChanges {
 
   private readonly refreshTrigger$ = new BehaviorSubject<void>(undefined);
 
-  constructor(
-    private readonly profileService: ProfileService,
-    private readonly alertController: AlertController
-  ) {
+  constructor(private readonly profileService: ProfileService) {
     super();
   }
 
@@ -255,38 +251,27 @@ export class TransactionsComponent extends BaseComponent implements OnChanges {
   }
 
   async onDelete(item: Expense) {
-    const alert = await this.alertController.create({
-      header: this.translateService.instant('CONFIRM.DELETE_HEADER'),
-      message: this.translateService.instant('CONFIRM.DELETE_MESSAGE'),
-      buttons: [
-        {
-          text: this.translateService.instant('COMMON.CANCEL'),
-          role: 'cancel',
-        },
-        {
-          text: this.translateService.instant('COMMON.DELETE'),
-          role: 'destructive',
-          handler: () => {
-            this.expenseService.deleteExpense((item as any)._id).subscribe({
-              next: async () => {
-                this.toastService.presentSuccessToast(
-                  'bottom',
-                  'Transaction deleted successfully'
-                );
-                this.onAddTransaction(); // Refresh list
-              },
-              error: async (err) => {
-                this.toastService.presentErrorToast(
-                  'bottom',
-                  'Error deleting transaction. Please try again.'
-                );
-                console.error(err);
-              },
-            });
+    const transactionName = this.getOperationName(item);
+    const confirmed = await this.alertService.showDeleteConfirm(
+      transactionName,
+      async () => {
+        this.expenseService.deleteExpense((item as any)._id).subscribe({
+          next: async () => {
+            this.toastService.presentSuccessToast(
+              'bottom',
+              'Transaction deleted successfully'
+            );
+            this.refreshTransactions();
           },
-        },
-      ],
-    });
-    await alert.present();
+          error: async (err) => {
+            this.toastService.presentErrorToast(
+              'bottom',
+              'Error deleting transaction. Please try again.'
+            );
+            console.error(err);
+          },
+        });
+      }
+    );
   }
 }

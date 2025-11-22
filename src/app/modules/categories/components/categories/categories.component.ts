@@ -145,10 +145,12 @@ export class CategoriesComponent
     if (currentResponse) {
       const movedItem = currentResponse.data.splice(ev.detail.from, 1)[0];
       currentResponse.data.splice(ev.detail.to, 0, movedItem);
-      const reorderedCategories = currentResponse.data.map((category, index) => ({
-        id: category._id as string,
-        order: index,
-      }));
+      const reorderedCategories = currentResponse.data.map(
+        (category, index) => ({
+          id: category._id as string,
+          order: index,
+        })
+      );
       this.categoryService.updateOrder(reorderedCategories).subscribe();
       this._responseSub.next({ ...currentResponse });
     }
@@ -187,25 +189,10 @@ export class CategoriesComponent
   }
 
   async presentDeleteConfirm(id: string) {
-    const alert = await this.alertController.create({
-      header: this.translate.instant('CATEGORY.DELETE'),
-      message: this.translate.instant('CATEGORY.CONFIRM_DELETE'),
-      buttons: [
-        {
-          text: this.translate.instant('COMMON.CANCEL'),
-          role: 'cancel',
-          cssClass: 'secondary',
-        },
-        {
-          text: this.translate.instant('COMMON.OK'),
-          handler: () => {
-            this.deleteCategory(id);
-          },
-        },
-      ],
+    const categoryName = this.selectedCategory?.title || '';
+    await this.alertService.showDeleteConfirm(categoryName, async () => {
+      this.deleteCategory(id);
     });
-
-    await alert.present();
   }
 
   deleteCategory(id: string) {
@@ -225,10 +212,19 @@ export class CategoriesComponent
         if (result !== null) {
           const currentResponse = this._responseSub.getValue();
           if (currentResponse) {
-            const filteredData = currentResponse.data.filter((c) => c._id !== id);
+            const filteredData = currentResponse.data.filter(
+              (c) => c._id !== id
+            );
             const newTotal = currentResponse.total - 1;
-            this._responseSub.next({ ...currentResponse, data: filteredData, total: newTotal });
-            this.toastService.presentSuccessToast('bottom', 'Category successfully deleted!');
+            this._responseSub.next({
+              ...currentResponse,
+              data: filteredData,
+              total: newTotal,
+            });
+            this.toastService.presentSuccessToast(
+              'bottom',
+              'Category successfully deleted!'
+            );
           }
         }
       });

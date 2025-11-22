@@ -464,4 +464,11 @@ export class HomePageComponent
 
     this.cdr.markForCheck();
   }
+
+  // Toggle language between Arabic and English
+  toggleLanguage(): void {
+    const newLang = this.currentLang === 'ar' ? 'en' : 'ar';
+    this.translationService?.setLanguage(newLang);
+    this.cdr.markForCheck();
+  }
 }

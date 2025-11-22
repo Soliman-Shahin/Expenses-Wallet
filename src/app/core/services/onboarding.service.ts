@@ -31,62 +31,60 @@ export class OnboardingService {
   private readonly APP_VERSION_KEY = 'app_version';
 
   // Default onboarding steps - Must be defined before usage in getInitialState
+  // Contains translation keys instead of hardcoded text
   private readonly DEFAULT_STEPS: OnboardingStep[] = [
     {
       id: 'welcome',
-      title: 'مرحباً بك في Expenses Wallet!',
-      description: 'تطبيقك المثالي لإدارة المصروفات الشخصية بسهولة وأمان',
+      title: 'ONBOARDING.WELCOME_TITLE',
+      description: 'ONBOARDING.WELCOME_DESC',
       icon: 'wallet-outline',
       action: {
-        label: 'التالي',
+        label: 'ONBOARDING.NEXT',
       },
     },
     {
       id: 'expenses',
-      title: 'تتبع مصروفاتك',
-      description:
-        'سجل جميع مصروفاتك اليومية وصنفها بسهولة لمعرفة أين تذهب أموالك',
+      title: 'ONBOARDING.EXPENSES_TITLE',
+      description: 'ONBOARDING.EXPENSES_DESC',
       icon: 'receipt-outline',
       action: {
-        label: 'التالي',
+        label: 'ONBOARDING.NEXT',
       },
     },
     {
       id: 'categories',
-      title: 'تنظيم بالفئات',
-      description: 'أنشئ فئات مخصصة لمصروفاتك (طعام، مواصلات، ترفيه، وغيرها)',
+      title: 'ONBOARDING.CATEGORIES_TITLE',
+      description: 'ONBOARDING.CATEGORIES_DESC',
       icon: 'pricetags-outline',
       action: {
-        label: 'التالي',
+        label: 'ONBOARDING.NEXT',
       },
     },
     {
       id: 'analytics',
-      title: 'تحليلات ذكية',
-      description:
-        'احصل على رؤى واضحة عن عادات الإنفاق من خلال الرسوم البيانية والإحصائيات',
+      title: 'ONBOARDING.ANALYTICS_TITLE',
+      description: 'ONBOARDING.ANALYTICS_DESC',
       icon: 'analytics-outline',
       action: {
-        label: 'التالي',
+        label: 'ONBOARDING.NEXT',
       },
     },
     {
       id: 'backup',
-      title: 'نسخ احتياطي آمن',
-      description: 'احفظ بياناتك بأمان مع إمكانية إنشاء نسخ احتياطية مشفرة',
+      title: 'ONBOARDING.BACKUP_TITLE',
+      description: 'ONBOARDING.BACKUP_DESC',
       icon: 'shield-checkmark-outline',
       action: {
-        label: 'التالي',
+        label: 'ONBOARDING.NEXT',
       },
     },
     {
       id: 'offline',
-      title: 'يعمل بدون إنترنت',
-      description:
-        'استخدم التطبيق في أي وقت حتى بدون اتصال بالإنترنت، وسيتم المزامنة تلقائياً',
+      title: 'ONBOARDING.OFFLINE_TITLE',
+      description: 'ONBOARDING.OFFLINE_DESC',
       icon: 'cloud-offline-outline',
       action: {
-        label: 'ابدأ الآن',
+        label: 'ONBOARDING.START',
         route: '/home',
       },
     },

@@ -9,8 +9,6 @@ import {
 } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FormGroup, Validators } from '@angular/forms';
-import { AlertController } from '@ionic/angular';
-import { TranslateService } from '@ngx-translate/core';
 import { Observable, combineLatest } from 'rxjs';
 import { map, startWith, finalize } from 'rxjs/operators';
 
@@ -46,11 +44,7 @@ export class ExpenseFormComponent
     map(([isLoading]) => ({ isLoading }))
   );
 
-  constructor(
-    private alertController: AlertController,
-    private profileService: ProfileService,
-    public translate: TranslateService
-  ) {
+  constructor(private profileService: ProfileService) {
     super();
   }
 
@@ -120,19 +114,10 @@ export class ExpenseFormComponent
   }
 
   async onDelete(): Promise<void> {
-    const alert = await this.alertController.create({
-      header: this.translate.instant('COMMON.CONFIRM_DELETE'),
-      message: this.translate.instant('EXPENSE.DELETE_CONFIRM_MSG'),
-      buttons: [
-        { text: this.translate.instant('COMMON.CANCEL'), role: 'cancel' },
-        {
-          text: this.translate.instant('COMMON.DELETE'),
-          role: 'destructive',
-          handler: () => this.deleteExpense(),
-        },
-      ],
-    });
-    await alert.present();
+    const confirmed = await this.alertService.showDeleteConfirm(
+      this.expense?.description || '',
+      async () => this.deleteExpense()
+    );
   }
 
   private deleteExpense(): void {
@@ -144,13 +129,13 @@ export class ExpenseFormComponent
         next: () => {
           this.toastService.presentSuccessToast(
             'bottom',
-            this.translate.instant('EXPENSE.DELETE_SUCCESS')
+            this.translateService.instant('EXPENSE.DELETE_SUCCESS')
           );
           this.modalCtrl?.dismiss(null, 'delete');
         },
         error: (error) =>
           this.handleError(
-            this.translate.instant('EXPENSE.DELETE_ERROR'),
+            this.translateService.instant('EXPENSE.DELETE_ERROR'),
             error,
             true
           ),
@@ -176,15 +161,15 @@ export class ExpenseFormComponent
     action$.pipe(finalize(() => this.setLoading(false))).subscribe({
       next: (response) => {
         const message = this.isEditMode
-          ? this.translate.instant('EXPENSE.UPDATE_SUCCESS')
-          : this.translate.instant('EXPENSE.CREATE_SUCCESS');
+          ? this.translateService.instant('EXPENSE.UPDATE_SUCCESS')
+          : this.translateService.instant('EXPENSE.CREATE_SUCCESS');
         this.toastService.presentSuccessToast('bottom', message);
         this.modalCtrl?.dismiss(response, 'confirm');
       },
       error: (error) => {
         const message = this.isEditMode
-          ? this.translate.instant('EXPENSE.UPDATE_ERROR')
-          : this.translate.instant('EXPENSE.CREATE_ERROR');
+          ? this.translateService.instant('EXPENSE.UPDATE_ERROR')
+          : this.translateService.instant('EXPENSE.CREATE_ERROR');
         this.handleError(message, error, true);
       },
     });

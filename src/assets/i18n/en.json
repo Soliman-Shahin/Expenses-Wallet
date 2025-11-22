@@ -141,7 +141,15 @@
     "INCOME": "Income",
     "OUTCOME": "Outcome",
     "DELETE": "Delete",
-    "SAVINGS": "Savings"
+    "SAVINGS": "Savings",
+    "NOT_SUPPORTED": "This feature is not currently supported",
+    "SUCCESS": "Success",
+    "ERROR": "Error",
+    "WARNING": "Warning",
+    "INFO": "Information",
+    "CONFIRM": "Confirm",
+    "DELETE_CONFIRM": "Are you sure you want to delete this?",
+    "DELETE_CONFIRM_ITEM": "Are you sure you want to delete {{item}}?"
   },
   "CATEGORY": {
     "ADD": "Add new category",

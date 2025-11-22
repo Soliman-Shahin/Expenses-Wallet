@@ -5,7 +5,7 @@ import { ExpenseService } from 'src/app/core/services/expense.service';
 import { ProfileService } from 'src/app/modules/profile/services/profile.service';
 import { Expense } from 'src/app/shared/models/expense.model';
 import { BaseComponent } from 'src/app/shared/base/base.component';
-import { AlertController, ModalController, ToastController } from '@ionic/angular';
+import { ModalController } from '@ionic/angular';
 import { ExpenseFormComponent } from 'src/app/home/components/expense-form/expense-form.component';
 
 @Component({
@@ -36,9 +36,7 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
 
   constructor(
     private readonly profileService: ProfileService,
-    private readonly modalController: ModalController,
-    private readonly alertController: AlertController,
-    private readonly toastController: ToastController,
+    private readonly modalController: ModalController
   ) {
     super();
     // Setup search debouncing
@@ -210,7 +208,10 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
         const sortedDates = dates.sort();
         this.startDate = sortedDates[0];
         // If only one date is selected, use it as the end date as well
-        this.endDate = sortedDates.length > 1 ? sortedDates[sortedDates.length - 1] : sortedDates[0];
+        this.endDate =
+          sortedDates.length > 1
+            ? sortedDates[sortedDates.length - 1]
+            : sortedDates[0];
       }
     } else if (typeof dates === 'string') {
       // Handle the case where only a single date is emitted
@@ -322,42 +323,27 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
   }
 
   async onDelete(item: Expense) {
-    const alert = await this.alertController.create({
-      header: 'Confirm Delete',
-      message: `Are you sure you want to delete this transaction? This action cannot be undone.`,
-      buttons: [
-        {
-          text: 'Cancel',
-          role: 'cancel',
-        },
-        {
-          text: 'Delete',
-          role: 'destructive',
-          handler: () => {
-            this.expenseService.deleteExpense((item as any)._id).subscribe({
-              next: async () => {
-                const toast = await this.toastController.create({
-                  message: 'Transaction deleted successfully.',
-                  duration: 2000,
-                  color: 'success',
-                });
-                toast.present();
-                this.loadTransactions(); // Refresh list
-              },
-              error: async (err) => {
-                const toast = await this.toastController.create({
-                  message: 'Error deleting transaction. Please try again.',
-                  duration: 3000,
-                  color: 'danger',
-                });
-                toast.present();
-                console.error(err);
-              },
-            });
+    const transactionName = this.getTitle(item);
+    const confirmed = await this.alertService.showDeleteConfirm(
+      transactionName,
+      async () => {
+        this.expenseService.deleteExpense((item as any)._id).subscribe({
+          next: async () => {
+            await this.toastService.presentSuccessToast(
+              'bottom',
+              'Transaction deleted successfully.'
+            );
+            this.loadTransactions(); // Refresh list
           },
-        },
-      ],
-    });
-    await alert.present();
+          error: async (err) => {
+            await this.toastService.presentErrorToast(
+              'bottom',
+              'Error deleting transaction. Please try again.'
+            );
+            console.error(err);
+          },
+        });
+      }
+    );
   }
 }

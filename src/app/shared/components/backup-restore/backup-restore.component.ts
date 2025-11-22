@@ -1,29 +1,27 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { AlertController, ToastController } from '@ionic/angular';
 import {
   BackupService,
   BackupMetadata,
 } from 'src/app/core/services/backup.service';
+import { BaseComponent } from '../../base/base.component';
 
 @Component({
   selector: 'app-backup-restore',
   templateUrl: './backup-restore.component.html',
   styleUrls: ['./backup-restore.component.scss'],
 })
-export class BackupRestoreComponent implements OnInit {
+export class BackupRestoreComponent extends BaseComponent implements OnInit {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   backupHistory: BackupMetadata[] = [];
-  isLoading = false;
   loadingMessage = '';
 
-  constructor(
-    private backupService: BackupService,
-    private alertCtrl: AlertController,
-    private toastCtrl: ToastController
-  ) {}
+  constructor(private backupService: BackupService) {
+    super();
+  }
 
-  ngOnInit() {
+  override ngOnInit() {
+    super.ngOnInit();
     this.loadHistory();
   }
 
@@ -32,56 +30,68 @@ export class BackupRestoreComponent implements OnInit {
   }
 
   async createBackup() {
-    const alert = await this.alertCtrl.create({
-      header: 'إنشاء نسخة احتياطية',
-      message: 'هل تريد تشفير النسخة الاحتياطية بكلمة مرور؟',
-      inputs: [
-        {
-          name: 'password',
-          type: 'password',
-          placeholder: 'كلمة المرور (اختياري)',
-        },
-      ],
-      buttons: [
-        {
-          text: 'إلغاء',
-          role: 'cancel',
-        },
-        {
-          text: 'إنشاء',
-          handler: (data) => {
-            this.performBackup(!!data.password, data.password);
+    const alert = await this.modalCtrl.create({
+      component: 'ion-alert',
+      cssClass: 'custom-alert',
+      componentProps: {
+        header: this.translateService.instant('BACKUP.CREATE_ALERT_TITLE'),
+        message: this.translateService.instant('BACKUP.CREATE_ALERT_MSG'),
+        inputs: [
+          {
+            name: 'password',
+            type: 'password',
+            placeholder: this.translateService.instant(
+              'BACKUP.PASSWORD_PLACEHOLDER'
+            ),
           },
-        },
-      ],
+        ],
+        buttons: [
+          {
+            text: this.translateService.instant('COMMON.CANCEL'),
+            role: 'cancel',
+          },
+          {
+            text: this.translateService.instant('COMMON.CREATE'),
+            handler: (data: any) => {
+              this.performBackup(!!data.password, data.password);
+            },
+          },
+        ],
+      },
     });
 
     await alert.present();
   }
 
   private performBackup(encrypt: boolean, password?: string) {
-    this.isLoading = true;
-    this.loadingMessage = 'جاري إنشاء النسخة الاحتياطية...';
+    this.setLoading(true);
+    this.loadingMessage = this.translateService.instant('COMMON.LOADING');
 
     this.backupService.createFullBackup(encrypt, password).subscribe({
       next: async (backup) => {
-        this.isLoading = false;
+        this.setLoading(false);
         this.loadHistory();
 
         // Export immediately
         try {
           await this.backupService.exportBackup(backup);
-          this.showToast(
-            'تم إنشاء النسخة الاحتياطية وتصديرها بنجاح',
-            'success'
+          this.toastService.presentSuccessToast(
+            'bottom',
+            this.translateService.instant('BACKUP.SUCCESS_CREATE')
           );
         } catch (error) {
-          this.showToast('تم الإنشاء ولكن فشل التصدير', 'warning');
+          this.toastService.presentWarningToast(
+            'bottom',
+            this.translateService.instant('BACKUP.FAILED_CREATE')
+          );
         }
       },
       error: (error) => {
-        this.isLoading = false;
-        this.showToast('فشل إنشاء النسخة الاحتياطية', 'danger');
+        this.setLoading(false);
+        this.toastService.presentErrorToast(
+          'bottom',
+          this.translateService.instant('BACKUP.FAILED_CREATE')
+        );
         console.error(error);
       },
     });
@@ -113,91 +123,80 @@ export class BackupRestoreComponent implements OnInit {
       try {
         backupData = JSON.parse(content);
       } catch {
-        this.showToast('ملف غير صالح', 'danger');
+        this.toastService.presentErrorToast(
+          'bottom',
+          this.translateService.instant('BACKUP.INVALID_FILE')
+        );
         return;
       }
 
       if (backupData.encrypted) {
-        const alert = await this.alertCtrl.create({
-          header: 'فك التشفير',
-          message: 'هذه النسخة مشفرة. الرجاء إدخال كلمة المرور.',
-          inputs: [
-            {
-              name: 'password',
-              type: 'password',
-              placeholder: 'كلمة المرور',
-            },
-          ],
-          buttons: [
-            {
-              text: 'إلغاء',
-              role: 'cancel',
-            },
-            {
-              text: 'استعادة',
-              handler: async (data) => {
-                if (!data.password) {
-                  this.showToast('كلمة المرور مطلوبة', 'warning');
-                  return false;
-                }
-                await this.performRestore(content, data.password);
-                return true;
-              },
-            },
-          ],
-        });
-        await alert.present();
+        // For encrypted backup, show password prompt
+        this.toastService.presentInfoToast(
+          'bottom',
+          this.translateService.instant('BACKUP.DECRYPT_ALERT_MSG')
+        );
+        // TODO: Implement proper password dialog
+        const password = prompt(
+          this.translateService.instant('BACKUP.PASSWORD_PLACEHOLDER')
+        );
+        if (password) {
+          await this.performRestore(content, password);
+        }
       } else {
-        const alert = await this.alertCtrl.create({
-          header: 'تأكيد الاستعادة',
-          message:
-            'سيتم استبدال البيانات الحالية بالبيانات الموجودة في النسخة الاحتياطية. هل أنت متأكد؟',
-          buttons: [
-            {
-              text: 'إلغاء',
-              role: 'cancel',
-            },
-            {
-              text: 'نعم، استعادة',
-              handler: () => {
-                this.performRestore(content);
-              },
-            },
-          ],
-        });
-        await alert.present();
+        // For unencrypted backup, ask for confirmation
+        if (
+          confirm(this.translateService.instant('BACKUP.RESTORE_CONFIRM_MSG'))
+        ) {
+          await this.performRestore(content);
+        }
       }
     } catch (error) {
-      this.showToast('حدث خطأ أثناء قراءة الملف', 'danger');
+      this.toastService.presentErrorToast(
+        'bottom',
+        this.translateService.instant('BACKUP.INVALID_FILE')
+      );
     }
   }
 
   private async performRestore(content: string, password?: string) {
-    this.isLoading = true;
-    this.loadingMessage = 'جاري استعادة البيانات...';
+    this.setLoading(true);
+    this.loadingMessage = this.translateService.instant('COMMON.LOADING');
 
     try {
       const backup = await this.backupService.importBackup(content, password);
 
       this.backupService.restoreFromBackup(backup).subscribe({
         next: (success) => {
-          this.isLoading = false;
+          this.setLoading(false);
           if (success) {
-            this.showToast('تم استعادة البيانات بنجاح', 'success');
+            this.toastService.presentSuccessToast(
+              'bottom',
+              this.translateService.instant('BACKUP.SUCCESS_RESTORE')
+            );
             // Optional: Reload app or navigate to home
           } else {
-            this.showToast('فشل استعادة البيانات', 'danger');
+            this.toastService.presentErrorToast(
+              'bottom',
+              this.translateService.instant('BACKUP.FAILED_RESTORE')
+            );
           }
         },
         error: (error) => {
-          this.isLoading = false;
-          this.showToast('حدث خطأ أثناء الاستعادة', 'danger');
+          this.setLoading(false);
+          this.toastService.presentErrorToast(
+            'bottom',
+            this.translateService.instant('BACKUP.FAILED_RESTORE')
+          );
           console.error(error);
         },
       });
     } catch (error) {
-      this.isLoading = false;
-      this.showToast('كلمة المرور غير صحيحة أو الملف تالف', 'danger');
+      this.setLoading(false);
+      this.toastService.presentErrorToast(
+        'bottom',
+        this.translateService.instant('BACKUP.WRONG_PASSWORD')
+      );
     }
   }
 
@@ -206,26 +205,13 @@ export class BackupRestoreComponent implements OnInit {
     // we can't re-export from history directly without reading from storage/file.
     // For now, we'll just show info.
     // Ideally, we should store backups in files and keep paths in metadata.
-    this.showToast(
-      'المشاركة من السجل غير مدعومة حالياً. قم بإنشاء نسخة جديدة للمشاركة.',
-      'medium'
+    this.toastService.presentInfoToast(
+      'bottom',
+      this.translateService.instant('COMMON.NOT_SUPPORTED')
     );
   }
 
   formatSize(bytes: number): string {
     return this.backupService.formatFileSize(bytes);
-  }
-
-  private async showToast(
-    message: string,
-    color: 'success' | 'danger' | 'warning' | 'medium'
-  ) {
-    const toast = await this.toastCtrl.create({
-      message,
-      duration: 3000,
-      color,
-      position: 'bottom',
-    });
-    await toast.present();
   }
 }

@@ -11,10 +11,10 @@ import {
   HostBinding,
   ElementRef,
   ViewChild,
-  ChangeDetectorRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
+import { BaseComponent } from 'src/app/shared/base/base.component';
 import {
   ChartTooltipComponent,
   TooltipData,
@@ -44,7 +44,10 @@ interface InternalChartData extends ChartData {
   templateUrl: './pie-chart.component.html',
   styleUrls: ['./pie-chart.component.scss'],
 })
-export class PieChartComponent implements OnInit, OnChanges, OnDestroy {
+export class PieChartComponent
+  extends BaseComponent
+  implements OnInit, OnChanges, OnDestroy
+{
   @Output() sliceClick = new EventEmitter<ChartData>();
 
   @Input() data: ChartData[] = inject(CHART_DATA, { optional: true }) || [];
@@ -99,9 +102,9 @@ export class PieChartComponent implements OnInit, OnChanges, OnDestroy {
   tooltipY = 0;
 
   private animationFrameId: number | null = null;
-  private cdr = inject(ChangeDetectorRef);
 
-  ngOnInit(): void {
+  override ngOnInit(): void {
+    super.ngOnInit();
     this.updateChart(true);
   }
 
@@ -111,10 +114,11 @@ export class PieChartComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  ngOnDestroy(): void {
+  override ngOnDestroy(): void {
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
     }
+    super.ngOnDestroy();
   }
 
   private updateChart(animate = false): void {

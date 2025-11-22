@@ -115,6 +115,15 @@ ion-row {
   display: flex !important;
   padding: 0;
   text-align: center;
+  overflow: hidden; // Hide overflow to prevent scrollbar
+
+  // Hide scrollbar for webkit browsers (Chrome, Safari, Edge)
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  // Hide scrollbar for Firefox
+  scrollbar-width: none;
 
   .welcome-illustration {
     position: relative;
@@ -220,6 +229,42 @@ ion-row {
         margin-bottom: var(--ew-space-3);
         color: var(--ew-color-primary-500, var(--ion-color-primary));
       }
+    }
+  }
+
+  .welcome-lang-btn {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    z-index: 10;
+    background: rgba(var(--ion-color-light-rgb), 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(var(--ion-color-medium-rgb), 0.2);
+    border-radius: 12px;
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--ion-text-color);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    ion-icon {
+      font-size: 1.2rem;
+      color: var(--ion-color-primary);
+    }
+
+    &:hover {
+      background: rgba(var(--ion-color-light-rgb), 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    &:active {
+      transform: translateY(0);
     }
   }
 }
@@ -575,7 +620,7 @@ ion-row {
               height: 8px;
               background-color: var(--ew-color-neutral-200);
               border-radius: var(--ew-radius-pill);
-        
+
               .progress-bar {
                 height: 100%;
                 background: var(--brand-gradient);

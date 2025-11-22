@@ -127,7 +127,15 @@
     "INCOME": "الدخل",
     "OUTCOME": "المصروف",
     "DELETE": "حذف",
-    "SAVINGS": "الإدخار"
+    "SAVINGS": "الإدخار",
+    "NOT_SUPPORTED": "هذه الميزة غير مدعومة حالياً",
+    "SUCCESS": "نجح",
+    "ERROR": "خطأ",
+    "WARNING": "تحذير",
+    "INFO": "معلومات",
+    "CONFIRM": "تأكيد",
+    "DELETE_CONFIRM": "هل أنت متأكد أنك تريد الحذف؟",
+    "DELETE_CONFIRM_ITEM": "هل أنت متأكد أنك تريد حذف {{item}}؟"
   },
   "CATEGORY": {
     "ADD": "إضافة قسم جديد",

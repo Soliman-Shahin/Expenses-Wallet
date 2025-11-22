@@ -5,6 +5,14 @@
     <div class="shape shape-3"></div>
   </div>
 
+  <!-- Language Toggle Button -->
+  <button class="language-toggle" (click)="toggleLanguage()">
+    <ion-icon name="language-outline"></ion-icon>
+    <span>{{
+      translationService.getCurrentLanguage() === "ar" ? "English" : "عربي"
+    }}</span>
+  </button>
+
   <div class="content-wrapper">
     <div class="slides-container" #slidesContainer (scroll)="onScroll($event)">
       <div class="slide" *ngFor="let step of steps; let i = index">
@@ -12,8 +20,8 @@
           <div class="icon-wrapper">
             <ion-icon [name]="step.icon"></ion-icon>
           </div>
-          <h2 class="title">{{ step.title }}</h2>
-          <p class="description">{{ step.description }}</p>
+          <h2 class="title">{{ step.title | translate }}</h2>
+          <p class="description">{{ step.description | translate }}</p>
         </div>
       </div>
     </div>

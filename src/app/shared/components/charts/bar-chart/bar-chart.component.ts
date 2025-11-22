@@ -11,9 +11,10 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
-import { TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 import { DirectionService } from 'src/app/core/services/direction.service';
+import { BaseComponent } from 'src/app/shared/base/base.component';
+import { takeUntil } from 'rxjs/operators';
 import {
   trigger,
   transition,
@@ -64,7 +65,10 @@ interface ChartData {
     ]),
   ],
 })
-export class BarChartComponent implements OnInit, OnChanges, OnDestroy {
+export class BarChartComponent
+  extends BaseComponent
+  implements OnInit, OnChanges, OnDestroy
+{
   @Output() barClick = new EventEmitter<ChartData>();
   @Input() data: ChartData[] = inject(CHART_DATA, { optional: true }) || [];
   @Input() title: string = inject(CHART_TITLE, { optional: true }) || '';
@@ -84,14 +88,15 @@ export class BarChartComponent implements OnInit, OnChanges, OnDestroy {
   tooltipX = 0;
   tooltipY = 0;
 
-  private directionSub!: Subscription;
-  private translate = inject(TranslateService);
   private directionService = inject(DirectionService);
 
-  ngOnInit(): void {
-    this.directionSub = this.directionService.direction$.subscribe(() => {
-      this.processData();
-    });
+  override ngOnInit(): void {
+    super.ngOnInit();
+    this.directionService.direction$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.processData();
+      });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -100,10 +105,8 @@ export class BarChartComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  ngOnDestroy(): void {
-    if (this.directionSub) {
-      this.directionSub.unsubscribe();
-    }
+  override ngOnDestroy(): void {
+    super.ngOnDestroy();
   }
 
   private processData(): void {

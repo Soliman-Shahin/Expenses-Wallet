@@ -152,6 +152,7 @@
       var(--ion-color-primary),
       var(--ion-color-secondary)
     );
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
@@ -274,5 +275,41 @@
   }
   100% {
     transform: translateX(100%);
+  }
+}
+
+.language-toggle {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  z-index: 10;
+  background: rgba(var(--ion-color-light-rgb), 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(var(--ion-color-medium-rgb), 0.2);
+  border-radius: 12px;
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--ion-text-color);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  ion-icon {
+    font-size: 1.2rem;
+    color: var(--ion-color-primary);
+  }
+
+  &:hover {
+    background: rgba(var(--ion-color-light-rgb), 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 }

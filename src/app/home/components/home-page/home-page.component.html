@@ -39,6 +39,15 @@
       <!-- Welcome State -->
       <ng-container *ngIf="!user; else authenticatedView">
         <ion-grid class="welcome-container ion-padding-vertical">
+          <!-- Language Toggle Button -->
+          <button
+            class="language-toggle-btn welcome-lang-btn"
+            (click)="toggleLanguage()"
+          >
+            <ion-icon name="language-outline"></ion-icon>
+            <span>{{ currentLang === "ar" ? "English" : "عربي" }}</span>
+          </button>
+
           <ion-row class="ion-justify-content-center ion-align-items-center">
             <ion-col
               size="12"
@@ -281,73 +290,73 @@
                       <!-- Salary Breakdown Section -->
                       <div (click)="$event.stopPropagation()">
                         <ng-container *ngIf="vm.totalSalary > 0">
-                        <!-- Salary Pie Chart -->
-                        <div class="salary-chart-container">
-                          <!-- chart -->
-                          <ng-container
-                            *ngIf="
-                              pieChartComponent | async as PieChartComponent;
-                              else pieChartLoading
-                            "
-                          >
+                          <!-- Salary Pie Chart -->
+                          <div class="salary-chart-container">
+                            <!-- chart -->
                             <ng-container
-                              *ngComponentOutlet="
-                                PieChartComponent;
-                                injector: salaryBreakdownPieChartInjector
-                              "
-                            ></ng-container>
-                          </ng-container>
-                          <ng-template #pieChartLoading>
-                            <app-skeleton-block
-                              variant="chart"
-                            ></app-skeleton-block>
-                          </ng-template>
-                          <!-- Detailed Salary List -->
-                          <div class="salary-list ion-padding-top">
-                            <div
-                              *ngFor="
-                                let item of vm.salaryBreakdown;
-                                trackBy: trackByIndex
-                              "
-                              class="salary-item"
-                              [attr.aria-label]="
-                                item.name +
-                                ': ' +
-                                formatAmount(item.value) +
-                                ' (' +
-                                (item.percentage | percent : '1.0-0') +
-                                ')'
+                              *ngIf="
+                                pieChartComponent | async as PieChartComponent;
+                                else pieChartLoading
                               "
                             >
-                              <div class="item-details">
-                                <ion-icon
-                                  name="briefcase-outline"
-                                  class="item-icon"
-                                ></ion-icon>
-                                <div class="item-info">
-                                  <span class="salary-source">{{
-                                    item.name
-                                  }}</span>
-                                  <span class="salary-amount">{{
-                                    formatAmount(item.value)
-                                  }}</span>
+                              <ng-container
+                                *ngComponentOutlet="
+                                  PieChartComponent;
+                                  injector: salaryBreakdownPieChartInjector
+                                "
+                              ></ng-container>
+                            </ng-container>
+                            <ng-template #pieChartLoading>
+                              <app-skeleton-block
+                                variant="chart"
+                              ></app-skeleton-block>
+                            </ng-template>
+                            <!-- Detailed Salary List -->
+                            <div class="salary-list ion-padding-top">
+                              <div
+                                *ngFor="
+                                  let item of vm.salaryBreakdown;
+                                  trackBy: trackByIndex
+                                "
+                                class="salary-item"
+                                [attr.aria-label]="
+                                  item.name +
+                                  ': ' +
+                                  formatAmount(item.value) +
+                                  ' (' +
+                                  (item.percentage | percent : '1.0-0') +
+                                  ')'
+                                "
+                              >
+                                <div class="item-details">
+                                  <ion-icon
+                                    name="briefcase-outline"
+                                    class="item-icon"
+                                  ></ion-icon>
+                                  <div class="item-info">
+                                    <span class="salary-source">{{
+                                      item.name
+                                    }}</span>
+                                    <span class="salary-amount">{{
+                                      formatAmount(item.value)
+                                    }}</span>
+                                  </div>
                                 </div>
-                              </div>
-                              <div class="item-progress">
-                                <span class="progress-percentage">{{
-                                  item.percentage | percent : "1.0-0"
-                                }}</span>
-                                <div class="progress-bar-container">
-                                  <div
-                                    class="progress-bar"
-                                    [style.width]="item.percentage | percent"
-                                  ></div>
+                                <div class="item-progress">
+                                  <span class="progress-percentage">{{
+                                    item.percentage | percent : "1.0-0"
+                                  }}</span>
+                                  <div class="progress-bar-container">
+                                    <div
+                                      class="progress-bar"
+                                      [style.width]="item.percentage | percent"
+                                    ></div>
+                                  </div>
                                 </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      </ng-container>
+                        </ng-container>
                       </div>
                     </ng-container>
                     <ng-template #chartsSkeleton>

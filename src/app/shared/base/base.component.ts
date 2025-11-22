@@ -37,6 +37,7 @@ import { CategoryService } from 'src/app/modules/categories/services';
 import { ExpenseService } from 'src/app/core/services/expense.service';
 import { MENU_ITEMS } from 'src/app/core/constants';
 import { MenuItem } from '../models';
+import { AlertService } from '../services/alert.service';
 
 /**
  * Base component that provides common functionality and dependency injection.
@@ -105,6 +106,7 @@ export abstract class BaseComponent<T = any> implements OnInit, OnDestroy {
   protected readonly loadingService = inject(LoadingService);
   protected readonly errorHandler = inject(ErrorHandlerService);
   protected readonly state = inject(ComponentStateService);
+  protected readonly alertService = inject(AlertService);
 
   /**
    * Initialize the component with common setup

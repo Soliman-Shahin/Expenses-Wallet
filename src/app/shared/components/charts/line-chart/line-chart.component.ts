@@ -10,10 +10,10 @@ import {
   ElementRef,
   ViewChild,
   OnDestroy,
-  ChangeDetectorRef,
 } from '@angular/core';
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
+import { BaseComponent } from 'src/app/shared/base/base.component';
 import {
   ChartTooltipComponent,
   TooltipData,
@@ -37,7 +37,10 @@ interface ChartData {
   templateUrl: './line-chart.component.html',
   styleUrls: ['./line-chart.component.scss'],
 })
-export class LineChartComponent implements OnInit, OnChanges, OnDestroy {
+export class LineChartComponent
+  extends BaseComponent
+  implements OnInit, OnChanges, OnDestroy
+{
   @Output() dataPointClick = new EventEmitter<ChartData>();
   @Input() data: ChartData[] = inject(CHART_DATA, { optional: true }) || [];
   @Input() title: string = inject(CHART_TITLE, { optional: true }) || '';
@@ -73,10 +76,10 @@ export class LineChartComponent implements OnInit, OnChanges, OnDestroy {
   tooltipY = 0;
 
   private animationFrameId: number | null = null;
-  private cdr = inject(ChangeDetectorRef);
   private document = inject(DOCUMENT);
 
-  ngOnInit(): void {
+  override ngOnInit(): void {
+    super.ngOnInit();
     this.processData(true);
   }
 
@@ -86,10 +89,11 @@ export class LineChartComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  ngOnDestroy(): void {
+  override ngOnDestroy(): void {
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
     }
+    super.ngOnDestroy();
   }
 
   private processData(animate = false): void {
