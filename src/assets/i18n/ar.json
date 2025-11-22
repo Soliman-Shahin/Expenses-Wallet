@@ -135,7 +135,11 @@
     "INFO": "معلومات",
     "CONFIRM": "تأكيد",
     "DELETE_CONFIRM": "هل أنت متأكد أنك تريد الحذف؟",
-    "DELETE_CONFIRM_ITEM": "هل أنت متأكد أنك تريد حذف {{item}}؟"
+    "DELETE_CONFIRM_ITEM": "هل أنت متأكد أنك تريد حذف {{item}}؟",
+    "ERRORS": {
+      "LOAD_DATA": "فشل تحميل البيانات. يرجى المحاولة مرة أخرى.",
+      "DEFAULT": "حدث خطأ غير متوقع."
+    }
   },
   "CATEGORY": {
     "ADD": "إضافة قسم جديد",
@@ -287,6 +291,7 @@
     "CONFIRM_PASSWORD_PLACEHOLDER": "تأكيد كلمة المرور",
     "OR_SIGN_UP_WITH": "أو سجل باستخدام",
     "GOOGLE_SIGNUP_COMING_SOON": "التسجيل عبر جوجل قريباً!",
+    "FACEBOOK_SIGNUP_COMING_SOON": "التسجيل عبر فيسبوك قريباً!",
     "I_AGREE_TO": "أوافق على",
     "TERMS": "شروط الخدمة",
     "PRIVACY_POLICY": "سياسة الخصوصية",
