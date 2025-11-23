@@ -21,6 +21,7 @@ export const environment = {
       roles: [],
     },
   },
+  encryptionKey: 'ExpensesWalletSecretKey2024',
 };
 
 /*

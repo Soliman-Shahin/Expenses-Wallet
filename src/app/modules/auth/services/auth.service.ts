@@ -15,6 +15,7 @@ import { ApiService } from 'src/app/core/services';
 import { ProfileService } from 'src/app/modules/profile/services/profile.service';
 import { StorageService } from './storage.service';
 import { TokenService } from './token.service';
+import { EncryptionService } from 'src/app/core/services/encryption.service';
 
 @Injectable({
   providedIn: 'root',
@@ -27,13 +28,16 @@ export class AuthService {
   private zone = inject(NgZone);
   private profileService = inject(ProfileService);
   private tokenService = inject(TokenService);
+  private encryptionService = inject(EncryptionService);
   // Raw backend to create HttpClient that bypasses interceptors when needed
   private httpBackend = inject(HttpBackend);
 
   private userSubject = new BehaviorSubject<User | null>(null);
   public user$ = this.userSubject.asObservable();
 
-  public isLoggedIn$: Observable<boolean> = this.user$.pipe(map(user => !!user));
+  public isLoggedIn$: Observable<boolean> = this.user$.pipe(
+    map((user) => !!user)
+  );
 
   // Store the URL to redirect to after login
   public redirectUrl: string | null = null;
@@ -91,35 +95,66 @@ export class AuthService {
     if (isNative) {
       return from(
         (async () => {
-          const GA = (window as any)?.Capacitor?.Plugins?.GoogleAuth || (window as any)?.GoogleAuth;
+          const GA =
+            (window as any)?.Capacitor?.Plugins?.GoogleAuth ||
+            (window as any)?.GoogleAuth;
           if (!GA) {
-            throw new Error('GoogleAuth plugin not available. Please install @codetrix-studio/capacitor-google-auth and run npx cap sync.');
+            throw new Error(
+              'GoogleAuth plugin not available. Please install @codetrix-studio/capacitor-google-auth and run npx cap sync.'
+            );
           }
           try {
             // Initialize if available (safe no-op on native if not needed)
-            if (typeof GA.initialize === 'function' && environment.google?.webClientId) {
+            if (
+              typeof GA.initialize === 'function' &&
+              environment.google?.webClientId
+            ) {
               try {
-                await GA.initialize({ serverClientId: environment.google.webClientId, scopes: ['profile', 'email'] });
-                console.log('[AuthService] GoogleAuth initialized with serverClientId:', environment.google.webClientId);
+                await GA.initialize({
+                  serverClientId: environment.google.webClientId,
+                  scopes: ['profile', 'email'],
+                });
+                console.log(
+                  '[AuthService] GoogleAuth initialized with serverClientId:',
+                  environment.google.webClientId
+                );
               } catch {}
             }
             const res = await GA.signIn();
             console.log('[AuthService] GoogleAuth.signIn() result:', res);
-            const idToken: string = res?.authentication?.idToken || res?.idToken || '';
-            console.log('[AuthService] Extracted idToken:', idToken ? '***' + idToken.substring(0, 10) + '...' : 'MISSING');
+            const idToken: string =
+              res?.authentication?.idToken || res?.idToken || '';
+            console.log(
+              '[AuthService] Extracted idToken:',
+              idToken ? '***' + idToken.substring(0, 10) + '...' : 'MISSING'
+            );
             if (!idToken) {
               throw new Error('Failed to obtain Google idToken');
             }
-            console.log('[AuthService] Sending idToken to backend:', `${environment.apiUrl}/user/auth/google/native`);
+            console.log(
+              '[AuthService] Sending idToken to backend:',
+              `${environment.apiUrl}/user/auth/google/native`
+            );
+
             // Reuse authenticate() to handle HTTP (native/web), token storage, navigation
-            await this.authenticate(`/user/auth/google/native`, { idToken }).toPromise();
-            console.log('[AuthService] Backend response received and processed');
+            await this.authenticate(`/user/auth/google/native`, {
+              idToken,
+            }).toPromise();
+            console.log(
+              '[AuthService] Backend response received and processed'
+            );
             return;
           } catch (err) {
             console.error('[AuthService] Native Google Sign-In error:', err);
             // Show a more user-friendly error message
-            const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred during Google Sign-In';
-            console.error('[AuthService] Native Google Sign-In failed:', errorMessage);
+            const errorMessage =
+              err instanceof Error
+                ? err.message
+                : 'Unknown error occurred during Google Sign-In';
+            console.error(
+              '[AuthService] Native Google Sign-In failed:',
+              errorMessage
+            );
             throw new Error(`Google Sign-In failed: ${errorMessage}`);
           }
         })()
@@ -318,6 +353,11 @@ export class AuthService {
   ): Observable<AuthResponse> {
     const fullUrl = `${environment.apiUrl}${url}`;
 
+    // Encrypt credentials
+    const encryptedCredentials = {
+      data: this.encryptionService.encrypt(credentials),
+    };
+
     // On native (Android/iOS), prefer Capacitor HTTP plugin to bypass WebView CORS
     if (Capacitor.isNativePlatform()) {
       const Http = (window as any)?.Capacitor?.Plugins?.Http;
@@ -326,12 +366,25 @@ export class AuthService {
           Http.post({
             url: fullUrl,
             headers: { 'Content-Type': 'application/json' },
-            data: credentials,
+            data: encryptedCredentials,
           })
         ).pipe(
           map((resp: any) => {
             // Plugin returns { status, data, headers, url }
-            const response = resp?.data;
+            let response = resp?.data;
+
+            // Decrypt response if needed
+            if (
+              response &&
+              response.data &&
+              typeof response.data === 'string'
+            ) {
+              const decrypted = this.encryptionService.decrypt(response.data);
+              if (decrypted) {
+                response = decrypted;
+              }
+            }
+
             if (!response?.data?.user) {
               const message = response?.error?.message || 'Invalid credentials';
               throw new HttpErrorResponse({
@@ -356,8 +409,10 @@ export class AuthService {
               refreshToken: refreshTokenNormalized,
             } as NonNullable<AuthResponse['data']['tokens']>;
 
-            if (tokens?.accessToken) this.tokenService.setAccessToken(tokens.accessToken);
-            if (tokens?.refreshToken) this.tokenService.setRefreshToken(tokens.refreshToken);
+            if (tokens?.accessToken)
+              this.tokenService.setAccessToken(tokens.accessToken);
+            if (tokens?.refreshToken)
+              this.tokenService.setRefreshToken(tokens.refreshToken);
             if (user && user._id) this.tokenService.setUserId(user._id);
             this.storageService.set('user', user);
             this.userSubject.next(user);
@@ -378,8 +433,17 @@ export class AuthService {
 
     // Web: Use a bare HttpClient (bypasses interceptors and ApiService error wrapping)
     const http = new HttpClient(this.httpBackend);
-    return http.post<any>(fullUrl, credentials).pipe(
-      map((response) => {
+    return http.post<any>(fullUrl, encryptedCredentials).pipe(
+      map((res) => {
+        let response = res;
+        // Decrypt response if needed
+        if (response && response.data && typeof response.data === 'string') {
+          const decrypted = this.encryptionService.decrypt(response.data);
+          if (decrypted) {
+            response = decrypted;
+          }
+        }
+
         // Some backends may return { success: false, error: { message } } with 200
         if (!response?.data?.user) {
           const message = response?.error?.message || 'Invalid credentials';
@@ -464,10 +528,24 @@ export class AuthService {
     const refreshToken = this.getRefreshToken();
     // Use a bare HttpClient that bypasses interceptors to avoid cycles
     const http = new HttpClient(this.httpBackend);
+
+    const encryptedBody = {
+      data: this.encryptionService.encrypt({ refreshToken }),
+    };
+
     return http
-      .post<any>(`${environment.apiUrl}/user/refresh-token`, { refreshToken })
+      .post<any>(`${environment.apiUrl}/user/refresh-token`, encryptedBody)
       .pipe(
-        map((response) => {
+        map((res) => {
+          let response = res;
+          // Decrypt response if needed
+          if (response && response.data && typeof response.data === 'string') {
+            const decrypted = this.encryptionService.decrypt(response.data);
+            if (decrypted) {
+              response = decrypted;
+            }
+          }
+
           // Response: { accessToken, refreshToken }
           if (response && response.accessToken && response.refreshToken) {
             // Store new tokens
@@ -511,7 +589,8 @@ export class AuthService {
       const json = atob(payloadB64);
       const parsed = JSON.parse(json);
       const user = parsed?.user as User | undefined;
-      const accessToken = parsed?.tokens?.accessToken || parsed?.accessToken || parsed?.token;
+      const accessToken =
+        parsed?.tokens?.accessToken || parsed?.accessToken || parsed?.token;
       const refreshToken = parsed?.tokens?.refreshToken || parsed?.refreshToken;
       if (!user || !accessToken || !refreshToken) {
         return throwError(() => new Error('Invalid OAuth payload'));

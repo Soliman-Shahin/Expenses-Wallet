@@ -6,4 +6,5 @@ export const environment = {
     webClientId:
       '358709669585-0td9nf2p58ncgtoreopgqkq7vosco473.apps.googleusercontent.com',
   },
+  encryptionKey: 'ExpensesWalletSecretKey2024',
 };

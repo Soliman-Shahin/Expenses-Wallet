@@ -19,6 +19,7 @@ import { LayoutModule } from './layout/layout.module';
 import { SharedModule } from './shared/shared.module';
 import { AuthInterceptor } from './modules/auth/helper/authInterceptor';
 import { ErrorInterceptor } from './modules/auth/helper/errorInterceptor';
+import { EncryptionInterceptor } from './core/interceptors/encryption.interceptor';
 
 export function HttpLoaderFactory(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -45,6 +46,11 @@ export function HttpLoaderFactory(http: HttpClient) {
   ],
   providers: [
     provideHttpClient(withInterceptorsFromDi()),
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: EncryptionInterceptor,
+      multi: true,
+    },
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
   ],
