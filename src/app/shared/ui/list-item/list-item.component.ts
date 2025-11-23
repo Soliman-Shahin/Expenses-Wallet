@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Input } from '@angular/core';
 
 @Component({
   selector: 'app-list-item',
@@ -7,6 +7,7 @@ import { Component, Input } from '@angular/core';
   styleUrls: ['./list-item.component.scss'],
   standalone: true,
   imports: [CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ListItemComponent {
   @Input() icon?: string;

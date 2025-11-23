@@ -1,4 +1,4 @@
-import { Directive } from '@angular/core';
+import { Directive, ChangeDetectionStrategy } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import {
   PAGE_SIZE_OPTIONS,

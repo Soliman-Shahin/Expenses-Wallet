@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, OnDestroy } from '@angular/core';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 import { Router } from '@angular/router';
 import { ExpenseService } from 'src/app/core/services/expense.service';
@@ -12,6 +12,7 @@ import { ExpenseFormComponent } from 'src/app/home/components/expense-form/expen
   selector: 'app-transactions-list',
   templateUrl: './transactions-list.component.html',
   styleUrls: ['./transactions-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TransactionsListComponent extends BaseComponent implements OnInit {
   transactions: Expense[] = [];

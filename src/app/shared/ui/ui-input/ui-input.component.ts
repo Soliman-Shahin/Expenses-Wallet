@@ -1,12 +1,9 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
-  Input,
+import { Component, ChangeDetectionStrategy, Input,
   forwardRef,
   Injector,
   OnInit,
-  ViewChild,
-} from '@angular/core';
+  ViewChild, } from '@angular/core';
 import {
   ControlValueAccessor,
   FormsModule,
@@ -36,6 +33,7 @@ import { TranslateModule } from '@ngx-translate/core';
       multi: true,
     },
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UiInputComponent implements ControlValueAccessor, OnInit {
   @Input() label = '';

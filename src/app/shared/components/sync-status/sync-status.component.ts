@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { TranslateModule } from '@ngx-translate/core';
@@ -281,6 +281,7 @@ import { BaseComponent } from 'src/app/shared/base';
       }
     `,
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SyncStatusComponent
   extends BaseComponent

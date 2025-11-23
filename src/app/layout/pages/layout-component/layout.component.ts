@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy,  } from '@angular/core';
 import { OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -8,6 +8,7 @@ import { BaseComponent } from 'src/app/shared/base/base.component';
   selector: 'app-layout',
   templateUrl: './layout.component.html',
   styleUrls: ['./layout.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LayoutComponent
   extends BaseComponent

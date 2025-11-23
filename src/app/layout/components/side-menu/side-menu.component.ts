@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { NavigationEnd } from '@angular/router';
 import { Observable, combineLatest } from 'rxjs';
 import { filter, map, startWith } from 'rxjs/operators';
@@ -10,6 +10,7 @@ import { MenuItem } from 'src/app/shared/models';
   selector: 'app-side-menu',
   templateUrl: './side-menu.component.html',
   styleUrls: ['./side-menu.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SideMenuComponent
   extends BaseComponent

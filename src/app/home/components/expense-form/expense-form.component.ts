@@ -6,6 +6,7 @@ import {
   OnDestroy,
   ElementRef,
   ViewChild,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FormGroup, Validators } from '@angular/forms';
@@ -21,6 +22,7 @@ import { trapFocus, releaseFocus } from 'src/app/shared/utils/focus-trap';
   selector: 'app-expense-form',
   templateUrl: './expense-form.component.html',
   styleUrls: ['./expense-form.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ExpenseFormComponent
   extends BaseComponent

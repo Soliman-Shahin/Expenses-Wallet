@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { BehaviorSubject, combineLatest, finalize, Observable, takeUntil } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -9,6 +9,7 @@ import { BaseComponent } from 'src/app/shared/base/base.component';
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LoginComponent extends BaseComponent implements OnInit {
   loginForm!: FormGroup;

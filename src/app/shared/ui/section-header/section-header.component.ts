@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { RouterModule } from '@angular/router';
@@ -9,6 +9,7 @@ import { RouterModule } from '@angular/router';
   imports: [CommonModule, IonicModule, RouterModule],
   templateUrl: './section-header.component.html',
   styleUrls: ['./section-header.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SectionHeaderComponent {
   @Input() icon?: string;

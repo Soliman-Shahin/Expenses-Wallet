@@ -1,11 +1,8 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
-  Input,
+import { Component, ChangeDetectionStrategy, Input,
   OnChanges,
   SimpleChanges,
-  ViewEncapsulation,
-} from '@angular/core';
+  ViewEncapsulation, } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { toObservable } from '@angular/core/rxjs-interop';
@@ -36,6 +33,7 @@ import { ToastController } from '@ionic/angular';
   templateUrl: './transactions.component.html',
   styleUrls: ['./transactions.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TransactionsComponent extends BaseComponent implements OnChanges {
   @Input() limit: number = 5;

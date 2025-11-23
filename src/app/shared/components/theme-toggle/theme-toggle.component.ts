@@ -1,13 +1,10 @@
-import {
-  Component,
-  OnInit,
+import { Component, ChangeDetectionStrategy, OnInit,
   Output,
   EventEmitter,
   signal,
   computed,
   DestroyRef,
-  inject,
-} from '@angular/core';
+  inject, } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { BaseComponent } from 'src/app/shared/base/base.component';
 
@@ -15,6 +12,7 @@ import { BaseComponent } from 'src/app/shared/base/base.component';
   selector: 'app-theme-toggle',
   templateUrl: './theme-toggle.component.html',
   styleUrls: ['./theme-toggle.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ThemeToggleComponent extends BaseComponent implements OnInit {
   private destroyRef = inject(DestroyRef);

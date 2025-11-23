@@ -1,14 +1,11 @@
-import {
-  Component,
-  Input,
+import { Component, ChangeDetectionStrategy, Input,
   OnChanges,
   SimpleChanges,
   inject,
   OnInit,
   OnDestroy,
   Output,
-  EventEmitter,
-} from '@angular/core';
+  EventEmitter, } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
@@ -51,7 +48,9 @@ interface ChartData {
         query(
           ':enter',
           [
-            style({ opacity: 0, transform: 'translateY(20px)' }),
+            style({ opacity: 0, transform: 'translateY(20px)' ,
+  changeDetection: ChangeDetectionStrategy.OnPush
+}),
             stagger(50, [
               animate(
                 '300ms ease-out',

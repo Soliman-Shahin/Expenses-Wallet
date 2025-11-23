@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import {
   AbstractControl,
   FormGroup,
@@ -14,6 +14,7 @@ import { BaseComponent } from 'src/app/shared/base/base.component';
   selector: 'app-signup',
   templateUrl: './signup.component.html',
   styleUrls: ['./signup.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SignupComponent extends BaseComponent implements OnInit {
   signupForm!: FormGroup;

@@ -1,4 +1,4 @@
-import { Component, NgZone, OnInit, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, NgZone, OnInit, inject } from '@angular/core';
 import { App } from '@capacitor/app';
 import { BaseComponent } from './shared/base/base.component';
 import { DirectionService } from './core/services/direction.service';
@@ -10,6 +10,7 @@ import { BiometricService } from './core/services/biometric.service';
   selector: 'app-root',
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent extends BaseComponent implements OnInit {
   isLocked = false;

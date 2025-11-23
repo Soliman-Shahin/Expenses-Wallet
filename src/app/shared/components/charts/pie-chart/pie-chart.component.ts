@@ -1,6 +1,4 @@
-import {
-  Component,
-  Input,
+import { Component, ChangeDetectionStrategy, Input,
   OnChanges,
   SimpleChanges,
   Output,
@@ -10,8 +8,7 @@ import {
   OnDestroy,
   HostBinding,
   ElementRef,
-  ViewChild,
-} from '@angular/core';
+  ViewChild, } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { BaseComponent } from 'src/app/shared/base/base.component';
@@ -43,6 +40,7 @@ interface InternalChartData extends ChartData {
   imports: [CommonModule, ChartTooltipComponent, TranslateModule],
   templateUrl: './pie-chart.component.html',
   styleUrls: ['./pie-chart.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PieChartComponent
   extends BaseComponent

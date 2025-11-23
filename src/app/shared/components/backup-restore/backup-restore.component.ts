@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ElementRef, OnInit, ViewChild } from '@angular/core';
 import {
   BackupService,
   BackupMetadata,
@@ -9,6 +9,7 @@ import { BaseComponent } from '../../base/base.component';
   selector: 'app-backup-restore',
   templateUrl: './backup-restore.component.html',
   styleUrls: ['./backup-restore.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BackupRestoreComponent extends BaseComponent implements OnInit {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;

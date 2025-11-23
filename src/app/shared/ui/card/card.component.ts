@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostBinding, Input } from '@angular/core';
+import { Component, ChangeDetectionStrategy, HostBinding, Input } from '@angular/core';
 
 @Component({
   selector: 'app-card',
@@ -7,6 +7,7 @@ import { Component, HostBinding, Input } from '@angular/core';
   styleUrls: ['./card.component.scss'],
   standalone: true,
   imports: [CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CardComponent {
   @Input() padding: 'sm' | 'md' | 'lg' | 'none' = 'md';

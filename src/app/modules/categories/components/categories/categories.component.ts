@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, OnInit } from '@angular/core';
 import {
   AlertController,
   InfiniteScrollCustomEvent,
@@ -23,6 +23,7 @@ import { Category, CategoryParams } from '../../models';
   selector: 'app-categories',
   templateUrl: './categories.component.html',
   styleUrls: ['./categories.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CategoriesComponent
   extends BaseListComponent<Category>

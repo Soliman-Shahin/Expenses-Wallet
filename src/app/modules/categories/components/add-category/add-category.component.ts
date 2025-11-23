@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { BehaviorSubject, combineLatest, finalize, takeUntil } from 'rxjs';
 import { BaseComponent } from 'src/app/shared/base';
@@ -7,6 +7,7 @@ import { BaseComponent } from 'src/app/shared/base';
   selector: 'app-add-category',
   templateUrl: './add-category.component.html',
   styleUrls: ['./add-category.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AddCategoryComponent extends BaseComponent implements OnInit {
   categoryForm!: FormGroup;

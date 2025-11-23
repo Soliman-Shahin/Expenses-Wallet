@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { TranslateModule } from '@ngx-translate/core';
 import { COLORS } from '../../models';
@@ -10,6 +10,7 @@ import { COLORS } from '../../models';
   selector: 'app-color-selector',
   templateUrl: './color-selector.component.html',
   styleUrls: ['./color-selector.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ColorSelectorComponent implements OnInit {
   @Output() color = new EventEmitter<string>();

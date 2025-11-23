@@ -1,6 +1,4 @@
-import {
-  Component,
-  Input,
+import { Component, ChangeDetectionStrategy, Input,
   OnInit,
   inject,
   OnChanges,
@@ -9,8 +7,7 @@ import {
   EventEmitter,
   ElementRef,
   ViewChild,
-  OnDestroy,
-} from '@angular/core';
+  OnDestroy, } from '@angular/core';
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { BaseComponent } from 'src/app/shared/base/base.component';
@@ -36,6 +33,7 @@ interface ChartData {
   imports: [CommonModule, ChartTooltipComponent, TranslateModule],
   templateUrl: './line-chart.component.html',
   styleUrls: ['./line-chart.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LineChartComponent
   extends BaseComponent

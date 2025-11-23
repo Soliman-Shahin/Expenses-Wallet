@@ -1,11 +1,8 @@
-import {
-  Component,
-  Input,
+import { Component, ChangeDetectionStrategy, Input,
   Output,
   EventEmitter,
   signal,
-  computed,
-} from '@angular/core';
+  computed, } from '@angular/core';
 
 export interface UserInfo {
   displayName: string;
@@ -18,6 +15,7 @@ export interface UserInfo {
   selector: 'app-user-info',
   templateUrl: './user-info.component.html',
   styleUrls: ['./user-info.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserInfoComponent {
   // Inputs

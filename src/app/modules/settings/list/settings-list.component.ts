@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { BaseComponent } from 'src/app/shared/base/base.component';
 import { BiometricService } from 'src/app/core/services/biometric.service';
 
@@ -6,6 +6,7 @@ import { BiometricService } from 'src/app/core/services/biometric.service';
   selector: 'app-settings-list',
   templateUrl: './settings-list.component.html',
   styleUrls: ['./settings-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SettingsListComponent extends BaseComponent implements OnInit {
   biometricAvailable = false;

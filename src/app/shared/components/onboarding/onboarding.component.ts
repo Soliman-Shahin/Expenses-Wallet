@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   OnboardingService,
@@ -10,6 +10,7 @@ import { BaseComponent } from '../../base/base.component';
   selector: 'app-onboarding',
   templateUrl: './onboarding.component.html',
   styleUrls: ['./onboarding.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class OnboardingComponent extends BaseComponent implements OnInit {
   @ViewChild('slidesContainer') slidesContainer!: ElementRef;

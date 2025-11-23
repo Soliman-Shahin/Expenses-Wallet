@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 
@@ -18,6 +18,7 @@ export type SkeletonVariant =
   imports: [CommonModule, IonicModule],
   templateUrl: './skeleton-block.component.html',
   styleUrls: ['./skeleton-block.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SkeletonBlockComponent {
   @Input() variant: SkeletonVariant = 'line';

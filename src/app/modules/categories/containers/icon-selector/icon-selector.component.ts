@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { ICONS } from '../../models';
 
@@ -9,6 +9,7 @@ import { ICONS } from '../../models';
   selector: 'app-icon-selector',
   templateUrl: './icon-selector.component.html',
   styleUrls: ['./icon-selector.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class IconSelectorComponent implements OnInit {
   @Output() icon = new EventEmitter<string>();

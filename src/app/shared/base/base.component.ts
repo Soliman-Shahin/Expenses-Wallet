@@ -1,13 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import {
-  ChangeDetectorRef,
-  Directive,
-  HostBinding,
-  inject,
-  OnDestroy,
-  OnInit,
-  Type,
-} from '@angular/core';
+import { ChangeDetectorRef, Directive, HostBinding, inject, OnDestroy, OnInit, Type, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';

@@ -14,7 +14,11 @@
     "sync": "cap sync",
     "sync:android": "cap sync android",
     "sync:ios": "cap sync ios",
-    "open:android": "npx cap sync android && npx cap open android"
+    "open:android": "npx cap sync android && npx cap open android",
+    "build:prod": "ng build --configuration production",
+    "serve:prod": "ng serve --configuration production",
+    "analyze": "source-map-explorer \"dist/**/*.js\"",
+    "update-onpush": "node update-onpush.js"
   },
   "private": true,
   "dependencies": {
