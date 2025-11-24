@@ -1,47 +1,53 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, BehaviorSubject, from, of, timer, interval, merge } from 'rxjs';
-import { 
-  map, 
-  switchMap, 
-  catchError, 
-  tap, 
-  filter, 
-  takeUntil, 
-  retry, 
-  delay,
-  concatMap,
-  mergeMap,
+import { Observable, BehaviorSubject, from, of, timer, interval } from 'rxjs';
+import {
+  map,
+  switchMap,
+  catchError,
+  tap,
+  filter,
   finalize,
-  take
 } from 'rxjs/operators';
 import { Network } from '@capacitor/network';
 import { ApiService } from './api.service';
 import { OfflineStorageService } from './offline-storage.service';
-import { 
-  SyncEntity, 
-  SyncStatus, 
-  SyncMetadata, 
-  SyncOperation, 
-  SyncConfig, 
+import {
+  SyncEntity,
+  SyncStatus,
+  SyncMetadata,
+  SyncOperation,
+  SyncConfig,
   SyncProgress,
-  ConflictResolution 
 } from 'src/app/shared/models/sync.model';
 
+/**
+ * 🔄 Sync Service - Professional Implementation
+ *
+ * المسؤوليات:
+ * 1. مزامنة البيانات بين الفرونت والباك (Pull & Push)
+ * 2. إدارة الـ Offline Mode
+ * 3. معالجة التعارضات (Conflicts)
+ * 4. تتبع حالة المزامنة (Metadata & Progress)
+ */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class SyncService {
   private apiService = inject(ApiService);
   private offlineStorage = inject(OfflineStorageService);
 
+  // ==================== CONFIGURATION ====================
+
   private syncConfig: SyncConfig = {
     autoSync: true,
-    syncInterval: 300000, // 5 minutes (300000ms) - optimized for battery and data usage
+    syncInterval: 300000, // 5 minutes
     maxRetries: 3,
     conflictResolution: 'prompt',
-    batchSize: 10,
-    enableOfflineMode: true
+    batchSize: 50,
+    enableOfflineMode: true,
   };
+
+  // ==================== OBSERVABLES ====================
 
   private syncMetadataSubject = new BehaviorSubject<SyncMetadata>({
     lastSyncTime: new Date(),
@@ -50,7 +56,7 @@ export class SyncService {
     conflictCount: 0,
     errorCount: 0,
     isOnline: false,
-    isSyncing: false
+    isSyncing: false,
   });
 
   private syncProgressSubject = new BehaviorSubject<SyncProgress>({
@@ -59,508 +65,431 @@ export class SyncService {
     percentage: 0,
     currentOperation: '',
     isComplete: true,
-    errors: []
+    errors: [],
   });
 
   public syncMetadata$ = this.syncMetadataSubject.asObservable();
   public syncProgress$ = this.syncProgressSubject.asObservable();
 
+  // ==================== STATE ====================
+
   private isOnline = false;
   private syncInProgress = false;
+
+  // ==================== INITIALIZATION ====================
 
   constructor() {
     this.initializeNetworkMonitoring();
     this.initializeAutoSync();
   }
 
-  // ==================== SYNC API ENDPOINTS ====================
-
   /**
-   * Pull data from server sync API
+   * مراقبة حالة الاتصال بالإنترنت
    */
-  pullFromServer(params: {
-    lastSyncTime?: string;
-    entityType?: 'expense' | 'category' | 'user';
-    limit?: number;
-    offset?: number;
-  } = {}): Observable<any> {
-    return this.apiService.get<any>(
-      `/sync/pull`,
-      this.buildHttpParams(params)
-    );
-  }
-
-  /**
-   * Push local changes to server sync API
-   */
-  pushToServer(entities: any[]): Observable<any> {
-    return this.apiService.post<any>(`/sync/push`, { entities });
-  }
-
-  /**
-   * Bulk sync to server
-   */
-  bulkSyncToServer(entities: any[]): Observable<any> {
-    return this.apiService.post<any>(`/sync/bulk`, { entities });
-  }
-
-  /**
-   * Get conflicts from server
-   */
-  getConflictsFromServer(): Observable<any[]> {
-    return this.apiService.get<any[]>(`/sync/conflicts`);
-  }
-
-  /**
-   * Resolve conflict on server
-   */
-  resolveConflictOnServer(conflict: {
-    entityId: string;
-    entityType: string;
-    resolution: 'local' | 'server' | 'merge';
-    mergedData?: any;
-  }): Observable<any> {
-    return this.apiService.post<any>(`/sync/conflicts/resolve`, conflict);
-  }
-
-  /**
-   * Get sync metadata from server
-   */
-  getSyncMetadataFromServer(): Observable<any> {
-    return this.apiService.get<any>(`/sync/metadata`);
-  }
-
-  /**
-   * Update sync metadata on server
-   */
-  updateSyncMetadataOnServer(metadata: any): Observable<any> {
-    return this.apiService.put<any>(`/sync/metadata`, metadata);
-  }
-
-  /**
-   * Helper to build HttpParams from object
-   */
-  private buildHttpParams(params: any): any {
-    // Angular HttpParams is not imported here, so just return params as is for ApiService
-    return params;
-  }
-
-  // ==================== INITIALIZATION ====================
-
   private initializeNetworkMonitoring(): void {
     // Check initial network status
-    Network.getStatus().then((status: any) => {
-      this.isOnline = status.connected;
-      this.updateSyncMetadata({ isOnline: this.isOnline });
-    });
+    Network.getStatus()
+      .then((status: any) => {
+        this.isOnline = status.connected;
+        this.updateSyncMetadata({ isOnline: this.isOnline });
+        console.log('📡 Network status:', this.isOnline ? 'Online' : 'Offline');
+      })
+      .catch(() => {
+        // Fallback to browser online status
+        this.isOnline = navigator.onLine;
+        this.updateSyncMetadata({ isOnline: this.isOnline });
+      });
 
     // Listen for network changes
     Network.addListener('networkStatusChange', (status: any) => {
+      const wasOnline = this.isOnline;
       this.isOnline = status.connected;
       this.updateSyncMetadata({ isOnline: this.isOnline });
-      
-      if (this.isOnline && this.syncConfig.autoSync) {
-        this.syncAll();
+
+      console.log(
+        '📡 Network changed:',
+        wasOnline ? 'Online' : 'Offline',
+        '→',
+        this.isOnline ? 'Online' : 'Offline'
+      );
+
+      // Auto-sync when coming back online
+      if (!wasOnline && this.isOnline && this.syncConfig.autoSync) {
+        console.log('🔄 Network restored, starting auto-sync...');
+        this.syncAll().subscribe({
+          next: (success) => console.log('✅ Auto-sync completed:', success),
+          error: (err) => console.error('❌ Auto-sync failed:', err),
+        });
       }
+    }).catch(() => {
+      console.warn('⚠️ Network listener not available, using browser events');
     });
   }
 
+  /**
+   * تفعيل المزامنة التلقائية
+   */
   private initializeAutoSync(): void {
-    if (this.syncConfig.autoSync) {
-      interval(this.syncConfig.syncInterval).pipe(
-        filter(() => this.isOnline && !this.syncInProgress),
-        switchMap(() => this.syncAll())
-      ).subscribe();
+    if (this.syncConfig.autoSync && this.syncConfig.syncInterval > 0) {
+      interval(this.syncConfig.syncInterval)
+        .pipe(
+          filter(() => this.isOnline && !this.syncInProgress),
+          switchMap(() => {
+            console.log('⏰ Auto-sync triggered');
+            return this.syncAll();
+          })
+        )
+        .subscribe({
+          next: (success) =>
+            console.log('✅ Auto-sync:', success ? 'Success' : 'Failed'),
+          error: (err) => console.error('❌ Auto-sync error:', err),
+        });
     }
   }
 
-  // ==================== MAIN SYNC METHODS ====================
+  // ==================== MAIN SYNC OPERATION ====================
 
   /**
-   * مزامنة كل شيء: Pull ثم Push (Best Practice)
+   * 🔄 المزامنة الكاملة (Full Sync)
+   *
+   * الخطوات:
+   * 1. Pull البيانات من السيرفر
+   * 2. دمجها مع البيانات المحلية
+   * 3. Push التغييرات المحلية إلى السيرفر
    */
   syncAll(): Observable<boolean> {
+    // Check if sync is already running
     if (this.syncInProgress) {
-      console.log('Sync already in progress, skipping...');
+      console.log('⚠️ Sync already in progress, skipping...');
       return of(false);
     }
 
+    // Check if online
     if (!this.isOnline) {
-      console.log('Device is offline, skipping sync...');
+      console.log('⚠️ Device is offline, cannot sync');
       return of(false);
     }
 
+    // Start sync
     this.syncInProgress = true;
     this.updateSyncMetadata({ isSyncing: true });
     this.updateSyncProgress({
       current: 0,
-      total: 0,
+      total: 100,
       percentage: 0,
       currentOperation: 'Starting sync...',
       isComplete: false,
-      errors: []
+      errors: [],
     });
 
-    console.log('Starting full sync...');
+    console.log('🔄 Starting full sync...');
 
-    // 1. Pull latest data from server
-    return this.pullFromServer({
-      lastSyncTime: this.syncMetadataSubject.value.lastSyncTime?.toISOString?.() || undefined
-    }).pipe(
-      switchMap((pullResult: any) => {
-        console.log('Pull result:', pullResult);
-        
-        // تحديث الداتا المحلية بناءً على رد السيرفر
-        if (pullResult?.entities && Array.isArray(pullResult.entities)) {
-          // دمج كل نوع من الـ entities
-          const expenseEntities = pullResult.entities.filter((e: any) => e._entityType === 'expense');
-          const categoryEntities = pullResult.entities.filter((e: any) => e._entityType === 'category');
-          
-          if (expenseEntities.length > 0) {
-            this.offlineStorage.mergeEntities('expense', expenseEntities).subscribe();
-          }
-          if (categoryEntities.length > 0) {
-            this.offlineStorage.mergeEntities('category', categoryEntities).subscribe();
-          }
-        }
-        
-        if (pullResult?.conflicts && Array.isArray(pullResult.conflicts)) {
-          this.updateSyncMetadata({ conflictCount: pullResult.conflicts.length });
-        }
-        
-        // 2. Push local pending operations to server
-        return this.offlineStorage.getPendingOperations().pipe(
-          switchMap(operations => {
-            console.log('Pending operations:', operations.length);
-            
-            if (!operations.length) {
-              this.completeSync();
-              return of(true);
-            }
-            
-            // تحويل العمليات لصيغة مناسبة للسيرفر
-            const entitiesToPush = operations.map(op => ({
-              _id: op.entityId,
-              _entityType: op.entityType,
-              _lastModified: op.timestamp,
-              _version: 1,
-              _isDeleted: op.type === 'DELETE',
-              ...op.data
-            }));
-            
-            // دفع كل العمليات دفعة واحدة
-            return this.pushToServer(entitiesToPush).pipe(
-              tap((pushResult: any) => {
-                console.log('Push result:', pushResult);
-                
-                // إذا فيه تعارضات أو أخطاء
-                if (pushResult?.conflicts?.length) {
-                  this.updateSyncMetadata({ conflictCount: pushResult.conflicts.length });
-                }
-                
-                // إزالة العمليات من الـ queue إذا نجحت
-                if (pushResult?.success) {
-                  operations.forEach(op => this.offlineStorage.removeFromSyncQueue(op.id));
-                }
-              }),
-              map((pushResult: any) => !!pushResult?.success),
-              catchError(error => {
-                console.error('Sync push error:', error);
-                this.updateSyncProgress({ errors: [error.message || 'Sync push error'] });
-                return of(false);
-              })
-            );
+    // Step 1: Pull data from server
+    return this.pullDataFromServer().pipe(
+      tap(() => {
+        this.updateSyncProgress({
+          current: 50,
+          percentage: 50,
+          currentOperation: 'Pulling data from server...',
+        });
+      }),
+      switchMap((pullResult) => {
+        console.log(
+          `✅ Pulled ${pullResult.entities?.length || 0} entities from server`
+        );
+
+        // Step 2: Merge with local data
+        return this.mergeWithLocalData(pullResult.entities || []).pipe(
+          tap(() => {
+            this.updateSyncProgress({
+              current: 75,
+              percentage: 75,
+              currentOperation: 'Merging data...',
+            });
+          }),
+          switchMap(() => {
+            // Step 3: Push local pending changes
+            return this.pushLocalChanges();
           })
         );
       }),
-      tap(() => this.completeSync()),
-      catchError(error => {
-        console.error('Sync error:', error);
-        this.updateSyncProgress({ errors: [error.message || 'Unknown sync error'] });
+      tap(() => {
+        this.updateSyncProgress({
+          current: 100,
+          percentage: 100,
+          currentOperation: 'Sync completed',
+          isComplete: true,
+        });
+        this.completeSync();
+      }),
+      map(() => true),
+      catchError((error) => {
+        console.error('❌ Sync error:', error);
+        this.updateSyncProgress({
+          errors: [error.message || 'Unknown sync error'],
+          isComplete: true,
+        });
         this.completeSync();
         return of(false);
       }),
       finalize(() => {
         this.syncInProgress = false;
         this.updateSyncMetadata({ isSyncing: false });
-        console.log('Sync completed');
-      })
-    );
-  }
-
-  /**
-   * مزامنة مجموعة عمليات دفعة واحدة (Bulk)
-   */
-  private syncOperations(operations: SyncOperation[]): Observable<boolean> {
-    if (!operations.length) return of(true);
-    return this.bulkSyncToServer(operations).pipe(
-      tap((result: any) => {
-        if (result?.success) {
-          operations.forEach(op => this.offlineStorage.removeFromSyncQueue(op.id));
-        }
-        if (result?.results) {
-          const conflicts = result.results.filter((r: any) => r.conflict);
-          if (conflicts.length) {
-            this.updateSyncMetadata({ conflictCount: conflicts.length });
-          }
-        }
-      }),
-      map((result: any) => !!result?.success),
-      catchError(error => {
-        this.updateSyncProgress({ errors: [error.message || 'Bulk sync error'] });
-        return of(false);
-      })
-    );
-  }
-
-  /**
-   * مزامنة عملية واحدة (تستخدم فقط في حالات خاصة)
-   */
-  private syncOperation(operation: SyncOperation): Observable<boolean> {
-    // هنا يمكن استخدام pushToServer لعملية واحدة أو bulkSyncToServer لمجموعة
-    return this.pushToServer([operation]).pipe(
-      tap((result: any) => {
-        if (result?.success) {
-          this.offlineStorage.removeFromSyncQueue(operation.id);
-        }
-        if (result?.conflicts?.length) {
-          this.updateSyncMetadata({ conflictCount: result.conflicts.length });
-        }
-      }),
-      map((result: any) => !!result?.success),
-      catchError(error => {
-        this.updateSyncProgress({ errors: [error.message || 'Sync operation error'] });
-        return of(false);
-      })
-    );
-  }
-
-  // ==================== SYNC METHODS BY OPERATION TYPE ====================
-
-  private getSyncMethod(type: string) {
-    const methods = {
-      'CREATE': (op: SyncOperation) => this.createEntity(op),
-      'UPDATE': (op: SyncOperation) => this.updateEntity(op),
-      'DELETE': (op: SyncOperation) => this.deleteEntity(op)
-    };
-    return methods[type as keyof typeof methods] || (() => of(false));
-  }
-
-  private createEntity(operation: SyncOperation): Observable<boolean> {
-    const endpoint = this.getEndpoint(operation.entityType);
-    return this.apiService.post(`${endpoint}`, operation.data).pipe(
-      map(() => true),
-      catchError(error => {
-        console.error(`Create ${operation.entityType} error:`, error);
-        return of(false);
-      })
-    );
-  }
-
-  private updateEntity(operation: SyncOperation): Observable<boolean> {
-    const endpoint = this.getEndpoint(operation.entityType);
-    return this.apiService.put(`${endpoint}/${operation.entityId}`, operation.data).pipe(
-      map(() => true),
-      catchError(error => {
-        console.error(`Update ${operation.entityType} error:`, error);
-        return of(false);
-      })
-    );
-  }
-
-  private deleteEntity(operation: SyncOperation): Observable<boolean> {
-    const endpoint = this.getEndpoint(operation.entityType);
-    return this.apiService.delete(`${endpoint}/${operation.entityId}`).pipe(
-      map(() => true),
-      catchError(error => {
-        console.error(`Delete ${operation.entityType} error:`, error);
-        return of(false);
-      })
-    );
-  }
-
-  // ==================== CONFLICT RESOLUTION ====================
-
-  resolveConflict(resolution: ConflictResolution): Observable<boolean> {
-    const { entityId, entityType, resolution: resolutionType, mergedData } = resolution;
-
-    let dataToSync = mergedData;
-    if (resolutionType === 'local') {
-      dataToSync = resolution.localData;
-    } else if (resolutionType === 'server') {
-      dataToSync = resolution.serverData;
-    }
-
-    return this.apiService.put(`/${entityType}/${entityId}`, dataToSync).pipe(
-      tap(() => {
-        const currentMetadata = (this.syncMetadata$ as BehaviorSubject<SyncMetadata>).getValue();
-        this.updateSyncMetadata({
-          conflictCount: (currentMetadata?.conflictCount ?? 1) - 1
-        });
-      }),
-      map(() => true),
-      catchError(error => {
-        console.error('Conflict resolution error:', error);
-        return of(false);
+        console.log('🏁 Sync process finished');
       })
     );
   }
 
   // ==================== PULL DATA FROM SERVER ====================
 
-  pullData(entityType: string): Observable<any[]> {
-    const endpoint = this.getEndpoint(entityType);
-    return this.apiService.get<any[]>(`/${endpoint}`).pipe(
-      tap(data => {
-        // Update local storage with server data
-        this.offlineStorage.getEntities(entityType).pipe(
-          switchMap(localEntities => {
-            const updatedEntities = this.mergeServerData(localEntities, data);
-            return this.offlineStorage.getEntities(entityType);
-          })
-        ).subscribe();
+  /**
+   * 📥 Pull البيانات من السيرفر
+   */
+  private pullDataFromServer(): Observable<any> {
+    const lastSyncTime = this.syncMetadataSubject.value.lastSyncTime;
+
+    console.log('📥 Pulling data from server...');
+    console.log('📅 Last sync time:', lastSyncTime);
+
+    return this.apiService
+      .get<any>('/sync/pull', {
+        lastSyncTime: lastSyncTime?.toISOString(),
+        limit: this.syncConfig.batchSize,
+      })
+      .pipe(
+        tap((response) => {
+          console.log('✅ Pull response:', {
+            entitiesCount: response.entities?.length || 0,
+            conflicts: response.conflicts?.length || 0,
+            totalCount: response.totalCount,
+          });
+        }),
+        catchError((error) => {
+          console.error('❌ Pull error:', error);
+          return of({
+            entities: [],
+            conflicts: [],
+            totalCount: 0,
+            hasMore: false,
+          });
+        })
+      );
+  }
+
+  // ==================== MERGE WITH LOCAL DATA ====================
+
+  /**
+   * 🔀 دمج البيانات من السيرفر مع البيانات المحلية
+   */
+  private mergeWithLocalData(serverEntities: any[]): Observable<boolean> {
+    if (!serverEntities || serverEntities.length === 0) {
+      console.log('ℹ️ No server entities to merge');
+      return of(true);
+    }
+
+    console.log(
+      `🔀 Merging ${serverEntities.length} entities with local data...`
+    );
+
+    // Group entities by type
+    const expenseEntities = serverEntities.filter(
+      (e) => e._entityType === 'expense' || e._entityType === 'outcome'
+    );
+    const categoryEntities = serverEntities.filter(
+      (e) => e._entityType === 'category'
+    );
+
+    const mergeObservables: Observable<any>[] = [];
+
+    // Merge expenses
+    if (expenseEntities.length > 0) {
+      console.log(`💰 Merging ${expenseEntities.length} expenses...`);
+      mergeObservables.push(
+        this.offlineStorage.mergeEntities('expense', expenseEntities)
+      );
+    }
+
+    // Merge categories
+    if (categoryEntities.length > 0) {
+      console.log(`📁 Merging ${categoryEntities.length} categories...`);
+      mergeObservables.push(
+        this.offlineStorage.mergeEntities('category', categoryEntities)
+      );
+    }
+
+    if (mergeObservables.length === 0) {
+      return of(true);
+    }
+
+    return from(
+      Promise.all(mergeObservables.map((obs) => obs.toPromise()))
+    ).pipe(
+      map(() => {
+        console.log('✅ Merge completed');
+        return true;
       }),
-      catchError(error => {
-        console.error(`Pull ${entityType} error:`, error);
-        return of([]);
+      catchError((error) => {
+        console.error('❌ Merge error:', error);
+        return of(false);
       })
     );
   }
 
-  private mergeServerData(localEntities: SyncEntity[], serverData: any[]): SyncEntity[] {
-    const merged = [...localEntities];
-    
-    serverData.forEach(serverEntity => {
-      const localIndex = merged.findIndex(e => e._id === serverEntity._id);
-      
-      if (localIndex >= 0) {
-        // Check for conflicts
-        const localEntity = merged[localIndex];
-        if (this.hasConflict(localEntity, serverEntity)) {
-          localEntity._syncStatus = SyncStatus.CONFLICT;
-          localEntity._conflictData = serverEntity;
-        } else {
-          merged[localIndex] = { ...serverEntity, _syncStatus: SyncStatus.SYNCED };
+  // ==================== PUSH LOCAL CHANGES ====================
+
+  /**
+   * 📤 Push التغييرات المحلية إلى السيرفر
+   */
+  private pushLocalChanges(): Observable<boolean> {
+    console.log('📤 Checking for pending local changes...');
+
+    return this.offlineStorage.getPendingOperations().pipe(
+      switchMap((operations) => {
+        if (!operations || operations.length === 0) {
+          console.log('ℹ️ No pending operations to push');
+          return of(true);
         }
-      } else {
-        // New entity from server
-        merged.push({ ...serverEntity, _syncStatus: SyncStatus.SYNCED });
-      }
-    });
 
-    return merged;
+        console.log(`📤 Pushing ${operations.length} pending operations...`);
+
+        // Convert operations to entities format
+        const entities = operations.map((op) => ({
+          _id: op.entityId,
+          _entityType: op.entityType,
+          _lastModified: op.timestamp,
+          _version: 1,
+          _isDeleted: op.type === 'DELETE',
+          ...op.data,
+        }));
+
+        return this.apiService.post<any>('/sync/push', { entities }).pipe(
+          tap((result) => {
+            console.log('✅ Push result:', result);
+
+            // Remove successful operations from queue
+            if (result?.success) {
+              operations.forEach((op) => {
+                this.offlineStorage.removeFromSyncQueue(op.id);
+              });
+            }
+
+            // Update conflict count if any
+            if (result?.conflicts && result.conflicts.length > 0) {
+              this.updateSyncMetadata({
+                conflictCount: result.conflicts.length,
+              });
+            }
+          }),
+          map((result) => !!result?.success),
+          catchError((error) => {
+            console.error('❌ Push error:', error);
+            this.updateSyncProgress({
+              errors: [error.message || 'Push failed'],
+            });
+            return of(false);
+          })
+        );
+      })
+    );
   }
 
-  private hasConflict(localEntity: SyncEntity, serverEntity: any): boolean {
-    return localEntity._lastModified > new Date(serverEntity.updatedAt) && 
-           localEntity._syncStatus === SyncStatus.PENDING;
-  }
+  // ==================== SYNC COMPLETION ====================
 
-  // ==================== UTILITY METHODS ====================
-
-  private getEndpoint(entityType: string): string {
-    const endpoints = {
-      'expense': 'expenses',
-      'category': 'categories',
-      'user': 'user'
-    };
-    return endpoints[entityType as keyof typeof endpoints] || entityType;
-  }
-
-  private handleSyncError(operation: SyncOperation, error: any): void {
-    const retryCount = operation.retryCount + 1;
-    
-    if (retryCount < operation.maxRetries) {
-      this.offlineStorage.updateSyncOperation(operation.id, {
-        retryCount,
-        status: SyncStatus.PENDING
-      });
-      
-      // Retry after delay
-      timer(5000).pipe(
-        switchMap(() => this.syncOperation(operation))
-      ).subscribe();
-    } else {
-      this.offlineStorage.updateSyncOperation(operation.id, {
-        status: SyncStatus.ERROR,
-        error: error.message || 'Max retries exceeded'
-      });
-
-      this.updateSyncMetadata({
-        errorCount: this.syncMetadataSubject.value.errorCount + 1
-      });
-    }
-  }
-
+  /**
+   * ✅ إكمال المزامنة
+   */
   private completeSync(): void {
     const now = new Date();
     this.updateSyncMetadata({
       lastSyncTime: now,
-      isSyncing: false
+      isSyncing: false,
     });
 
     this.updateSyncProgress({
       isComplete: true,
       currentOperation: 'Sync completed',
-      percentage: 100
+      percentage: 100,
     });
-    
-    console.log('Sync metadata updated:', this.syncMetadataSubject.value);
+
+    console.log('✅ Sync completed at:', now);
   }
 
-  private updateSyncMetadata(updates: Partial<SyncMetadata>): void {
-    this.syncMetadataSubject.next({
-      ...this.syncMetadataSubject.value,
-      ...updates
-    });
+  // ==================== MANUAL SYNC TRIGGERS ====================
+
+  /**
+   * 🔄 Force Sync (Manual)
+   */
+  forceSync(): Observable<boolean> {
+    console.log('🔄 Force sync requested');
+    return this.syncAll();
   }
 
-  private updateSyncProgress(updates: Partial<SyncProgress>): void {
-    this.syncProgressSubject.next({
-      ...this.syncProgressSubject.value,
-      ...updates
-    });
+  // ==================== CONFLICT RESOLUTION ====================
+
+  /**
+   * حل التعارض
+   */
+  resolveConflict(resolution: any): Observable<boolean> {
+    console.log('🔧 Resolving conflict:', resolution);
+
+    if (!this.isOnline) {
+      console.warn('⚠️ Cannot resolve conflict while offline');
+      return of(false);
+    }
+
+    return this.apiService
+      .post<any>('/sync/conflicts/resolve', {
+        entityId: resolution.entityId,
+        entityType: resolution.entityType,
+        resolution: resolution.resolution,
+        mergedData: resolution.mergedData,
+      })
+      .pipe(
+        tap((result) => {
+          console.log('✅ Conflict resolved:', result);
+          // Update conflict count
+          const currentConflicts = this.syncMetadataSubject.value.conflictCount;
+          this.updateSyncMetadata({
+            conflictCount: Math.max(0, currentConflicts - 1),
+          });
+        }),
+        map(() => true),
+        catchError((error) => {
+          console.error('❌ Conflict resolution error:', error);
+          return of(false);
+        })
+      );
+  }
+
+  /**
+   * الحصول على التعارضات من السيرفر
+   */
+  getConflicts(): Observable<any[]> {
+    if (!this.isOnline) {
+      return of([]);
+    }
+
+    return this.apiService.get<any[]>('/sync/conflicts').pipe(
+      tap((conflicts) => {
+        console.log(`📋 Fetched ${conflicts.length} conflicts`);
+        this.updateSyncMetadata({ conflictCount: conflicts.length });
+      }),
+      catchError((error) => {
+        console.error('❌ Error fetching conflicts:', error);
+        return of([]);
+      })
+    );
   }
 
   // ==================== CONFIGURATION ====================
 
   updateConfig(config: Partial<SyncConfig>): void {
     this.syncConfig = { ...this.syncConfig, ...config };
+    console.log('⚙️ Sync config updated:', this.syncConfig);
   }
 
   getConfig(): SyncConfig {
     return { ...this.syncConfig };
-  }
-
-  // ==================== MANUAL SYNC TRIGGERS ====================
-
-  forceSync(): Observable<boolean> {
-    return this.syncAll();
-  }
-
-  syncEntity(entityType: string, entityId: string): Observable<boolean> {
-    return this.offlineStorage.getEntity(entityType, entityId).pipe(
-      switchMap(entity => {
-        if (entity) {
-          return this.syncOperation({
-            id: this.generateId(),
-            type: 'UPDATE',
-            entityType: entityType as any,
-            entityId,
-            data: entity,
-            timestamp: new Date(),
-            retryCount: 0,
-            maxRetries: 3,
-            status: SyncStatus.PENDING
-          });
-        }
-        return of(false);
-      })
-    );
-  }
-
-  private generateId(): string {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
   }
 
   // ==================== STATUS QUERIES ====================
@@ -574,14 +503,26 @@ export class SyncService {
   }
 
   getPendingCount(): Observable<number> {
-    return this.syncMetadata$.pipe(
-      map(metadata => metadata.pendingCount)
-    );
+    return this.syncMetadata$.pipe(map((metadata) => metadata.pendingCount));
   }
 
   getConflictCount(): Observable<number> {
-    return this.syncMetadata$.pipe(
-      map(metadata => metadata.conflictCount)
-    );
+    return this.syncMetadata$.pipe(map((metadata) => metadata.conflictCount));
+  }
+
+  // ==================== UTILITY METHODS ====================
+
+  private updateSyncMetadata(updates: Partial<SyncMetadata>): void {
+    this.syncMetadataSubject.next({
+      ...this.syncMetadataSubject.value,
+      ...updates,
+    });
+  }
+
+  private updateSyncProgress(updates: Partial<SyncProgress>): void {
+    this.syncProgressSubject.next({
+      ...this.syncProgressSubject.value,
+      ...updates,
+    });
   }
 }

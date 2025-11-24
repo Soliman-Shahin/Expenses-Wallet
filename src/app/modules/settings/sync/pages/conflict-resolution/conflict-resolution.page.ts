@@ -138,7 +138,7 @@ export class ConflictResolutionPage extends BaseComponent implements OnInit {
     };
 
     this.syncService.resolveConflict(resolutionData).subscribe({
-      next: (success) => {
+      next: (success: boolean) => {
         if (success) {
           this.conflicts = this.conflicts.filter(
             (c) => c.entityId !== conflict.entityId
@@ -151,7 +151,7 @@ export class ConflictResolutionPage extends BaseComponent implements OnInit {
           this.toastService.presentErrorToast('bottom', 'SYNC.RESOLVE_FAILED');
         }
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Conflict resolution error:', error);
         this.toastService.presentErrorToast('bottom', 'SYNC.RESOLVE_ERROR');
       },

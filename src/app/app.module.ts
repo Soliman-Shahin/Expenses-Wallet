@@ -18,8 +18,10 @@ import { CoreModule } from './core/core.module';
 import { LayoutModule } from './layout/layout.module';
 import { SharedModule } from './shared/shared.module';
 import { AuthInterceptor } from './modules/auth/helper/authInterceptor';
-import { ErrorInterceptor } from './modules/auth/helper/errorInterceptor';
-import { EncryptionInterceptor } from './core/interceptors/encryption.interceptor';
+// Import new interceptors
+import { EncryptionAdvancedInterceptor } from './core/interceptors/encryption.interceptor';
+import { ErrorInterceptor as EnhancedErrorInterceptor } from './core/interceptors/error.interceptor';
+import { RetryInterceptor } from './core/interceptors/retry.interceptor';
 import { CacheInterceptor } from './core/interceptors/cache.interceptor';
 
 export function HttpLoaderFactory(http: HttpClient) {
@@ -47,14 +49,37 @@ export function HttpLoaderFactory(http: HttpClient) {
   ],
   providers: [
     provideHttpClient(withInterceptorsFromDi()),
+    // Interceptor order matters! They execute top to bottom for requests, bottom to top for responses
+    // 1. Retry - First to catch and retry failed requests
     {
       provide: HTTP_INTERCEPTORS,
-      useClass: EncryptionInterceptor,
+      useClass: RetryInterceptor,
       multi: true,
     },
-    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
-    { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
-    { provide: HTTP_INTERCEPTORS, useClass: CacheInterceptor, multi: true },
+    // 2. Encryption - Encrypt/decrypt before auth
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: EncryptionAdvancedInterceptor,
+      multi: true,
+    },
+    // 3. Auth - Add auth tokens
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true,
+    },
+    // 4. Cache - Cache responses
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: CacheInterceptor,
+      multi: true,
+    },
+    // 5. Error - Last to handle all errors
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: EnhancedErrorInterceptor,
+      multi: true,
+    },
   ],
 })
 export class AppModule {}

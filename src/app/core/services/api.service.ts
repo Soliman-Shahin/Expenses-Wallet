@@ -63,9 +63,11 @@ export class ApiService {
   get<T>(path: string, params?: any): Observable<T> {
     // Convert params object to HttpParams if needed
     let httpParams: HttpParams | undefined;
-    if (params) {
+    if (params instanceof HttpParams) {
+      httpParams = params;
+    } else if (params) {
       httpParams = new HttpParams();
-      Object.keys(params).forEach(key => {
+      Object.keys(params).forEach((key) => {
         if (params[key] !== undefined && params[key] !== null) {
           httpParams = httpParams!.append(key, String(params[key]));
         }

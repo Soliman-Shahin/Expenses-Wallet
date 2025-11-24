@@ -1,8 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, Input,
+import {
+  Component,
+  ChangeDetectionStrategy,
+  Input,
   OnChanges,
   SimpleChanges,
-  ViewEncapsulation, } from '@angular/core';
+  ViewEncapsulation,
+} from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { toObservable } from '@angular/core/rxjs-interop';
@@ -33,7 +37,7 @@ import { ToastController } from '@ionic/angular';
   templateUrl: './transactions.component.html',
   styleUrls: ['./transactions.component.scss'],
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TransactionsComponent extends BaseComponent implements OnChanges {
   @Input() limit: number = 5;
@@ -167,9 +171,9 @@ export class TransactionsComponent extends BaseComponent implements OnChanges {
     const cat = (t as any)?.category;
     const icon = (cat as any)?.icon || (cat as any)?.iconName;
     if (icon && typeof icon === 'string') return icon;
-    const type = (cat as any)?.type as 'income' | 'expense' | undefined;
+    const type = (cat as any)?.type as 'income' | 'outcome' | undefined;
     if (type === 'income') return 'arrow-down-circle-outline';
-    if (type === 'expense') return 'arrow-up-circle-outline';
+    if (type === 'outcome') return 'arrow-up-circle-outline';
     return 'pricetag-outline';
   }
 
@@ -209,10 +213,10 @@ export class TransactionsComponent extends BaseComponent implements OnChanges {
     return isNaN(n) ? 0 : n;
   }
 
-  getCategoryType(t: Expense): 'income' | 'expense' {
+  getCategoryType(t: Expense): 'income' | 'outcome' {
     const cat = (t as any)?.category;
     const type = (cat as any)?.type;
-    return type === 'income' ? 'income' : 'expense';
+    return type === 'income' ? 'income' : 'outcome';
   }
 
   onTransactionClick(item: Expense) {
