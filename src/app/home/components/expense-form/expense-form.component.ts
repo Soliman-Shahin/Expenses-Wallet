@@ -1,141 +1,184 @@
-import { Component, Input, OnInit } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  Input,
+  OnInit,
+  OnDestroy,
+  ElementRef,
+  ViewChild,
+  ChangeDetectionStrategy,
+} from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { FormGroup, Validators } from '@angular/forms';
-import { Observable, map } from 'rxjs';
+import { Observable, combineLatest } from 'rxjs';
+import { map, startWith, finalize } from 'rxjs/operators';
 
 import { BaseComponent } from 'src/app/shared/base/base.component';
 import { Expense, Category } from 'src/app/shared/models';
+import { ProfileService } from 'src/app/modules/profile/services/profile.service';
+import { trapFocus, releaseFocus } from 'src/app/shared/utils/focus-trap';
 
 @Component({
   selector: 'app-expense-form',
   templateUrl: './expense-form.component.html',
   styleUrls: ['./expense-form.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ExpenseFormComponent extends BaseComponent implements OnInit {
+export class ExpenseFormComponent
+  extends BaseComponent
+  implements OnInit, AfterViewInit, OnDestroy
+{
   @Input() expense?: Expense;
   @Input() onClose: () => void = () => {};
 
+  @ViewChild('formContainer', { read: ElementRef })
+  formContainerRef!: ElementRef<HTMLElement>;
+
   expenseForm!: FormGroup;
-  categories$!: Observable<Category[]>;
   isEditMode = false;
-  minDate = '2000-01-01';
-  maxDate = '2100-12-31';
-  submitting = false;
+  maxDate = new Date().toISOString();
+  userCurrency = 'USD';
+
+  private allCategories: Category[] = [];
+  filteredCategories$!: Observable<Category[]>;
+
+  vm$ = combineLatest([toObservable(this.state.loading)]).pipe(
+    map(([isLoading]) => ({ isLoading }))
+  );
+
+  constructor(private profileService: ProfileService) {
+    super();
+  }
 
   override ngOnInit() {
     super.ngOnInit();
     this.isEditMode = !!this.expense;
+    this.userCurrency = this.profileService.getProfile()?.currency || 'USD';
     this.initForm();
     this.loadCategories();
   }
 
-  private initForm() {
-    let categoryId = '';
-    if (this.expense?.category) {
-      categoryId = this.getCategoryId(this.expense.category);
-    }
+  ngAfterViewInit() {
+    setTimeout(() => {
+      if (this.formContainerRef?.nativeElement) {
+        trapFocus(
+          this.formContainerRef.nativeElement.closest(
+            'ion-modal, .main-modal, .modal-wrapper'
+          ) || this.formContainerRef.nativeElement
+        );
+      }
+    }, 400);
+  }
+
+  private initForm(): void {
+    const categoryObj =
+      this.expense?.category && typeof this.expense.category !== 'string'
+        ? this.expense.category
+        : null;
+    const type = categoryObj?.type || 'outcome';
+    const categoryId =
+      categoryObj?._id ||
+      (typeof this.expense?.category === 'string'
+        ? this.expense.category
+        : null);
 
     this.expenseForm = this.fb.group({
-      description: [
-        this.expense?.description || '',
-        [
-          Validators.required,
-          Validators.minLength(2),
-          Validators.pattern(/^(?=.*\S).+$/), // no all-whitespace
-        ],
-      ],
+      type: [type],
       amount: [
-        this.expense?.amount || '',
+        this.expense?.amount,
         [Validators.required, Validators.min(0.01)],
       ],
+      category: [categoryId, Validators.required],
+      description: [this.expense?.description, Validators.required],
       date: [
-        this.expense
-          ? new Date(this.expense.date).toISOString()
-          : new Date().toISOString(),
+        this.expense?.date || new Date().toISOString(),
         Validators.required,
       ],
-      category: [categoryId, Validators.required],
     });
+
+    this.filteredCategories$ = this.expenseForm.get('type')!.valueChanges.pipe(
+      startWith(type),
+      map((t) => this.allCategories.filter((c) => c.type === t))
+    );
   }
 
-  private loadCategories() {
-    this.categories$ = this.categoryService
-      .getCategories({
-        skip: 0,
-        limit: 100,
-        sort: 'name',
-      })
-      .pipe(
-        map((res) =>
-          (res.data || []).map((c: any) => ({ ...c, name: c.title }))
-        )
-      );
+  private loadCategories(): void {
+    this.categoryService
+      .getCategories({ skip: 0, limit: 200, sort: 'order' })
+      .pipe(map((res) => res.data || []))
+      .subscribe((categories) => {
+        this.allCategories = categories;
+        // Trigger the filtering initially
+        this.expenseForm
+          .get('type')!
+          .updateValueAndValidity({ emitEvent: true });
+      });
   }
 
-  private getCategoryId(category: Category | string): string {
-    if (!category) return '';
-    return typeof category === 'string' ? category : category._id;
+  async onDelete(): Promise<void> {
+    const confirmed = await this.alertService.showDeleteConfirm(
+      this.expense?.description || '',
+      async () => this.deleteExpense()
+    );
   }
 
-  onCancel() {
-    if (this.modalCtrl) {
-      this.modalCtrl.dismiss();
-    } else if (this.onClose) {
-      this.onClose();
-    }
+  private deleteExpense(): void {
+    this.setLoading(true);
+    this.expenseService
+      .deleteExpense(this.expense!._id)
+      .pipe(finalize(() => this.setLoading(false)))
+      .subscribe({
+        next: () => {
+          this.toastService.presentSuccessToast(
+            'bottom',
+            this.translateService.instant('EXPENSE.DELETE_SUCCESS')
+          );
+          this.modalCtrl?.dismiss(null, 'delete');
+        },
+        error: (error) =>
+          this.handleError(
+            this.translateService.instant('EXPENSE.DELETE_ERROR'),
+            error,
+            true
+          ),
+      });
   }
 
-  onSubmit() {
+  onSubmit(): void {
     if (this.expenseForm.invalid) {
       return;
     }
-    this.submitting = true;
-
-    const { description, amount, date, category } = this.expenseForm.value;
+    this.setLoading(true);
+    const formValue = this.expenseForm.value;
     const payload: Partial<Expense> = {
-      description: (description || '').trim(),
-      amount: Number(amount),
-      date: new Date(date).toISOString(),
-      category,
-    } as any;
-    let action$: Observable<Expense>;
+      ...formValue,
+      amount: Number(formValue.amount),
+      date: new Date(formValue.date).toISOString(),
+    };
 
-    if (this.isEditMode) {
-      action$ = this.expenseService.updateExpense(this.expense!._id, payload);
-    } else {
-      action$ = this.expenseService.createExpense(payload);
-    }
+    const action$ = this.isEditMode
+      ? this.expenseService.updateExpense(this.expense!._id, payload)
+      : this.expenseService.createExpense(payload);
 
-    action$.subscribe({
-      next: async (response) => {
+    action$.pipe(finalize(() => this.setLoading(false))).subscribe({
+      next: (response) => {
         const message = this.isEditMode
-          ? 'Expense updated successfully'
-          : 'Expense created successfully';
-        const toast = await this.toastCtrl?.create({
-          message,
-          duration: 2000,
-          color: 'success',
-        });
-        toast?.present();
+          ? this.translateService.instant('EXPENSE.UPDATE_SUCCESS')
+          : this.translateService.instant('EXPENSE.CREATE_SUCCESS');
+        this.toastService.presentSuccessToast('bottom', message);
         this.modalCtrl?.dismiss(response, 'confirm');
-        this.submitting = false;
       },
-      error: async (error) => {
+      error: (error) => {
         const message = this.isEditMode
-          ? 'Failed to update expense'
-          : 'Failed to create expense';
-        const toast = await this.toastCtrl?.create({
-          message,
-          duration: 2000,
-          color: 'danger',
-        });
-        toast?.present();
-        console.error(message, error);
-        this.submitting = false;
+          ? this.translateService.instant('EXPENSE.UPDATE_ERROR')
+          : this.translateService.instant('EXPENSE.CREATE_ERROR');
+        this.handleError(message, error, true);
       },
     });
   }
 
-  close() {
+  close(): void {
+    releaseFocus();
     this.modalCtrl?.dismiss();
   }
 }

@@ -1,0 +1,64 @@
+:host {
+  display: contents;
+}
+
+.fab-add {
+  // Use CSS variables for easy theming and consistency.
+  --background: var(--ion-color-primary);
+  --color: var(--ion-color-primary-contrast);
+  --box-shadow: var(--ew-shadow-xl);
+  --transition: var(--ew-transition-base);
+  --border-radius: var(--ew-radius-full); // Perfectly circular
+  border-radius: var(--ew-radius-full); // Ensure animation is circular
+
+  // Custom properties for size
+  width: var(--ew-size-14);
+  height: var(--ew-size-14);
+
+  // Pulse animation for attracting attention
+  animation: pulse 2s infinite;
+
+  ion-icon {
+    font-size: var(--ew-font-size-3xl); // Larger icon
+  }
+
+  // Hover state: change color and lift the button
+  &:hover {
+    --background: var(--ion-color-secondary);
+    transform: translateY(-4px) scale(1.1);
+    animation: none; // Stop pulse on interaction
+  }
+
+  // Focus state for accessibility
+  &:focus-visible {
+    outline: var(--ew-border-width-md) solid var(--ion-color-secondary);
+    outline-offset: var(--ew-border-width-md);
+    box-shadow: 0 0 0 var(--ew-border-width-lg) rgba(var(--ion-color-secondary-rgb), 0.25);
+    animation: none; // Stop pulse on interaction
+  }
+}
+
+// Keyframes for the pulse animation, creating a subtle glowing effect.
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(var(--ion-color-primary-rgb), 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgba(var(--ion-color-primary-rgb), 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(var(--ion-color-primary-rgb), 0);
+  }
+}
+
+// Accessibility: disable animations if the user prefers reduced motion.
+@media (prefers-reduced-motion: reduce) {
+  .fab-add {
+    animation: none;
+
+    &:hover,
+    &:focus-visible {
+      transform: none;
+    }
+  }
+}

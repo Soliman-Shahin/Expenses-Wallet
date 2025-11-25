@@ -1,1 +1,15 @@
-<app-layout />
+<ng-container *ngIf="!isLocked">
+  <app-layout />
+  <app-onboarding *ngIf="onboardingService.shouldShowOnboarding()" />
+</ng-container>
+
+<div *ngIf="isLocked" class="lock-screen">
+  <div class="lock-content">
+    <ion-icon name="finger-print-outline" size="large"></ion-icon>
+    <h2>{{ "SETTINGS.BIOMETRIC" | translate }}</h2>
+    <p>{{ "SETTINGS.BIOMETRIC_DESC" | translate }}</p>
+    <ion-button (click)="checkBiometric()" fill="clear">
+      {{ "COMMON.RETRY" | translate }}
+    </ion-button>
+  </div>
+</div>

@@ -1,5 +1,35 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Input,
+  OnChanges,
+  SimpleChanges,
+  inject,
+  OnInit,
+  OnDestroy,
+  Output,
+  EventEmitter, } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
+import { Subscription } from 'rxjs';
+import { DirectionService } from 'src/app/core/services/direction.service';
+import { BaseComponent } from 'src/app/shared/base/base.component';
+import { takeUntil } from 'rxjs/operators';
+import {
+  trigger,
+  transition,
+  style,
+  animate,
+  query,
+  stagger,
+} from '@angular/animations';
+import {
+  ChartTooltipComponent,
+  TooltipData,
+} from '../../ui/chart-tooltip/chart-tooltip.component';
+import {
+  CHART_DATA,
+  CHART_TITLE,
+  CHART_ARIA_LABEL,
+  CHART_DESCRIPTION,
+} from '../chart.tokens';
 
 interface ChartData {
   name: string;
@@ -9,81 +39,176 @@ interface ChartData {
 @Component({
   selector: 'app-bar-chart',
   standalone: true,
-  imports: [CommonModule],
-  template: `
-    <div class="chart-container" [attr.aria-label]="ariaLabel">
-      <h3 *ngIf="title" class="chart-title">{{ title }}</h3>
-      <div
-        class="chart-wrapper"
-        role="img"
-        [attr.aria-label]="chartDescription"
-      >
-        <div class="chart-bars">
-          <div
-            *ngFor="let item of chartData; let i = index"
-            class="bar-container"
-          >
-            <div class="bar-area">
-              <div
-                class="bar"
-                [style.height]="getBarHeight(item.value)"
-                [style.background-color]="getBarColor(i)"
-                [attr.aria-label]="item.name + ': ' + item.value"
-                role="img"
-              ></div>
-            </div>
-            <div class="bar-meta">
-              <div class="bar-label">{{ item.name }}</div>
-              <div class="bar-value">{{ item.value | number : '1.0-0' }}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `,
+  imports: [CommonModule, ChartTooltipComponent, TranslateModule],
+  templateUrl: './bar-chart.component.html',
   styleUrls: ['./bar-chart.component.scss'],
+  animations: [
+    trigger('barAnimation', [
+      transition('* => *', [
+        query(
+          ':enter',
+          [
+            style({ opacity: 0, transform: 'translateY(20px)' ,
+  changeDetection: ChangeDetectionStrategy.OnPush
+}),
+            stagger(50, [
+              animate(
+                '300ms ease-out',
+                style({ opacity: 1, transform: 'translateY(0)' })
+              ),
+            ]),
+          ],
+          { optional: true }
+        ),
+      ]),
+    ]),
+  ],
 })
-export class BarChartComponent implements OnChanges {
-  @Input() data: ChartData[] = [];
-  @Input() title: string = '';
-  @Input() ariaLabel: string = 'Bar chart';
-  @Input() chartDescription: string = 'Bar chart visualization';
-  @Input() containerHeight: string = '200px';
+export class BarChartComponent
+  extends BaseComponent
+  implements OnInit, OnChanges, OnDestroy
+{
+  @Output() barClick = new EventEmitter<ChartData>();
+  @Input() data: ChartData[] = inject(CHART_DATA, { optional: true }) || [];
+  @Input() title: string = inject(CHART_TITLE, { optional: true }) || '';
+  @Input() ariaLabel: string =
+    inject(CHART_ARIA_LABEL, { optional: true }) || 'Bar chart';
+  @Input() chartDescription: string =
+    inject(CHART_DESCRIPTION, { optional: true }) || 'Bar chart showing data';
+  containerHeight: string = '200px';
 
   chartData: ChartData[] = [];
   maxValue: number = 0;
+  yAxisLabels: number[] = [];
+
+  // Tooltip properties
+  tooltipVisible = false;
+  tooltipData: TooltipData | null = null;
+  tooltipX = 0;
+  tooltipY = 0;
+
+  private directionService = inject(DirectionService);
+
+  override ngOnInit(): void {
+    super.ngOnInit();
+    this.directionService.direction$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.processData();
+      });
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['data'] && this.data) {
-      this.chartData = [...this.data];
-      this.calculateMaxValue();
+    if (changes['data']) {
+      this.processData();
     }
   }
 
-  private calculateMaxValue(): void {
-    this.maxValue = Math.max(...this.chartData.map((item) => item.value), 0);
+  override ngOnDestroy(): void {
+    super.ngOnDestroy();
+  }
+
+  private processData(): void {
+    if (!this.data || this.data.length === 0) {
+      this.chartData = [];
+      this.maxValue = 0;
+      return;
+    }
+
+    const data = [...this.data];
+    // Reverse the data array for RTL languages to fix the bar order
+    if (this.directionService.currentDirection === 'rtl') {
+      data.reverse();
+    }
+    this.chartData = data;
+
+    this.calculateYAxis();
+  }
+
+  private calculateYAxis(): void {
+    const dataMax = Math.max(...this.chartData.map((item) => item.value), 0);
+    if (dataMax === 0) {
+      this.maxValue = 0;
+      this.yAxisLabels = [];
+      return;
+    }
+
+    // Calculate a 'nice' round number for the max value of the axis
+    const magnitude = Math.pow(10, Math.floor(Math.log10(dataMax)));
+    const residual = dataMax / magnitude;
+    let tick;
+    if (residual > 5) {
+      tick = 10;
+    } else if (residual > 2) {
+      tick = 5;
+    } else if (residual > 1) {
+      tick = 2;
+    } else {
+      tick = 1;
+    }
+    const niceMaxValue =
+      Math.ceil(dataMax / ((magnitude * tick) / 4)) * ((magnitude * tick) / 4);
+    this.maxValue = niceMaxValue;
+
+    // Generate 5 labels for the Y-axis
+    this.yAxisLabels = Array.from(
+      { length: 5 },
+      (_, i) => (niceMaxValue / 4) * i
+    ).reverse();
   }
 
   getBarHeight(value: number): string {
     if (this.maxValue === 0) return '0%';
-    const raw = (value / this.maxValue) * 100;
-    // Clamp to avoid touching edges and reserve space for labels below
-    const clamped = Math.max(5, Math.min(60, raw));
-    return `${clamped}%`;
+    const percentage = (value / this.maxValue) * 100;
+    return `${Math.max(percentage, 3)}%`;
   }
 
   getBarColor(index: number): string {
-    // Simple color palette for bars
     const colors = [
-      '#3880ff', // primary blue
-      '#5260ff', // secondary blue
-      '#2dd36f', // success green
-      '#ffc409', // warning yellow
-      '#eb445a', // danger red
-      '#8884d8', // purple
-      '#82ca9d', // light green
-      '#ffc658', // light orange
+      'var(--ion-color-primary)',
+      'var(--ion-color-secondary)',
+      'var(--ion-color-tertiary)',
+      'var(--ion-color-success)',
+      'var(--ion-color-warning)',
+      'var(--ion-color-danger)',
     ];
     return colors[index % colors.length];
+  }
+
+  onMouseEnter(
+    event: MouseEvent | FocusEvent,
+    item: ChartData,
+    index: number
+  ): void {
+    this.tooltipData = {
+      label: item.name,
+      value: item.value.toString(),
+      color: this.getBarColor(index),
+    };
+    this.tooltipVisible = true;
+    if (event instanceof MouseEvent) {
+      this.tooltipX = event.clientX;
+      this.tooltipY = event.clientY;
+    } else {
+      const target = event.target as HTMLElement;
+      const rect = target.getBoundingClientRect();
+      this.tooltipX = rect.left + rect.width / 2;
+      this.tooltipY = rect.top;
+    }
+  }
+
+  onMouseMove(event: MouseEvent): void {
+    if (this.tooltipVisible) {
+      this.tooltipX = event.clientX;
+      this.tooltipY = event.clientY;
+    }
+  }
+
+  onMouseLeave(): void {
+    this.tooltipVisible = false;
+  }
+
+  onBarClick(item: ChartData): void {
+    this.barClick.emit(item);
   }
 }

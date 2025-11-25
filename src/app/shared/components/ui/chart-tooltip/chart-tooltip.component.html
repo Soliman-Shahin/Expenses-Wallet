@@ -1,0 +1,16 @@
+<div
+  *ngIf="data"
+  class="tooltip-container"
+  role="tooltip"
+  [attr.aria-hidden]="!visible"
+>
+  <div class="tooltip-item">
+    <span
+      *ngIf="data.color"
+      class="tooltip-color-swatch"
+      [style.backgroundColor]="data.color"
+    ></span>
+    <span class="tooltip-label">{{ data.label | translate }}:</span>
+    <span class="tooltip-value">{{ data.value | number : '1.0-2' }}</span>
+  </div>
+</div>

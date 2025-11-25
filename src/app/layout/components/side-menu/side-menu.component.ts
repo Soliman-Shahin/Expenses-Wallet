@@ -1,6 +1,7 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { NavigationEnd } from '@angular/router';
-import { filter } from 'rxjs/operators';
+import { Observable, combineLatest } from 'rxjs';
+import { filter, map, startWith } from 'rxjs/operators';
 import { IonMenu } from '@ionic/angular';
 import { BaseComponent } from 'src/app/shared/base/base.component';
 import { MenuItem } from 'src/app/shared/models';
@@ -9,6 +10,7 @@ import { MenuItem } from 'src/app/shared/models';
   selector: 'app-side-menu',
   templateUrl: './side-menu.component.html',
   styleUrls: ['./side-menu.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SideMenuComponent
   extends BaseComponent
@@ -17,89 +19,35 @@ export class SideMenuComponent
   @ViewChild('menu') menu!: IonMenu;
   private menuInitialized = false;
   private firstMenuItem?: HTMLElement;
-  activeLink = '';
-  isDarkMode = false;
   defaultAvatar = 'https://ionicframework.com/docs/img/demos/avatar.svg';
-  user$ = this.authService.user$;
-  publicMenuItems: MenuItem[] = [];
 
-  menuItems: MenuItem[] = [
-    {
-      title: 'DASHBOARD',
-      icon: 'home-outline',
-      link: '/dashboard',
-      requiresAuth: true,
-    },
-    {
-      title: 'TRANSACTIONS',
-      icon: 'swap-horizontal-outline',
-      link: '/transactions',
-      requiresAuth: true,
-    },
-    {
-      title: 'CATEGORIES',
-      icon: 'pricetags-outline',
-      link: '/categories',
-      requiresAuth: true,
-    },
-    {
-      title: 'REPORTS',
-      icon: 'bar-chart-outline',
-      link: '/reports',
-      requiresAuth: true,
-    },
-    {
-      title: 'SETTINGS',
-      icon: 'settings-outline',
-      link: '/settings',
-      requiresAuth: true,
-    },
-    {
-      title: 'ABOUT',
-      icon: 'information-circle-outline',
-      link: '/about',
-      requiresAuth: false,
-    },
-  ];
+  private readonly activeLink$ = this.router.events.pipe(
+    filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+    map((event: NavigationEnd) => event.url.split('?')[0]),
+    startWith(this.router.url.split('?')[0])
+  );
+
+  vm$!: Observable<{
+    profile: { user: any | null; isLoggedIn: boolean };
+    links: MenuItem[];
+    language: string;
+    activeLink: string;
+  }>;
 
   // Add method to close menu
   async closeMenu() {
     await this.menuCtrl?.close();
   }
 
-  constructor() {
-    super();
-    // Initialize language from localStorage or browser
-    this.language =
-      localStorage.getItem('userLanguage') ||
-      window.navigator.language.split('-')[0] ||
-      'en';
-    this.translateService.use(this.language);
-  }
-
   override ngOnInit() {
-    this.publicMenuItems = this.menuItems.filter((item) => !item.requiresAuth);
-    // Set initial active link
-    this.setActiveLink(this.router.url);
+    super.ngOnInit();
 
-    // Subscribe to route changes
-    const routeSub = this.router.events
-      .pipe(
-        filter(
-          (event): event is NavigationEnd => event instanceof NavigationEnd
-        )
-      )
-      .subscribe((event: NavigationEnd) => {
-        this.setActiveLink(event.url);
-      });
-
-    // Subscribe to theme changes
-    this.themeService.theme$.subscribe((theme) => {
-      this.isDarkMode = theme === 'dark';
+    this.vm$ = combineLatest({
+      profile: this.profile$,
+      links: this.links$,
+      language: this.language$,
+      activeLink: this.activeLink$,
     });
-
-    // Initialize theme
-    this.isDarkMode = this.themeService.isDarkMode();
   }
 
   onMenuOpen() {
@@ -167,12 +115,7 @@ export class SideMenuComponent
     });
   }
 
-  setActiveLink(url: string) {
-    const baseUrl = url.split('?')[0];
-    this.activeLink = baseUrl;
-  }
-
-  isActive(link: string): boolean {
-    return this.activeLink.startsWith(link);
+  isActive(link: string, activeLink: string): boolean {
+    return activeLink.startsWith(link);
   }
 }

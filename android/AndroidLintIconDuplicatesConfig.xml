@@ -1,0 +1,46 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/res/drawable/splash.png</file>
+  <line>1</line>
+  <module>android.app.main</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/res/drawable/splash.png" />
+  <problem_class id="AndroidLintIconDuplicatesConfig" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Identical bitmaps across various configurations</problem_class>
+  <hints />
+  <description>&lt;html&gt;The &lt;code&gt;splash.png&lt;/code&gt; icon has identical contents in the following configuration folders: drawable-port-mdpi, drawable&lt;/html&gt;</description>
+  <highlighted_element />
+  <language />
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/res/drawable-land-night-ldpi/splash.png</file>
+  <line>1</line>
+  <module>android.app.main</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/res/drawable-land-night-ldpi/splash.png" />
+  <problem_class id="AndroidLintIconDuplicatesConfig" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Identical bitmaps across various configurations</problem_class>
+  <hints />
+  <description>&lt;html&gt;The &lt;code&gt;splash.png&lt;/code&gt; icon has identical contents in the following configuration folders: drawable-land-night-ldpi, drawable-night&lt;/html&gt;</description>
+  <highlighted_element />
+  <language />
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/res/drawable-night/splash.png</file>
+  <line>1</line>
+  <module>android.app.main</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/res/drawable-night/splash.png" />
+  <problem_class id="AndroidLintIconDuplicatesConfig" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Identical bitmaps across various configurations</problem_class>
+  <hints />
+  <description>&lt;html&gt;The &lt;code&gt;splash.png&lt;/code&gt; icon has identical contents in the following configuration folders: drawable-land-night-ldpi, drawable-night&lt;/html&gt;</description>
+  <highlighted_element />
+  <language />
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/app/src/main/res/drawable-port-mdpi/splash.png</file>
+  <line>1</line>
+  <module>android.app.main</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/app/src/main/res/drawable-port-mdpi/splash.png" />
+  <problem_class id="AndroidLintIconDuplicatesConfig" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Identical bitmaps across various configurations</problem_class>
+  <hints />
+  <description>&lt;html&gt;The &lt;code&gt;splash.png&lt;/code&gt; icon has identical contents in the following configuration folders: drawable-port-mdpi, drawable&lt;/html&gt;</description>
+  <highlighted_element />
+  <language />
+</problem>
+</problems>

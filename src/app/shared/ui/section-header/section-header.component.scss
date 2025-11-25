@@ -1,0 +1,27 @@
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--ew-space-6);
+  padding: 0 var(--ew-space-3);
+}
+
+.section-title {
+  font-size: var(--ew-font-xl);
+  font-weight: var(--ew-font-weight-bold);
+  margin: 0;
+  color: var(--ion-color-primary);
+  letter-spacing: var(--ew-letter-spacing-wide);
+  display: flex;
+  align-items: center;
+}
+
+.section-title ion-icon {
+  margin-inline-end: var(--ew-space-3);
+  font-size: var(--ew-font-lg);
+}
+
+ion-button[fill='clear'] {
+  --padding-start: var(--ew-space-3);
+  --padding-end: var(--ew-space-3);
+}

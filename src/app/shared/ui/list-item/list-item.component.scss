@@ -1,0 +1,61 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.list-item-container {
+  display: flex;
+  align-items: center;
+  padding: var(--ew-space-3) var(--ew-space-4);
+  border-radius: var(--ew-radius-md);
+  transition: background-color var(--ew-transition-duration-fast);
+  background: var(--ion-item-background, var(--ion-color-step-50));
+
+  &.interactive {
+    cursor: pointer;
+
+    &:hover {
+      background: var(--ion-item-background-hover, var(--ion-color-step-150));
+    }
+
+    &:active {
+      background: var(--ion-item-background-activated, var(--ion-color-step-200));
+    }
+  }
+}
+
+.start-slot,
+.end-slot {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.start-slot {
+  margin-inline-end: var(--ew-space-4);
+}
+
+.end-slot {
+  margin-inline-start: var(--ew-space-4);
+}
+
+.main-content {
+  flex: 1;
+  min-width: 0; /* Prevents text overflow issues */
+}
+
+.title {
+  font-weight: var(--ew-font-weight-semibold);
+  color: var(--ew-text-color-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.subtitle {
+  font-size: var(--ew-font-size-sm);
+  color: var(--ew-text-color-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

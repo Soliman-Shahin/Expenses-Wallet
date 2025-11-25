@@ -1,0 +1,53 @@
+<div class="onboarding-container">
+  <div class="background-shapes">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+  </div>
+
+  <!-- Language Toggle Button -->
+  <button class="language-toggle" (click)="toggleLanguage()">
+    <ion-icon name="language-outline"></ion-icon>
+    <span>{{
+      translationService.getCurrentLanguage() === "ar" ? "English" : "عربي"
+    }}</span>
+  </button>
+
+  <div class="content-wrapper">
+    <div class="slides-container" #slidesContainer (scroll)="onScroll($event)">
+      <div class="slide" *ngFor="let step of steps; let i = index">
+        <div class="slide-content">
+          <div class="icon-wrapper">
+            <ion-icon [name]="step.icon"></ion-icon>
+          </div>
+          <h2 class="title">{{ step.title | translate }}</h2>
+          <p class="description">{{ step.description | translate }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="pagination">
+        <div
+          class="dot"
+          *ngFor="let step of steps; let i = index"
+          [class.active]="i === currentStepIndex"
+          (click)="goToStep(i)"
+        ></div>
+      </div>
+
+      <div class="buttons">
+        <button class="btn-skip" (click)="skip()" *ngIf="!isLastStep">
+          {{ "ONBOARDING.SKIP" | translate }}
+        </button>
+
+        <button class="btn-next" (click)="next()">
+          <span *ngIf="!isLastStep">{{ "ONBOARDING.NEXT" | translate }}</span>
+          <span *ngIf="isLastStep">{{ "ONBOARDING.START" | translate }}</span>
+          <ion-icon name="arrow-forward-outline" *ngIf="!isLastStep"></ion-icon>
+          <ion-icon name="rocket-outline" *ngIf="isLastStep"></ion-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,8 +1,93 @@
-<ion-card>
-  <ion-card-header>
-    <ion-card-title>Card Title</ion-card-title>
-  </ion-card-header>
-  <ion-card-content>
-    <p>Card content</p>
-  </ion-card-content>
-</ion-card>
+<ng-container *ngIf="vm$ | async as vm">
+  <!-- Skeleton while loading -->
+  <ion-list *ngIf="vm.loading" class="skeleton-list">
+    <app-skeleton-block
+      *ngFor="let i of [1, 2, 3, 4, 5]"
+      variant="list-item-avatar"
+    ></app-skeleton-block>
+  </ion-list>
+
+  <!-- Error State -->
+  <div *ngIf="vm.error" class="ion-text-center ion-padding">
+    <ion-icon
+      name="warning-outline"
+      style="font-size: 28px; opacity: 0.6"
+    ></ion-icon>
+    <p class="ion-margin-top">{{ "COMMON.ERRORS.LOAD_DATA" | translate }}</p>
+  </div>
+
+  <!-- Content after loading -->
+  <ng-container *ngIf="!vm.loading && !vm.error">
+    <ion-list
+      class="transactions-list list-fade-in"
+      *ngIf="vm.transactions.length > 0; else empty"
+    >
+      <ion-item-sliding *ngFor="let t of vm.transactions; trackBy: trackById">
+        <ion-item class="transaction-item item-card" lines="none" button>
+          <span
+            class="category-icon"
+            [style.background]="getCategoryColor(t)"
+            aria-hidden="true"
+          >
+            <ion-icon size="large" [name]="getCategoryIcon(t)"></ion-icon>
+          </span>
+          <ion-label>
+            <h3 class="ion-text-wrap transaction-title">
+              {{ getOperationName(t) }}
+            </h3>
+            <p class="transaction-meta">
+              <span class="transaction-date">{{
+                getDateValue(t) | date : "mediumDate"
+              }}</span>
+              <span
+                *ngIf="getCategoryName(t) as cat"
+                class="transaction-category"
+              >
+                <ion-icon name="pricetag-outline"></ion-icon>
+                {{ cat }}
+              </span>
+            </p>
+          </ion-label>
+          <ion-note
+            slot="end"
+            [color]="getCategoryType(t) === 'income' ? 'success' : 'primary'"
+          >
+            {{ getCategoryType(t) === "income" ? "+" : ""
+            }}{{
+              getAmountValue(t) | currency : userCurrency : "symbol" : "1.0-0"
+            }}
+          </ion-note>
+        </ion-item>
+        <ion-item-options side="end">
+          <ion-item-option (click)="onEdit(t)">
+            <ion-icon slot="start" name="create-outline"></ion-icon>
+            Edit
+          </ion-item-option>
+          <ion-item-option color="danger" (click)="onDelete(t)">
+            <ion-icon slot="start" name="trash-outline"></ion-icon>
+            Delete
+          </ion-item-option>
+        </ion-item-options>
+      </ion-item-sliding>
+    </ion-list>
+
+    <!-- Empty State -->
+    <ng-template #empty>
+      <div class="empty-state ion-text-center ion-padding">
+        <div class="empty-state-icon-wrapper">
+          <img
+            src="assets/icons/icon-192.webp"
+            alt="App Logo"
+            class="empty-state-icon"
+          />
+        </div>
+        <h3 class="empty-state-title">
+          {{ "TRANSACTIONS.NO_RECENT" | translate }}
+        </h3>
+        <p class="empty-state-subtitle">
+          {{ "TRANSACTIONS.ADD_NEW" | translate }}
+        </p>
+      </div>
+    </ng-template>
+  </ng-container>
+</ng-container>

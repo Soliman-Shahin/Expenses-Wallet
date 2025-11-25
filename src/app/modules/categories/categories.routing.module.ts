@@ -6,6 +6,11 @@ import { AddCategoryComponent, CategoriesComponent } from './components';
 
 const categoriesRoutes: Routes = [
   {
+    path: '',
+    redirectTo: APP_ROUTES.CATEGORIES.LIST,
+    pathMatch: 'full',
+  },
+  {
     path: APP_ROUTES.CATEGORIES.LIST,
     component: CategoriesComponent,
     data: {

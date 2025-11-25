@@ -1,0 +1,30 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/Bridge.java</file>
+  <line>261</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/Bridge.java" />
+  <problem_class id="AndroidLintRestrictedApi" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Restricted API</problem_class>
+  <hints />
+  <description>&lt;html&gt;WebViewFeature.DOCUMENT_START_SCRIPT can only be accessed from within the same library group (referenced groupId=&lt;code&gt;androidx.webkit&lt;/code&gt; from groupId=&lt;code&gt;android&lt;/code&gt;)&lt;/html&gt;</description>
+  <highlighted_element>DOCUMENT_START_SCRIPT</highlighted_element>
+  <language>JAVA</language>
+  <offset>61</offset>
+  <length>21</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/Bridge.java</file>
+  <line>264</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/Bridge.java" />
+  <problem_class id="AndroidLintRestrictedApi" severity="ERROR" attribute_key="ERRORS_ATTRIBUTES">Restricted API</problem_class>
+  <hints />
+  <description>&lt;html&gt;WebViewCompat.addDocumentStartJavaScript can only be called from within the same library group (referenced groupId=&lt;code&gt;androidx.webkit&lt;/code&gt; from groupId=&lt;code&gt;android&lt;/code&gt;)&lt;/html&gt;</description>
+  <highlighted_element>addDocumentStartJavaScript</highlighted_element>
+  <language>JAVA</language>
+  <offset>30</offset>
+  <length>26</length>
+</problem>
+</problems>

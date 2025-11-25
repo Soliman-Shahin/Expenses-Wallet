@@ -1,27 +1,83 @@
+:host([dir="rtl"]) {
+  .y-axis {
+    border-right: none;
+    border-left: 1px solid var(--ion-border-color);
+    padding-right: 0;
+    padding-left: var(--ew-space-3);
+
+    .y-axis-label {
+      text-align: left;
+    }
+  }
+
+  .chart-area-wrapper {
+    margin-left: 0;
+    margin-right: var(--ew-space-3);
+  }
+}
+
 .chart-container {
-  padding: 16px;
-  border-radius: 8px;
-  background-color: var(--ion-background-color, #fff);
-  box-shadow: var(--card-shadow, 0 2px 8px rgba(0, 0, 0, 0.1));
-  margin: 16px 0;
+  padding: var(--ew-space-4);
+  border-radius: var(--ew-radius-lg);
+  background-color: var(--ion-card-background);
+  box-shadow: var(--ew-shadow-sm);
+  transition: all 0.3s var(--ew-easing-standard);
+  position: relative;
+  overflow: hidden; /* Ensures animations are contained */
 }
 
 .chart-title {
   margin-top: 0;
-  margin-bottom: 16px;
-  color: var(--ion-text-color, #000);
-  font-size: 1.2rem;
-  font-weight: 500;
+  margin-bottom: var(--ew-space-5);
+  color: var(--ew-text-color-primary);
+  font-size: var(--ew-font-xl);
+  font-weight: var(--ew-font-weight-bold);
 }
 
 .chart-wrapper {
   display: flex;
-  align-items: flex-end;
-  height: 160px;
-  padding: 12px 0 8px;
-  border-bottom: 1px solid var(--ion-border-color, #ddd);
-  overflow: hidden; /* contain tall bars */
-  box-sizing: border-box;
+  height: 220px;
+  position: relative;
+}
+
+.y-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  padding-inline-end: var(--ew-space-3);
+  border-inline-end: 1px solid var(--ion-border-color);
+
+  .y-axis-label {
+    font-size: var(--ew-font-xs);
+    color: var(--ew-text-color-muted);
+    transform: translateY(50%); /* Center align with grid lines */
+    text-align: end;
+  }
+}
+
+.chart-area-wrapper {
+  flex: 1;
+  position: relative;
+  margin-inline-start: var(--ew-space-3);
+}
+
+.grid-lines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  .grid-line {
+    width: 100%;
+    height: 1px;
+    background-color: var(--ion-border-color);
+    opacity: 0.5;
+  }
 }
 
 .chart-bars {
@@ -30,6 +86,9 @@
   justify-content: space-around;
   width: 100%;
   height: 100%;
+  gap: var(--ew-space-4);
+  position: relative;
+  z-index: 2; /* Ensure bars are on top of grid lines */
 }
 
 .bar-container {
@@ -39,7 +98,27 @@
   justify-content: flex-end;
   flex: 1;
   height: 100%;
-  margin: 0 4px;
+  min-width: 10px;
+  max-width: 75px;
+  cursor: pointer;
+  transition: transform var(--ew-transition-duration-fast) ease-in-out;
+  outline: none; /* Remove default outline */
+
+  &:hover,
+  &:focus-visible {
+    transform: translateY(-6px);
+    .bar {
+      box-shadow: var(--ew-shadow-md);
+      filter: brightness(1.1);
+    }
+  }
+
+  &:focus-visible {
+    .bar {
+      outline: 2px solid var(--ion-color-primary-tint);
+      outline-offset: 3px;
+    }
+  }
 }
 
 .bar-area {
@@ -47,80 +126,101 @@
   align-items: flex-end;
   justify-content: center;
   width: 100%;
-  height: 70%; /* reserve space for labels */
-}
-
-.bar-meta {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  height: 25%;
+  height: 100%;
 }
 
 .bar {
-  width: 70%;
-  min-height: 2px;
-  max-height: 70%; /* avoid touching top edge */
-  border-radius: 4px 4px 0 0;
-  transition: height 0.3s ease;
+  width: 75%;
+  min-height: 4px;
+  border-radius: var(--ew-radius-md) var(--ew-radius-md) 0 0;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all var(--ew-transition-duration-fast) ease-in-out;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.25) 0%,
+      rgba(255, 255, 255, 0) 70%
+    );
+    z-index: 1;
+  }
+}
+
+.bar-meta {
+  margin-top: var(--ew-space-3);
+  text-align: center;
+  width: 100%;
 }
 
 .bar-label {
-  margin-top: 8px;
-  font-size: 0.8rem;
-  text-align: center;
-  color: var(--ion-text-color, #000);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
+  font-size: var(--ew-font-sm);
+  color: var(--ew-text-color-secondary);
+  line-height: 1.3;
+  word-break: break-word;
 }
 
 .bar-value {
-  margin-top: 4px;
-  font-size: 0.7rem;
-  text-align: center;
-  color: var(--ion-text-color-secondary, #666);
+  margin-top: var(--ew-space-1);
+  font-size: var(--ew-font-xs);
+  font-weight: var(--ew-font-weight-medium);
+  color: var(--ew-text-color-muted);
 }
 
-/* Dark mode support */
-body.dark {
-  .chart-container {
-    background-color: var(--ion-background-color, #1e1e1e);
-    box-shadow: var(--card-shadow, 0 2px 8px rgba(0, 0, 0, 0.3));
+/* Empty State Styling */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 220px;
+  color: var(--ew-text-color-secondary);
+  text-align: center;
+
+  .empty-icon {
+    font-size: 3rem;
+    margin-bottom: var(--ew-space-4);
+    filter: grayscale(80%);
+    opacity: 0.6;
   }
 
-  .chart-title,
-  .bar-label {
-    color: var(--ion-text-color, #fff);
+  p {
+    font-size: var(--ew-font-lg);
+    font-weight: var(--ew-font-weight-medium);
   }
+}
 
-  .bar-value {
-    color: var(--ion-text-color-secondary, #aaa);
-  }
-
-  .chart-wrapper {
-    border-bottom: 1px solid var(--ion-border-color, #444);
-  }
+/* Tooltip is positioned globally */
+app-chart-tooltip {
+  position: fixed;
+  z-index: 1001; /* Ensure it's on top */
+  pointer-events: none; /* Let mouse events pass through */
 }
 
 /* Responsive design */
 @media (max-width: 768px) {
   .chart-container {
-    padding: 12px;
+    padding: var(--ew-space-4);
   }
 
   .chart-title {
-    font-size: 1.1rem;
+    font-size: var(--ew-font-lg);
   }
 
   .bar-label {
-    font-size: 0.7rem;
+    font-size: var(--ew-font-xs);
   }
 
   .bar-value {
-    font-size: 0.6rem;
+    font-size: var(--ew-font-xs);
   }
 }
 
@@ -130,10 +230,10 @@ body.dark {
   }
 
   .bar-label {
-    font-size: 0.6rem;
+    font-size: var(--ew-font-xxs);
   }
 
   .bar-value {
-    font-size: 0.5rem;
+    font-size: var(--ew-font-xxs);
   }
 }

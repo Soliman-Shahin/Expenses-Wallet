@@ -1,0 +1,36 @@
+:host {
+
+    // ===================================================================
+    //  Modern Header & Toolbar Styling
+    // ===================================================================
+    ion-header {
+
+        // Remove default Ionic borders and shadows for a cleaner, modern look.
+        &::after {
+            display: none;
+        }
+
+        ion-toolbar {
+            // Use semantic background colors from the master design tokens.
+            --background: var(--ion-background-color);
+            // Remove default padding to allow for custom spacing.
+            --padding-start: 0;
+            --padding-end: 0;
+            --padding-top: 0;
+            --padding-bottom: 0;
+            // Use consistent spacing tokens for a balanced layout.
+            padding: var(--ew-space-2) var(--ew-space-4);
+        }
+
+        ion-title {
+            // Apply custom heading font styles for better typography.
+            font-family: var(--ew-font-family-heading);
+            font-weight: var(--ew-font-weight-bold);
+            font-size: var(--ew-font-size-2xl);
+            color: var(--ew-text-color-primary);
+            // Ensure title is properly aligned.
+            padding: 0 !important;
+            text-align: start;
+        }
+    }
+}

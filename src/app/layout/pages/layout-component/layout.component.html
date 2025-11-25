@@ -1,4 +1,4 @@
-<ion-app>
+<ion-app [class.no-tabs]="!(isLoggedIn$ | async)">
   <!-- Global Loader Overlay -->
   <div
     *ngIf="isLoading"
@@ -10,26 +10,24 @@
       class="custom-loader"
       role="alertdialog"
       aria-modal="true"
-      aria-label="Loading"
+      [attr.aria-label]="'COMMON.LOADING' | translate"
     >
-      <ion-spinner
-        name="crescent"
-        style="width: 48px; height: 48px"
-      ></ion-spinner>
-      <span class="visually-hidden">Loading…</span>
+      <ion-spinner name="crescent"></ion-spinner>
+      <!-- Optional message from LoadingService -->
+      <div class="mt-2" *ngIf="message$ | async as msg">
+        {{ msg }}
+      </div>
+      <span class="visually-hidden">{{ "COMMON.LOADING" | translate }}</span>
     </div>
   </div>
   <!-- Side Menu -->
   <app-side-menu></app-side-menu>
 
   <div class="ion-page" id="main-content">
-    <!-- Header -->
-    <app-header></app-header>
-
     <!-- Main Content -->
     <ion-router-outlet></ion-router-outlet>
 
-    <!-- Tabs Bar -->
-    <app-tabs-bar></app-tabs-bar>
+    <!-- Tabs Bar (only when logged in) -->
+    <app-tabs-bar *ngIf="isLoggedIn$ | async"></app-tabs-bar>
   </div>
 </ion-app>

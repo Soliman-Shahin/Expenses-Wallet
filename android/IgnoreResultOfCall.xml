@@ -1,0 +1,54 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/capacitor-cordova-android-plugins/src/main/java/com/ionicframework/common/IonicCordovaCommon.java</file>
+  <line>145</line>
+  <module>android.capacitor-cordova-android-plugins.main</module>
+  <package>com.ionicframework.common</package>
+  <entry_point TYPE="method" FQNAME="com.ionicframework.common.IonicCordovaCommon void copyAssets(java.lang.String assetPath, java.lang.String targetDir)" />
+  <problem_class id="IgnoreResultOfCall" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Result of method call ignored</problem_class>
+  <description>Result of &lt;code&gt;File.mkdir()&lt;/code&gt; is ignored #loc</description>
+  <highlighted_element>mkdir</highlighted_element>
+  <language>JAVA</language>
+  <offset>17</offset>
+  <length>5</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/capacitor-cordova-android-plugins/src/main/java/com/ionicframework/common/IonicCordovaCommon.java</file>
+  <line>152</line>
+  <module>android.capacitor-cordova-android-plugins.main</module>
+  <package>com.ionicframework.common</package>
+  <entry_point TYPE="method" FQNAME="com.ionicframework.common.IonicCordovaCommon void copyAssets(java.lang.String assetPath, java.lang.String targetDir)" />
+  <problem_class id="IgnoreResultOfCall" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Result of method call ignored</problem_class>
+  <description>Result of &lt;code&gt;File.mkdirs()&lt;/code&gt; is ignored #loc</description>
+  <highlighted_element>mkdirs</highlighted_element>
+  <language>JAVA</language>
+  <offset>20</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/capacitor-cordova-android-plugins/src/main/java/com/ionicframework/common/IonicCordovaCommon.java</file>
+  <line>277</line>
+  <module>android.capacitor-cordova-android-plugins.main</module>
+  <package>com.ionicframework.common</package>
+  <entry_point TYPE="method" FQNAME="com.ionicframework.common.IonicCordovaCommon void downloadFile(org.apache.cordova.CallbackContext callbackContext, org.json.JSONObject options)" />
+  <problem_class id="IgnoreResultOfCall" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Result of method call ignored</problem_class>
+  <description>Result of &lt;code&gt;File.mkdirs()&lt;/code&gt; is ignored #loc</description>
+  <highlighted_element>mkdirs</highlighted_element>
+  <language>JAVA</language>
+  <offset>31</offset>
+  <length>6</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/capacitor-cordova-android-plugins/src/main/java/com/ionicframework/common/IonicCordovaCommon.java</file>
+  <line>278</line>
+  <module>android.capacitor-cordova-android-plugins.main</module>
+  <package>com.ionicframework.common</package>
+  <entry_point TYPE="method" FQNAME="com.ionicframework.common.IonicCordovaCommon void downloadFile(org.apache.cordova.CallbackContext callbackContext, org.json.JSONObject options)" />
+  <problem_class id="IgnoreResultOfCall" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Result of method call ignored</problem_class>
+  <description>Result of &lt;code&gt;File.createNewFile()&lt;/code&gt; is ignored #loc</description>
+  <highlighted_element>createNewFile</highlighted_element>
+  <language>JAVA</language>
+  <offset>15</offset>
+  <length>13</length>
+</problem>
+</problems>

@@ -1,20 +1,26 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { finalize, takeUntil, map } from 'rxjs';
+import { BehaviorSubject, combineLatest, finalize, Observable, takeUntil } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { BaseComponent } from 'src/app/shared/base/base.component';
-import { Category } from 'src/app/shared/models/category.model';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LoginComponent extends BaseComponent {
+export class LoginComponent extends BaseComponent implements OnInit {
   loginForm!: FormGroup;
   hide = true;
-  errorMessage = '';
-  categories: Category[] = [];
+  private readonly loading = new BehaviorSubject<boolean>(false);
+  private readonly errorMessage = new BehaviorSubject<string>('');
+
+  readonly vm$ = combineLatest({
+    isLoading: this.loading.asObservable(),
+    errorMessage: this.errorMessage.asObservable(),
+  });
 
   // Form control names for template access
   readonly formFields = {
@@ -28,81 +34,41 @@ export class LoginComponent extends BaseComponent {
   }
 
   override ngOnInit(): void {
+    super.ngOnInit();
     this.initForm();
-    this.loadCategories();
   }
 
   // Ensure UI resets correctly when returning to login (e.g., after logout)
   ionViewWillEnter(): void {
-    this.setLoading(false);
-    this.errorMessage = '';
+    this.loading.next(false);
+    this.errorMessage.next('');
     if (this.loginForm) {
-      this.loginForm.markAsPristine();
-      this.loginForm.markAsUntouched();
-      this.loginForm.updateValueAndValidity({
-        onlySelf: false,
-        emitEvent: false,
-      });
+      this.loginForm.reset({ [this.formFields.rememberMe]: this.loginForm.get(this.formFields.rememberMe)?.value });
     }
   }
 
   signInWithFacebook(): void {
-    this.authService
-      .loginWithFacebook()
-      .pipe(
-        takeUntil(this.destroy$),
-        finalize(() => this.setLoading(false))
-      )
-      .subscribe({
-        next: () => {
-          this.toastService.presentSuccessToast(
-            'bottom',
-            this.translateService.instant('AUTH.LOGIN_SUCCESS')
-          );
-        },
-        error: (error: any) => {
-          console.error('Login error:', error);
-          this.errorMessage =
-            error?.error?.message ||
-            this.translateService.instant('AUTH.LOGIN_ERROR');
-          this.toastService.presentErrorToast('top', this.errorMessage);
-        },
-      });
+    this.handleAuth(this.authService.loginWithFacebook());
   }
 
-  private loadCategories(): void {
-    this.categoryService
-      .getCategories({ skip: 0, limit: 20, sort: '-createdAt' })
-      .pipe(
-        map((res) => res.data),
-        takeUntil(this.destroy$)
-      )
-      .subscribe({
-        next: (list) => (this.categories = list),
-        error: (err) => console.warn('Failed to load categories:', err),
-      });
-  }
 
   togglePasswordVisibility(): void {
     this.hide = !this.hide;
   }
 
   private initForm(): void {
-    // Try to get saved credentials if they exist
     const savedEmail = localStorage.getItem('savedEmail') || '';
     const rememberMe = savedEmail !== '';
 
     this.loginForm = new FormGroup({
-      [this.formFields.email]: new FormControl(savedEmail, [
-        Validators.required,
-        Validators.email,
-        Validators.maxLength(100),
-      ]),
-      [this.formFields.password]: new FormControl('', [
-        Validators.required,
-        Validators.minLength(6),
-        Validators.maxLength(50),
-      ]),
+      [this.formFields.email]: new FormControl(savedEmail, {
+        validators: [Validators.required, Validators.email, Validators.maxLength(100)],
+        updateOn: 'blur',
+      }),
+      [this.formFields.password]: new FormControl('', {
+        validators: [Validators.required, Validators.minLength(6), Validators.maxLength(50)],
+        updateOn: 'blur',
+      }),
       [this.formFields.rememberMe]: new FormControl(rememberMe),
     });
   }
@@ -116,27 +82,7 @@ export class LoginComponent extends BaseComponent {
   }
 
   signInWithGoogle(): void {
-    this.authService
-      .loginWithGoogle()
-      .pipe(
-        takeUntil(this.destroy$),
-        finalize(() => this.setLoading(false))
-      )
-      .subscribe({
-        next: () => {
-          this.toastService.presentSuccessToast(
-            'bottom',
-            this.translateService.instant('AUTH.LOGIN_SUCCESS')
-          );
-        },
-        error: (error: any) => {
-          console.error('Login error:', error);
-          this.errorMessage =
-            error?.error?.message ||
-            this.translateService.instant('AUTH.LOGIN_ERROR');
-          this.toastService.presentErrorToast('top', this.errorMessage);
-        },
-      });
+    this.handleAuth(this.authService.loginWithGoogle());
   }
 
   login(): void {
@@ -145,42 +91,49 @@ export class LoginComponent extends BaseComponent {
       return;
     }
 
-    this.setLoading(true);
-    this.errorMessage = '';
     const { email, password, rememberMe } = this.loginForm.value;
-    const credentials = { email, password };
 
-    // Handle remember me functionality (only email)
     if (rememberMe) {
       localStorage.setItem('savedEmail', email);
     } else {
       localStorage.removeItem('savedEmail');
     }
 
-    this.authService
-      .login(credentials.email, credentials.password)
+    this.handleAuth(this.authService.login(email, password));
+  }
+
+  private handleAuth(authObservable: Observable<any>): void {
+    this.loading.next(true);
+    this.errorMessage.next('');
+
+    authObservable
       .pipe(
         takeUntil(this.destroy$),
-        finalize(() => this.setLoading(false))
+        finalize(() => this.loading.next(false))
       )
       .subscribe({
-        next: (res: any) => {
-          // Navigation and state are handled by the AuthService.
-          // We just show a success message here.
+        next: (res) => {
+          // If backend explicitly indicates failure, treat as error
+          if (res && res.success === false) {
+            const backendMessage: string | undefined = res?.error?.message;
+            const message =
+              backendMessage ||
+              this.translateService.instant('AUTH.LOGIN_ERROR');
+            this.errorMessage.next(message);
+            this.toastService.presentErrorToast('bottom', message);
+            return;
+          }
+
           this.toastService.presentSuccessToast(
             'bottom',
             this.translateService.instant('AUTH.LOGIN_SUCCESS')
           );
-          if (!res?.success) {
-            this.toastService.presentErrorToast('bottom', res?.error?.message);
-          }
         },
         error: (error) => {
-          // Prefer backend message when available
-          const backendMessage: string | undefined = error?.error?.message;
+          const backendMessage: string | undefined =
+            error?.error?.error?.message || error?.error?.message;
           let fallbackKey = 'AUTH.LOGIN_ERROR';
 
-          // Map status codes only for fallback text
           if (error?.status === 401) {
             fallbackKey = 'AUTH.INVALID_CREDENTIALS';
           } else if (error?.status === 0) {
@@ -191,7 +144,7 @@ export class LoginComponent extends BaseComponent {
 
           const message =
             backendMessage || this.translateService.instant(fallbackKey);
-          this.errorMessage = message;
+          this.errorMessage.next(message);
           this.toastService.presentErrorToast('bottom', message);
         },
       });

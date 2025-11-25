@@ -1,0 +1,14 @@
+<div class="list-item-container" [class.interactive]="interactive">
+  <div class="start-slot">
+    <ng-content select="[start]"></ng-content>
+  </div>
+
+  <div class="main-content">
+    <div class="title">{{ title }}</div>
+    <div class="subtitle" *ngIf="subtitle">{{ subtitle }}</div>
+  </div>
+
+  <div class="end-slot">
+    <ng-content select="[end]"></ng-content>
+  </div>
+</div>

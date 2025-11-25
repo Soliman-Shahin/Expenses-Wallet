@@ -4,7 +4,7 @@ import {
   OnInit,
   ViewChild,
   ElementRef,
-  OnDestroy,
+  inject,
 } from '@angular/core';
 import {
   AbstractControl,
@@ -15,11 +15,11 @@ import {
   Validators,
 } from '@angular/forms';
 import { ToastService } from 'src/app/shared/services/toast.service';
+import { BaseComponent } from 'src/app/shared/base/base.component';
 import { ProfileService } from '../../services/profile.service';
 import { UserProfile } from '../../models/profile.model';
-import { Subject, takeUntil } from 'rxjs';
-import { finalize } from 'rxjs/operators';
-import { LoadingService } from 'src/app/core/services/loading.service';
+import { BehaviorSubject, combineLatest, takeUntil } from 'rxjs';
+import { catchError, finalize, tap } from 'rxjs/operators';
 import { ItemReorderEventDetail } from '@ionic/angular';
 
 @Component({
@@ -28,12 +28,31 @@ import { ItemReorderEventDetail } from '@ionic/angular';
   styleUrls: ['./profile-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ProfilePageComponent implements OnInit, OnDestroy {
+export class ProfilePageComponent extends BaseComponent implements OnInit {
   personalForm!: FormGroup;
   salaryForm!: FormGroup;
   @ViewChild('avatarInput') avatarInputRef!: ElementRef<HTMLInputElement>;
-  avatarUrl: string | undefined;
-  private destroy$ = new Subject<void>();
+  avatarUrl: string | null = null;
+  isPersonalFormDirty = false;
+  isSalaryFormDirty = false;
+
+  // State
+  private isLoadingProfile$ = new BehaviorSubject<boolean>(false);
+  private isLoadingPersonal$ = new BehaviorSubject<boolean>(false);
+  private isLoadingSalary$ = new BehaviorSubject<boolean>(false);
+  private isLoadingAvatar$ = new BehaviorSubject<boolean>(false);
+  private errorMessage$ = new BehaviorSubject<string | null>(null);
+
+  private readonly profileService = inject(ProfileService);
+
+  vm$ = combineLatest({
+    profile: this.profileService.profile$,
+    isLoadingProfile: this.isLoadingProfile$.asObservable(),
+    isLoadingPersonal: this.isLoadingPersonal$.asObservable(),
+    isLoadingSalary: this.isLoadingSalary$.asObservable(),
+    isLoadingAvatar: this.isLoadingAvatar$.asObservable(),
+    errorMessage: this.errorMessage$.asObservable(),
+  });
 
   currencies: string[] = [
     'USD',
@@ -50,15 +69,10 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     'DZD',
     'TND',
   ];
+  private nextDetailId = 0;
 
-  constructor(
-    private fb: FormBuilder,
-    private profileService: ProfileService,
-    private toast: ToastService,
-    private loading: LoadingService
-  ) {}
-
-  ngOnInit(): void {
+  override ngOnInit(): void {
+    super.ngOnInit();
     this.personalForm = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
@@ -76,23 +90,18 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     }
 
     // Fetch latest profile from backend
-    this.loading.setLoading('profile_fetch', true);
+    this.isLoadingProfile$.next(true);
     this.profileService
       .fetchProfile()
       .pipe(
-        finalize(() => this.loading.setLoading('profile_fetch', false)),
-        takeUntil(this.destroy$)
+        finalize(() => this.isLoadingProfile$.next(false)),
+        takeUntil(this.destroy$),
+        catchError((err) => {
+          this.errorMessage$.next(err);
+          return [];
+        })
       )
-      .subscribe({
-        next: (profile) => {
-          if (!profile) {
-            // keep local cache, optionally notify
-          }
-        },
-        error: () => {
-          // handled inside service; keep UX quiet here
-        },
-      });
+      .subscribe();
 
     // Subscribe to changes for reactive UI (e.g., avatar preview updates)
     this.profileService.profile$
@@ -104,11 +113,16 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
         if (isEditing) return;
         this.patchFromProfile(profile);
       });
-  }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+    this.personalForm.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => (this.isPersonalFormDirty = true));
+
+    this.salaryForm.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => (this.isSalaryFormDirty = true));
+
+    this.personalForm.get('email')?.disable();
   }
 
   private patchFromProfile(profile: UserProfile): void {
@@ -129,7 +143,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
       arr.push(this.createDetailGroup('Salary', 0));
     }
     this.salaryForm.patchValue({ currency: profile.currency });
-    this.avatarUrl = profile.avatarUrl;
+    this.avatarUrl = profile.avatarUrl ?? null;
   }
 
   // Salary details helpers
@@ -139,6 +153,7 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
 
   private createDetailGroup(label: string = '', amount: number = 0) {
     const group = this.fb.group({
+      id: [`detail-${this.nextDetailId++}`],
       label: [label, [Validators.required, Validators.maxLength(50)]],
       amount: [amount, [Validators.required, Validators.min(0)]],
     });
@@ -159,8 +174,11 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     this.details.updateValueAndValidity();
   }
 
-  removeDetail(index: number): void {
-    if (this.details.length > 1) {
+  removeDetail(id: string | null | undefined): void {
+    const index = this.details.controls.findIndex(
+      (ctrl) => ctrl.get('id')?.value === id
+    );
+    if (index > -1 && this.details.length > 1) {
       this.details.removeAt(index);
       this.details.updateValueAndValidity();
     }
@@ -184,15 +202,15 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     while (this.details.length) {
       this.details.removeAt(0);
     }
-    reordered.forEach(ctrl => this.details.push(ctrl));
+    reordered.forEach((ctrl) => this.details.push(ctrl));
 
     this.details.updateValueAndValidity();
     this.salaryForm.markAsDirty();
     event.detail.complete(true);
   }
 
-  trackByIndex(index: number): number {
-    return index;
+  trackByIndex(index: number, control: AbstractControl): string {
+    return control.get('id')?.value || index.toString();
   }
 
   // Validator to prevent duplicate labels (case-insensitive, trimmed)
@@ -233,42 +251,101 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
 
   // Total salary computed from details
   get totalSalary(): number {
-    const values = (this.details.value || []) as Array<{ label: string; amount: number }>;
+    const values = (this.details.value || []) as Array<{
+      label: string;
+      amount: number;
+    }>;
     return values.reduce((sum, d) => sum + (Number(d?.amount) || 0), 0);
+  }
+
+  // Calculate profile completion percentage
+  get profileCompletion(): number {
+    const profile = this.profileService.getProfile();
+    if (!profile) return 0;
+
+    let completedFields = 0;
+    let totalFields = 5;
+
+    // Check if fields are completed
+    if (profile.username && profile.username.trim().length > 0)
+      completedFields++;
+    if (profile.email && profile.email.trim().length > 0) completedFields++;
+    if (profile.phone && profile.phone.trim().length > 0) completedFields++;
+    if (profile.avatarUrl && profile.avatarUrl.trim().length > 0)
+      completedFields++;
+    if (
+      profile.salary &&
+      profile.salary.length > 0 &&
+      profile.salary[0].amount > 0
+    )
+      completedFields++;
+
+    return Math.round((completedFields / totalFields) * 100);
+  }
+
+  // Get member since date
+  getMemberSince(): string {
+    const profile = this.profileService.getProfile();
+    if (!profile || !profile.createdAt) {
+      return '2024';
+    }
+
+    const date = new Date(profile.createdAt);
+    const year = date.getFullYear();
+    const month = date.toLocaleString('default', { month: 'short' });
+    return `${month} ${year}`;
   }
 
   savePersonal(): void {
     if (this.personalForm.invalid) {
       this.personalForm.markAllAsTouched();
-      this.toast.presentErrorToast('top', 'PROFILE.TOASTS.PERSONAL_INVALID');
+      this.toastService.presentErrorToast(
+        'top',
+        'PROFILE.TOASTS.PERSONAL_INVALID'
+      );
       return;
     }
-    this.loading.setLoading('profile_save_personal', true);
+    this.isLoadingPersonal$.next(true);
+    this.errorMessage$.next(null);
     this.profileService
       .updateProfile({ ...(this.personalForm.value as Partial<UserProfile>) })
       .pipe(
-        finalize(() => this.loading.setLoading('profile_save_personal', false))
+        finalize(() => this.isLoadingPersonal$.next(false)),
+        takeUntil(this.destroy$),
+        tap((updated) => {
+          if (updated) {
+            this.toastService.presentSuccessToast(
+              'top',
+              'PROFILE.TOASTS.PERSONAL_SAVED'
+            );
+          } else {
+            this.errorMessage$.next('PROFILE.TOASTS.PERSONAL_FAILED');
+          }
+        }),
+        catchError((err) => {
+          this.errorMessage$.next(err);
+          return [];
+        })
       )
-      .subscribe((updated) => {
-        if (updated) {
-          this.toast.presentSuccessToast(
-            'top',
-            'PROFILE.TOASTS.PERSONAL_SAVED'
-          );
-        } else {
-          this.toast.presentErrorToast('top', 'PROFILE.TOASTS.PERSONAL_FAILED');
-        }
-      });
+      .subscribe();
   }
 
   saveSalary(): void {
     if (this.salaryForm.invalid) {
       this.salaryForm.markAllAsTouched();
-      console.warn('Salary form invalid:', this.salaryForm.errors, this.salaryForm);
-      this.toast.presentErrorToast('top', 'PROFILE.TOASTS.SALARY_INVALID');
+      console.warn(
+        'Salary form invalid:',
+        this.salaryForm.errors,
+        this.salaryForm
+      );
+      this.toastService.presentErrorToast(
+        'top',
+        'PROFILE.TOASTS.SALARY_INVALID'
+      );
       return;
     }
-    this.loading.setLoading('profile_save_salary', true);
+    this.isLoadingSalary$.next(true);
+    this.errorMessage$.next(null);
     const detailsRaw = this.details.getRawValue() || [];
     const salaryPayload = detailsRaw.map((d: any) => ({
       label: String(d?.label ?? 'Salary'),
@@ -285,17 +362,26 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     this.profileService
       .updateProfile(payload)
       .pipe(
-        finalize(() => this.loading.setLoading('profile_save_salary', false))
+        finalize(() => this.isLoadingSalary$.next(false)),
+        takeUntil(this.destroy$),
+        tap((updated) => {
+          if (updated) {
+            console.log('[Profile] Salary saved, backend responded:', updated);
+            this.salaryForm.markAsPristine();
+            this.toastService.presentSuccessToast(
+              'top',
+              'PROFILE.TOASTS.SALARY_SAVED'
+            );
+          } else {
+            this.errorMessage$.next('PROFILE.TOASTS.SALARY_FAILED');
+          }
+        }),
+        catchError((err) => {
+          this.errorMessage$.next(err);
+          return [];
+        })
       )
-      .subscribe((updated) => {
-        if (updated) {
-          console.log('[Profile] Salary saved, backend responded:', updated);
-          this.salaryForm.markAsPristine();
-          this.toast.presentSuccessToast('top', 'PROFILE.TOASTS.SALARY_SAVED');
-        } else {
-          this.toast.presentErrorToast('top', 'PROFILE.TOASTS.SALARY_FAILED');
-        }
-      });
+      .subscribe();
   }
 
   triggerAvatarFile(): void {
@@ -306,65 +392,69 @@ export class ProfilePageComponent implements OnInit, OnDestroy {
     const input = event.target as HTMLInputElement;
     const file = input.files && input.files[0];
     if (!file) return;
-    
+
     // Validate file type
     const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     if (!validTypes.includes(file.type)) {
-      this.toast.presentErrorToast('top', 'PROFILE.TOASTS.INVALID_FILE_TYPE');
+      this.toastService.presentErrorToast(
+        'top',
+        'PROFILE.TOASTS.INVALID_FILE_TYPE'
+      );
       input.value = '';
       return;
     }
-    
+
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      this.toast.presentErrorToast('top', 'PROFILE.TOASTS.FILE_TOO_LARGE');
+      this.toastService.presentErrorToast(
+        'top',
+        'PROFILE.TOASTS.FILE_TOO_LARGE'
+      );
       input.value = '';
       return;
     }
-    
-    this.loading.setLoading('profile_avatar_upload', true);
+
+    this.isLoadingAvatar$.next(true);
+    this.errorMessage$.next(null);
     this.profileService
       .uploadAvatar(file)
       .pipe(
-        finalize(() => this.loading.setLoading('profile_avatar_upload', false))
-      )
-      .subscribe(async (res) => {
-        if (res) {
-          this.toast.presentSuccessToast('top', 'PROFILE.TOASTS.AVATAR_SAVED');
-          // Add a small delay to allow the UI to update before showing the animation
-          setTimeout(() => {
-            const avatarElement = document.querySelector('.avatar');
-            if (avatarElement) {
-              avatarElement.classList.add('pulse-on-change');
-              setTimeout(() => {
-                avatarElement.classList.remove('pulse-on-change');
-              }, 300);
-            }
-          }, 100);
-        } else {
-          // fallback to local store if backend fails
-          const ok = await this.profileService.setAvatar(file);
-          if (ok) {
-            this.toast.presentSuccessToast(
-              'top',
-              'PROFILE.TOASTS.AVATAR_SAVED'
-            );
-            // Add a small delay to allow the UI to update before showing the animation
-            setTimeout(() => {
-              const avatarElement = document.querySelector('.avatar');
-              if (avatarElement) {
-                avatarElement.classList.add('pulse-on-change');
-                setTimeout(() => {
-                  avatarElement.classList.remove('pulse-on-change');
-                }, 300);
-              }
-            }, 100);
+        finalize(() => this.isLoadingAvatar$.next(false)),
+        takeUntil(this.destroy$),
+        tap(async (res) => {
+          if (res) {
+            this.showAvatarSuccess();
           } else {
-            this.toast.presentErrorToast('top', 'PROFILE.TOASTS.AVATAR_FAILED');
+            // fallback to local store if backend fails
+            const ok = await this.profileService.setAvatar(file);
+            if (ok) {
+              this.showAvatarSuccess();
+            } else {
+              this.errorMessage$.next('PROFILE.TOASTS.AVATAR_FAILED');
+            }
           }
-        }
-      });
+        }),
+        catchError((err) => {
+          this.errorMessage$.next(err);
+          return [];
+        })
+      )
+      .subscribe();
     // clear selection
     input.value = '';
+  }
+
+  private showAvatarSuccess(): void {
+    this.toastService.presentSuccessToast('top', 'PROFILE.TOASTS.AVATAR_SAVED');
+    // Add a small delay to allow the UI to update before showing the animation
+    setTimeout(() => {
+      const avatarElement = document.querySelector('.avatar');
+      if (avatarElement) {
+        avatarElement.classList.add('pulse-on-change');
+        setTimeout(() => {
+          avatarElement.classList.remove('pulse-on-change');
+        }, 300);
+      }
+    }, 100);
   }
 }

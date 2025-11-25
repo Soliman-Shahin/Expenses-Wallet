@@ -1,6 +1,4 @@
-import {
-  Component,
-  EventEmitter,
+import { Component, ChangeDetectionStrategy, EventEmitter,
   Input,
   Output,
   OnInit,
@@ -8,14 +6,14 @@ import {
   ViewChild,
   ElementRef,
   OnChanges,
-  SimpleChanges,
-} from '@angular/core';
+  SimpleChanges, } from '@angular/core';
 import { MonthYear } from 'src/app/home/models';
 
 @Component({
   selector: 'app-months-scroll-header',
   templateUrl: './months-scroll-header.component.html',
   styleUrls: ['./months-scroll-header.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MonthsScrollHeaderComponent
   implements OnInit, AfterViewInit, OnChanges

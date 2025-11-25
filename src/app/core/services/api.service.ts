@@ -1,7 +1,7 @@
 import { Injectable, Injector } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { AuthService, TokenService } from 'src/app/modules/auth/services';
 
@@ -47,16 +47,7 @@ export class ApiService {
       console.warn('No valid access token found in storage');
     }
 
-    try {
-      const userId = this.storageService.getUserId();
-      if (userId) {
-        headers['_id'] = userId;
-      } else {
-        console.warn('No user ID available for request headers');
-      }
-    } catch (error) {
-      console.warn('Could not get user ID for request headers', error);
-    }
+    // Do not send user id as a custom header; JWT already carries the subject
 
     if (!environment.production) {
       console.log('Request headers:', headers);
@@ -69,13 +60,35 @@ export class ApiService {
     return new HttpHeaders(this.getHeadersObject());
   }
 
-  get<T>(path: string, params?: HttpParams): Observable<T> {
+  get<T>(path: string, params?: any): Observable<T> {
+    // Convert params object to HttpParams if needed
+    let httpParams: HttpParams | undefined;
+    if (params instanceof HttpParams) {
+      httpParams = params;
+    } else if (params) {
+      httpParams = new HttpParams();
+      Object.keys(params).forEach((key) => {
+        if (params[key] !== undefined && params[key] !== null) {
+          httpParams = httpParams!.append(key, String(params[key]));
+        }
+      });
+    }
+
     return this.http
-      .get<T>(`${this.baseUrl}${path}`, {
+      .get<any>(`${this.baseUrl}${path}`, {
         headers: this.getHeaders(),
-        params,
+        params: httpParams,
       })
-      .pipe(catchError(this.handleError));
+      .pipe(
+        map((response) => {
+          // Handle both {data: T} and direct response formats
+          if (response && response.data !== undefined) {
+            return response.data;
+          }
+          return response;
+        }),
+        catchError(this.handleError)
+      );
   }
 
   post<T>(
@@ -99,11 +112,20 @@ export class ApiService {
     });
 
     return this.http
-      .post<T>(`${this.baseUrl}${path}`, body, {
+      .post<any>(`${this.baseUrl}${path}`, body, {
         headers: mergedHeaders,
         params: options.params,
       })
-      .pipe(catchError(this.handleError));
+      .pipe(
+        map((response) => {
+          // Handle both {data: T} and direct response formats
+          if (response && response.data !== undefined) {
+            return response.data;
+          }
+          return response;
+        }),
+        catchError(this.handleError)
+      );
   }
 
   /**
@@ -145,11 +167,20 @@ export class ApiService {
     options: { params?: HttpParams } = {}
   ): Observable<T> {
     return this.http
-      .put<T>(`${this.baseUrl}${path}`, body, {
+      .put<any>(`${this.baseUrl}${path}`, body, {
         headers: this.getHeaders(),
         params: options.params,
       })
-      .pipe(catchError(this.handleError));
+      .pipe(
+        map((response) => {
+          // Handle both {data: T} and direct response formats
+          if (response && response.data !== undefined) {
+            return response.data;
+          }
+          return response;
+        }),
+        catchError(this.handleError)
+      );
   }
 
   delete<T>(
@@ -170,11 +201,14 @@ export class ApiService {
     options: { params?: HttpParams } = {}
   ): Observable<T> {
     return this.http
-      .patch<T>(`${this.baseUrl}${path}`, body, {
+      .patch<{ data: T }>(`${this.baseUrl}${path}`, body, {
         headers: this.getHeaders(),
         params: options.params,
       })
-      .pipe(catchError(this.handleError));
+      .pipe(
+        map((response) => response.data),
+        catchError(this.handleError)
+      );
   }
 
   // Centralized error handler

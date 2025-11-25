@@ -1,0 +1,144 @@
+ion-content {
+    --background: var(--ion-color-light);
+}
+
+.no-conflicts {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+    text-align: center;
+}
+
+.no-conflicts ion-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+}
+
+.no-conflicts h2 {
+    margin: 0 0 8px 0;
+    color: var(--ion-color-success);
+}
+
+.no-conflicts p {
+    margin: 0;
+    color: var(--ion-color-medium);
+}
+
+.conflict-card {
+    margin: 16px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.conflict-card ion-card-header {
+    padding-bottom: 8px;
+}
+
+.conflict-card ion-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.1em;
+}
+
+.conflict-details {
+    margin-bottom: 16px;
+}
+
+.data-comparison {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.data-section {
+    border: 1px solid var(--ion-color-light-shade);
+    border-radius: 8px;
+    padding: 12px;
+    background: var(--ion-color-light-tint);
+}
+
+.data-section h4 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 8px 0;
+    font-size: 0.9em;
+    font-weight: 600;
+}
+
+.data-content {
+    margin-bottom: 8px;
+}
+
+.data-content pre {
+    background: var(--ion-color-light);
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.merge-option {
+    border: 1px solid var(--ion-color-tertiary-tint);
+    border-radius: 8px;
+    padding: 12px;
+    background: var(--ion-color-tertiary-tint);
+}
+
+.merge-option h4 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 8px 0;
+    font-size: 0.9em;
+    font-weight: 600;
+}
+
+.merge-option p {
+    margin: 0 0 8px 0;
+    font-size: 0.8em;
+    color: var(--ion-color-medium);
+}
+
+.resolution-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.bulk-actions {
+    margin: 16px;
+    border-radius: 12px;
+}
+
+.bulk-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+@media (min-width: 768px) {
+    .data-comparison {
+        flex-direction: row;
+    }
+
+    .data-section {
+        flex: 1;
+    }
+
+    .resolution-actions {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    .bulk-buttons {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+}

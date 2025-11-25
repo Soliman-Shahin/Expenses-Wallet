@@ -1,0 +1,17 @@
+:host {
+  --border-radius: var(--ew-radius-lg);
+
+  &:focus-visible {
+    outline: var(--ew-border-width-md) solid var(--ion-color-primary);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 var(--ew-border-width-lg) rgba(var(--ion-color-primary-rgb), 0.18);
+    z-index: 2;
+    transition: outline 0.2s, box-shadow 0.2s;
+  }
+}
+
+.full-round {
+  --border-radius: 50%;
+  width: var(--ion-button-size, 56px);
+  height: var(--ion-button-size, 56px);
+}

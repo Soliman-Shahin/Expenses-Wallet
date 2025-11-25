@@ -1,0 +1,18 @@
+<div class="empty-state" [attr.aria-label]="ariaLabel || title">
+  <ion-icon class="empty-icon" [name]="icon" aria-hidden="true"></ion-icon>
+  <h3 class="empty-title">{{ title }}</h3>
+  <p class="empty-message">{{ message }}</p>
+
+  <ng-container *ngIf="ctaText || ctaRouterLink">
+    <ion-button
+      size="default"
+      [routerLink]="ctaRouterLink || null"
+      [disabled]="ctaDisabled"
+      (click)="ctaClick.emit()"
+      [attr.aria-label]="ctaText || title"
+    >
+      <ion-icon slot="start" [name]="ctaIcon" aria-hidden="true"></ion-icon>
+      {{ ctaText }}
+    </ion-button>
+  </ng-container>
+</div>

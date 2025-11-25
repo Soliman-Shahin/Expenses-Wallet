@@ -1,0 +1,50 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/Bridge.java</file>
+  <line>362</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="method" FQNAME="com.getcapacitor.Bridge int extractWebViewMajorVersion(android.content.pm.PackageManager pm, java.lang.String webViewPackageName)" />
+  <problem_class id="SameParameterValue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Method parameter always has the same value</problem_class>
+  <hints>
+    <hint value="webViewPackageName &quot;com.amazon.webview.chromium&quot;" />
+  </hints>
+  <description>Value of parameter &lt;code&gt;webViewPackageName&lt;/code&gt; is always '&quot;com.amazon.webview.chromium&quot;'</description>
+  <highlighted_element>webViewPackageName</highlighted_element>
+  <language>JAVA</language>
+  <offset>81</offset>
+  <length>18</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/FileUtils.java</file>
+  <line>58</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="method" FQNAME="com.getcapacitor.FileUtils.Type Type(java.lang.String type)" />
+  <problem_class id="SameParameterValue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Method parameter always has the same value</problem_class>
+  <hints>
+    <hint value="type &quot;image&quot;" />
+  </hints>
+  <description>Value of parameter &lt;code&gt;type&lt;/code&gt; is always '&quot;image&quot;'</description>
+  <highlighted_element>type</highlighted_element>
+  <language>JAVA</language>
+  <offset>20</offset>
+  <length>4</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/haptics/android/src/main/java/com/capacitorjs/plugins/haptics/Haptics.java</file>
+  <line>46</line>
+  <module>android.capacitor-haptics.main</module>
+  <package>com.capacitorjs.plugins.haptics</package>
+  <entry_point TYPE="method" FQNAME="com.capacitorjs.plugins.haptics.Haptics void vibratePre26(long[] pattern, int repeat)" />
+  <problem_class id="SameParameterValue" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Method parameter always has the same value</problem_class>
+  <hints>
+    <hint value="repeat -1" />
+  </hints>
+  <description>Value of parameter &lt;code&gt;repeat&lt;/code&gt; is always '-1'</description>
+  <highlighted_element>repeat</highlighted_element>
+  <language>JAVA</language>
+  <offset>50</offset>
+  <length>6</length>
+</problem>
+</problems>

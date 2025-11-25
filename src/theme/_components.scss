@@ -1,0 +1,520 @@
+// ===================================================================
+//  COMPONENT STYLES
+//  - Custom styles for global components (cards, buttons, etc.)
+//  - Overrides for Ionic components
+// ===================================================================
+
+/* Card Styles */
+ion-card,
+.card,
+.container {
+  border-radius: var(--ew-radius-xl, 18px);
+  box-shadow: var(--ew-shadow-1);
+  margin: 18px 0;
+  padding: 1.5rem 1.25rem;
+  background: var(--ion-card-background);
+  border: 1px solid var(--ion-border-color);
+  transition: box-shadow var(--ew-animation-duration-normal)
+      var(--ew-animation-easing-standard),
+    transform var(--ew-animation-duration-normal)
+      var(--ew-animation-easing-standard);
+  animation: fadeInUp 0.4s var(--ew-animation-easing-standard);
+
+  &:hover {
+    transform: translateY(-6px) scale(1.015);
+    box-shadow: var(--ew-shadow-2);
+  }
+}
+
+/* Button Overrides */
+ion-button {
+  --border-radius: var(--ew-radius-large, 12px);
+  --box-shadow: var(--ew-shadow-1);
+  --transition: all var(--ew-animation-duration-normal)
+    var(--ew-animation-easing-standard);
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0.5px;
+
+  &:hover {
+    --box-shadow: var(--ew-shadow-2);
+  }
+}
+
+/* For list items that should appear as individual cards */
+.item-card {
+  --background: var(--ion-item-background, var(--ion-color-light));
+  --border-radius: var(--ew-radius-xl, 16px);
+  --padding-start: var(--ew-space-4, 16px);
+  --inner-padding-end: var(--ew-space-4, 16px);
+  --min-height: 72px;
+  margin: 0 var(--ew-space-4, 16px) var(--ew-space-3, 12px);
+  box-shadow: var(--ew-shadow-sm);
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--ew-shadow-md);
+  }
+}
+
+/* For ion-item used as a container for form inputs */
+.form-input-item {
+  --background: var(--ion-item-background, var(--ion-color-light));
+  --border-radius: var(--ew-radius-large, 12px);
+  --min-height: 52px;
+  --padding-start: var(--ew-space-3, 12px);
+  --inner-padding-end: var(--ew-space-3, 12px);
+  margin-bottom: var(--ew-space-4, 16px);
+  box-shadow: var(--ew-shadow-sm);
+  border: 1px solid var(--ion-border-color);
+  border-radius: var(--ew-radius-lg);
+  transition: box-shadow 0.2s ease-out, border-color 0.2s ease-out;
+
+  &.item-has-focus {
+    border-color: var(--ion-color-primary);
+    box-shadow: var(--ew-shadow-md);
+  }
+}
+
+/* Custom Toast & Loader Styles */
+.custom-toast {
+  // Glow color for animation - defined here for light/dark modes
+  --ew-toast-glow-color: rgba(67, 97, 238, 0.14);
+
+  --background: var(--ew-background-color-glass);
+  --color: var(--ew-text-color-primary);
+  --border-radius: var(--ew-radius-xl);
+  --box-shadow: var(--ew-shadow-lg);
+  --padding-start: 1.25rem;
+  --padding-end: 1.25rem;
+  font-size: 1.04rem;
+  font-weight: 500;
+  border: 1px solid var(--ew-border-color);
+  backdrop-filter: blur(18px) saturate(150%);
+  z-index: 10010; // Ensure toast sits above overlays
+}
+
+.custom-loader {
+  --background: var(--ew-background-color-overlay);
+  --color: var(--ew-text-color-primary);
+  --spinner-color: var(--ion-color-primary);
+  --border-radius: var(--ew-radius-xl);
+  --box-shadow: var(--ew-shadow-xl);
+
+  .loading-wrapper {
+    padding: var(--ew-space-6);
+  }
+
+  ion-spinner {
+    width: var(--ew-size-12);
+    height: var(--ew-size-12);
+    transform: scale(1.5);
+    margin-bottom: var(--ew-space-4);
+  }
+}
+
+body.dark {
+  .custom-toast {
+    --ew-toast-glow-color: rgba(34, 211, 238, 0.16);
+  }
+}
+
+/* Keyframes for Toast & Loader */
+@keyframes toastFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toastFadeOutDown {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(24px) scale(0.95);
+  }
+}
+
+@keyframes loaderScaleIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes loaderFadeOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+@keyframes loaderPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .custom-toast,
+  .custom-toast.ion-leave-active,
+  .custom-loader,
+  .custom-loader.ion-leave-active,
+  .custom-loader ion-spinner {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+// ===================================================================
+//  ADVANCED COMPONENT STYLES (v2.1)
+// ===================================================================
+
+/* Card Advanced States */
+ion-card {
+  &:active {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: var(--ew-shadow-xl);
+  }
+
+  &.disabled,
+  &[disabled] {
+    opacity: 0.6;
+    pointer-events: none;
+    filter: grayscale(0.5);
+  }
+
+  &.loading {
+    position: relative;
+    overflow: hidden;
+    pointer-events: none;
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: var(--shimmer-gradient);
+      animation: shimmer 2s infinite;
+    }
+  }
+
+  &.card-elevated {
+    box-shadow: var(--ew-shadow-xl);
+  }
+
+  &.card-flat {
+    box-shadow: none;
+    border: 1px solid var(--ion-border-color);
+  }
+}
+
+/* Button Variants */
+.btn-gradient,
+ion-button.btn-gradient {
+  --background: var(--brand-gradient);
+  --background-hover: var(--gradient-primary-secondary);
+  --background-activated: var(--gradient-primary-secondary);
+  --color: white;
+  border: none;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      135deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent
+    );
+    transform: translateX(-100%);
+    transition: transform 0.6s;
+  }
+
+  &:hover::before {
+    transform: translateX(100%);
+  }
+}
+
+.btn-glass,
+ion-button.btn-glass {
+  --background: var(--glass-background);
+  --color: var(--ion-color-primary);
+  backdrop-filter: blur(18px) saturate(150%);
+  border: var(--glass-border);
+
+  &:hover {
+    --background: rgba(var(--ion-color-primary-rgb), 0.15);
+  }
+}
+
+.btn-outline,
+ion-button.btn-outline {
+  --background: transparent;
+  --color: var(--ion-color-primary);
+  --border-width: 2px;
+  --border-style: solid;
+  --border-color: var(--ion-color-primary);
+
+  &:hover {
+    --background: var(--primary-alpha-10);
+  }
+}
+
+.btn-icon-only {
+  --padding-start: 12px;
+  --padding-end: 12px;
+  min-width: 44px;
+  min-height: 44px;
+
+  ion-icon {
+    font-size: 24px;
+  }
+}
+
+/* Card Types */
+.card-glass {
+  background: var(--glass-background) !important;
+  backdrop-filter: blur(18px) saturate(150%);
+  border: var(--glass-border);
+  box-shadow: var(--ew-shadow-lg);
+}
+
+.card-gradient {
+  background: var(--brand-gradient) !important;
+  color: white;
+
+  ion-card-header,
+  ion-card-title,
+  ion-card-content {
+    color: white;
+  }
+}
+
+.card-bordered {
+  border: 2px solid var(--ion-border-color);
+  box-shadow: none;
+
+  &:hover {
+    border-color: var(--ion-color-primary);
+  }
+}
+
+/* Badge Component */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.75rem;
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--ew-radius-pill);
+  line-height: 1;
+  white-space: nowrap;
+
+  &.badge-primary {
+    background: var(--primary-alpha-10);
+    color: var(--ion-color-primary);
+  }
+
+  &.badge-success {
+    background: var(--success-alpha-10);
+    color: var(--ion-color-success);
+  }
+
+  &.badge-danger {
+    background: var(--danger-alpha-10);
+    color: var(--ion-color-danger);
+  }
+
+  &.badge-warning {
+    background: var(--warning-alpha-10);
+    color: var(--ion-color-warning);
+  }
+
+  &.badge-gradient {
+    background: var(--brand-gradient);
+    color: white;
+  }
+
+  &.badge-lg {
+    padding: 0.5rem 1rem;
+    font-size: var(--text-sm);
+  }
+
+  &.badge-sm {
+    padding: 0.125rem 0.5rem;
+    font-size: 0.625rem;
+  }
+}
+
+/* Ribbon Component */
+.ribbon {
+  position: absolute;
+  top: 10px;
+  right: -5px;
+  padding: 4px 12px;
+  background: var(--ion-color-primary);
+  color: white;
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-bold);
+  border-radius: var(--ew-radius-sm);
+  box-shadow: var(--ew-shadow-md);
+  z-index: 10;
+
+  &::before {
+    content: "";
+    position: absolute;
+    bottom: -5px;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-top: 5px solid var(--ion-color-primary-shade);
+  }
+
+  &.ribbon-success {
+    background: var(--ion-color-success);
+
+    &::before {
+      border-top-color: var(--ion-color-success-shade);
+    }
+  }
+
+  &.ribbon-danger {
+    background: var(--ion-color-danger);
+
+    &::before {
+      border-top-color: var(--ion-color-danger-shade);
+    }
+  }
+}
+
+/* Divider Styles */
+.divider {
+  height: 1px;
+  background: var(--ion-border-color);
+  margin: var(--ew-space-4) 0;
+
+  &.divider-gradient {
+    background: var(--brand-gradient);
+    height: 2px;
+  }
+
+  &.divider-dashed {
+    border-top: 1px dashed var(--ion-border-color);
+    background: transparent;
+  }
+
+  &.divider-thick {
+    height: 3px;
+  }
+}
+
+/* Avatar Component */
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-alpha-10);
+  color: var(--ion-color-primary);
+  font-weight: var(--font-weight-semibold);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &.avatar-sm {
+    width: 32px;
+    height: 32px;
+    font-size: var(--text-xs);
+  }
+
+  &.avatar-lg {
+    width: 56px;
+    height: 56px;
+    font-size: var(--text-lg);
+  }
+
+  &.avatar-xl {
+    width: 80px;
+    height: 80px;
+    font-size: var(--text-2xl);
+  }
+
+  &.avatar-bordered {
+    border: 3px solid var(--ion-color-primary);
+    box-shadow: var(--ew-shadow-md);
+  }
+}
+
+/* Skeleton Loader */
+.skeleton {
+  background: var(--ew-color-gray-200);
+  border-radius: var(--ew-radius-sm);
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+
+  &.skeleton-text {
+    height: 16px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+  }
+
+  &.skeleton-circle {
+    border-radius: 50%;
+  }
+
+  &.skeleton-rect {
+    border-radius: var(--ew-radius-md);
+  }
+}
+
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+body.dark .skeleton {
+  background: var(--ew-color-gray-300);
+}

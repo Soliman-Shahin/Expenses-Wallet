@@ -1,13 +1,13 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    
+
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.0.0'
+        classpath 'com.android.tools.build:gradle:8.12.1'
         classpath 'com.google.gms:google-services:4.3.15'
 
         // NOTE: Do not place your application dependencies here; they belong
@@ -17,10 +17,22 @@ buildscript {
 
 apply from: "variables.gradle"
 
-allprojects {
+subprojects {
     repositories {
         google()
         mavenCentral()
+    }
+    // Force AndroidX versions across all subprojects to avoid incompatible resolutions
+    configurations.configureEach {
+        resolutionStrategy {
+            force(
+                "androidx.core:core:${androidxCoreVersion}",
+                "androidx.core:core-ktx:${androidxCoreVersion}",
+                // Avoid D8 NPE with appcompat 1.7.0 on AGP 8.0/Gradle 8.0.2
+                "androidx.appcompat:appcompat:${androidxAppCompatVersion}",
+                "androidx.appcompat:appcompat-resources:${androidxAppCompatVersion}"
+            )
+        }
     }
 }
 

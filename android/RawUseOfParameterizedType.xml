@@ -1,0 +1,54 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/capacitor-cordova-android-plugins/src/main/java/com/ionicframework/common/IonicCordovaCommon.java</file>
+  <line>468</line>
+  <module>android.capacitor-cordova-android-plugins.main</module>
+  <package>com.ionicframework.common</package>
+  <entry_point TYPE="method" FQNAME="com.ionicframework.common.IonicCordovaCommon void mergeObjects(org.json.JSONObject obj1, org.json.JSONObject obj2)" />
+  <problem_class id="RawUseOfParameterizedType" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Raw use of parameterized class</problem_class>
+  <description>Raw use of parameterized class &lt;code&gt;Iterator&lt;/code&gt; #loc</description>
+  <highlighted_element>Iterator</highlighted_element>
+  <language>JAVA</language>
+  <offset>4</offset>
+  <length>8</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/BridgeWebChromeClient.java</file>
+  <line>49</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="field" FQNAME="com.getcapacitor.BridgeWebChromeClient permissionLauncher" />
+  <problem_class id="RawUseOfParameterizedType" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Raw use of parameterized class</problem_class>
+  <description>Raw use of parameterized class &lt;code&gt;ActivityResultLauncher&lt;/code&gt; #loc</description>
+  <highlighted_element>ActivityResultLauncher</highlighted_element>
+  <language>JAVA</language>
+  <offset>12</offset>
+  <length>22</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/BridgeWebChromeClient.java</file>
+  <line>50</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="field" FQNAME="com.getcapacitor.BridgeWebChromeClient activityLauncher" />
+  <problem_class id="RawUseOfParameterizedType" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Raw use of parameterized class</problem_class>
+  <description>Raw use of parameterized class &lt;code&gt;ActivityResultLauncher&lt;/code&gt; #loc</description>
+  <highlighted_element>ActivityResultLauncher</highlighted_element>
+  <language>JAVA</language>
+  <offset>12</offset>
+  <length>22</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/Plugin.java</file>
+  <line>679</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor</package>
+  <entry_point TYPE="method" FQNAME="com.getcapacitor.Plugin void notifyListeners(java.lang.String eventName, com.getcapacitor.JSObject data, boolean retainUntilConsumed)" />
+  <problem_class id="RawUseOfParameterizedType" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Raw use of parameterized class</problem_class>
+  <description>Raw use of parameterized class &lt;code&gt;CopyOnWriteArrayList&lt;/code&gt; #loc</description>
+  <highlighted_element>CopyOnWriteArrayList</highlighted_element>
+  <language>JAVA</language>
+  <offset>61</offset>
+  <length>20</length>
+</problem>
+</problems>

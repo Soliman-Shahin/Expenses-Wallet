@@ -1,19 +1,16 @@
 import { HttpClient } from '@angular/common/http';
-import {
-  ChangeDetectorRef,
-  Directive,
-  HostBinding,
-  inject,
-  OnDestroy,
-  OnInit,
-  Type,
-} from '@angular/core';
+import { ChangeDetectorRef, Directive, HostBinding, inject, OnDestroy, OnInit, Type, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { Observable, Subject, throwError } from 'rxjs';
-import { catchError, finalize, takeUntil } from 'rxjs/operators';
-import { HeaderService } from 'src/app/layout/services';
+import {
+  BehaviorSubject,
+  Observable,
+  Subject,
+  throwError,
+  combineLatest,
+} from 'rxjs';
+import { catchError, takeUntil, map } from 'rxjs/operators';
 import { ToastService } from '../services/toast.service';
 import { TranslationService } from '../services/translation.service';
 import {
@@ -30,6 +27,10 @@ import { ThemeService } from '../services';
 import { TokenService } from 'src/app/modules/auth/services';
 import { CategoryService } from 'src/app/modules/categories/services';
 import { ExpenseService } from 'src/app/core/services/expense.service';
+import { MENU_ITEMS } from 'src/app/core/constants';
+import { MenuItem } from '../models';
+import { AlertService } from '../services/alert.service';
+
 /**
  * Base component that provides common functionality and dependency injection.
  * Can be used with both standalone and module-based components.
@@ -43,6 +44,11 @@ export abstract class BaseComponent<T = any> implements OnInit, OnDestroy {
   protected language: string = 'en';
   protected user: User | null = null;
   protected readonly destroy$ = new Subject<void>();
+
+  // Public observables for child components
+  public language$ = new BehaviorSubject<string>(this.currentLang);
+  public profile$!: Observable<{ user: User | null; isLoggedIn: boolean }>;
+  public links$!: Observable<MenuItem[]>;
 
   // Host bindings for common component states
   @HostBinding('class.loading') get isLoading() {
@@ -77,7 +83,6 @@ export abstract class BaseComponent<T = any> implements OnInit, OnDestroy {
   protected readonly translationService = inject(TranslationService);
   protected readonly themeService = inject(ThemeService);
   protected readonly http = inject(HttpClient);
-  protected readonly headerService = inject(HeaderService);
   protected readonly tokenService = inject(TokenService);
   // protected readonly transactionService = inject(TransactionService);
 
@@ -93,6 +98,7 @@ export abstract class BaseComponent<T = any> implements OnInit, OnDestroy {
   protected readonly loadingService = inject(LoadingService);
   protected readonly errorHandler = inject(ErrorHandlerService);
   protected readonly state = inject(ComponentStateService);
+  protected readonly alertService = inject(AlertService);
 
   /**
    * Initialize the component with common setup
@@ -101,6 +107,29 @@ export abstract class BaseComponent<T = any> implements OnInit, OnDestroy {
     this.initializeLanguage();
     this.initializeUser();
     this.subscribeToUserChanges();
+
+    this.profile$ = combineLatest([
+      this.authService.user$,
+      this.authService.isLoggedIn$,
+    ]).pipe(map(([user, isLoggedIn]) => ({ user, isLoggedIn })));
+
+    this.links$ = this.authService.isLoggedIn$.pipe(
+      map((isLoggedIn) => {
+        const links = isLoggedIn
+          ? MENU_ITEMS
+          : MENU_ITEMS.filter((item) => !item.requiresAuth);
+
+        return links.map((item: MenuItem) => ({
+          ...item,
+        }));
+      })
+    );
+
+    this.translateService.onLangChange
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((event: { lang: string }) => {
+        this.language$.next(event.lang);
+      });
   }
 
   //#region Getters & Setters
@@ -293,7 +322,15 @@ export abstract class BaseComponent<T = any> implements OnInit, OnDestroy {
    */
   protected logOut(): void {
     this.state.setLoading(true);
-    this.authService.logout();
+    this.authService.logout().subscribe({
+      next: () => {
+        this.state.setLoading(false);
+      },
+      error: () => {
+        // Even if an error occurs, ensure the loader is hidden
+        this.state.setLoading(false);
+      },
+    });
   }
 
   /**

@@ -1,0 +1,41 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/live-updates/android/build.gradle</file>
+  <line>11</line>
+  <module>android.capacitor-live-updates</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/../node_modules/@capacitor/live-updates/android/build.gradle" />
+  <problem_class id="AndroidLintJcenterRepositoryObsolete" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">JCenter Maven repository is read-only</problem_class>
+  <hints />
+  <description>&lt;html&gt;JCenter Maven repository is no longer receiving updates: newer library versions may be available elsewhere&lt;/html&gt;</description>
+  <highlighted_element>jcenter()</highlighted_element>
+  <language>Groovy</language>
+  <offset>8</offset>
+  <length>9</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@codetrix-studio/capacitor-google-auth/android/build.gradle</file>
+  <line>10</line>
+  <module>android.codetrix-studio-capacitor-google-auth</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/../node_modules/@codetrix-studio/capacitor-google-auth/android/build.gradle" />
+  <problem_class id="AndroidLintJcenterRepositoryObsolete" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">JCenter Maven repository is read-only</problem_class>
+  <hints />
+  <description>&lt;html&gt;JCenter Maven repository is no longer receiving updates: newer library versions may be available elsewhere&lt;/html&gt;</description>
+  <highlighted_element>jcenter()</highlighted_element>
+  <language>Groovy</language>
+  <offset>8</offset>
+  <length>9</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@codetrix-studio/capacitor-google-auth/android/build.gradle</file>
+  <line>48</line>
+  <module>android.codetrix-studio-capacitor-google-auth</module>
+  <entry_point TYPE="file" FQNAME="file://$PROJECT_DIR$/../node_modules/@codetrix-studio/capacitor-google-auth/android/build.gradle" />
+  <problem_class id="AndroidLintJcenterRepositoryObsolete" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">JCenter Maven repository is read-only</problem_class>
+  <hints />
+  <description>&lt;html&gt;JCenter Maven repository is no longer receiving updates: newer library versions may be available elsewhere&lt;/html&gt;</description>
+  <highlighted_element>jcenter()</highlighted_element>
+  <language>Groovy</language>
+  <offset>4</offset>
+  <length>9</length>
+</problem>
+</problems>

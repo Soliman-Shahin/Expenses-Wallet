@@ -1,9 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'sh.expenses.wallet',
+  appId: 'com.shahin.expenseswallet',
   appName: 'Expenses Wallet',
-  bundledWebRuntime: false,
   webDir: 'www',
   server: {
     androidScheme: 'https',
@@ -16,23 +15,14 @@ const config: CapacitorConfig = {
       maxVersions: 2,
     },
     SplashScreen: {
-      launchAutoHide: false,
-      launchShowDuration: 3000,
+      launchAutoHide: true,
+      launchShowDuration: 1500,
     },
-    App: {
-      icon: './src/assets/icon/favicon.png',
-    },
-  },
-  cordova: {
-    preferences: {
-      ScrollEnabled: 'false',
-      'android-minSdkVersion': '19',
-      BackupWebStorage: 'none',
-      SplashMaintainAspectRatio: 'true',
-      FadeSplashScreenDuration: '300',
-      SplashShowOnlyFirstTime: 'false',
-      SplashScreen: 'screen',
-      SplashScreenDelay: '3000',
+    GoogleAuth: {
+      scopes: ['profile', 'email'],
+      serverClientId:
+        '358709669585-0td9nf2p58ncgtoreopgqkq7vosco473.apps.googleusercontent.com',
+      forceCodeForRefreshToken: true,
     },
   },
 };

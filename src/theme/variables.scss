@@ -1,279 +1,481 @@
 // Ionic Variables and Theming. For more info, please see:
 // http://ionicframework.com/docs/theming/
 
-// === THEME VARIABLE CONSOLIDATION ===
-// Imports
-@import "forms-variables";
-@import "layout-variables";
-@import "typography";
+// ===================================================================
+//
+//  EXPENSES WALLET - MASTER DESIGN TOKENS (v2.0)
+//
+//  This file is the single source of truth for all design tokens.
+//  - Core & Semantic Color System
+//  - Advanced Tokens (Spacing, Typography, Shadows, Effects)
+//  - Component-specific Variables
+//  - Dark Theme
+//
+// ===================================================================
 
-// === CORE COLOR PALETTE ===
 :root {
-  // === GRADIENTS ===
-  --brand-gradient: linear-gradient(90deg, #4361ee 0%, #43eefd 100%);
-  --surface-gradient: linear-gradient(180deg, #f8f9fe 0%, #e8eafc 100%);
+  // ===================================================================
+  // === CORE & SEMANTIC COLOR SYSTEM
+  // ===================================================================
 
-  // === SHADOWS ===
-  --shadow-elevated: 0 4px 24px rgba(67, 97, 238, 0.08);
-  --shadow-card: 0 2px 12px rgba(67, 97, 238, 0.05);
-  --shadow-header: 0 2px 10px rgba(67, 97, 238, 0.07);
-
-  // === TYPOGRAPHY ===
+  // --- Base Font ---
   --ion-font-family: "Ubuntu", sans-serif;
 
-  // === PRIMARY COLOR ===
-  --ion-color-primary: #4361ee; // Modern blue
-  --ion-color-primary-rgb: 67, 97, 238;
+  // --- Brand Colors (Light Theme) ---
+  --ion-color-primary: #3867d6;
+  --ion-color-primary-rgb: 56, 103, 214;
   --ion-color-primary-contrast: #ffffff;
   --ion-color-primary-contrast-rgb: 255, 255, 255;
-  --ion-color-primary-shade: #3b56d0;
-  --ion-color-primary-tint: #5671ee;
+  --ion-color-primary-shade: #305abf;
+  --ion-color-primary-tint: #4a76dd;
 
-  // === SECONDARY COLOR ===
-  --ion-color-secondary: #43eefd; // Modern cyan
-  --ion-color-secondary-rgb: 67, 238, 253;
+  --ion-color-secondary: #0fb9b1;
+  --ion-color-secondary-rgb: 15, 185, 177;
   --ion-color-secondary-contrast: #ffffff;
   --ion-color-secondary-contrast-rgb: 255, 255, 255;
-  --ion-color-secondary-shade: #2fb9d3;
-  --ion-color-secondary-tint: #6ff3fd;
+  --ion-color-secondary-shade: #0da29b;
+  --ion-color-secondary-tint: #27bfb7;
 
-  // === TERTIARY COLOR ===
-  --ion-color-tertiary: #f472b6; // Accent pink
-  --ion-color-tertiary-rgb: 244, 114, 182;
+  --ion-color-tertiary: #fa8231;
+  --ion-color-tertiary-rgb: 250, 130, 49;
   --ion-color-tertiary-contrast: #ffffff;
   --ion-color-tertiary-contrast-rgb: 255, 255, 255;
-  --ion-color-tertiary-shade: #ec4899;
-  --ion-color-tertiary-tint: #f9a8d4;
+  --ion-color-tertiary-shade: #da722b;
+  --ion-color-tertiary-tint: #fb8e45;
 
-  // === SUCCESS COLOR ===
-  --ion-color-success: #16c784;
-  --ion-color-success-rgb: 22, 199, 132;
+  // --- Status Colors (Light Theme) ---
+  --ion-color-success: #20bf6b;
+  --ion-color-success-rgb: 32, 191, 107;
   --ion-color-success-contrast: #ffffff;
   --ion-color-success-contrast-rgb: 255, 255, 255;
-  --ion-color-success-shade: #12a06a;
-  --ion-color-success-tint: #2de5a3;
+  --ion-color-success-shade: #1ca85e;
+  --ion-color-success-tint: #36c579;
 
-  // === WARNING COLOR ===
-  --ion-color-warning: #fbbf24;
-  --ion-color-warning-rgb: 251, 191, 36;
-  --ion-color-warning-contrast: #1a202c;
-  --ion-color-warning-contrast-rgb: 26, 32, 44;
-  --ion-color-warning-shade: #eab308;
-  --ion-color-warning-tint: #fde68a;
+  --ion-color-warning: #f7b731;
+  --ion-color-warning-rgb: 247, 183, 49;
+  --ion-color-warning-contrast: #000000;
+  --ion-color-warning-contrast-rgb: 0, 0, 0;
+  --ion-color-warning-shade: #d8a12b;
+  --ion-color-warning-tint: #f8be45;
 
-  // === DANGER COLOR ===
-  --ion-color-danger: #ef4444;
-  --ion-color-danger-rgb: 239, 68, 68;
+  --ion-color-danger: #eb3b5a;
+  --ion-color-danger-rgb: 235, 59, 90;
   --ion-color-danger-contrast: #ffffff;
   --ion-color-danger-contrast-rgb: 255, 255, 255;
-  --ion-color-danger-shade: #b91c1c;
-  --ion-color-danger-tint: #f87171;
+  --ion-color-danger-shade: #ce344f;
+  --ion-color-danger-tint: #ed4f6a;
 
-  // === DARK COLOR ===
-  --ion-color-dark: #18181b;
-  --ion-color-dark-rgb: 24, 24, 27;
-  --ion-color-dark-contrast: #fafafa;
-  --ion-color-dark-contrast-rgb: 250, 250, 250;
-  --ion-color-dark-shade: #0a0a0a;
-  --ion-color-dark-tint: #27272a;
+  // --- Neutral Gray Scale (Light Theme) ---
+  --ew-color-gray-50: #f8f9fa;   // Lightest
+  --ew-color-gray-100: #e9ecef;
+  --ew-color-gray-200: #dee2e6;
+  --ew-color-gray-300: #ced4da;
+  --ew-color-gray-400: #adb5bd;
+  --ew-color-gray-500: #868e96;
+  --ew-color-gray-600: #495057;
+  --ew-color-gray-700: #343a40;
+  --ew-color-gray-800: #212529;
+  --ew-color-gray-900: #121212;   // Darkest
 
-  // === MEDIUM COLOR ===
-  --ion-color-medium: #a1a1aa;
-  --ion-color-medium-rgb: 161, 161, 170;
+  // --- Semantic Colors (Light Theme) ---
+  --ion-background-color: #f6f8fa;
+  --ion-background-color-rgb: 246, 248, 250;
+  --ion-text-color: var(--ew-color-gray-900);
+  --ion-text-color-rgb: 18, 18, 18;
+  --ion-border-color: var(--ew-color-gray-200);
+
+  --ion-item-background: #ffffff;
+  --ion-card-background: #ffffff;
+
+  // --- Legacy Ionic Neutrals (mapped to new system for compatibility) ---
+  --ion-color-light: var(--ew-color-gray-50);
+  --ion-color-light-rgb: 248, 249, 250;
+  --ion-color-light-contrast: var(--ew-color-gray-900);
+  --ion-color-light-contrast-rgb: 33, 37, 41;
+
+  --ion-color-medium: var(--ew-color-gray-600);
+  --ion-color-medium-rgb: 134, 142, 150;
   --ion-color-medium-contrast: #ffffff;
   --ion-color-medium-contrast-rgb: 255, 255, 255;
-  --ion-color-medium-shade: #71717a;
-  --ion-color-medium-tint: #d4d4d8;
 
-  // === LIGHT COLOR ===
-  --ion-color-light: #f9fafb;
-  --ion-color-light-rgb: 249, 250, 251;
-  --ion-color-light-contrast: #1a202c;
-  --ion-color-light-contrast-rgb: 26, 32, 44;
-  --ion-color-light-shade: #e5e7eb;
-  --ion-color-light-tint: #f3f4f6;
+  --ion-color-dark: var(--ew-color-gray-900);
+  --ion-color-dark-rgb: 33, 37, 41;
+  --ion-color-dark-contrast: #ffffff;
+  --ion-color-dark-contrast-rgb: 255, 255, 255;
 
-  // === BACKGROUND & SURFACE ===
-  --ion-background-color: #f6f8fa;
-  --ion-text-color: #1a202c;
-  --ion-item-background: #fff;
-  --ion-card-background: #fff;
-  --ion-border-color: #e5e7eb;
+  // ===================================================================
+  // === ADVANCED TOKENS
+  // ===================================================================
 
-  // === TRANSPARENT COLORS ===
-  --ion-color-primary-rgb-transparent: rgba(var(--ion-color-primary-rgb), 0.2);
-  --ion-color-primary-rgb-transparent-hover: rgba(
-    var(--ion-color-primary-rgb),
-    0.3
-  );
+  // --- Gradients & Effects ---
+  --gradient-direction: to right;
+  --brand-gradient: linear-gradient(var(--gradient-direction), var(--ion-color-primary), var(--ion-color-secondary));
+  --surface-gradient: linear-gradient(180deg, #f8f9fe 0%, #e8eafc 100%);
+  --glass-background: rgba(255, 255, 255, 0.55);
+  --glass-background-dark: rgba(28, 30, 40, 0.65);
+  --glass-blur: backdrop-filter: blur(18px);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.2);
 
-  // === ANIMATION & TRANSITION ===
-  --animation-duration-fast: 120ms;
-  --animation-duration-base: 220ms;
-  --animation-duration-slow: 400ms;
-  --animation-easing: cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-base: all var(--animation-duration-base) var(--animation-easing);
+  // --- Spacing (Consistent Scale) ---
+  --ew-space-0: 0;      // 0px
+  --ew-space-1: 0.25rem; // 4px
+  --ew-space-2: 0.5rem;  // 8px
+  --ew-space-3: 0.75rem; // 12px
+  --ew-space-4: 1rem;    // 16px
+  --ew-space-5: 1.25rem; // 20px
+  --ew-space-6: 1.5rem;  // 24px
+  --ew-space-7: 2rem;    // 32px
+  --ew-space-8: 2.5rem;  // 40px
 
-  // === Z-INDEX SCALE ===
-  --z-index-dropdown: 1000;
-  --z-index-sticky: 1020;
-  --z-index-fixed: 1030;
-  --z-index-modal-backdrop: 1040;
-  --z-index-modal: 1050;
-  --z-index-popover: 1060;
-  --z-index-tooltip: 1070;
+  // --- Sizing (for width/height) ---
+  --ew-size-0: 0;
+  --ew-size-1: 0.25rem;   // 4px
+  --ew-size-2: 0.5rem;    // 8px
+  --ew-size-3: 0.75rem;   // 12px
+  --ew-size-4: 1rem;      // 16px
+  --ew-size-5: 1.25rem;   // 20px
+  --ew-size-6: 1.5rem;    // 24px
+  --ew-size-7: 1.75rem;   // 28px
+  --ew-size-8: 2rem;      // 32px
+  --ew-size-9: 2.25rem;   // 36px
+  --ew-size-10: 2.5rem;   // 40px
+  --ew-size-11: 2.75rem;   // 44px
+  --ew-size-12: 3rem;     // 48px
+  --ew-size-14: 3.5rem;   // 56px
+  --ew-size-15: 3.75rem;  // 60px
+  --ew-size-16: 4rem;     // 64px
+  --ew-size-20: 5rem;     // 80px
+  --ew-size-24: 6rem;     // 96px
+  --ew-size-28: 7rem;     // 112px
+  --ew-size-32: 8rem;     // 128px
+  --ew-size-36: 9rem;     // 144px
+  --ew-size-40: 10rem;    // 160px
+  --ew-size-44: 11rem;    // 176px
+  --ew-size-48: 12rem;    // 192px
+  --ew-size-52: 13rem;    // 208px
+  --ew-size-56: 14rem;    // 224px
+  --ew-size-60: 15rem;    // 240px
+  --ew-size-64: 16rem;    // 256px
+  --ew-size-72: 18rem;    // 288px
+  --ew-size-80: 20rem;    // 320px
+  --ew-size-96: 24rem;    // 384px
+
+  // --- Radius ---
+  --ew-radius-xs: 4px;
+  --ew-radius-sm: 8px;
+  --ew-radius-md: 12px;
+  --ew-radius-lg: 16px;
+  --ew-radius-xl: 24px;
+  --ew-radius-full: 50%;
+  --ew-radius-pill: 9999px;
+
+  // --- Border Width ---
+  --ew-border-width-sm: 1px;
+  --ew-border-width-md: 2px;
+  --ew-border-width-lg: 4px;
+  --ew-border-width-xl: 8px;
+
+  // --- Shadows (Layered & Nuanced) ---
+  --ew-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --ew-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --ew-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --ew-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --ew-shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+  --ew-shadow-none: none;
+  --ew-shadow-focus: 0 0 0 3px rgba(var(--ion-color-primary-rgb), 0.4);
+
+  // --- Animation & Transition ---
+  --ew-duration-short: 150ms;
+  --ew-duration-base: 250ms;
+  --ew-duration-long: 400ms;
+  --ew-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ew-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ew-ease-elastic: cubic-bezier(0.64, 0, 0.78, 0);
+  --ew-transition-base: all var(--ew-duration-base) var(--ew-ease-in-out);
+
+  // --- Z-Index ---
+  --ew-z-index-base: 1;
+  --ew-z-index-sticky: 1020;
+  --ew-z-index-fab: 1030;
+  --ew-z-index-drawer: 1040;
+  --ew-z-index-modal: 1050;
+  --ew-z-index-popover: 1060;
+  --ew-z-index-toast: 1080;
+  --ew-z-index-tooltip: 1090;
+
+  // ===================================================================
+  // === TYPOGRAPHY TOKENS
+  // ===================================================================
+
+  // --- Font Families ---
+  --ew-font-family-base: "Ubuntu", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --ew-font-family-heading: "Montserrat", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --ew-font-family-mono: "Roboto Mono", "Fira Mono", monospace;
+
+  // --- Font Weights ---
+  --ew-font-weight-light: 300;
+  --ew-font-weight-regular: 400;
+  --ew-font-weight-medium: 500;
+  --ew-font-weight-semibold: 600;
+  --ew-font-weight-bold: 700;
+
+  // --- Fluid Font Sizes (using clamp) ---
+  --ew-font-size-xs: clamp(0.75rem, 0.69rem + 0.28vw, 0.88rem);   /* ~12px -> 14px */
+  --ew-font-size-sm: clamp(0.88rem, 0.80rem + 0.37vw, 1.06rem);   /* ~14px -> 17px */
+  --ew-font-size-base: clamp(1rem, 0.91rem + 0.46vw, 1.25rem);      /* ~16px -> 20px */
+  --ew-font-size-lg: clamp(1.13rem, 1.01rem + 0.58vw, 1.44rem);   /* ~18px -> 23px */
+  --ew-font-size-xl: clamp(1.25rem, 1.10rem + 0.74vw, 1.63rem);   /* ~20px -> 26px */
+  --ew-font-size-2xl: clamp(1.50rem, 1.30rem + 1.02vw, 2.00rem);    /* ~24px -> 32px */
+  --ew-font-size-3xl: clamp(1.88rem, 1.58rem + 1.48vw, 2.50rem);   /* ~30px -> 40px */
+  --ew-font-size-4xl: clamp(2.25rem, 1.85rem + 2.04vw, 3.13rem);   /* ~36px -> 50px */
+
+  // --- Line Heights ---
+  --ew-line-height-tight: 1.25;
+  --ew-line-height-normal: 1.5;
+  --ew-line-height-relaxed: 1.75;
+
+  // --- Semantic Text Colors ---
+  --ew-text-color-primary: var(--ew-color-gray-900);
+  --ew-text-color-secondary: var(--ew-color-gray-700);
+  --ew-text-color-muted: var(--ew-color-gray-500);
+  --ew-text-color-inverted: #ffffff;
+
+  // ===================================================================
+  // === COMPONENT-SPECIFIC TOKENS
+  // ===================================================================
+
+  // --- Layout ---
+  --ew-container-padding: var(--ew-space-4);
+  --ew-container-max-width: 1280px;
+  --ew-header-height: 60px;
+  --ew-footer-height: 64px;
+  --ew-tab-bar-height: 72px;
+
+  // --- Card ---
+  --ew-card-padding: var(--ew-space-5);
+  --ew-card-border-radius: var(--ew-radius-lg);
+  --ew-card-box-shadow: var(--ew-shadow-md);
+  --ew-card-background: var(--ion-card-background);
+
+  // --- Forms ---
+  --ew-input-padding: 0.75rem 1rem;
+  --ew-input-border-radius: var(--ew-radius-md);
+  --ew-input-border-width: 1px;
+  --ew-input-border-color: var(--ew-color-gray-300);
+  --ew-input-background: var(--ion-item-background);
+  --ew-input-placeholder-color: var(--ew-color-gray-500);
+  --ew-input-focus-border-color: var(--ion-color-primary);
+  --ew-input-focus-shadow: var(--ew-shadow-focus);
+
+  // ===================================================================
+  // === EXTENDED DESIGN TOKENS (v2.1)
+  // ===================================================================
+
+  // --- Color Opacity Variants ---
+  --primary-alpha-10: rgba(var(--ion-color-primary-rgb), 0.1);
+  --primary-alpha-20: rgba(var(--ion-color-primary-rgb), 0.2);
+  --primary-alpha-30: rgba(var(--ion-color-primary-rgb), 0.3);
+  --primary-alpha-50: rgba(var(--ion-color-primary-rgb), 0.5);
+  --primary-alpha-80: rgba(var(--ion-color-primary-rgb), 0.8);
+
+  --secondary-alpha-10: rgba(var(--ion-color-secondary-rgb), 0.1);
+  --secondary-alpha-20: rgba(var(--ion-color-secondary-rgb), 0.2);
+  --secondary-alpha-50: rgba(var(--ion-color-secondary-rgb), 0.5);
+
+  --success-alpha-10: rgba(var(--ion-color-success-rgb), 0.1);
+  --success-alpha-20: rgba(var(--ion-color-success-rgb), 0.2);
+
+  --danger-alpha-10: rgba(var(--ion-color-danger-rgb), 0.1);
+  --danger-alpha-20: rgba(var(--ion-color-danger-rgb), 0.2);
+
+  --warning-alpha-10: rgba(var(--ion-color-warning-rgb), 0.1);
+  --warning-alpha-20: rgba(var(--ion-color-warning-rgb), 0.2);
+
+  // --- Advanced Gradient Presets ---
+  --gradient-primary-secondary: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-secondary) 100%);
+  --gradient-primary-tertiary: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-tertiary) 100%);
+  --gradient-success: linear-gradient(135deg, #20bf6b 0%, #34d399 100%);
+  --gradient-danger: linear-gradient(135deg, #eb3b5a 0%, #ff4757 100%);
+  --gradient-warning: linear-gradient(135deg, #f7b731 0%, #facc15 100%);
+  --gradient-purple: linear-gradient(135deg, #a55eea 0%, #8854d0 100%);
+  --gradient-ocean: linear-gradient(135deg, #3867d6 0%, #0fb9b1 100%);
+  --gradient-sunset: linear-gradient(135deg, #fa8231 0%, #eb3b5a 100%);
+  --gradient-radial-primary: radial-gradient(circle, var(--ion-color-primary), var(--ion-color-primary-shade));
+
+  // --- Semantic Transaction Colors ---
+  --color-income: var(--ion-color-success);
+  --color-income-rgb: var(--ion-color-success-rgb);
+  --color-expense: var(--ion-color-danger);
+  --color-expense-rgb: var(--ion-color-danger-rgb);
+  --color-investment: var(--ion-color-tertiary);
+  --color-investment-rgb: var(--ion-color-tertiary-rgb);
+  --color-savings: #8854d0;
+  --color-savings-rgb: 136, 84, 208;
+
+  // --- Missing Shadow Variables (for component compatibility) ---
+  --ew-shadow-1: var(--ew-shadow-sm);
+  --ew-shadow-2: var(--ew-shadow-md);
+  --ew-shadow-3: var(--ew-shadow-lg);
+  --ew-shadow-4: var(--ew-shadow-xl);
+
+  // --- Animation Duration Variables (standardized names) ---
+  --ew-animation-duration-instant: 100ms;
+  --ew-animation-duration-fast: var(--ew-duration-short);
+  --ew-animation-duration-normal: var(--ew-duration-base);
+  --ew-animation-duration-slow: var(--ew-duration-long);
+  --ew-animation-duration-slower: 600ms;
+
+  // --- Animation Easing (standardized names) ---
+  --ew-animation-easing-standard: var(--ew-ease-in-out);
+  --ew-animation-easing-emphasized: cubic-bezier(0.4, 0, 0.2, 1);
+  --ew-animation-easing-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ew-animation-easing-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  // --- Background Patterns & Overlays ---
+  --ew-overlay-light: rgba(0, 0, 0, 0.5);
+  --ew-overlay-dark: rgba(0, 0, 0, 0.7);
+  --ew-overlay-blur: rgba(255, 255, 255, 0.1);
+
+  // --- Shimmer Effect ---
+  --shimmer-gradient: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.2) 50%, 
+    transparent 100%);
+
 }
 
-// Create a Sass map from the CSS variables
-$theme-colors: (
-  "primary": var(--ion-color-primary),
-  "secondary": var(--ion-color-secondary),
-  "tertiary": var(--ion-color-tertiary),
-  "success": var(--ion-color-success),
-  "warning": var(--ion-color-warning),
-  "danger": var(--ion-color-danger),
-  "dark": var(--ion-color-dark),
-  "medium": var(--ion-color-medium),
-  "light": var(--ion-color-light),
-);
+// ===================================================================
+// === DARK THEME
+// ===================================================================
+.dark {
+  // --- Brand Colors (Neon Noir Dark Theme) ---
+  --ion-color-primary: #58a6ff; // Bright Blue
+  --ion-color-primary-rgb: 88, 166, 255;
+  --ion-color-primary-contrast: #0d1117;
+  --ion-color-primary-contrast-rgb: 13, 17, 23;
+  --ion-color-primary-shade: #4d90e0;
+  --ion-color-primary-tint: #67acff;
 
-body.dark {
-  --brand-gradient: linear-gradient(90deg, #181a20 0%, #23263a 100%);
-  --surface-gradient: linear-gradient(180deg, #181a20 0%, #23263a 100%);
-  --shadow-elevated: 0 4px 24px rgba(59, 130, 246, 0.10);
-  --shadow-card: 0 2px 12px rgba(16, 185, 129, 0.09);
-  --shadow-header: 0 2px 10px rgba(59, 130, 246, 0.11);
+  --ion-color-secondary: #f778ba; // Neon Pink
+  --ion-color-secondary-rgb: 247, 120, 186;
+  --ion-color-secondary-contrast: #0d1117;
+  --ion-color-secondary-contrast-rgb: 13, 17, 23;
+  --ion-color-secondary-shade: #d969a3;
+  --ion-color-secondary-tint: #f884c1;
 
-  --brand-gradient: linear-gradient(90deg, #282a36 0%, #6272a4 100%);
-  --surface-gradient: linear-gradient(180deg, #282a36 0%, #44475a 100%);
-  --shadow-elevated: 0 4px 24px rgba(98, 114, 164, 0.10);
-  --shadow-card: 0 2px 12px rgba(98, 114, 164, 0.08);
-  --shadow-header: 0 2px 10px rgba(98, 114, 164, 0.09);
+  --ion-color-tertiary: #39c5fe; // Bright Cyan
+  --ion-color-tertiary-rgb: 57, 197, 254;
+  --ion-color-tertiary-contrast: #0d1117;
+  --ion-color-tertiary-contrast-rgb: 13, 17, 23;
+  --ion-color-tertiary-shade: #32adde;
+  --ion-color-tertiary-tint: #4cc9fe;
 
-  /** primary **/
-  --ion-color-primary: #3b82f6; // Modern blue
-  --ion-color-primary-rgb: 59, 130, 246;
-  --ion-color-primary-contrast: #fff;
-  --ion-color-primary-contrast-rgb: 255, 255, 255;
-  --ion-color-primary-shade: #2563eb;
-  --ion-color-primary-tint: #60a5fa;
+  // --- Status Colors (Neon Noir Dark Theme) ---
+  --ion-color-success: #34d399; // Vibrant Green
+  --ion-color-success-rgb: 52, 211, 153;
+  --ion-color-success-contrast: #0d1117;
+  --ion-color-success-contrast-rgb: 13, 17, 23;
+  --ion-color-success-shade: #2db887;
+  --ion-color-success-tint: #48d9a1;
 
-  --ion-color-primary-rgb: 189, 147, 249;
-  --ion-color-primary-contrast: #282a36;
-  --ion-color-primary-contrast-rgb: 40, 42, 54;
-  --ion-color-primary-shade: #a681da;
-  --ion-color-primary-tint: #c39dfb;
+  --ion-color-warning: #facc15; // Vivid Yellow
+  --ion-color-warning-rgb: 250, 204, 21;
+  --ion-color-warning-contrast: #0d1117;
+  --ion-color-warning-contrast-rgb: 13, 17, 23;
+  --ion-color-warning-shade: #dcb213;
+  --ion-color-warning-tint: #fbcf2d;
 
-  /** secondary **/
-  --ion-color-secondary: #10b981; // Modern green
-  --ion-color-secondary-rgb: 16, 185, 129;
-  --ion-color-secondary-contrast: #fff;
-  --ion-color-secondary-contrast-rgb: 255, 255, 255;
-  --ion-color-secondary-shade: #059669;
-  --ion-color-secondary-tint: #34d399;
-
-  --ion-color-secondary-rgb: 255, 121, 198;
-  --ion-color-secondary-contrast: #282a36;
-  --ion-color-secondary-contrast-rgb: 40, 42, 54;
-  --ion-color-secondary-shade: #e06ab0;
-  --ion-color-secondary-tint: #ff86ce;
-
-  /** tertiary **/
-  --ion-color-tertiary: #f59e42; // Accent orange
-  --ion-color-tertiary-rgb: 245, 158, 66;
-  --ion-color-tertiary-contrast: #fff;
-  --ion-color-tertiary-contrast-rgb: 255, 255, 255;
-  --ion-color-tertiary-shade: #ea580c;
-  --ion-color-tertiary-tint: #fbbf24;
-
-  --ion-color-tertiary-rgb: 139, 233, 253;
-  --ion-color-tertiary-contrast: #282a36;
-  --ion-color-tertiary-contrast-rgb: 40, 42, 54;
-  --ion-color-tertiary-shade: #7ccce0;
-  --ion-color-tertiary-tint: #98eefe;
-
-  /** success **/
-  --ion-color-success: #50fa7b;
-  --ion-color-success-rgb: 80, 250, 123;
-  --ion-color-success-contrast: #282a36;
-  --ion-color-success-contrast-rgb: 40, 42, 54;
-  --ion-color-success-shade: #46dc6c;
-  --ion-color-success-tint: #62fa88;
-
-  /** warning **/
-  --ion-color-warning: #f1fa8c;
-  --ion-color-warning-rgb: 241, 250, 140;
-  --ion-color-warning-contrast: #282a36;
-  --ion-color-warning-contrast-rgb: 40, 42, 54;
-  --ion-color-warning-shade: #d4dc7b;
-  --ion-color-warning-tint: #f2fb97;
-
-  /** danger **/
-  --ion-color-danger: #ff5555;
-  --ion-color-danger-rgb: 255, 85, 85;
+  --ion-color-danger: #ff4757; // Bright Red
+  --ion-color-danger-rgb: 255, 71, 87;
   --ion-color-danger-contrast: #ffffff;
   --ion-color-danger-contrast-rgb: 255, 255, 255;
-  --ion-color-danger-shade: #e04b4b;
-  --ion-color-danger-tint: #ff6666;
+  --ion-color-danger-shade: #e03f4d;
+  --ion-color-danger-tint: #ff5b6a;
 
-  /** dark **/
-  --ion-color-dark: #f8f8f2;
-  --ion-color-dark-rgb: 248, 248, 242;
-  --ion-color-dark-contrast: #282a36;
-  --ion-color-dark-contrast-rgb: 40, 42, 54;
-  --ion-color-dark-shade: #d9d9d5;
-  --ion-color-dark-tint: #f9f9f3;
+  // --- Neutral Gray Scale (Neon Noir Dark Theme) ---
+  --ew-color-gray-50: #0d1117;   // Darkest (Background)
+  --ew-color-gray-100: #161b22;  // Cards / Items
+  --ew-color-gray-200: #21262d;  // Borders
+  --ew-color-gray-300: #30363d;  // UI Elements
+  --ew-color-gray-400: #484f58;
+  --ew-color-gray-500: #6e7681;  // Muted Text
+  --ew-color-gray-600: #8b949e;  // Secondary Text
+  --ew-color-gray-700: #c9d1d9;  // Primary Text
+  --ew-color-gray-800: #f0f6fc;  // Lightest
+  --ew-color-gray-900: #ffffff;  // Pure White
 
-  /** medium **/
-  --ion-color-medium: #6272a4;
-  --ion-color-medium-rgb: 98, 114, 164;
-  --ion-color-medium-contrast: #f8f8f2;
-  --ion-color-medium-contrast-rgb: 248, 248, 242;
-  --ion-color-medium-shade: #566490;
-  --ion-color-medium-tint: #7280ac;
+  // --- Semantic Colors (Neon Noir Dark Theme) ---
+  --ion-background-color: var(--ew-color-gray-50);
+  --ion-background-color-rgb: 13, 17, 23;
+  --ion-text-color: var(--ew-color-gray-700);
+  --ion-text-color-rgb: 201, 209, 217;
+  --ion-border-color: var(--ew-color-gray-200);
 
-  /** light **/
-  --ion-color-light: #44475a;
-  --ion-color-light-rgb: 68, 71, 90;
-  --ion-color-light-contrast: #f8f8f2;
-  --ion-color-light-contrast-rgb: 248, 248, 242;
-  --ion-color-light-shade: #3c3e4f;
-  --ion-color-light-tint: #57596a;
+  --ion-item-background: var(--ew-color-gray-100);
+  --ion-card-background: var(--ew-color-gray-100);
 
-  --ion-background-color: #181a20;
-  --ion-text-color: #f4f4fa;
-  --ion-item-background: #23263a;
-  --ion-card-background: #23263a;
-  --ion-border-color: #23263a;
+  // --- Semantic Text Colors (Dark) ---
+  --ew-text-color-primary: var(--ew-color-gray-900);
+  --ew-text-color-secondary: var(--ew-color-gray-700);
+  --ew-text-color-muted: var(--ew-color-gray-500);
+  --ew-text-color-inverted: var(--ew-color-gray-50);
 
-  --ion-text-color: #f4f4fa;
-  --ion-item-background: #35354b;
-  --ion-border-color: #6272a4;
-
-  --ion-toolbar-background: #35354b;
-  --ion-tab-bar-background: #35354b;
-  --ion-card-background: #35354b;
+  // --- Gradients & Effects (Dark) ---
+  --brand-gradient: linear-gradient(var(--gradient-direction), #121e2d 0%, var(--ion-color-primary) 100%);
+  --surface-gradient: linear-gradient(180deg, #181a20 0%, #23263a 100%);
+  --glass-background: var(--glass-background-dark);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+// ===================================================================
+// === BASE HTML & UTILITIES
+// ===================================================================
 html {
-  /*
-   * For more information on dynamic font scaling, visit the documentation:
-   * https://ionicframework.com/docs/layout/dynamic-font-scaling
-   */
   --ion-dynamic-font: var(--ion-default-dynamic-font);
-  --ion-font-family: "Ubuntu", sans-serif;
+  --ion-font-family: var(--ew-font-family-base);
+}
+
+ion-label,
+ion-title,
+ion-button {
+  text-transform: none !important;
+}
+
+[dir="rtl"],
+:host-context([dir="rtl"]) {
+  --gradient-direction: to left;
 }
 
 [dir="rtl"] body {
   --ion-font-family: "Cairo", sans-serif !important;
 }
 
+// --- Toast Styles ---
 .toast-success {
   --background: var(--ion-color-success);
-  --color: var(--ion-color-light);
+  --color: var(--ion-color-success-contrast);
 }
-
 .toast-error {
   --background: var(--ion-color-danger);
-  --color: var(--ion-color-light);
+  --color: var(--ion-color-danger-contrast);
+}
+.toast-warning {
+  --background: var(--ion-color-warning);
+  --color: var(--ion-color-warning-contrast);
+}
+.toast-info {
+  --background: var(--ion-color-primary);
+  --color: var(--ion-color-primary-contrast);
+}
+
+// ===================================================================
+// === ACCESSIBILITY
+// ===================================================================
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --ew-duration-short: 0ms;
+    --ew-duration-base: 0ms;
+    --ew-duration-long: 0ms;
+    --ew-transition-base: none;
+  }
 }

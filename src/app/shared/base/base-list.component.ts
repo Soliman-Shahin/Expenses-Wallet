@@ -1,4 +1,4 @@
-import { Directive } from '@angular/core';
+import { Directive, ChangeDetectionStrategy } from '@angular/core';
 import { PagingResponse } from '../models';
 import { BasePagedResponse } from './base-paged-response.component';
 

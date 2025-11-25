@@ -1,0 +1,66 @@
+<div class="chart-container" [attr.aria-label]="ariaLabel">
+  <div class="chart-header">
+    <h3 *ngIf="title" class="chart-title">{{ title | translate }}</h3>
+  </div>
+
+  <div class="chart-wrapper" #chartWrapper>
+    <div class="pie-chart">
+      <svg [attr.viewBox]="getViewBox()" xmlns="http://www.w3.org/2000/svg">
+        <g [attr.transform]="getTransform()">
+          <path
+            *ngFor="let slice of slices; let i = index"
+            [attr.d]="slice.path"
+            [attr.fill]="slice.color"
+            [attr.stroke]="strokeColor"
+            [attr.stroke-width]="donutWidth"
+            class="pie-slice"
+            (click)="onSliceClick(chartData[slice.originalIndex])"
+            (mouseenter)="onSliceHover(i)"
+            (focus)="onSliceHover(i)"
+            (mouseleave)="onSliceLeave()"
+            (blur)="onSliceLeave()"
+            [attr.aria-label]="getAriaLabel(slice, i)"
+            role="button"
+            tabindex="0"
+          >
+            <title>{{ getAriaLabel(slice, i) }}</title>
+          </path>
+        </g>
+      </svg>
+    </div>
+
+    <div class="chart-center" *ngIf="centerLabel || centerSubtitle">
+      <div class="center-label" *ngIf="centerLabel">
+        {{ centerLabel | translate }}
+      </div>
+      <div class="center-subtitle" *ngIf="centerSubtitle">
+        {{ centerSubtitle | translate }}
+      </div>
+    </div>
+
+    <app-chart-tooltip
+      #tooltip
+      [data]="tooltipData"
+      [visible]="tooltipVisible"
+      [x]="tooltipX"
+      [y]="tooltipY"
+    ></app-chart-tooltip>
+  </div>
+
+  <div class="chart-legend" *ngIf="showLegend">
+    <div
+      *ngFor="let item of legendData; let i = index"
+      class="legend-item"
+      (click)="toggleSeries(item)"
+      role="button"
+      [attr.aria-pressed]="item.visible"
+      tabindex="0"
+      [class.inactive]="!item.visible"
+      (keyup.enter)="toggleSeries(item)"
+      (keyup.space)="toggleSeries(item); $event.preventDefault()"
+    >
+      <div class="legend-color" [style.background-color]="item.color"></div>
+      <span class="legend-label">{{ item.label | translate }}</span>
+    </div>
+  </div>
+</div>

@@ -1,104 +1,189 @@
-.category-icon {
-  height: 40px !important;
-  width: 40px !important;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-inline-end: 0.7rem;
-}
+:host {
+  // ===================================================================
+  //  Modern Header & Toolbar Styling
+  // ===================================================================
+  ion-header {
+    // Remove default Ionic borders and shadows for a cleaner, modern look.
+    &::after {
+      display: none;
+    }
 
-.no_data {
-  text-align: center;
-  margin-top: 3rem;
-}
+    ion-toolbar {
+      // Use semantic background colors from the master design tokens.
+      --background: var(--ion-background-color);
+      // Remove default padding to allow for custom spacing.
+      --padding-start: 0;
+      --padding-end: 0;
+      --padding-top: 0;
+      --padding-bottom: 0;
+      // Use consistent spacing tokens for a balanced layout.
+      padding: var(--ew-space-2) var(--ew-space-4);
+    }
 
-/* Floating Add Button styles */
-:root {
-  --fab-bg: var(--ion-color-primary);
-  --fab-fg: var(--ion-color-primary-contrast);
-  --fab-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-}
-
-ion-fab .fab-add {
-  --background: var(--fab-bg);
-  --color: var(--fab-fg);
-  box-shadow: var(--fab-shadow);
-  transition: transform 200ms ease, box-shadow 200ms ease, filter 200ms ease;
-}
-
-ion-fab .fab-add:hover {
-  transform: translateY(-2px) scale(1.03);
-  box-shadow: 0 14px 24px rgba(0, 0, 0, 0.22);
-  filter: brightness(1.05);
-}
-
-ion-fab .fab-add:active {
-  transform: translateY(0) scale(0.98);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.18);
-}
-
-ion-fab .fab-add:focus-visible {
-  outline: 3px solid var(--ion-color-primary);
-  outline-offset: 3px;
-}
-
-/* Categories list polish */
-.categories-list {
-  padding: 0.5rem 0.75rem; /* more breathing room */
-}
-
-.category-item {
-  --background: var(--ion-card-background, var(--ion-color-step-50, #1e1e1e));
-  margin: 10px 6px;
-  border-radius: 16px;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
-  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
-  animation: cardAppear 320ms ease both;
-}
-
-.category-item:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
-}
-
-.category-item:active {
-  transform: translateY(0);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-}
-
-.category-item .title {
-  font-weight: 600;
-}
-
-.skeleton-list ion-item {
-  margin: 10px 6px;
-}
-
-/* Appear animation */
-@keyframes cardAppear {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
+    ion-title {
+      // Apply custom heading font styles for better typography.
+      font-family: var(--ew-font-family-heading);
+      font-weight: var(--ew-font-weight-bold);
+      font-size: var(--ew-font-size-2xl);
+      color: var(--ew-text-color-primary);
+      // Ensure title is properly aligned.
+      padding: 0 !important;
+      text-align: start;
+    }
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  // ===================================================================
+  //  Search Bar Overhaul
+  // ===================================================================
+  ion-searchbar {
+    // Use consistent spacing tokens.
+    padding: var(--ew-space-2) var(--ew-space-4) !important;
+
+    // Style the input field to match the modern design system.
+    .searchbar-input-container {
+      .searchbar-input {
+        border-radius: var(--ew-radius-lg) !important; // 16px
+        background-color: var(--ion-item-background) !important;
+        color: var(--ew-text-color-primary) !important;
+        border: var(--ew-border-width-sm) solid var(--ion-border-color);
+        box-shadow: var(--ew-shadow-sm) !important;
+        font-family: var(--ew-font-family-base);
+        font-weight: var(--ew-font-weight-regular);
+        transition: var(--ew-transition-base);
+
+        // Modern focus state with primary color accent.
+        &:focus {
+          border-color: var(--ion-color-primary);
+          box-shadow: var(--ew-shadow-focus) !important;
+        }
+      }
+    }
+
+    // Ensure clear and search icons are properly colored.
+    .searchbar-clear-icon,
+    .searchbar-search-icon {
+      color: var(--ew-text-color-muted) !important;
+    }
   }
-}
 
-/* Subtle stagger for first items */
-.categories-list ion-item.category-item:nth-child(1) { animation-delay: 20ms; }
-.categories-list ion-item.category-item:nth-child(2) { animation-delay: 40ms; }
-.categories-list ion-item.category-item:nth-child(3) { animation-delay: 60ms; }
-.categories-list ion-item.category-item:nth-child(4) { animation-delay: 80ms; }
-.categories-list ion-item.category-item:nth-child(5) { animation-delay: 100ms; }
-.categories-list ion-item.category-item:nth-child(6) { animation-delay: 120ms; }
-.categories-list ion-item.category-item:nth-child(7) { animation-delay: 140ms; }
-.categories-list ion-item.category-item:nth-child(8) { animation-delay: 160ms; }
+  // ===================================================================
+  //  Segment (Filter) Overhaul
+  // ===================================================================
+  ion-segment {
+    // Use consistent spacing tokens.
+    width: 100%;
+    background: var(--background);
 
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-  .category-item { animation: none !important; transition: none !important; }
-  ion-fab .fab-add { transition: none !important; }
+    ion-segment-button {
+      --indicator-height: 4px;
+      --padding-end: 8px;
+      --padding-top: 8px;
+      --padding-bottom: 8px;
+      --color: var(--ew-text-color-muted);
+      --color-checked: var(--ew-color-primary);
+      --indicator-color: var(--ew-color-primary);
+      text-transform: none;
+      letter-spacing: 0.5px;
+      font-weight: 500;
+      transition: var(--ew-transition-base);
+      --indicator-color: transparent !important; // Disable default indicator.
+
+      // Ensure consistent height and remove default margins.
+      transition: var(--ew-transition-base);
+
+      // Vertically and horizontally center the icon and label
+      ion-label,
+      ion-icon {
+        display: flex;
+        align-items: center;
+        margin: 0 var(--ew-space-1);
+      }
+
+      ion-label {
+        font-family: var(--ew-font-family-base);
+        font-weight: var(--ew-font-weight-semibold);
+        font-size: var(--ew-font-size-sm);
+      }
+
+      ion-icon {
+        font-size: 18px;
+      }
+
+      // Add a subtle hover effect for better interactivity.
+      &:hover:not(.segment-button-checked) {
+        background: var(--ew-color-gray-100);
+        .dark & {
+          background: var(--ew-color-gray-200);
+        }
+      }
+    }
+  }
+
+  // ===================================================================
+  //  General List & Item Styling
+  // ===================================================================
+  ion-list {
+    background: transparent;
+    padding: 0 var(--ew-space-2);
+  }
+
+
+  // Style for the circular category icon
+  .category-icon {
+    height: 44px !important;
+    width: 44px !important;
+    min-width: 44px !important;
+    border-radius: var(--ew-radius-full);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-inline-end: var(--ew-space-3);
+    color: white;
+    flex-shrink: 0;
+
+    ion-icon {
+      font-size: 24px;
+    }
+
+    /* The background is set dynamically via inline style, so no dark mode override is needed here. */
+  }
+
+  .reorder-icon {
+    font-size: 24px;
+    color: var(--ew-text-color-muted);
+  }
+
+  // ===================================================================
+  //  Empty State Styling
+  // ===================================================================
+  .no_data {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: calc(100vh - 300px); // Adjust based on header/footer height
+    text-align: center;
+    padding: var(--ew-space-6);
+
+    ion-icon {
+      font-size: var(--ew-size-20); // 80px
+      color: var(--ew-text-color-muted);
+      margin-bottom: var(--ew-space-4);
+    }
+
+    h2 {
+      font-family: var(--ew-font-family-heading);
+      font-weight: var(--ew-font-weight-bold);
+      font-size: var(--ew-font-size-xl);
+      color: var(--ew-text-color-primary);
+      margin-bottom: var(--ew-space-2);
+    }
+
+    p {
+      font-family: var(--ew-font-family-base);
+      color: var(--ew-text-color-secondary);
+      max-width: 320px;
+      margin-bottom: var(--ew-space-6);
+    }
+  }
 }

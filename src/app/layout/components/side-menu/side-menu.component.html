@@ -10,33 +10,59 @@
   <ion-content
     class="ion-padding"
     role="navigation"
-    aria-label="Main menu"
+    [attr.aria-label]="'SIDEBAR.MAIN_MENU' | translate"
     tabindex="0"
   >
-    <ng-container *ngIf="user$ | async as user; else loginPrompt">
-      <!-- User is Logged In -->
-      <div class="user-info" [routerLink]="['/profile']" (click)="closeMenu()">
-        <div class="avatar">
-          <ion-avatar>
-            <img
-              [src]="user.image || defaultAvatar"
-              [alt]="'USER_AVATAR' | translate"
-            />
-          </ion-avatar>
+    <ng-container *ngIf="vm$ | async as vm">
+      <!-- Profile Header or Login Prompt -->
+      <ng-container *ngIf="vm.profile.isLoggedIn; else loginPrompt">
+        <div
+          class="user-info"
+          [routerLink]="['/profile']"
+          (click)="closeMenu()"
+        >
+          <div class="avatar">
+            <ion-avatar>
+              <img
+                [src]="vm.profile.user?.image || defaultAvatar"
+                [alt]="'USER_AVATAR' | translate"
+              />
+            </ion-avatar>
+          </div>
+          <div class="user-details">
+            <h3>
+              {{
+                vm.profile.user?.username || ("USER.DEFAULT_NAME" | translate)
+              }}
+            </h3>
+            <p>
+              {{ vm.profile.user?.email || ("USER.DEFAULT_EMAIL" | translate) }}
+            </p>
+          </div>
         </div>
-        <div class="user-details">
-          <h3>{{ user.username || "User" }}</h3>
-          <p>{{ user.email || "user@example.com" }}</p>
-        </div>
-      </div>
+      </ng-container>
 
-      <!-- Menu Items (for logged-in user) -->
-      <ion-list lines="none" role="menu">
+      <ng-template #loginPrompt>
+        <div class="login-prompt">
+          <ion-button
+            expand="block"
+            fill="clear"
+            routerLink="/auth/login"
+            (click)="closeMenu()"
+          >
+            <ion-icon slot="start" name="log-in-outline"></ion-icon>
+            {{ "LOGIN" | translate }}
+          </ion-button>
+        </div>
+      </ng-template>
+
+      <!-- Dynamic Menu Items -->
+      <ion-list lines="none" role="menu" class="main-menu-list">
         <ion-item
-          *ngFor="let item of menuItems"
+          *ngFor="let item of vm.links"
           [routerLink]="item.link"
           (click)="closeMenu()"
-          [class.active]="isActive(item.link)"
+          [class.active]="isActive(item.link, vm.activeLink)"
           button
           role="menuitem"
         >
@@ -45,93 +71,69 @@
         </ion-item>
       </ion-list>
 
-      <!-- Bottom Menu (for logged-in user) -->
+      <!-- Common Bottom Menu Items -->
       <ion-list lines="none" class="bottom-menu" role="menu">
-        <ion-item (click)="logOut()" button role="menuitem" tabindex="0">
+        <!-- Logout Button (conditional) -->
+        <ion-item
+          *ngIf="vm.profile.isLoggedIn"
+          (click)="logOut()"
+          button
+          role="menuitem"
+          tabindex="0"
+        >
           <ion-icon name="log-out-outline" slot="start"></ion-icon>
           <ion-label>{{ "LOGOUT" | translate }}</ion-label>
         </ion-item>
-      </ion-list>
-    </ng-container>
 
-    <ng-template #loginPrompt>
-      <!-- User is Logged Out -->
-      <div class="login-prompt">
-        <ion-button
-          expand="block"
-          fill="clear"
-          routerLink="/auth/login"
-          (click)="closeMenu()"
-        >
-          <ion-icon slot="start" name="log-in-outline"></ion-icon>
-          {{ "LOGIN" | translate }}
-        </ion-button>
-      </div>
-
-      <!-- Menu Items (for logged-out user) -->
-      <ion-list lines="none" role="menu">
+        <!-- Language Toggle -->
         <ion-item
-          *ngFor="let item of publicMenuItems"
-          [routerLink]="item.link"
-          (click)="closeMenu()"
-          [class.active]="isActive(item.link)"
+          (click)="changeLanguage()"
           button
           role="menuitem"
+          tabindex="0"
+          [attr.aria-label]="'LANG.CHANGE_LANG' | translate"
         >
-          <ion-icon [name]="item.icon" slot="start"></ion-icon>
-          <ion-label>{{ item.title | translate }}</ion-label>
+          <ion-icon
+            [name]="
+              vm.language === 'ar' ? 'language-outline' : 'language-outline'
+            "
+            slot="start"
+          ></ion-icon>
+          <ion-label>{{
+            (vm.language === "en" ? "ARABIC" : "ENGLISH") | translate
+          }}</ion-label>
+          <ion-icon
+            [name]="vm.language === 'ar' ? 'arrow-forward' : 'arrow-back'"
+            slot="end"
+          ></ion-icon>
+        </ion-item>
+
+        <!-- Theme Toggle -->
+        <ion-item>
+          <ion-icon name="contrast-outline" slot="start"></ion-icon>
+          <ion-label>{{ "THEME" | translate }}</ion-label>
+          <app-theme-toggle slot="end"></app-theme-toggle>
+        </ion-item>
+
+        <!-- Help & About -->
+        <ion-item
+          (click)="closeMenu()"
+          routerLink="/help"
+          button
+          role="menuitem"
+          tabindex="0"
+          [attr.aria-current]="isActive('/help', vm.activeLink) ? 'page' : null"
+        >
+          <ion-icon name="help-circle-outline" slot="start"></ion-icon>
+          <ion-label>{{ "HELP" | translate }}</ion-label>
+        </ion-item>
+
+        <!-- App Version -->
+        <ion-item class="version-info" tabindex="-1" role="none">
+          <ion-icon name="information-circle-outline" slot="start"></ion-icon>
+          <ion-label>{{ "VERSION" | translate }}</ion-label>
         </ion-item>
       </ion-list>
-    </ng-template>
-
-    <!-- Common Bottom Menu Items -->
-    <ion-list lines="none" class="bottom-menu" role="menu">
-      <!-- Language Toggle -->
-      <ion-item
-        (click)="changeLanguage()"
-        button
-        role="menuitem"
-        tabindex="0"
-        aria-label="Switch language"
-      >
-        <ion-icon
-          [name]="language === 'ar' ? 'language-outline' : 'language-outline'"
-          slot="start"
-        ></ion-icon>
-        <ion-label>{{
-          (language === "en" ? "ARABIC" : "ENGLISH") | translate
-        }}</ion-label>
-        <ion-icon
-          [name]="language === 'ar' ? 'arrow-forward' : 'arrow-back'"
-          slot="end"
-        ></ion-icon>
-      </ion-item>
-
-      <!-- Theme Toggle -->
-      <ion-item>
-        <ion-icon name="contrast-outline" slot="start"></ion-icon>
-        <ion-label>{{ "THEME" | translate }}</ion-label>
-        <app-theme-toggle slot="end"></app-theme-toggle>
-      </ion-item>
-
-      <!-- Help & About -->
-      <ion-item
-        (click)="closeMenu()"
-        routerLink="/help"
-        button
-        role="menuitem"
-        tabindex="0"
-        [attr.aria-current]="isActive('/help') ? 'page' : null"
-      >
-        <ion-icon name="help-circle-outline" slot="start"></ion-icon>
-        <ion-label>{{ "HELP" | translate }}</ion-label>
-      </ion-item>
-
-      <!-- App Version -->
-      <ion-item class="version-info" tabindex="-1" role="none">
-        <ion-icon name="information-circle-outline" slot="start"></ion-icon>
-        <ion-label>{{ "VERSION" | translate }}</ion-label>
-      </ion-item>
-    </ion-list>
+    </ng-container>
   </ion-content>
 </ion-menu>

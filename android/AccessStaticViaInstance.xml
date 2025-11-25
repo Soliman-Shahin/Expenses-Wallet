@@ -1,0 +1,80 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/capacitor-cordova-android-plugins/src/main/java/com/ionicframework/common/IonicCordovaCommon.java</file>
+  <line>350</line>
+  <module>android.capacitor-cordova-android-plugins.main</module>
+  <package>com.ionicframework.common</package>
+  <entry_point TYPE="method" FQNAME="com.ionicframework.common.IonicCordovaCommon org.json.JSONObject getCustomConfig()" />
+  <problem_class id="AccessStaticViaInstance" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Access static member via instance reference</problem_class>
+  <description>Static member 'com.ionicframework.common.IonicCordovaCommon.CUSTOM_PREFS_KEY' accessed via instance reference</description>
+  <highlighted_element>this.CUSTOM_PREFS_KEY</highlighted_element>
+  <language>JAVA</language>
+  <offset>41</offset>
+  <length>21</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/capacitor-cordova-android-plugins/src/main/java/com/ionicframework/common/IonicCordovaCommon.java</file>
+  <line>368</line>
+  <module>android.capacitor-cordova-android-plugins.main</module>
+  <package>com.ionicframework.common</package>
+  <entry_point TYPE="method" FQNAME="com.ionicframework.common.IonicCordovaCommon void configure(org.apache.cordova.CallbackContext callbackContext, org.json.JSONObject newConfig)" />
+  <problem_class id="AccessStaticViaInstance" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Access static member via instance reference</problem_class>
+  <description>Static member 'com.ionicframework.common.IonicCordovaCommon.CUSTOM_PREFS_KEY' accessed via instance reference</description>
+  <highlighted_element>this.CUSTOM_PREFS_KEY</highlighted_element>
+  <language>JAVA</language>
+  <offset>21</offset>
+  <length>21</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/capacitor-cordova-android-plugins/src/main/java/com/ionicframework/common/IonicCordovaCommon.java</file>
+  <line>389</line>
+  <module>android.capacitor-cordova-android-plugins.main</module>
+  <package>com.ionicframework.common</package>
+  <entry_point TYPE="method" FQNAME="com.ionicframework.common.IonicCordovaCommon void getPreferences(org.apache.cordova.CallbackContext callbackContext)" />
+  <problem_class id="AccessStaticViaInstance" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Access static member via instance reference</problem_class>
+  <description>Static member 'com.ionicframework.common.IonicCordovaCommon.PREFS_KEY' accessed via instance reference</description>
+  <highlighted_element>this.PREFS_KEY</highlighted_element>
+  <language>JAVA</language>
+  <offset>41</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/capacitor-cordova-android-plugins/src/main/java/com/ionicframework/common/IonicCordovaCommon.java</file>
+  <line>488</line>
+  <module>android.capacitor-cordova-android-plugins.main</module>
+  <package>com.ionicframework.common</package>
+  <entry_point TYPE="method" FQNAME="com.ionicframework.common.IonicCordovaCommon void setPreferences(org.apache.cordova.CallbackContext callbackContext, org.json.JSONObject newPrefs)" />
+  <problem_class id="AccessStaticViaInstance" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Access static member via instance reference</problem_class>
+  <description>Static member 'com.ionicframework.common.IonicCordovaCommon.PREFS_KEY' accessed via instance reference</description>
+  <highlighted_element>this.PREFS_KEY</highlighted_element>
+  <language>JAVA</language>
+  <offset>21</offset>
+  <length>14</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/plugin/util/HttpRequestHandler.java</file>
+  <line>146</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor.plugin.util</package>
+  <entry_point TYPE="method" FQNAME="com.getcapacitor.plugin.util.HttpRequestHandler.HttpURLConnectionBuilder com.getcapacitor.plugin.util.HttpRequestHandler.HttpURLConnectionBuilder setUrlParams(com.getcapacitor.JSObject params, boolean shouldEncode)" />
+  <problem_class id="AccessStaticViaInstance" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Access static member via instance reference</problem_class>
+  <description>Static member 'com.getcapacitor.plugin.util.HttpRequestHandler.HttpURLConnectionBuilder.addUrlParam(java.lang.StringBuilder, java.lang.String, java.lang.String, boolean)' accessed via instance reference</description>
+  <highlighted_element>this.addUrlParam</highlighted_element>
+  <language>JAVA</language>
+  <offset>24</offset>
+  <length>16</length>
+</problem>
+<problem>
+  <file>file://$PROJECT_DIR$/../node_modules/@capacitor/android/capacitor/src/main/java/com/getcapacitor/plugin/util/HttpRequestHandler.java</file>
+  <line>159</line>
+  <module>android.capacitor-android.main</module>
+  <package>com.getcapacitor.plugin.util</package>
+  <entry_point TYPE="method" FQNAME="com.getcapacitor.plugin.util.HttpRequestHandler.HttpURLConnectionBuilder com.getcapacitor.plugin.util.HttpRequestHandler.HttpURLConnectionBuilder setUrlParams(com.getcapacitor.JSObject params, boolean shouldEncode)" />
+  <problem_class id="AccessStaticViaInstance" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">Access static member via instance reference</problem_class>
+  <description>Static member 'com.getcapacitor.plugin.util.HttpRequestHandler.HttpURLConnectionBuilder.addUrlParam(java.lang.StringBuilder, java.lang.String, java.lang.String, boolean)' accessed via instance reference</description>
+  <highlighted_element>this.addUrlParam</highlighted_element>
+  <language>JAVA</language>
+  <offset>20</offset>
+  <length>16</length>
+</problem>
+</problems>

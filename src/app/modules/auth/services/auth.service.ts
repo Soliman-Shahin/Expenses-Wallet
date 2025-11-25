@@ -1,25 +1,21 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpErrorResponse,
+  HttpBackend,
+} from '@angular/common/http';
 import { Injectable, inject, NgZone } from '@angular/core';
+import { Capacitor } from '@capacitor/core';
 import { Router } from '@angular/router';
 import { NavController } from '@ionic/angular';
 import { Observable, throwError, BehaviorSubject, from, of } from 'rxjs';
 import { catchError, tap, map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
-import { User } from '../models';
+import { AuthResponse, User } from '../models';
 import { ApiService } from 'src/app/core/services';
+import { ProfileService } from 'src/app/modules/profile/services/profile.service';
 import { StorageService } from './storage.service';
-
-interface AuthResponse {
-  data: {
-    user: User;
-    tokens?: {
-      accessToken: string;
-      refreshToken: string;
-    };
-    token?: string;
-    refreshToken?: string;
-  };
-}
+import { TokenService } from './token.service';
+import { EncryptionService } from 'src/app/core/services/encryption.service';
 
 @Injectable({
   providedIn: 'root',
@@ -30,17 +26,26 @@ export class AuthService {
   private apiService = inject(ApiService);
   private storageService = inject(StorageService);
   private zone = inject(NgZone);
+  private profileService = inject(ProfileService);
+  private tokenService = inject(TokenService);
+  private encryptionService = inject(EncryptionService);
+  // Raw backend to create HttpClient that bypasses interceptors when needed
+  private httpBackend = inject(HttpBackend);
 
   private userSubject = new BehaviorSubject<User | null>(null);
   public user$ = this.userSubject.asObservable();
-  
+
+  public isLoggedIn$: Observable<boolean> = this.user$.pipe(
+    map((user) => !!user)
+  );
+
   // Store the URL to redirect to after login
   public redirectUrl: string | null = null;
 
   // Getter for current user state
   get isLoggedIn(): boolean {
-    // Use consistent key name 'access-token'
-    return !!this.storageService.get('access-token');
+    // Token is stored securely via TokenService
+    return !!this.tokenService.getAccessToken();
   }
 
   // Alias for current user
@@ -66,7 +71,9 @@ export class AuthService {
   }
 
   private initializeUser(): void {
-    const user = this.storageService.get('user') as User | null;
+    const user =
+      (this.storageService.get('user') as User | null) ??
+      this.tokenService.getUser();
     if (user) {
       this.userSubject.next(user);
     }
@@ -82,14 +89,104 @@ export class AuthService {
   }
 
   loginWithGoogle(): Observable<void> {
-    // Popup-based OAuth: open backend Google route, listen for postMessage
+    const platform = Capacitor.getPlatform?.() || 'web';
+    const isNative = platform === 'android' || platform === 'ios';
+    // Native path: Use Capacitor GoogleAuth plugin to get idToken, then authenticate via backend
+    if (isNative) {
+      return from(
+        (async () => {
+          const GA =
+            (window as any)?.Capacitor?.Plugins?.GoogleAuth ||
+            (window as any)?.GoogleAuth;
+          if (!GA) {
+            throw new Error(
+              'GoogleAuth plugin not available. Please install @codetrix-studio/capacitor-google-auth and run npx cap sync.'
+            );
+          }
+          try {
+            // Initialize if available (safe no-op on native if not needed)
+            if (
+              typeof GA.initialize === 'function' &&
+              environment.google?.webClientId
+            ) {
+              try {
+                await GA.initialize({
+                  serverClientId: environment.google.webClientId,
+                  scopes: ['profile', 'email'],
+                });
+                console.log(
+                  '[AuthService] GoogleAuth initialized with serverClientId:',
+                  environment.google.webClientId
+                );
+              } catch {}
+            }
+            const res = await GA.signIn();
+            console.log('[AuthService] GoogleAuth.signIn() result:', res);
+            const idToken: string =
+              res?.authentication?.idToken || res?.idToken || '';
+            console.log(
+              '[AuthService] Extracted idToken:',
+              idToken ? '***' + idToken.substring(0, 10) + '...' : 'MISSING'
+            );
+            if (!idToken) {
+              throw new Error('Failed to obtain Google idToken');
+            }
+            console.log(
+              '[AuthService] Sending idToken to backend:',
+              `${environment.apiUrl}/user/auth/google/native`
+            );
+
+            // Reuse authenticate() to handle HTTP (native/web), token storage, navigation
+            await this.authenticate(`/user/auth/google/native`, {
+              idToken,
+            }).toPromise();
+            console.log(
+              '[AuthService] Backend response received and processed'
+            );
+            return;
+          } catch (err) {
+            console.error('[AuthService] Native Google Sign-In error:', err);
+            // Show a more user-friendly error message
+            const errorMessage =
+              err instanceof Error
+                ? err.message
+                : 'Unknown error occurred during Google Sign-In';
+            console.error(
+              '[AuthService] Native Google Sign-In failed:',
+              errorMessage
+            );
+            throw new Error(`Google Sign-In failed: ${errorMessage}`);
+          }
+        })()
+      ).pipe(
+        map(() => undefined),
+        catchError((error) => {
+          console.error('[AuthService] HTTP error in native flow:', error);
+          // Extract more detailed error information
+          let errorMessage = 'Network error occurred during Google Sign-In';
+          if (error?.status) {
+            errorMessage += ` (HTTP ${error.status})`;
+          }
+          if (error?.message) {
+            errorMessage += `: ${error.message}`;
+          }
+          console.error('[AuthService] Detailed HTTP error:', errorMessage);
+          // Return a more descriptive error
+          return throwError(() => new Error(errorMessage));
+        })
+      );
+    }
+
+    // Web popup-based OAuth: open backend Google route, listen for postMessage
     const authUrl = `${environment.apiUrl}/user/google`;
     const authOrigin = new URL(environment.apiUrl).origin;
 
     const popupWidth = 500;
     const popupHeight = 600;
-    const left = window.screenX + Math.max(0, (window.outerWidth - popupWidth) / 2);
-    const top = window.screenY + Math.max(0, (window.outerHeight - popupHeight) / 2.5);
+    const left =
+      window.screenX + Math.max(0, (window.outerWidth - popupWidth) / 2);
+    const top =
+      window.screenY + Math.max(0, (window.outerHeight - popupHeight) / 2.5);
 
     const features = [
       `width=${popupWidth}`,
@@ -102,59 +199,68 @@ export class AuthService {
 
     const popup = window.open(authUrl, 'google_oauth', features);
 
-    return from(new Promise<void>((resolve, reject) => {
-      if (!popup) {
-        reject(new Error('Unable to open authentication window'));
-        return;
-      }
-
-      const timer = setInterval(() => {
-        if (popup.closed) {
-          clearInterval(timer);
-        }
-      }, 500);
-
-      const onMessage = (event: MessageEvent) => {
-        // Ensure message is from backend origin (or allow any during local dev)
-        const isFromBackend = event.origin === authOrigin;
-        if (!isFromBackend) {
+    return from(
+      new Promise<void>((resolve, reject) => {
+        if (!popup) {
+          reject(new Error('Unable to open authentication window'));
           return;
         }
-        const data = event.data || {};
-        if (data && data.type === 'google-auth-success' && data.payload) {
-          window.removeEventListener('message', onMessage);
-          try {
-            const { user, tokens } = data.payload as { user: User; tokens: { accessToken: string; refreshToken: string } };
 
-            // Store tokens and user data
-            if (tokens?.accessToken) {
-              this.storageService.set('access-token', tokens.accessToken);
-            }
-            if (tokens?.refreshToken) {
-              this.storageService.set('refresh-token', tokens.refreshToken);
-            }
-            this.storageService.set('user', user);
-            this.storageService.set('user-id', user._id);
-            this.userSubject.next(user);
-
-            // Navigate after login inside Angular zone
-            const redirectUrl = this.redirectUrl || '/home';
-            this.redirectUrl = null;
-            this.zone.run(() => {
-              this.router.navigateByUrl(redirectUrl);
-            });
-
-            resolve();
-          } catch (e) {
-            reject(e);
-          } finally {
-            try { popup.close(); } catch {}
+        const timer = setInterval(() => {
+          if (popup.closed) {
+            clearInterval(timer);
           }
-        }
-      };
+        }, 500);
 
-      window.addEventListener('message', onMessage);
-    })).pipe(catchError(this.handleError));
+        const onMessage = (event: MessageEvent) => {
+          // Ensure message is from backend origin (or allow any during local dev)
+          const isFromBackend = event.origin === authOrigin;
+          if (!isFromBackend) {
+            return;
+          }
+          const data = event.data || {};
+          if (data && data.type === 'google-auth-success' && data.payload) {
+            window.removeEventListener('message', onMessage);
+            try {
+              const { user, tokens } = data.payload as {
+                user: User;
+                tokens: { accessToken: string; refreshToken: string };
+              };
+
+              // Store tokens (secure) and user data
+              if (tokens?.accessToken) {
+                this.tokenService.setAccessToken(tokens.accessToken);
+              }
+              if (tokens?.refreshToken) {
+                this.tokenService.setRefreshToken(tokens.refreshToken);
+              }
+              if (user && user._id) {
+                this.tokenService.setUserId(user._id);
+              }
+              this.storageService.set('user', user);
+              this.userSubject.next(user);
+
+              // Navigate after login inside Angular zone
+              const redirectUrl = this.redirectUrl || '/home';
+              this.redirectUrl = null;
+              this.zone.run(() => {
+                this.router.navigateByUrl(redirectUrl);
+              });
+
+              resolve();
+            } catch (e) {
+              reject(e);
+            } finally {
+              try {
+                popup.close();
+              } catch {}
+            }
+          }
+        };
+
+        window.addEventListener('message', onMessage);
+      })
+    ).pipe(catchError(this.handleError));
   }
 
   loginWithFacebook(): Observable<void> {
@@ -164,8 +270,10 @@ export class AuthService {
 
     const popupWidth = 500;
     const popupHeight = 600;
-    const left = window.screenX + Math.max(0, (window.outerWidth - popupWidth) / 2);
-    const top = window.screenY + Math.max(0, (window.outerHeight - popupHeight) / 2.5);
+    const left =
+      window.screenX + Math.max(0, (window.outerWidth - popupWidth) / 2);
+    const top =
+      window.screenY + Math.max(0, (window.outerHeight - popupHeight) / 2.5);
 
     const features = [
       `width=${popupWidth}`,
@@ -178,37 +286,135 @@ export class AuthService {
 
     const popup = window.open(authUrl, 'facebook_oauth', features);
 
-    return from(new Promise<void>((resolve, reject) => {
-      if (!popup) {
-        reject(new Error('Unable to open authentication window'));
-        return;
-      }
-
-      const timer = setInterval(() => {
-        if (popup.closed) {
-          clearInterval(timer);
-        }
-      }, 500);
-
-      const onMessage = (event: MessageEvent) => {
-        const isFromBackend = event.origin === authOrigin;
-        if (!isFromBackend) {
+    return from(
+      new Promise<void>((resolve, reject) => {
+        if (!popup) {
+          reject(new Error('Unable to open authentication window'));
           return;
         }
-        const data = event.data || {};
-        if (data && data.type === 'facebook-auth-success' && data.payload) {
-          window.removeEventListener('message', onMessage);
-          try {
-            const { user, tokens } = data.payload as { user: User; tokens: { accessToken: string; refreshToken: string } };
 
-            if (tokens?.accessToken) {
-              this.storageService.set('access-token', tokens.accessToken);
+        const timer = setInterval(() => {
+          if (popup.closed) {
+            clearInterval(timer);
+          }
+        }, 500);
+
+        const onMessage = (event: MessageEvent) => {
+          const isFromBackend = event.origin === authOrigin;
+          if (!isFromBackend) {
+            return;
+          }
+          const data = event.data || {};
+          if (data && data.type === 'facebook-auth-success' && data.payload) {
+            window.removeEventListener('message', onMessage);
+            try {
+              const { user, tokens } = data.payload as {
+                user: User;
+                tokens: { accessToken: string; refreshToken: string };
+              };
+
+              if (tokens?.accessToken) {
+                this.tokenService.setAccessToken(tokens.accessToken);
+              }
+              if (tokens?.refreshToken) {
+                this.tokenService.setRefreshToken(tokens.refreshToken);
+              }
+              if (user && user._id) {
+                this.tokenService.setUserId(user._id);
+              }
+              this.storageService.set('user', user);
+              this.userSubject.next(user);
+
+              const redirectUrl = this.redirectUrl || '/home';
+              this.redirectUrl = null;
+              this.zone.run(() => {
+                this.router.navigateByUrl(redirectUrl);
+              });
+
+              resolve();
+            } catch (e) {
+              reject(e);
+            } finally {
+              try {
+                popup.close();
+              } catch {}
             }
-            if (tokens?.refreshToken) {
-              this.storageService.set('refresh-token', tokens.refreshToken);
+          }
+        };
+
+        window.addEventListener('message', onMessage);
+      })
+    ).pipe(catchError(this.handleError));
+  }
+
+  private authenticate(
+    url: string,
+    credentials: Record<string, any>
+  ): Observable<AuthResponse> {
+    const fullUrl = `${environment.apiUrl}${url}`;
+
+    // Encrypt credentials
+    const encryptedCredentials = {
+      data: this.encryptionService.encrypt(credentials),
+    };
+
+    // On native (Android/iOS), prefer Capacitor HTTP plugin to bypass WebView CORS
+    if (Capacitor.isNativePlatform()) {
+      const Http = (window as any)?.Capacitor?.Plugins?.Http;
+      if (Http && typeof Http.post === 'function') {
+        return from(
+          Http.post({
+            url: fullUrl,
+            headers: { 'Content-Type': 'application/json' },
+            data: encryptedCredentials,
+          })
+        ).pipe(
+          map((resp: any) => {
+            // Plugin returns { status, data, headers, url }
+            let response = resp?.data;
+
+            // Decrypt response if needed
+            if (
+              response &&
+              response.data &&
+              typeof response.data === 'string'
+            ) {
+              const decrypted = this.encryptionService.decrypt(response.data);
+              if (decrypted) {
+                response = decrypted;
+              }
             }
+
+            if (!response?.data?.user) {
+              const message = response?.error?.message || 'Invalid credentials';
+              throw new HttpErrorResponse({
+                status: 401,
+                statusText: 'Unauthorized',
+                error: { message },
+              });
+            }
+
+            const user = response.data.user as AuthResponse['data']['user'];
+            const accessTokenNormalized =
+              response?.data?.tokens?.accessToken ??
+              response?.data?.accessToken ??
+              response?.data?.token ??
+              '';
+            const refreshTokenNormalized =
+              response?.data?.tokens?.refreshToken ??
+              response?.data?.refreshToken ??
+              '';
+            const tokens = {
+              accessToken: accessTokenNormalized,
+              refreshToken: refreshTokenNormalized,
+            } as NonNullable<AuthResponse['data']['tokens']>;
+
+            if (tokens?.accessToken)
+              this.tokenService.setAccessToken(tokens.accessToken);
+            if (tokens?.refreshToken)
+              this.tokenService.setRefreshToken(tokens.refreshToken);
+            if (user && user._id) this.tokenService.setUserId(user._id);
             this.storageService.set('user', user);
-            this.storageService.set('user-id', user._id);
             this.userSubject.next(user);
 
             const redirectUrl = this.redirectUrl || '/home';
@@ -217,43 +423,64 @@ export class AuthService {
               this.router.navigateByUrl(redirectUrl);
             });
 
-            resolve();
-          } catch (e) {
-            reject(e);
-          } finally {
-            try { popup.close(); } catch {}
+            return response as AuthResponse;
+          }),
+          catchError(this.handleError)
+        );
+      }
+      // If plugin not available, fall back to web path below (may hit CORS on native)
+    }
+
+    // Web: Use a bare HttpClient (bypasses interceptors and ApiService error wrapping)
+    const http = new HttpClient(this.httpBackend);
+    return http.post<any>(fullUrl, encryptedCredentials).pipe(
+      map((res) => {
+        let response = res;
+        // Decrypt response if needed
+        if (response && response.data && typeof response.data === 'string') {
+          const decrypted = this.encryptionService.decrypt(response.data);
+          if (decrypted) {
+            response = decrypted;
           }
         }
-      };
 
-      window.addEventListener('message', onMessage);
-    })).pipe(catchError(this.handleError));
-  }
-
-  private authenticate(url: string, credentials: Record<string, any>): Observable<AuthResponse> {
-    return this.apiService.post<any>(url, credentials).pipe(
-      map((response) => {
         // Some backends may return { success: false, error: { message } } with 200
         if (!response?.data?.user) {
           const message = response?.error?.message || 'Invalid credentials';
-          throw new HttpErrorResponse({ status: 401, statusText: 'Unauthorized', error: { message } });
+          throw new HttpErrorResponse({
+            status: 401,
+            statusText: 'Unauthorized',
+            error: { message },
+          });
         }
 
         const user = response.data.user as AuthResponse['data']['user'];
-        const tokens = (response.data.tokens ?? {
-          accessToken: response.data.token || '',
-          refreshToken: response.data.refreshToken || '',
-        }) as NonNullable<AuthResponse['data']['tokens']>;
+        // Normalize tokens from different backend shapes
+        const accessTokenNormalized =
+          response?.data?.tokens?.accessToken ??
+          response?.data?.accessToken ??
+          response?.data?.token ??
+          '';
+        const refreshTokenNormalized =
+          response?.data?.tokens?.refreshToken ??
+          response?.data?.refreshToken ??
+          '';
+        const tokens = {
+          accessToken: accessTokenNormalized,
+          refreshToken: refreshTokenNormalized,
+        } as NonNullable<AuthResponse['data']['tokens']>;
 
-        // Store tokens and user data
-        if (tokens.accessToken) {
-          this.storageService.set('access-token', tokens.accessToken);
+        // Store tokens (secure) and user data
+        if (tokens?.accessToken) {
+          this.tokenService.setAccessToken(tokens.accessToken);
         }
-        if (tokens.refreshToken) {
-          this.storageService.set('refresh-token', tokens.refreshToken);
+        if (tokens?.refreshToken) {
+          this.tokenService.setRefreshToken(tokens.refreshToken);
+        }
+        if (user && user._id) {
+          this.tokenService.setUserId(user._id);
         }
         this.storageService.set('user', user);
-        this.storageService.set('user-id', user._id);
         this.userSubject.next(user);
 
         // Navigate to redirect URL or home
@@ -265,25 +492,28 @@ export class AuthService {
 
         return response as AuthResponse;
       }),
+      // Preserve original HttpErrorResponse so components can display messages
       catchError(this.handleError)
     );
   }
 
   logout(): Observable<void> {
     // Clear all auth-related data
-    this.storageService.remove('access-token');
-    this.storageService.remove('refresh-token');
-    this.storageService.remove('user');
-    this.storageService.remove('user-id');
+    this.tokenService.removeSession();
     this.storageService.clear();
+    // Also clear cached profile stored outside StorageService prefixing
+    this.profileService.clearProfile();
     // Update state
     this.userSubject.next(null);
     this.redirectUrl = null;
-    // Run navigation inside Angular's zone to ensure change detection is triggered
-    this.zone.run(() => {
-      // Reset navigation stack to avoid back navigation into protected pages
-      this.navCtrl.navigateRoot(['/login']);
-    });
+    // Avoid Angular/Ionic navigation to prevent StackController transition errors
+    // Perform a single hard redirect which resets history and view stack
+    try {
+      location.replace('/home');
+    } catch {
+      // Fallback
+      (window as any).location.href = '/home';
+    }
     return of(undefined);
   }
 
@@ -291,29 +521,50 @@ export class AuthService {
    * Calls the backend to refresh the access token using the stored refresh token.
    * Returns an object: { accessToken, refreshToken }
    */
-  refreshAccessToken(): Observable<{ accessToken: string, refreshToken: string }> {
+  refreshAccessToken(): Observable<{
+    accessToken: string;
+    refreshToken: string;
+  }> {
     const refreshToken = this.getRefreshToken();
-    return this.apiService.post<any>(`/user/refresh-token`, { refreshToken }).pipe(
-      map(response => {
-        // Response: { accessToken, refreshToken }
-        if (response && response.accessToken && response.refreshToken) {
-          // Store new tokens
-          this.storageService.set('access-token', response.accessToken);
-          this.storageService.set('refresh-token', response.refreshToken);
-          return {
-            accessToken: response.accessToken,
-            refreshToken: response.refreshToken
-          };
-        } else {
+    // Use a bare HttpClient that bypasses interceptors to avoid cycles
+    const http = new HttpClient(this.httpBackend);
+
+    const encryptedBody = {
+      data: this.encryptionService.encrypt({ refreshToken }),
+    };
+
+    return http
+      .post<any>(`${environment.apiUrl}/user/refresh-token`, encryptedBody)
+      .pipe(
+        map((res) => {
+          let response = res;
+          // Decrypt response if needed
+          if (response && response.data && typeof response.data === 'string') {
+            const decrypted = this.encryptionService.decrypt(response.data);
+            if (decrypted) {
+              response = decrypted;
+            }
+          }
+
+          // Response: { accessToken, refreshToken }
+          if (response && response.accessToken && response.refreshToken) {
+            // Store new tokens
+            this.tokenService.setAccessToken(response.accessToken);
+            this.tokenService.setRefreshToken(response.refreshToken);
+            return {
+              accessToken: response.accessToken,
+              refreshToken: response.refreshToken,
+            };
+          } else {
+            this.logout();
+            throw new Error('Invalid token refresh response');
+          }
+        }),
+        catchError((err) => {
           this.logout();
-          throw new Error('Invalid token refresh response');
-        }
-      }),
-      catchError(err => {
-        this.logout();
-        return throwError(() => err);
-      })
-    );
+          return throwError(() => err);
+        })
+      );
   }
 
   // Error handling: rethrow original HttpErrorResponse to keep status/body
@@ -322,10 +573,40 @@ export class AuthService {
   }
 
   getRefreshToken(): string | null {
-    return this.storageService.get('refresh-token');
+    return this.tokenService.getRefreshToken();
   }
 
   getUserId(): string | null {
     return this.currentUser?._id || null;
+  }
+
+  /**
+   * Handle OAuth payload delivered via mobile deep link (base64-encoded JSON in URL hash)
+   * @param payloadB64 base64 string of JSON: { user, tokens: { accessToken, refreshToken } }
+   */
+  handleOAuthDeepLink(payloadB64: string): Observable<void> {
+    try {
+      const json = atob(payloadB64);
+      const parsed = JSON.parse(json);
+      const user = parsed?.user as User | undefined;
+      const accessToken =
+        parsed?.tokens?.accessToken || parsed?.accessToken || parsed?.token;
+      const refreshToken = parsed?.tokens?.refreshToken || parsed?.refreshToken;
+      if (!user || !accessToken || !refreshToken) {
+        return throwError(() => new Error('Invalid OAuth payload'));
+      }
+
+      // Persist tokens & user
+      this.tokenService.setAccessToken(accessToken);
+      this.tokenService.setRefreshToken(refreshToken);
+      if (user && (user as any)._id) {
+        this.tokenService.setUserId((user as any)._id);
+      }
+      this.storageService.set('user', user);
+      this.userSubject.next(user);
+      return of(undefined);
+    } catch (e) {
+      return throwError(() => e);
+    }
   }
 }

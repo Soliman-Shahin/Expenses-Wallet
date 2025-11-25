@@ -22,29 +22,47 @@ export class AuthInterceptor implements HttpInterceptor {
     request: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
-    // Skip adding headers for login/signup/refresh endpoints
+    // Skip adding headers for login/signup/refresh endpoints and static assets
+    const url = request.url || '';
+    const isAsset =
+      url.includes('/assets/') ||
+      url.startsWith('/assets') ||
+      url.startsWith('assets/') ||
+      url.startsWith('./assets') ||
+      // absolute URL case
+      /^https?:\/\/[^\s]+\/assets\//.test(url) ||
+      // common static extensions
+      /\.(json|png|jpg|jpeg|gif|svg|webp|css|js|map|woff2?|ttf)(\?|$)/i.test(
+        url
+      );
     if (
-      request.url.includes('/login') ||
-      request.url.includes('/signup') ||
-      request.url.includes('/refresh-token')
+      url.includes('/login') ||
+      url.includes('/signup') ||
+      url.includes('/refresh-token') ||
+      isAsset
     ) {
       return next.handle(request);
     }
 
     const accessToken = this.authService['storageService'].get('access-token');
     const refreshToken = this.authService.getRefreshToken();
-    const userId = this.authService.getUserId();
     const headers: Record<string, string> = {};
     if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
     if (refreshToken) headers['refresh-token'] = refreshToken;
-    if (userId) headers['_id'] = userId;
     const authReq = request.clone({ setHeaders: headers });
 
     return next.handle(authReq).pipe(
       catchError((error: HttpErrorResponse) => {
-        if (error.status === 401 && !authReq.url.endsWith('/refresh-token')) {
+        // Only attempt refresh if we actually have a refresh token
+        const hasRefresh = !!this.authService.getRefreshToken();
+        if (
+          error.status === 401 &&
+          hasRefresh &&
+          !authReq.url.endsWith('/refresh-token')
+        ) {
           return this.handle401Error(authReq, next);
         }
+        // Otherwise, propagate the error so the UI can show proper messages
         return throwError(() => error);
       })
     );
@@ -77,11 +95,16 @@ export class AuthInterceptor implements HttpInterceptor {
               headers['Authorization'] = `Bearer ${tokens.accessToken}`;
             if (tokens.refreshToken)
               headers['refresh-token'] = tokens.refreshToken;
-            const userId = this.authService.getUserId();
-            if (userId) headers['_id'] = userId;
+            // no custom _id header; JWT carries subject
             // Always update tokens in storage before retry
-            this.authService['storageService'].set('access-token', tokens.accessToken);
-            this.authService['storageService'].set('refresh-token', tokens.refreshToken);
+            this.authService['storageService'].set(
+              'access-token',
+              tokens.accessToken
+            );
+            this.authService['storageService'].set(
+              'refresh-token',
+              tokens.refreshToken
+            );
             const retryReq = request.clone({ setHeaders: headers });
             return next.handle(retryReq);
           } else {
@@ -93,7 +116,8 @@ export class AuthInterceptor implements HttpInterceptor {
         }),
         catchError((err) => {
           this.refreshInProgress = false;
-          this.authService.logout();
+          // Do not force redirect to home on refresh failure; let caller handle
+          // Surface the error to the UI (e.g., to show login error message)
           return throwError(() => err);
         })
       );
@@ -105,11 +129,9 @@ export class AuthInterceptor implements HttpInterceptor {
         switchMap((token) => {
           const headers: Record<string, string> = {};
           if (token) headers['Authorization'] = `Bearer ${token}`;
-          const refreshToken =
-            this.authService['storageService'].get('refresh-token');
+          const refreshToken = this.authService.getRefreshToken();
           if (refreshToken) headers['refresh-token'] = refreshToken;
-          const userId = this.authService.getUserId();
-          if (userId) headers['_id'] = userId;
+          // no custom _id header; JWT carries subject
           const retryReq = request.clone({ setHeaders: headers });
           return next.handle(retryReq);
         })

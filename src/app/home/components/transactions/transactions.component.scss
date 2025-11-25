@@ -1,0 +1,182 @@
+/* Match the category icon style used in Categories list */
+.category-icon {
+  height: 44px !important;
+  width: 44px !important;
+  min-width: 44px !important;
+  border-radius: var(--ew-radius-full);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-inline-end: var(--ew-space-3);
+  color: white;
+  flex-shrink: 0;
+  ion-icon {
+    font-size: 24px;
+  }
+}
+
+
+/* Match Categories list spacing */
+.transactions-list {
+  background: transparent;
+}
+
+
+.transaction-title {
+  color: var(--ew-color-neutral-600);
+  font-weight: var(--ew-font-weight-semibold);
+  margin: 0 0 var(--ew-space-1) 0;
+}
+
+.transaction-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--ew-space-2);
+  margin: 0;
+  font-size: var(--ew-font-size-xs);
+  color: var(--ion-color-medium);
+  .transaction-date {
+    display: flex;
+    align-items: center;
+  }
+  .transaction-category {
+    display: flex;
+    align-items: center;
+    gap: var(--ew-space-1);
+    ion-icon {
+      font-size: var(--ew-font-size-xs);
+    }
+  }
+}
+
+ion-item-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ew-radius-lg);
+  margin: var(--ew-space-1);
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  height: 80%;
+  &:hover {
+    transform: scale(1.05);
+    background-color: var(--ion-color-primary-tint);
+  }
+}
+
+ion-item-option[color="danger"] {
+  &:hover {
+    background-color: var(--ion-color-danger-tint);
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: var(--ew-space-6);
+  ion-icon {
+    font-size: var(--ew-size-20);
+    color: var(--ew-text-color-muted);
+    margin-bottom: var(--ew-space-4);
+  }
+  h2 {
+    font-family: var(--ew-font-family-heading);
+    font-weight: var(--ew-font-weight-bold);
+    font-size: var(--ew-font-size-xl);
+    color: var(--ew-text-color-primary);
+    margin-bottom: var(--ew-space-2);
+  }
+  p {
+    font-family: var(--ew-font-family-base);
+    color: var(--ew-text-color-secondary);
+    max-width: 320px;
+    margin-bottom: var(--ew-space-6);
+  }
+}
+
+.transaction-amount {
+  font-weight: var(--ew-font-weight-bold);
+  font-size: var(--ew-font-size-base);
+  letter-spacing: var(--ew-letter-spacing-wide);
+
+  &.is-income {
+    color: var(--ion-color-success);
+  }
+
+  &.is-expense {
+    color: var(--ion-color-danger);
+  }
+}
+
+
+@keyframes cardAppear {
+  from {
+    opacity: 0;
+    transform: translateY(var(--ew-space-3));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.list-fade-in .transaction-item {
+  animation: cardAppear var(--ew-transition-duration-medium) ease both;
+  animation-delay: calc(var(--animation-order, 0) * 50ms);
+}
+
+.empty-state {
+  padding-top: var(--ew-space-8) !important;
+  padding-bottom: var(--ew-space-8) !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+
+  .empty-state-icon-wrapper {
+    background: rgba(var(--ion-color-primary-rgb), 0.08);
+    border-radius: var(--ew-radius-full);
+    padding: var(--ew-space-6);
+    margin-bottom: var(--ew-space-5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .empty-state-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 20%;
+  }
+
+  .empty-state-title {
+    font-weight: var(--ew-font-weight-bold);
+    font-size: var(--ew-font-size-lg);
+    color: var(--ion-text-color);
+    margin: 0 0 var(--ew-space-2) 0;
+  }
+
+  .empty-state-subtitle {
+    font-size: var(--ew-font-size-base);
+    color: var(--ion-color-medium);
+    margin: 0 0 var(--ew-space-6) 0;
+    max-width: 300px;
+  }
+
+  .add-transaction-button {
+    --color: var(--ion-color-primary);
+    font-weight: var(--ew-font-weight-semibold);
+    --ripple-color: var(--ion-color-primary);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .transaction-item,
+  .list-fade-in .transaction-item {
+    animation: none !important;
+    transition: none !important;
+  }
+}

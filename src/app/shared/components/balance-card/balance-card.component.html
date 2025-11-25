@@ -1,110 +1,188 @@
-<ion-card class="balance-card fade-in-up" [class.is-loading]="isLoading">
-  <ion-card-header>
-    <ion-card-title>{{ "HOME.BALANCE_SUMMARY" | translate }}</ion-card-title>
-    <ion-button
-      fill="clear"
-      size="small"
-      slot="end"
-      [attr.aria-label]="showBalance ? 'Hide balance' : 'Show balance'"
-      (click)="toggleBalance()"
+<div
+  class="balance-summary transaction-item"
+  [class.is-loading]="isLoading"
+  [class]="cardAnimationClass"
+  (click)="onCardClick()"
+  role="article"
+  aria-label="Balance Summary Card"
+>
+  <!-- Toggle Visibility Button -->
+  <button
+    type="button"
+    class="toggle-visibility transition-all hover:scale-110"
+    [attr.aria-label]="
+      showBalance()
+        ? ('HOME.HIDE_BALANCE' | translate)
+        : ('HOME.SHOW_BALANCE' | translate)
+    "
+    (click)="$event.stopPropagation(); toggleBalance()"
+  >
+    <ion-icon
+      [name]="showBalance() ? 'eye-off-outline' : 'eye-outline'"
+      class="transition-transform"
+    ></ion-icon>
+  </button>
+
+  <ng-container *ngIf="!isLoading; else loadingState">
+    <!-- Total Balance -->
+    <div
+      class="total-balance fade-in"
+      aria-live="polite"
+      aria-labelledby="balance-heading"
+      aria-describedby="balance-desc"
     >
-      <ion-icon
-        [name]="showBalance ? 'eye-off-outline' : 'eye-outline'"
-      ></ion-icon>
-    </ion-button>
-  </ion-card-header>
+      <span class="amount text-gradient">{{ formattedBalance() }}</span>
 
-  <ion-card-content>
-    <ng-container *ngIf="!isLoading; else loadingState">
-  <div class="total-balance" aria-live="polite" aria-labelledby="balance-heading" aria-describedby="balance-desc">
-    <span class="amount">{{ formattedBalance }}</span>
-    <ion-badge
-      *ngIf="percentageChange !== null"
-      [color]="percentageChange >= 0 ? 'success' : 'danger'"
-      [attr.aria-label]="
-        (percentageChange >= 0 ? 'Positive' : 'Negative') +
-        ' change ' +
-        (percentageChange | number : '1.0-1') +
-        '%'
-      "
-    >
-      {{ percentageChange | number : "1.0-1" }}%
-    </ion-badge>
-  </div>
-  <span id="balance-desc" class="visually-hidden">This shows your current total balance and the percentage change compared to last period.</span>
+      <!-- Percentage Change Badge -->
+      <ion-badge
+        *ngIf="percentageChange !== null && showPercentageBadge"
+        [color]="percentageChange >= 0 ? 'success' : 'danger'"
+        class="badge-gradient bounce-in"
+        [attr.aria-label]="
+          percentageChange >= 0
+            ? ('HOME.POSITIVE_CHANGE'
+              | translate : { value: (percentageChange | number : '1.0-1') })
+            : ('HOME.NEGATIVE_CHANGE'
+              | translate : { value: (percentageChange | number : '1.0-1') })
+        "
+      >
+        <ion-icon [name]="getPercentageIcon()" class="text-xs"></ion-icon>
+        {{ percentageChange | number : "1.0-1" }}%
+      </ion-badge>
+    </div>
 
-      <ion-grid>
-        <ion-row>
-          <ion-col size="6" class="ion-no-padding">
-            <div class="balance-item income">
-              <ion-icon
-                name="arrow-up-circle-outline"
-                color="success"
-                aria-label="Income"
-              ></ion-icon>
-              <div class="item-details">
-                <span class="label">{{ "HOME.INCOME" | translate }}</span>
-                <span class="amount">{{ formattedIncome }}</span>
+    <span id="balance-desc" class="visually-hidden">{{
+      "HOME.BALANCE_DESCRIPTION" | translate
+    }}</span>
+
+    <!-- Income & Expenses Grid -->
+    <ion-grid class="ion-no-padding">
+      <ion-row>
+        <!-- Income -->
+        <ion-col size="6" class="ion-no-padding">
+          <div class="balance-item income slide-in-left">
+            <ion-icon
+              name="arrow-up-circle"
+              color="success"
+              [attr.aria-label]="'COMMON.INCOME' | translate"
+              class="pulse"
+            ></ion-icon>
+            <div class="item-details">
+              <span class="label">{{ "COMMON.INCOME" | translate }}</span>
+              <span class="amount text-success-color font-semibold">{{
+                formattedIncome()
+              }}</span>
+            </div>
+          </div>
+        </ion-col>
+
+        <!-- Expenses -->
+        <ion-col size="6" class="ion-no-padding">
+          <div class="balance-item expenses slide-in-right">
+            <ion-icon
+              name="arrow-down-circle"
+              color="danger"
+              [attr.aria-label]="'COMMON.OUTCOME' | translate"
+              class="pulse"
+            ></ion-icon>
+            <div class="item-details">
+              <span class="label">{{ "COMMON.OUTCOME" | translate }}</span>
+              <span class="amount text-danger-color font-semibold">{{
+                formattedExpenses()
+              }}</span>
+            </div>
+          </div>
+        </ion-col>
+      </ion-row>
+
+      <!-- Savings Row (New Feature) -->
+      <ion-row class="mt-3">
+        <ion-col size="12" class="ion-no-padding">
+          <div class="divider divider-gradient my-2"></div>
+
+          <div
+            class="balance-item savings fade-in-up"
+            [class.positive]="isPositiveSavings()"
+            [class.negative]="!isPositiveSavings()"
+          >
+            <ion-icon
+              [name]="getSavingsIcon()"
+              [color]="isPositiveSavings() ? 'tertiary' : 'warning'"
+            ></ion-icon>
+            <div class="item-details flex-1">
+              <div class="flex items-center justify-between">
+                <span class="label">{{ "COMMON.SAVINGS" | translate }}</span>
+                <span
+                  class="badge"
+                  [class.badge-success]="isPositiveSavings()"
+                  [class.badge-warning]="!isPositiveSavings()"
+                >
+                  {{ savingsPercentage() | number : "1.0-1" }}%
+                </span>
               </div>
+              <span
+                class="amount font-bold"
+                [class.text-gradient-success]="isPositiveSavings()"
+                [class.text-gradient-warning]="!isPositiveSavings()"
+              >
+                {{ formatAmount(savings(), showBalance()) }}
+              </span>
             </div>
-          </ion-col>
-          <ion-col size="6" class="ion-no-padding">
-            <div class="balance-item expenses">
-              <ion-icon
-                name="arrow-down-circle-outline"
-                color="danger"
-                aria-label="Expenses"
-              ></ion-icon>
-              <div class="item-details">
-                <span class="label">{{ "HOME.EXPENSES" | translate }}</span>
-                <span class="amount">{{ formattedExpenses }}</span>
-              </div>
-            </div>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
-</ng-container>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ng-container>
 
-    <ng-template #loadingState>
-      <div class="total-balance">
-        <ion-skeleton-text
-          animated
-          style="width: 60%; height: 40px"
-          class="fade-in"
-        ></ion-skeleton-text>
-      </div>
-      <ion-grid>
-        <ion-row>
-          <ion-col size="6" class="ion-no-padding">
-            <div class="balance-item income">
-              <ion-skeleton-text
-                animated
-                style="width: 80%; height: 20px; margin-top: 8px"
-                class="fade-in"
-              ></ion-skeleton-text>
-              <ion-skeleton-text
-                animated
-                style="width: 60%; height: 24px"
-                class="fade-in"
-              ></ion-skeleton-text>
+  <!-- Loading State -->
+  <ng-template #loadingState>
+    <div class="total-balance">
+      <div
+        class="skeleton skeleton-text shimmer"
+        style="width: 60%; height: 40px"
+      ></div>
+    </div>
+
+    <ion-grid class="ion-no-padding">
+      <ion-row>
+        <ion-col size="6" class="ion-no-padding">
+          <div class="balance-item income">
+            <div
+              class="skeleton skeleton-circle shimmer"
+              style="width: 40px; height: 40px"
+            ></div>
+            <div class="item-details flex-1">
+              <div
+                class="skeleton skeleton-text shimmer"
+                style="width: 80%; height: 16px"
+              ></div>
+              <div
+                class="skeleton skeleton-text shimmer"
+                style="width: 60%; height: 20px; margin-top: 4px"
+              ></div>
             </div>
-          </ion-col>
-          <ion-col size="6" class="ion-no-padding">
-            <div class="balance-item expenses">
-              <ion-skeleton-text
-                animated
-                style="width: 80%; height: 20px; margin-top: 8px"
-                class="fade-in"
-              ></ion-skeleton-text>
-              <ion-skeleton-text
-                animated
-                style="width: 60%; height: 24px"
-                class="fade-in"
-              ></ion-skeleton-text>
+          </div>
+        </ion-col>
+
+        <ion-col size="6" class="ion-no-padding">
+          <div class="balance-item expenses">
+            <div
+              class="skeleton skeleton-circle shimmer"
+              style="width: 40px; height: 40px"
+            ></div>
+            <div class="item-details flex-1">
+              <div
+                class="skeleton skeleton-text shimmer"
+                style="width: 80%; height: 16px"
+              ></div>
+              <div
+                class="skeleton skeleton-text shimmer"
+                style="width: 60%; height: 20px; margin-top: 4px"
+              ></div>
             </div>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
-    </ng-template>
-  </ion-card-content>
-</ion-card>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ng-template>
+</div>

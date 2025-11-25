@@ -1,0 +1,80 @@
+:host {
+  display: block;
+}
+
+ion-skeleton-text {
+  --background: rgba(var(--ion-color-medium-rgb), 0.1);
+  --border-radius: var(--ew-radius-md);
+  margin: var(--ew-space-4) auto;
+}
+
+.skeleton-list-item-avatar {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: var(--ew-space-2) var(--ew-space-4);
+}
+
+.skeleton-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-inline-end: var(--ew-space-4);
+}
+
+.skeleton-text-container {
+  flex: 1;
+}
+
+.skeleton-line-md {
+  height: 18px;
+  width: 70%;
+  margin-bottom: var(--ew-space-2);
+}
+
+.skeleton-line-sm {
+  height: 14px;
+  width: 50%;
+}
+
+.skeleton-title {
+  width: 60%;
+  height: 32px;
+  border-radius: var(--ew-radius-md);
+}
+
+.skeleton-line {
+  width: 40%;
+  height: 16px;
+  border-radius: var(--ew-radius-sm);
+}
+
+.skeleton-card-sm {
+  width: 100%;
+  height: 120px;
+  border-radius: var(--ew-radius-lg);
+}
+
+.skeleton-card-md {
+  width: 80%;
+  height: 120px;
+  border-radius: var(--ew-radius-lg);
+}
+
+.skeleton-card-lg {
+  width: 90%;
+  height: 180px;
+  border-radius: var(--ew-radius-lg);
+}
+
+.skeleton-card-xl {
+  width: 90%;
+  height: 200px;
+  border-radius: var(--ew-radius-lg);
+}
+
+.skeleton-chart {
+  width: 100%;
+  height: 200px;
+  border-radius: var(--ew-radius-lg);
+}

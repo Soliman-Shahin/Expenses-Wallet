@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import {
   AbstractControl,
   FormGroup,
@@ -6,6 +6,7 @@ import {
   ValidatorFn,
   Validators,
 } from '@angular/forms';
+import { BehaviorSubject, combineLatest } from 'rxjs';
 import { finalize, takeUntil } from 'rxjs/operators';
 import { BaseComponent } from 'src/app/shared/base/base.component';
 
@@ -13,13 +14,21 @@ import { BaseComponent } from 'src/app/shared/base/base.component';
   selector: 'app-signup',
   templateUrl: './signup.component.html',
   styleUrls: ['./signup.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SignupComponent extends BaseComponent implements OnInit {
   signupForm!: FormGroup;
   hidePassword = true;
   hideConfirmPassword = true;
-  errorMessage = '';
   isSubmitted = false;
+
+  private readonly loading = new BehaviorSubject<boolean>(false);
+  private readonly errorMessage = new BehaviorSubject<string>('');
+
+  readonly vm$ = combineLatest({
+    isLoading: this.loading.asObservable(),
+    errorMessage: this.errorMessage.asObservable(),
+  });
   passwordStrength = 0;
   passwordStrengthMessage = '';
   // Make redirectUrl public for template access
@@ -215,6 +224,14 @@ export class SignupComponent extends BaseComponent implements OnInit {
     );
   }
 
+  signInWithFacebook(): void {
+    // TODO: Implement Facebook Sign In
+    this.toastService.presentSuccessToast(
+      'bottom',
+      this.translateService.instant('AUTH.FACEBOOK_SIGNUP_COMING_SOON')
+    );
+  }
+
   // Open terms and conditions
   openTerms(): void {
     // TODO: Implement terms and conditions modal or navigation
@@ -242,15 +259,15 @@ export class SignupComponent extends BaseComponent implements OnInit {
       return;
     }
 
-    this.setLoading(true);
-    this.errorMessage = '';
+    this.loading.next(true);
+    this.errorMessage.next('');
 
     const { name, email, password } = this.signupForm.value;
 
     this.authService
       .signup(email, password)
       .pipe(
-        finalize(() => this.setLoading(false)),
+        finalize(() => this.loading.next(false)),
         takeUntil(this.destroy$)
       )
       .subscribe({
@@ -287,8 +304,9 @@ export class SignupComponent extends BaseComponent implements OnInit {
             errorKey = 'AUTH.SERVER_ERROR';
           }
 
-          this.errorMessage = this.translateService.instant(errorKey);
-          this.toastService.presentErrorToast('bottom', this.errorMessage);
+          const errorMessage = this.translateService.instant(errorKey);
+          this.errorMessage.next(errorMessage);
+          this.toastService.presentErrorToast('bottom', errorMessage);
         },
       });
   }

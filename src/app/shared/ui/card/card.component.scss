@@ -1,0 +1,41 @@
+:host {
+  display: block;
+  background: var(--ion-card-background);
+  border-radius: var(--ew-radius-lg);
+  box-shadow: var(--ew-shadow-sm);
+  transition: var(--ew-transition-all-medium);
+}
+
+:host(.app-card-padding-sm) {
+  padding: var(--ew-space-3);
+}
+
+:host(.app-card-padding-md) {
+  padding: var(--ew-space-5);
+}
+
+:host(.app-card-padding-lg) {
+  padding: var(--ew-space-7);
+}
+
+:host(.app-card-interactive) {
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(calc(var(--ew-space-1) * -1));
+    box-shadow: var(--ew-shadow-lg);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: var(--ew-shadow-md);
+  }
+}
+
+.card-header:not(:empty) {
+  margin-bottom: var(--ew-space-4);
+}
+
+.card-footer:not(:empty) {
+  margin-top: var(--ew-space-4);
+}

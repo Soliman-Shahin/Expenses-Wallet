@@ -1,0 +1,28 @@
+<ng-container [ngSwitch]="variant">
+  <!-- Avatar List Item Variant -->
+  <ng-container *ngSwitchCase="'list-item-avatar'">
+    <div class="skeleton-list-item-avatar">
+      <ion-skeleton-text animated class="skeleton-avatar"></ion-skeleton-text>
+      <div class="skeleton-text-container">
+        <ion-skeleton-text animated class="skeleton-line-md"></ion-skeleton-text>
+        <ion-skeleton-text animated class="skeleton-line-sm"></ion-skeleton-text>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Default Skeleton Variants -->
+  <ng-container *ngSwitchDefault>
+    <ion-skeleton-text
+      animated
+      [ngClass]="{
+        'skeleton-line': variant === 'line',
+        'skeleton-title': variant === 'title',
+        'skeleton-card-sm': variant === 'card-sm',
+        'skeleton-card-md': variant === 'card-md',
+        'skeleton-card-lg': variant === 'card-lg',
+        'skeleton-card-xl': variant === 'card-xl',
+        'skeleton-chart': variant === 'chart'
+      }"
+    ></ion-skeleton-text>
+  </ng-container>
+</ng-container>

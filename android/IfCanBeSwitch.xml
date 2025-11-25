@@ -1,0 +1,15 @@
+<problems>
+<problem>
+  <file>file://$PROJECT_DIR$/capacitor-cordova-android-plugins/src/main/java/com/ionicframework/common/IonicCordovaCommon.java</file>
+  <line>89</line>
+  <module>android.capacitor-cordova-android-plugins.main</module>
+  <package>com.ionicframework.common</package>
+  <entry_point TYPE="method" FQNAME="com.ionicframework.common.IonicCordovaCommon boolean execute(java.lang.String action, org.json.JSONArray args, org.apache.cordova.CallbackContext callbackContext)" />
+  <problem_class id="IfCanBeSwitch" severity="WARNING" attribute_key="WARNING_ATTRIBUTES">'if' can be replaced with 'switch'</problem_class>
+  <description>&lt;code&gt;if&lt;/code&gt; statement can be replaced with 'switch' statement #loc</description>
+  <highlighted_element>if</highlighted_element>
+  <language>JAVA</language>
+  <offset>4</offset>
+  <length>2</length>
+</problem>
+</problems>
