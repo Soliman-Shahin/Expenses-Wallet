@@ -6,7 +6,10 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root',
 })
 export class EncryptionService {
-  private key = environment.encryptionKey;
+  // NOTE: This service is used for client-side encryption of request/response data
+  // The encryption key must match the backend's ENCRYPTION_KEY or fallback
+  // Using TEMP_TRANSPORT_KEY to match backend fallback
+  private readonly TRANSPORT_KEY = 'TEMP_TRANSPORT_KEY'; // Matches backend fallback
 
   constructor() {}
 
@@ -15,7 +18,7 @@ export class EncryptionService {
     try {
       return CryptoJS.AES.encrypt(
         JSON.stringify(data),
-        key || this.key
+        key || this.TRANSPORT_KEY
       ).toString();
     } catch (e) {
       console.error('Encryption failed', e);
@@ -26,7 +29,7 @@ export class EncryptionService {
   decrypt(ciphertext: string, key?: string, isObject: boolean = true): any {
     if (!ciphertext) return null;
     try {
-      const bytes = CryptoJS.AES.decrypt(ciphertext, key || this.key);
+      const bytes = CryptoJS.AES.decrypt(ciphertext, key || this.TRANSPORT_KEY);
       const decryptedData = bytes.toString(CryptoJS.enc.Utf8);
       return isObject ? JSON.parse(decryptedData) : decryptedData;
     } catch (e) {

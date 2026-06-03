@@ -1,90 +1,161 @@
 @import "src/theme/variables";
 
 :host {
-  --ion-background-color: var(--ion-card-background);
+  --ion-background-color: var(--ew-bg-surface);
+  --input-bg: var(--ew-bg-surface-2);
+  --input-border: var(--ion-color-step-150);
+  --input-border-focus: var(--ion-color-primary);
+  --input-radius: var(--ew-radius-xl);
+  --input-padding: var(--ew-space-4);
 }
 
 ion-toolbar {
   --background: transparent;
+  --border-width: 0;
+  padding: var(--ew-space-2) var(--ew-space-2) 0;
+
+  ion-title {
+    font-family: var(--ew-font-family-heading);
+    font-weight: var(--ew-font-weight-bold);
+    font-size: var(--ew-font-size-lg);
+    color: var(--ew-text-color-primary);
+  }
+
+  ion-buttons ion-button {
+    --color: var(--ew-text-color-secondary);
+    --background: var(--ew-bg-surface-2);
+    --border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    margin: 0;
+
+    &:hover {
+      --background: var(--ion-color-step-100);
+    }
+  }
 }
 
 .form-container {
   display: flex;
   flex-direction: column;
   height: 100%;
+  padding-bottom: var(--ew-space-4);
 }
 
+// Segment Control
 .type-segment {
-  margin-bottom: var(--ew-space-4);
-  --background: var(--ion-background-color);
+  margin: var(--ew-space-4) 0 var(--ew-space-6);
+  background: var(--ew-bg-surface-2);
+  // border-radius: var(--ew-radius-full);
+  padding: 4px;
+  height: auto;
 
   ion-segment-button {
     --indicator-color: var(--ion-color-primary);
     --color: var(--ew-text-color-secondary);
     --color-checked: var(--ion-color-primary-contrast);
+    // --border-radius: var(--ew-radius-full);
+    min-height: 40px;
+    font-weight: var(--ew-font-weight-semibold);
+    letter-spacing: 0.5px;
     text-transform: none;
+    margin: 0;
+
+    ion-icon {
+      margin-inline-end: 6px;
+      font-size: 18px;
+    }
+
+    &[value="income"] {
+      --indicator-color: var(--ion-color-success);
+    }
+
+    &[value="outcome"] {
+      --indicator-color: var(--ion-color-primary);
+    }
   }
 }
 
+// Amount Input Area
 .amount-container {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: center;
-  margin-bottom: var(--ew-space-4);
-  padding: var(--ew-space-4) 0;
-  border-bottom: 1px solid var(--ion-border-color);
+  margin-bottom: var(--ew-space-8);
+  position: relative;
 
   .amount-input {
-    font-size: var(--ew-font-size-5xl, 3rem);
+    font-size: 3.5rem;
     font-weight: var(--ew-font-weight-bold);
     --padding-start: 0;
     --padding-end: var(--ew-space-2);
-    text-align: end;
-    max-width: 70%;
-    color: var(--ion-text-color);
+    text-align: center;
+    max-width: 80%;
+    color: var(--ew-text-color-primary);
+    --background: transparent;
+
+    &.has-focus {
+      color: var(--ion-color-primary);
+    }
   }
 
   .currency-display {
-    font-size: var(--ew-font-size-xl, 1.5rem);
-    font-weight: var(--ew-font-weight-medium);
+    font-size: var(--ew-font-size-xl);
+    font-weight: var(--ew-font-weight-semibold);
     color: var(--ew-text-color-secondary);
+    margin-top: var(--ew-space-3);
   }
 }
 
+// Form Fields
 .form-fields-list {
   background: transparent;
   padding: 0;
-  margin-bottom: var(--ew-space-4);
-}
-
-ion-popover {
-  --width: 320px;
-}
-
-ion-datetime {
-  --background: var(--ion-card-background);
-  --ion-text-color: var(--ion-text-color);
-  border-radius: var(--ew-radius-lg);
+  margin-bottom: var(--ew-space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ew-space-4);
 }
 
 .form-input-item {
-  --background: var(--ion-background-color);
-  --border-radius: var(--ew-radius-lg, 12px);
-  --padding-start: var(--ew-space-4);
-  --inner-padding-end: var(--ew-space-4);
-  margin-bottom: var(--ew-space-3);
-  color: var(--ion-text-color);
+  --background: var(--input-bg);
+  --border-radius: var(--input-radius);
+  --padding-start: var(--input-padding);
+  --inner-padding-end: var(--input-padding);
+  --min-height: 56px;
+  --border-width: 1px;
+  --border-color: var(--input-border);
+  --border-style: solid;
+  margin: 0;
+  transition: all 0.2s ease;
+  box-shadow: var(--ew-shadow-sm);
 
-  ion-select::part(placeholder) {
-    color: var(--ew-text-color-muted);
+  &.item-has-focus {
+    --border-color: var(--input-border-focus);
+    box-shadow: var(--ew-shadow-md);
+    transform: translateY(-1px);
   }
 
-  ion-input {
-    color: var(--ion-text-color);
+  ion-icon {
+    color: var(--ew-text-color-secondary);
+    margin-inline-end: var(--ew-space-3);
+    font-size: 20px;
+  }
+
+  ion-select,
+  ion-input,
+  ion-datetime-button {
+    font-size: var(--ew-font-size-base);
+    font-weight: var(--ew-font-weight-medium);
+    --placeholder-color: var(--ew-text-color-muted);
+    --placeholder-opacity: 1;
   }
 
   ion-label {
-    color: var(--ion-text-color) !important;
+    font-size: var(--ew-font-size-base);
+    font-weight: var(--ew-font-weight-medium);
+    color: var(--ew-text-color-primary) !important;
+    margin: 0;
   }
 }
 
@@ -92,15 +163,72 @@ ion-datetime {
   display: flex;
   align-items: center;
   gap: var(--ew-space-3);
+
+  ion-icon {
+    font-size: 20px;
+  }
+
+  span {
+    font-weight: var(--ew-font-weight-medium);
+  }
 }
 
+// Action Buttons
 .form-actions {
-  margin-top: auto; // Pushes to the bottom
+  margin-top: auto;
   display: flex;
   gap: var(--ew-space-3);
   padding-top: var(--ew-space-4);
 
-  .save-button {
-    flex-grow: 1;
+  ion-button {
+    --border-radius: var(--ew-radius-xl);
+    height: 52px;
+    font-weight: var(--ew-font-weight-semibold);
+    font-size: var(--ew-font-size-base);
+    margin: 0;
+    --box-shadow: var(--ew-shadow-md);
+
+    &[color="danger"] {
+      --background: var(--ew-bg-surface-2);
+      --color: var(--ion-color-danger);
+      --border-color: var(--ion-color-danger-shade);
+      --border-width: 1px;
+      --border-style: solid;
+      flex: 0 0 auto;
+      min-width: 52px;
+
+      ion-icon {
+        margin: 0;
+        font-size: 22px;
+      }
+
+      // If text is shown (optional based on design)
+      &.with-text {
+        flex: 1;
+      }
+    }
+
+    &.save-button {
+      flex: 1;
+      --background: var(--ion-color-primary);
+      --background-hover: var(--ion-color-primary-shade);
+      --color: var(--ion-color-primary-contrast);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+    }
+  }
+}
+
+// Dark Mode Adjustments
+@media (prefers-color-scheme: dark) {
+  :host {
+    --input-bg: var(--ion-color-step-100);
+    --input-border: var(--ion-color-step-200);
+  }
+
+  .type-segment {
+    background: var(--ion-color-step-100);
   }
 }

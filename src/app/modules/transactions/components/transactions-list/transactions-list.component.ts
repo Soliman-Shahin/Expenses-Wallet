@@ -1,22 +1,45 @@
-import { Component, ChangeDetectionStrategy, OnInit, OnDestroy } from '@angular/core';
-import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
+import { Component, ChangeDetectionStrategy, OnInit } from '@angular/core';
+import {
+  Subject,
+  takeUntil,
+  debounceTime,
+  distinctUntilChanged,
+  finalize,
+} from 'rxjs';
 import { Router } from '@angular/router';
 import { ExpenseService } from 'src/app/core/services/expense.service';
 import { ProfileService } from 'src/app/modules/profile/services/profile.service';
 import { Expense } from 'src/app/shared/models/expense.model';
+import { Category } from 'src/app/shared/models/category.model';
 import { BaseComponent } from 'src/app/shared/base/base.component';
 import { ModalController } from '@ionic/angular';
 import { ExpenseFormComponent } from 'src/app/home/components/expense-form/expense-form.component';
+import { ComponentStateService } from 'src/app/shared/services/component-state.service';
+
+interface TransactionItem {
+  _id: string;
+  original: Expense;
+  title: string;
+  amount: number;
+  date: Date;
+  categoryName: string;
+  categoryIcon: string;
+  categoryColor: string;
+  type: 'income' | 'outcome';
+  isIncome: boolean;
+  formattedDate: string;
+}
 
 @Component({
   selector: 'app-transactions-list',
   templateUrl: './transactions-list.component.html',
   styleUrls: ['./transactions-list.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [ComponentStateService],
 })
 export class TransactionsListComponent extends BaseComponent implements OnInit {
-  transactions: Expense[] = [];
-  categories: any[] = [];
+  transactions: TransactionItem[] = [];
+  categories: Category[] = [];
   error: string | null = null;
   userCurrency = 'USD';
 
@@ -50,6 +73,7 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
   }
 
   override ngOnInit() {
+    super.ngOnInit();
     this.loadInitialData();
   }
 
@@ -108,45 +132,105 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
 
     this.expenseService
       .getExpenses(params)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => {
+          this.setLoading(false);
+          this.cdr.markForCheck();
+        })
+      )
       .subscribe({
         next: (response: any) => {
-          // Handle both old format (array) and new format (object with data)
-          if (response?.data && Array.isArray(response.data)) {
-            this.transactions = response.data;
-          } else {
-            const arr: Expense[] = Array.isArray(response)
-              ? response
-              : (response as any)?.data?.data || (response as any)?.data || [];
+          try {
+            let rawExpenses: Expense[] = [];
 
-            // Sort by date (newest first) - only if backend doesn't handle it
-            this.transactions = arr.sort((a, b) => {
-              const dateA = (a as any)?.date || (a as any)?.createdAt;
-              const dateB = (b as any)?.date || (b as any)?.createdAt;
+            // Handle both old format (array) and new format (object with data)
+            if (response?.data && Array.isArray(response.data)) {
+              rawExpenses = response.data;
+            } else {
+              rawExpenses = Array.isArray(response)
+                ? response
+                : (response as any)?.data?.data ||
+                  (response as any)?.data ||
+                  [];
+            }
 
-              if (!dateA && !dateB) return 0;
-              if (!dateA) return 1;
-              if (!dateB) return -1;
+            // Map to ViewModel
+            const items = rawExpenses.map((e) => this.mapToViewModel(e));
 
-              const da = new Date(dateA).getTime();
-              const db = new Date(dateB).getTime();
-
-              if (isNaN(da) && isNaN(db)) return 0;
-              if (isNaN(da)) return 1;
-              if (isNaN(db)) return -1;
-
-              return db - da; // Newest first
+            // Sort by date (newest first)
+            this.transactions = items.sort((a, b) => {
+              return b.date.getTime() - a.date.getTime();
             });
+          } catch (err) {
+            console.error('Error processing transactions:', err);
+            this.setError('Failed to process data');
           }
-
-          this.setLoading(false);
         },
         error: (err: any) => {
           this.setError('Failed to load transactions');
-          this.setLoading(false);
           console.error('Error loading transactions:', err);
         },
       });
+  }
+
+  private mapToViewModel(e: Expense): TransactionItem {
+    // Handle date normalization
+    const dateVal = e.date || e.createdAt || new Date();
+    let dateObj = new Date(dateVal);
+
+    // Safety check for invalid dates
+    if (isNaN(dateObj.getTime())) {
+      dateObj = new Date(); // Fallback to current date
+    }
+
+    // Handle Category
+    // e.category can be string (ID) or object (populated)
+    const cat = e.category;
+    const isPopulated = cat && typeof cat !== 'string';
+
+    // Fallbacks
+    const categoryName = isPopulated ? (cat as Category).title : '—';
+    const categoryColor = isPopulated
+      ? (cat as Category).color || '#ccc'
+      : '#ccc';
+
+    // Icon logic
+    let categoryIcon = 'pricetag-outline';
+    let type: 'income' | 'outcome' = 'outcome';
+
+    if (isPopulated) {
+      const c = cat as Category;
+      type = c.type;
+
+      if (c.icon) {
+        categoryIcon = c.icon;
+      } else {
+        if (c.type === 'income') categoryIcon = 'arrow-down-circle-outline';
+        else if (c.type === 'outcome') categoryIcon = 'arrow-up-circle-outline';
+      }
+    }
+
+    // Amount
+    const amount = Number(e.amount) || 0;
+
+    // Title/Description
+    const title =
+      e.description || (isPopulated ? (cat as Category).title : 'Transaction');
+
+    return {
+      _id: e._id,
+      original: e,
+      title,
+      amount,
+      date: dateObj,
+      formattedDate: dateObj.toISOString(),
+      categoryName,
+      categoryIcon,
+      categoryColor,
+      type,
+      isIncome: type === 'income',
+    };
   }
 
   // Search and filter methods
@@ -187,14 +271,12 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
   clearDateFilter() {
     this.startDate = null;
     this.endDate = null;
-    // Keep the modal open for the user to select a new date range
   }
 
   get datePickerValue(): (string | null)[] | null {
     if (this.startDate || this.endDate) {
       return [this.startDate, this.endDate];
     }
-    // Return null to have the calendar default to the current month
     return null;
   }
 
@@ -205,17 +287,14 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
         this.startDate = null;
         this.endDate = null;
       } else {
-        // Sort the dates to ensure the first one is the start date
         const sortedDates = dates.sort();
         this.startDate = sortedDates[0];
-        // If only one date is selected, use it as the end date as well
         this.endDate =
           sortedDates.length > 1
             ? sortedDates[sortedDates.length - 1]
             : sortedDates[0];
       }
     } else if (typeof dates === 'string') {
-      // Handle the case where only a single date is emitted
       this.startDate = dates;
       this.endDate = dates;
     }
@@ -236,7 +315,6 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
 
   // Navigation
   addTransaction() {
-    // Navigate to categories create page to add new expense
     this.router.navigate(['/categories/create']);
   }
 
@@ -247,64 +325,12 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
     }, 1000);
   }
 
-  trackById(_: number, item: Expense) {
-    return (item as any)?._id || (item as any)?.id || item;
+  trackById(_: number, item: TransactionItem) {
+    return item._id;
   }
 
-  // Template helpers
-  getTitle(t: Expense): string {
-    return (t as any)?.title || (t as any)?.name || '—';
-  }
-
-  getOperationName(t: Expense): string {
-    return (
-      (t as any)?.description || (t as any)?.title || (t as any)?.name || '—'
-    );
-  }
-
-  getCategoryName(t: Expense): string {
-    const cat = (t as any)?.category;
-    if (!cat) return '—';
-    if (typeof cat === 'string') {
-      return '—';
-    }
-    return (cat as any)?.name || '—';
-  }
-
-  getCategoryIcon(t: Expense): string {
-    const cat = (t as any)?.category;
-    const icon = (cat as any)?.icon || (cat as any)?.iconName;
-    if (icon && typeof icon === 'string') return icon;
-    const type = (cat as any)?.type as 'income' | 'outcome' | undefined;
-    if (type === 'income') return 'arrow-down-circle-outline';
-    if (type === 'outcome') return 'arrow-up-circle-outline';
-    return 'pricetag-outline';
-  }
-
-  getCategoryColor(t: Expense): string | null {
-    const cat = (t as any)?.category;
-    const color = (cat as any)?.color;
-    return typeof color === 'string' ? color : null;
-  }
-
-  getDateValue(t: Expense): string | number | Date | null | undefined {
-    const v = (t as any)?.date ?? (t as any)?.createdAt;
-    return v as any;
-  }
-
-  getAmountValue(t: Expense): number | null | undefined {
-    const n = Number((t as any)?.amount);
-    return isNaN(n) ? 0 : n;
-  }
-
-  getCategoryType(t: Expense): 'income' | 'outcome' {
-    const cat = (t as any)?.category;
-    const type = (cat as any)?.type;
-    return type === 'income' ? 'income' : 'outcome';
-  }
-
-  onTransactionClick(item: Expense) {
-    this.onEdit(item);
+  onTransactionClick(item: TransactionItem) {
+    this.onEdit(item.original);
   }
 
   async onEdit(item: Expense) {
@@ -324,11 +350,11 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
   }
 
   async onDelete(item: Expense) {
-    const transactionName = this.getTitle(item);
+    const transactionName = item.description || 'Transaction';
     const confirmed = await this.alertService.showDeleteConfirm(
       transactionName,
       async () => {
-        this.expenseService.deleteExpense((item as any)._id).subscribe({
+        this.expenseService.deleteExpense(item._id).subscribe({
           next: async () => {
             await this.toastService.presentSuccessToast(
               'bottom',

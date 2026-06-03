@@ -21,9 +21,9 @@ import { retry, retryWhen, mergeMap, finalize } from 'rxjs/operators';
  */
 @Injectable()
 export class RetryInterceptor implements HttpInterceptor {
-  private readonly MAX_RETRIES = 3;
+  private readonly MAX_RETRIES = 1; // Reduced from 3 to 1
   private readonly INITIAL_DELAY = 1000; // 1 second
-  private readonly MAX_DELAY = 10000; // 10 seconds
+  private readonly MAX_DELAY = 3000; // Reduced from 10s to 3s
 
   // HTTP methods that are safe to retry
   private readonly RETRYABLE_METHODS = ['GET', 'HEAD', 'OPTIONS'];
@@ -62,7 +62,7 @@ export class RetryInterceptor implements HttpInterceptor {
             // Calculate delay with exponential backoff
             const delay = this.calculateDelay(attempt);
 
-            console.log(
+            console.warn(
               `🔄 Retrying request (attempt ${attempt + 1}/${
                 this.MAX_RETRIES
               }) after ${delay}ms:`,
@@ -75,8 +75,7 @@ export class RetryInterceptor implements HttpInterceptor {
         )
       ),
       finalize(() => {
-        // Log when request completes (success or final failure)
-        console.log('✅ Request completed:', request.url);
+        // Cleanup - request completed
       })
     );
   }
@@ -112,11 +111,17 @@ export class RetryInterceptor implements HttpInterceptor {
       return false;
     }
 
-    // Retry network errors (status 0) and server errors (5xx)
-    const shouldRetry = error.status === 0 || error.status >= 500;
+    // Only retry server errors (5xx), NOT network errors (status 0)
+    // This prevents infinite retry loop when backend is down
+    const shouldRetry = error.status >= 500 && error.status < 600;
+
+    if (!shouldRetry && error.status === 0) {
+      console.log('❌ Backend not available - not retrying network error');
+      return false;
+    }
 
     if (shouldRetry) {
-      console.log(`✅ Will retry error: ${error.status} ${error.statusText}`);
+      console.log(`✅ Will retry server error: ${error.status} ${error.statusText}`);
     }
 
     return shouldRetry;

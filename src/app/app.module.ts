@@ -4,7 +4,7 @@ import {
   provideHttpClient,
   withInterceptorsFromDi,
 } from '@angular/common/http';
-import { NgModule } from '@angular/core';
+import { ErrorHandler, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
@@ -23,6 +23,7 @@ import { EncryptionAdvancedInterceptor } from './core/interceptors/encryption.in
 import { ErrorInterceptor as EnhancedErrorInterceptor } from './core/interceptors/error.interceptor';
 import { RetryInterceptor } from './core/interceptors/retry.interceptor';
 import { CacheInterceptor } from './core/interceptors/cache.interceptor';
+import { GlobalErrorHandler } from './core/services/global-error-handler.service';
 
 export function HttpLoaderFactory(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -49,6 +50,11 @@ export function HttpLoaderFactory(http: HttpClient) {
   ],
   providers: [
     provideHttpClient(withInterceptorsFromDi()),
+    // Global Error Handler
+    {
+      provide: ErrorHandler,
+      useClass: GlobalErrorHandler,
+    },
     // Interceptor order matters! They execute top to bottom for requests, bottom to top for responses
     // 1. Retry - First to catch and retry failed requests
     {

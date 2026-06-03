@@ -7,7 +7,7 @@ import { Injectable, inject, NgZone } from '@angular/core';
 import { Capacitor } from '@capacitor/core';
 import { Router } from '@angular/router';
 import { NavController } from '@ionic/angular';
-import { Observable, throwError, BehaviorSubject, from, of } from 'rxjs';
+import { Observable, throwError, BehaviorSubject, from, of, EMPTY } from 'rxjs';
 import { catchError, tap, map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { AuthResponse, User } from '../models';
@@ -88,264 +88,76 @@ export class AuthService {
     return this.authenticate(`/user/signup`, { email, password });
   }
 
+  /**
+   * Google Sign-In with platform detection:
+   * - Native (Android/iOS): Uses Capacitor GoogleAuth plugin
+   * - Web: Redirects to backend OAuth flow, returns to /auth/callback
+   */
   loginWithGoogle(): Observable<void> {
     const platform = Capacitor.getPlatform?.() || 'web';
-    const isNative = platform === 'android' || platform === 'ios';
-    // Native path: Use Capacitor GoogleAuth plugin to get idToken, then authenticate via backend
+    const hasGoogleAuthPlugin = !!(
+      (window as any)?.Capacitor?.Plugins?.GoogleAuth ||
+      (window as any)?.GoogleAuth
+    );
+    
+    const isNative = (platform === 'android' || platform === 'ios') && hasGoogleAuthPlugin;
+    
     if (isNative) {
       return from(
         (async () => {
           const GA =
             (window as any)?.Capacitor?.Plugins?.GoogleAuth ||
             (window as any)?.GoogleAuth;
+          
           if (!GA) {
-            throw new Error(
-              'GoogleAuth plugin not available. Please install @codetrix-studio/capacitor-google-auth and run npx cap sync.'
-            );
+            throw new Error('GoogleAuth plugin not available');
           }
+
           try {
-            // Initialize if available (safe no-op on native if not needed)
-            if (
-              typeof GA.initialize === 'function' &&
-              environment.google?.webClientId
-            ) {
+            // Initialize if needed
+            if (typeof GA.initialize === 'function' && environment.google?.webClientId) {
               try {
                 await GA.initialize({
-                  serverClientId: environment.google.webClientId,
+                  clientId: environment.google.webClientId,
                   scopes: ['profile', 'email'],
+                  grantOfflineAccess: true,
                 });
-                console.log(
-                  '[AuthService] GoogleAuth initialized with serverClientId:',
-                  environment.google.webClientId
-                );
-              } catch {}
+              } catch (initError) {
+                console.warn('[AuthService] GoogleAuth init warning:', initError);
+              }
             }
+
             const res = await GA.signIn();
-            console.log('[AuthService] GoogleAuth.signIn() result:', res);
-            const idToken: string =
-              res?.authentication?.idToken || res?.idToken || '';
-            console.log(
-              '[AuthService] Extracted idToken:',
-              idToken ? '***' + idToken.substring(0, 10) + '...' : 'MISSING'
-            );
+            const idToken: string = res?.authentication?.idToken || res?.idToken || '';
+            
             if (!idToken) {
               throw new Error('Failed to obtain Google idToken');
             }
-            console.log(
-              '[AuthService] Sending idToken to backend:',
-              `${environment.apiUrl}/user/auth/google/native`
-            );
 
-            // Reuse authenticate() to handle HTTP (native/web), token storage, navigation
-            await this.authenticate(`/user/auth/google/native`, {
-              idToken,
-            }).toPromise();
-            console.log(
-              '[AuthService] Backend response received and processed'
-            );
+            await this.authenticate(`/user/auth/google/native`, { idToken }).toPromise();
             return;
           } catch (err) {
-            console.error('[AuthService] Native Google Sign-In error:', err);
-            // Show a more user-friendly error message
-            const errorMessage =
-              err instanceof Error
-                ? err.message
-                : 'Unknown error occurred during Google Sign-In';
-            console.error(
-              '[AuthService] Native Google Sign-In failed:',
-              errorMessage
-            );
+            const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
             throw new Error(`Google Sign-In failed: ${errorMessage}`);
           }
         })()
       ).pipe(
         map(() => undefined),
         catchError((error) => {
-          console.error('[AuthService] HTTP error in native flow:', error);
-          // Extract more detailed error information
           let errorMessage = 'Network error occurred during Google Sign-In';
-          if (error?.status) {
-            errorMessage += ` (HTTP ${error.status})`;
-          }
-          if (error?.message) {
-            errorMessage += `: ${error.message}`;
-          }
-          console.error('[AuthService] Detailed HTTP error:', errorMessage);
-          // Return a more descriptive error
+          if (error?.status) errorMessage += ` (HTTP ${error.status})`;
+          if (error?.message) errorMessage += `: ${error.message}`;
           return throwError(() => new Error(errorMessage));
         })
       );
     }
 
-    // Web popup-based OAuth: open backend Google route, listen for postMessage
+    // Web: Redirect to backend OAuth (will redirect back to /auth/callback)
     const authUrl = `${environment.apiUrl}/user/google`;
-    const authOrigin = new URL(environment.apiUrl).origin;
-
-    const popupWidth = 500;
-    const popupHeight = 600;
-    const left =
-      window.screenX + Math.max(0, (window.outerWidth - popupWidth) / 2);
-    const top =
-      window.screenY + Math.max(0, (window.outerHeight - popupHeight) / 2.5);
-
-    const features = [
-      `width=${popupWidth}`,
-      `height=${popupHeight}`,
-      `left=${left}`,
-      `top=${top}`,
-      'resizable=yes',
-      'scrollbars=yes',
-    ].join(',');
-
-    const popup = window.open(authUrl, 'google_oauth', features);
-
-    return from(
-      new Promise<void>((resolve, reject) => {
-        if (!popup) {
-          reject(new Error('Unable to open authentication window'));
-          return;
-        }
-
-        const timer = setInterval(() => {
-          if (popup.closed) {
-            clearInterval(timer);
-          }
-        }, 500);
-
-        const onMessage = (event: MessageEvent) => {
-          // Ensure message is from backend origin (or allow any during local dev)
-          const isFromBackend = event.origin === authOrigin;
-          if (!isFromBackend) {
-            return;
-          }
-          const data = event.data || {};
-          if (data && data.type === 'google-auth-success' && data.payload) {
-            window.removeEventListener('message', onMessage);
-            try {
-              const { user, tokens } = data.payload as {
-                user: User;
-                tokens: { accessToken: string; refreshToken: string };
-              };
-
-              // Store tokens (secure) and user data
-              if (tokens?.accessToken) {
-                this.tokenService.setAccessToken(tokens.accessToken);
-              }
-              if (tokens?.refreshToken) {
-                this.tokenService.setRefreshToken(tokens.refreshToken);
-              }
-              if (user && user._id) {
-                this.tokenService.setUserId(user._id);
-              }
-              this.storageService.set('user', user);
-              this.userSubject.next(user);
-
-              // Navigate after login inside Angular zone
-              const redirectUrl = this.redirectUrl || '/home';
-              this.redirectUrl = null;
-              this.zone.run(() => {
-                this.router.navigateByUrl(redirectUrl);
-              });
-
-              resolve();
-            } catch (e) {
-              reject(e);
-            } finally {
-              try {
-                popup.close();
-              } catch {}
-            }
-          }
-        };
-
-        window.addEventListener('message', onMessage);
-      })
-    ).pipe(catchError(this.handleError));
+    window.location.href = authUrl;
+    return EMPTY;
   }
 
-  loginWithFacebook(): Observable<void> {
-    // Popup-based OAuth: open backend Facebook route, listen for postMessage
-    const authUrl = `${environment.apiUrl}/user/facebook`;
-    const authOrigin = new URL(environment.apiUrl).origin;
-
-    const popupWidth = 500;
-    const popupHeight = 600;
-    const left =
-      window.screenX + Math.max(0, (window.outerWidth - popupWidth) / 2);
-    const top =
-      window.screenY + Math.max(0, (window.outerHeight - popupHeight) / 2.5);
-
-    const features = [
-      `width=${popupWidth}`,
-      `height=${popupHeight}`,
-      `left=${left}`,
-      `top=${top}`,
-      'resizable=yes',
-      'scrollbars=yes',
-    ].join(',');
-
-    const popup = window.open(authUrl, 'facebook_oauth', features);
-
-    return from(
-      new Promise<void>((resolve, reject) => {
-        if (!popup) {
-          reject(new Error('Unable to open authentication window'));
-          return;
-        }
-
-        const timer = setInterval(() => {
-          if (popup.closed) {
-            clearInterval(timer);
-          }
-        }, 500);
-
-        const onMessage = (event: MessageEvent) => {
-          const isFromBackend = event.origin === authOrigin;
-          if (!isFromBackend) {
-            return;
-          }
-          const data = event.data || {};
-          if (data && data.type === 'facebook-auth-success' && data.payload) {
-            window.removeEventListener('message', onMessage);
-            try {
-              const { user, tokens } = data.payload as {
-                user: User;
-                tokens: { accessToken: string; refreshToken: string };
-              };
-
-              if (tokens?.accessToken) {
-                this.tokenService.setAccessToken(tokens.accessToken);
-              }
-              if (tokens?.refreshToken) {
-                this.tokenService.setRefreshToken(tokens.refreshToken);
-              }
-              if (user && user._id) {
-                this.tokenService.setUserId(user._id);
-              }
-              this.storageService.set('user', user);
-              this.userSubject.next(user);
-
-              const redirectUrl = this.redirectUrl || '/home';
-              this.redirectUrl = null;
-              this.zone.run(() => {
-                this.router.navigateByUrl(redirectUrl);
-              });
-
-              resolve();
-            } catch (e) {
-              reject(e);
-            } finally {
-              try {
-                popup.close();
-              } catch {}
-            }
-          }
-        };
-
-        window.addEventListener('message', onMessage);
-      })
-    ).pipe(catchError(this.handleError));
-  }
 
   private authenticate(
     url: string,
@@ -353,10 +165,10 @@ export class AuthService {
   ): Observable<AuthResponse> {
     const fullUrl = `${environment.apiUrl}${url}`;
 
-    // Encrypt credentials
-    const encryptedCredentials = {
-      data: this.encryptionService.encrypt(credentials),
-    };
+    // Encrypt credentials only if encryption is enabled
+    const payload = environment.enableEncryption
+      ? { data: this.encryptionService.encrypt(credentials) }
+      : credentials;
 
     // On native (Android/iOS), prefer Capacitor HTTP plugin to bypass WebView CORS
     if (Capacitor.isNativePlatform()) {
@@ -366,7 +178,7 @@ export class AuthService {
           Http.post({
             url: fullUrl,
             headers: { 'Content-Type': 'application/json' },
-            data: encryptedCredentials,
+            data: payload,
           })
         ).pipe(
           map((resp: any) => {
@@ -433,7 +245,7 @@ export class AuthService {
 
     // Web: Use a bare HttpClient (bypasses interceptors and ApiService error wrapping)
     const http = new HttpClient(this.httpBackend);
-    return http.post<any>(fullUrl, encryptedCredentials).pipe(
+    return http.post<any>(fullUrl, payload).pipe(
       map((res) => {
         let response = res;
         // Decrypt response if needed
@@ -588,10 +400,22 @@ export class AuthService {
     try {
       const json = atob(payloadB64);
       const parsed = JSON.parse(json);
-      const user = parsed?.user as User | undefined;
+      return this.handleOAuthCallback(parsed);
+    } catch (e) {
+      return throwError(() => e);
+    }
+  }
+
+  /**
+   * Handle OAuth callback payload (already parsed)
+   * @param payload { user, tokens: { accessToken, refreshToken } }
+   */
+  handleOAuthCallback(payload: any): Observable<void> {
+    try {
+      const user = payload?.user as User | undefined;
       const accessToken =
-        parsed?.tokens?.accessToken || parsed?.accessToken || parsed?.token;
-      const refreshToken = parsed?.tokens?.refreshToken || parsed?.refreshToken;
+        payload?.tokens?.accessToken || payload?.accessToken || payload?.token;
+      const refreshToken = payload?.tokens?.refreshToken || payload?.refreshToken;
       if (!user || !accessToken || !refreshToken) {
         return throwError(() => new Error('Invalid OAuth payload'));
       }

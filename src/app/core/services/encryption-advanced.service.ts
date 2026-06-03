@@ -23,12 +23,13 @@ export class EncryptionAdvancedService {
   }
 
   /**
-   * Initialize encryption key from environment
+   * Initialize encryption key
+   * NOTE: This is a temporary transport key. In production, implement proper key exchange.
    */
   private async initializeKey(): Promise<void> {
     try {
-      const keyString =
-        environment.encryptionKey || 'ExpensesWalletSecretKey2024';
+      // TODO: Implement secure key exchange protocol with backend
+      const keyString = 'TEMP_TRANSPORT_KEY_FOR_EXCHANGE';
 
       // Derive key using PBKDF2 (same as backend scrypt concept)
       const keyMaterial = await this.getKeyMaterial(keyString);

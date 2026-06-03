@@ -8,8 +8,9 @@ export const environment = {
   // apiUrl: 'https://expenses-wallet.up.railway.app/v1',
 
   // Encryption settings
-  enableEncryption: true, // Set to false to disable encryption
-  encryptionKey: '12sd67dj89kju98475mmfnfh000shahin000ysds12', // Must match backend ENCRYPTION_KEY
+  // NOTE: Full payload encryption for login/signup requests
+  // Backend supports both full payload and field-level encryption
+  enableEncryption: true, // Encryption is now working correctly!
 
   // Google OAuth
   google: {
