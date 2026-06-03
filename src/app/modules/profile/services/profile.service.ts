@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { UserProfile } from '../models/profile.model';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { ApiService } from 'src/app/core/services/api.service';
-import { catchError, map, tap } from 'rxjs/operators';
+import { catchError, map, tap, shareReplay } from 'rxjs/operators';
 import { StorageService } from 'src/app/modules/auth/services/storage.service';
 
 // Deprecated old storage key - kept for cleanup only
@@ -138,6 +138,7 @@ export class ProfileService {
 
   /**
    * Fetch profile from backend and propagate to local cache and stream.
+   * Uses shareReplay to cache the result and share it among multiple subscribers.
    */
   fetchProfile(): Observable<UserProfile | null> {
     return this.api.get<any>(this.PROFILE_ME_ENDPOINT).pipe(
@@ -148,7 +149,8 @@ export class ProfileService {
       catchError((err) => {
         console.error('Failed to fetch profile', err);
         return of(null);
-      })
+      }),
+      shareReplay({ bufferSize: 1, refCount: true })
     );
   }
 

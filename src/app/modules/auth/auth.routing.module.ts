@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { LoginComponent, SignupComponent } from './components';
+import { AuthCallbackComponent } from './pages/auth-callback/auth-callback.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'app', pathMatch: 'full' },
@@ -11,6 +12,10 @@ const routes: Routes = [
   {
     path: 'signup',
     component: SignupComponent,
+  },
+  {
+    path: 'callback',
+    component: AuthCallbackComponent,
   },
 ];
 

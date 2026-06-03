@@ -224,13 +224,6 @@ export class SignupComponent extends BaseComponent implements OnInit {
     );
   }
 
-  signInWithFacebook(): void {
-    // TODO: Implement Facebook Sign In
-    this.toastService.presentSuccessToast(
-      'bottom',
-      this.translateService.instant('AUTH.FACEBOOK_SIGNUP_COMING_SOON')
-    );
-  }
 
   // Open terms and conditions
   openTerms(): void {

@@ -32,16 +32,6 @@
             {{ "AUTH.SIGN_UP_WITH_GOOGLE" | translate }}
           </ion-button>
 
-          <ion-button
-            expand="block"
-            fill="outline"
-            class="facebook-btn ion-margin-top"
-            (click)="signInWithFacebook()"
-            [disabled]="vm.isLoading"
-          >
-            <ion-icon slot="start" name="logo-facebook"></ion-icon>
-            {{ "AUTH.SIGN_UP_WITH_FACEBOOK" | translate }}
-          </ion-button>
         </div>
 
         <div class="divider">

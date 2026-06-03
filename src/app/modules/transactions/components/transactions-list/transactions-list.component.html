@@ -118,48 +118,45 @@
       *ngIf="transactions.length > 0; else empty"
     >
       <ion-item-sliding *ngFor="let t of transactions; trackBy: trackById">
-        <ion-item class="transaction-item item-card" lines="none" button>
+        <ion-item
+          class="transaction-item item-card"
+          lines="none"
+          button
+          (click)="onTransactionClick(t)"
+        >
           <span
             class="category-icon"
-            [style.background]="getCategoryColor(t)"
+            [style.background]="t.categoryColor"
             aria-hidden="true"
           >
-            <ion-icon size="large" [name]="getCategoryIcon(t)"></ion-icon>
+            <ion-icon size="large" [name]="t.categoryIcon"></ion-icon>
           </span>
           <ion-label>
             <h3 class="ion-text-wrap transaction-title">
-              {{ getOperationName(t) }}
+              {{ t.title }}
             </h3>
             <p class="transaction-meta">
               <span class="transaction-date">{{
-                getDateValue(t) | date : "mediumDate"
+                t.date | date : "mediumDate"
               }}</span>
-              <span
-                *ngIf="getCategoryName(t) as cat"
-                class="transaction-category"
-              >
+              <span class="transaction-category">
                 <ion-icon name="pricetag-outline"></ion-icon>
-                {{ cat }}
+                {{ t.categoryName }}
               </span>
             </p>
           </ion-label>
-          <ion-note
-            slot="end"
-            [color]="getCategoryType(t) === 'income' ? 'success' : 'primary'"
-          >
-            {{ getCategoryType(t) === "income" ? "+" : ""
-            }}{{
-              getAmountValue(t) | currency : userCurrency : "symbol" : "1.0-0"
-            }}
+          <ion-note slot="end" [color]="t.isIncome ? 'success' : 'primary'">
+            {{ t.isIncome ? "+" : ""
+            }}{{ t.amount | currency : userCurrency : "symbol" : "1.0-0" }}
           </ion-note>
         </ion-item>
 
         <ion-item-options side="end">
-          <ion-item-option (click)="onEdit(t)">
+          <ion-item-option (click)="onEdit(t.original)">
             <ion-icon slot="start" name="create-outline"></ion-icon>
             {{ "Edit" | translate }}
           </ion-item-option>
-          <ion-item-option color="danger" (click)="onDelete(t)">
+          <ion-item-option color="danger" (click)="onDelete(t.original)">
             <ion-icon slot="start" name="trash-outline"></ion-icon>
             {{ "Delete" | translate }}
           </ion-item-option>

@@ -47,9 +47,6 @@ export class LoginComponent extends BaseComponent implements OnInit {
     }
   }
 
-  signInWithFacebook(): void {
-    this.handleAuth(this.authService.loginWithFacebook());
-  }
 
 
   togglePasswordVisibility(): void {
@@ -82,6 +79,7 @@ export class LoginComponent extends BaseComponent implements OnInit {
   }
 
   signInWithGoogle(): void {
+    console.log('🔵 [LoginComponent] Google Sign-In button clicked!');
     this.handleAuth(this.authService.loginWithGoogle());
   }
 
