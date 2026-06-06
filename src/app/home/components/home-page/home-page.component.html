@@ -6,431 +6,306 @@
   [fullscreen]="true"
 >
   <ng-container *ngIf="vm$ | async as vm">
-    <!-- Loading State with Skeleton -->
+
+    <!-- ══ Loading Skeleton ══ -->
     <ng-container *ngIf="vm.loading; else content">
-      <div class="skeleton-container ion-padding">
-        <app-skeleton-block variant="title"></app-skeleton-block>
-        <app-skeleton-block variant="card-md"></app-skeleton-block>
-        <app-skeleton-block variant="card-lg"></app-skeleton-block>
-        <app-skeleton-block variant="card-xl"></app-skeleton-block>
+      <div class="skeleton-page">
+        <div class="sk-header"></div>
+        <div class="sk-card"></div>
+        <div class="sk-stats">
+          <div class="sk-stat"></div>
+          <div class="sk-stat"></div>
+          <div class="sk-stat"></div>
+        </div>
+        <div class="sk-block"></div>
+        <div class="sk-block sk-block--short"></div>
       </div>
     </ng-container>
 
-    <!-- Main Content -->
+    <!-- ══ Main Content ══ -->
     <ng-template #content>
+
       <!-- Error State -->
-      <div
-        *ngIf="state.error()"
-        class="error-state ion-padding ion-text-center"
-      >
-        <ion-icon name="warning-outline" class="error-icon"></ion-icon>
-        <p class="ion-margin-top">{{ state.error() }}</p>
-        <ion-button
-          fill="clear"
-          (click)="retry()"
-          [attr.aria-label]="'COMMON.RETRY' | translate"
-          class="retry-button"
-        >
+      <div *ngIf="state.error()" class="error-state ion-text-center">
+        <ion-icon name="cloud-offline-outline" class="error-icon"></ion-icon>
+        <p>{{ state.error() }}</p>
+        <ion-button fill="clear" (click)="retry()" class="retry-btn">
           <ion-icon slot="start" name="refresh-outline"></ion-icon>
           {{ "COMMON.RETRY" | translate }}
         </ion-button>
       </div>
 
-      <!-- Welcome State -->
+      <!-- ══════════════════════════════════════════════
+           WELCOME STATE  (Not logged in)
+      ══════════════════════════════════════════════ -->
       <ng-container *ngIf="!user; else authenticatedView">
-        <ion-grid class="welcome-container ion-padding-vertical">
-          <!-- Language Toggle Button -->
-          <button
-            class="language-toggle-btn welcome-lang-btn"
-            (click)="toggleLanguage()"
-          >
-            <ion-icon name="language-outline"></ion-icon>
-            <span>{{ currentLang === "ar" ? "English" : "عربي" }}</span>
+        <div class="welcome-page">
+
+          <!-- Animated mesh background -->
+          <div class="mesh-bg">
+            <div class="mesh-blob mesh-blob--1"></div>
+            <div class="mesh-blob mesh-blob--2"></div>
+            <div class="mesh-blob mesh-blob--3"></div>
+          </div>
+
+          <!-- Language toggle -->
+          <button class="lang-pill" (click)="toggleLanguage()">
+            <ion-icon name="globe-outline"></ion-icon>
+            {{ currentLang === "ar" ? "English" : "عربي" }}
           </button>
 
-          <ion-row class="ion-justify-content-center ion-align-items-center">
-            <ion-col
-              size="12"
-              size-md="12"
-              size-lg="12"
-              class="ion-text-center"
-            >
-              <div class="welcome-illustration">
-                <img
-                  src="assets/icons/icon-192.webp"
-                  alt="App Logo"
-                  class="welcome-icon"
-                />
-                <div class="welcome-dots">
-                  <span
-                    *ngFor="let dot of [1, 2, 3, 4, 5]; trackBy: trackByIndex"
-                  ></span>
-                </div>
-              </div>
+          <!-- Logo + Title -->
+          <div class="brand-section">
+            <div class="logo-float-wrap">
+              <img src="assets/icon/icon.png" alt="App Logo" class="brand-logo" />
+              <div class="logo-glow"></div>
+            </div>
+            <h1 class="brand-title">{{ "APP_TITLE" | translate }}</h1>
+            <p class="brand-sub">{{ 'AUTH.APP_TAGLINE' | translate }}</p>
+          </div>
 
-              <h1
-                class="welcome-title"
-                [attr.aria-label]="'HOME.WELCOME_TITLE' | translate"
-              >
-                {{ "HOME.WELCOME_TITLE" | translate }}
-              </h1>
-              <p
-                class="welcome-message"
-                [attr.aria-label]="'HOME.WELCOME_MESSAGE' | translate"
-              >
-                {{ "HOME.WELCOME_MESSAGE" | translate }}
-              </p>
-              <div
-                class="welcome-actions ion-padding-horizontal ion-margin-top"
-              >
-                <ion-button
-                  routerLink="/auth/login"
-                  expand="block"
-                  class="ion-margin-bottom"
-                  [attr.aria-label]="'AUTH.SIGN_IN' | translate"
-                  shape="round"
-                  size="large"
-                >
-                  {{ "AUTH.SIGN_IN" | translate }}
-                </ion-button>
-                <ion-button
-                  routerLink="/auth/signup"
-                  fill="outline"
-                  expand="block"
-                  [attr.aria-label]="'AUTH.SIGN_UP' | translate"
-                  shape="round"
-                  size="large"
-                >
-                  {{ "AUTH.SIGN_UP" | translate }}
-                </ion-button>
+          <!-- Feature cards — staggered slide-in -->
+          <div class="features-grid">
+            <div class="feat-card feat-card--1">
+              <div class="feat-icon">
+                <ion-icon name="trending-up-outline"></ion-icon>
               </div>
+              <div class="feat-text">
+                <strong>{{ "HOME.FEATURES.TRACKING" | translate }}</strong>
+                <span>{{ "HOME.INCOME_VS_EXPENSES" | translate }}</span>
+              </div>
+            </div>
+            <div class="feat-card feat-card--2">
+              <div class="feat-icon feat-icon--teal">
+                <ion-icon name="wallet-outline"></ion-icon>
+              </div>
+              <div class="feat-text">
+                <strong>{{ "HOME.FEATURES.BUDGETING" | translate }}</strong>
+                <span>{{ "HOME.MONTHLY_SUMMARY" | translate }}</span>
+              </div>
+            </div>
+            <div class="feat-card feat-card--3">
+              <div class="feat-icon feat-icon--orange">
+                <ion-icon name="pie-chart-outline"></ion-icon>
+              </div>
+              <div class="feat-text">
+                <strong>{{ "HOME.FEATURES.INSIGHTS" | translate }}</strong>
+                <span>{{ "HOME.EXPENSE_BY_CATEGORY" | translate }}</span>
+              </div>
+            </div>
+          </div>
 
-              <div class="features-preview ion-padding-top">
-                <div class="feature-item">
-                  <ion-icon name="analytics-outline"></ion-icon>
-                  <span>{{ "HOME.FEATURES.TRACKING" | translate }}</span>
-                </div>
-                <div class="feature-item">
-                  <ion-icon name="calendar-outline"></ion-icon>
-                  <span>{{ "HOME.FEATURES.BUDGETING" | translate }}</span>
-                </div>
-                <div class="feature-item">
-                  <ion-icon name="stats-chart-outline"></ion-icon>
-                  <span>{{ "HOME.FEATURES.INSIGHTS" | translate }}</span>
-                </div>
+          <!-- Floating CTA Dock -->
+          <div class="floating-cta">
+            <div class="cta-content">
+              <ion-button
+                routerLink="/auth/signup"
+                expand="block"
+                class="btn-primary"
+                [attr.aria-label]="'AUTH.SIGN_UP' | translate"
+              >
+                {{ "AUTH.SIGN_UP" | translate }}
+                <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
+              </ion-button>
+
+              <div class="cta-login-row">
+                <span class="cta-text">{{ "AUTH.ALREADY_HAVE_ACCOUNT" | translate }}</span>
+                <a routerLink="/auth/login" class="cta-link">{{ "AUTH.SIGN_IN" | translate }}</a>
               </div>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
+            </div>
+          </div>
+
+        </div>
       </ng-container>
 
-      <!-- Authenticated Content -->
+      <!-- ══════════════════════════════════════════════
+           AUTHENTICATED STATE (Dashboard)
+      ══════════════════════════════════════════════ -->
       <ng-template #authenticatedView>
-        <ion-grid class="authenticated-content">
-          <ion-row>
-            <ion-col
-              size="12"
-              size-md="12"
-              size-lg="12"
-              class="ion-margin-auto"
+        <div class="dashboard">
+
+          <!-- ── Top Header Bar ── -->
+          <div class="dash-header">
+            <div class="dash-header__left">
+              <p class="dash-greeting">{{ "HOME.GREETING" | translate }}</p>
+              <h1 class="dash-name">{{ displayUsername }}</h1>
+            </div>
+            <div class="dash-header__date">
+              <span class="dash-date-day">
+                {{ currentDate | date : "EEE" : undefined : currentLang }}
+              </span>
+              <span class="dash-date-full">
+                {{ currentDate | date : "d MMM" : undefined : currentLang }}
+              </span>
+            </div>
+          </div>
+
+          <!-- ── Month Selector ── -->
+          <app-months-scroll-header
+            (monthSelected)="onMonthChange($event)"
+            (scrolled)="onMonthScroll($event)"
+            [selectedDate]="selectedMonth"
+            [locale]="currentLang"
+            [ngClass]="{
+              'scroll-start': isScrolledToStart,
+              'scroll-end': isScrolledToEnd
+            }"
+            [ariaLabel]="'HOME.SELECT_MONTH' | translate"
+            class="month-selector"
+          ></app-months-scroll-header>
+
+          <!-- ── Segment Tabs ── -->
+          <div class="tabs-row">
+            <ion-segment
+              [value]="activeTab"
+              (ionChange)="setActiveTab($event.detail.value)"
+              class="dash-tabs"
+              [ngClass]="{
+                'summary-active': activeTab === 'summary',
+                'charts-active': activeTab === 'charts'
+              }"
+              role="tablist"
+              [attr.aria-label]="'HOME.SECTIONS' | translate"
             >
-              <!-- Welcome Header -->
-              <div
-                class="welcome-header ion-padding-horizontal ion-padding-bottom"
-              >
-                <h1 class="greeting">
-                  {{ "HOME.GREETING" | translate }},
-                  <span class="user-name">{{ displayUsername }}</span>
-                </h1>
-                <p class="current-date">
-                  {{
-                    currentDate
-                      | date : "EEEE, MMMM d" : undefined : currentLang
-                  }}
-                </p>
-              </div>
+              <ion-segment-button value="summary" layout="icon-start">
+                <ion-icon name="document-text-outline"></ion-icon>
+                <ion-label>{{ "HOME.TABS.SUMMARY" | translate }}</ion-label>
+              </ion-segment-button>
+              <ion-segment-button value="charts" layout="icon-start">
+                <ion-icon name="pie-chart-outline"></ion-icon>
+                <ion-label>{{ "HOME.TABS.CHARTS" | translate }}</ion-label>
+              </ion-segment-button>
+              <div class="sliding-indicator"></div>
+            </ion-segment>
+          </div>
 
-              <!-- Month Selector (moved above tabs) -->
-              <app-months-scroll-header
-                (monthSelected)="onMonthChange($event)"
-                (scrolled)="onMonthScroll($event)"
-                [selectedDate]="selectedMonth"
-                [locale]="currentLang"
-                [ngClass]="{
-                  'scroll-start': isScrolledToStart,
-                  'scroll-end': isScrolledToEnd
-                }"
-                ariaLabel="{{ 'HOME.SELECT_MONTH' | translate }}"
-                class="month-selector"
-              ></app-months-scroll-header>
+          <!-- Skeleton template -->
+          <ng-template #summarySkeleton>
+            <div class="skeleton-container">
+              <app-skeleton-block variant="line"></app-skeleton-block>
+              <app-skeleton-block variant="card-sm"></app-skeleton-block>
+            </div>
+          </ng-template>
 
-              <!-- Tabs -->
-              <div class="ion-padding">
-                <ion-segment
-                  [value]="activeTab"
-                  (ionChange)="setActiveTab($event.detail.value)"
-                  class="home-tabs"
-                  [ngClass]="{
-                    'summary-active': activeTab === 'summary',
-                    'charts-active': activeTab === 'charts'
-                  }"
-                  role="tablist"
-                  [attr.aria-label]="'HOME.SECTIONS' | translate"
-                >
-                  <ion-segment-button value="summary" layout="icon-start">
-                    <ion-icon name="document-text-outline"></ion-icon>
-                    <ion-label>{{ "HOME.TABS.SUMMARY" | translate }}</ion-label>
-                  </ion-segment-button>
-                  <ion-segment-button value="charts" layout="icon-start">
-                    <ion-icon name="pie-chart-outline"></ion-icon>
-                    <ion-label>{{ "HOME.TABS.CHARTS" | translate }}</ion-label>
-                  </ion-segment-button>
-                  <div class="sliding-indicator"></div>
-                </ion-segment>
-              </div>
+          <!-- ── Charts Tab ── -->
+          <ng-container *ngIf="activeTab === 'charts'">
+            <div class="tab-content" [@tabAnimation]>
+              <app-date-range-selector (rangeChange)="onRangeChange($event)"></app-date-range-selector>
 
-              <!-- Summary skeleton template used across summary sections -->
-              <ng-template #summarySkeleton>
-                <div class="skeleton-container">
-                  <app-skeleton-block variant="line"></app-skeleton-block>
-                  <app-skeleton-block variant="card-sm"></app-skeleton-block>
-                </div>
-              </ng-template>
-
-              <!-- Charts Section (tab: charts) -->
-              <ng-container *ngIf="activeTab === 'charts'">
-                <div class="charts-view" [@tabAnimation]>
-                  <app-date-range-selector
-                    (rangeChange)="onRangeChange($event)"
-                  ></app-date-range-selector>
-                  <section
-                    class="card-section charts-card ion-margin-vertical"
-                    role="region"
-                    aria-live="polite"
-                    [attr.aria-label]="'HOME.CHARTS' | translate"
-                  >
-                    <app-section-header
-                      icon="analytics-outline"
-                      [title]="'HOME.CHARTS' | translate"
-                    ></app-section-header>
-
-                    <ng-container *ngIf="!vm.loading; else chartsSkeleton">
-                      <!-- Income vs Expenses Bar Chart (Lazy) -->
-                      <div (click)="$event.stopPropagation()">
-                        <ng-container *ngIf="vm.incomeVsExpense.length > 0">
-                          <ng-container
-                            *ngIf="
-                              barChartComponent | async as BarChartComponent;
-                              else barChartLoading
-                            "
-                          >
-                            <ng-container
-                              *ngComponentOutlet="
-                                BarChartComponent;
-                                injector: barChartInjector
-                              "
-                            ></ng-container>
-                          </ng-container>
-                          <ng-template #barChartLoading>
-                            <app-skeleton-block
-                              variant="chart"
-                            ></app-skeleton-block>
-                          </ng-template>
+              <section class="card-section charts-card" role="region" [attr.aria-label]="'HOME.CHARTS' | translate">
+                <app-section-header icon="analytics-outline" [title]="'HOME.CHARTS' | translate"></app-section-header>
+                <ng-container *ngIf="!vm.loading; else chartsSkeleton">
+                  <div (click)="$event.stopPropagation()">
+                    <ng-container *ngIf="vm.incomeVsExpense.length > 0">
+                      <ng-container *ngIf="barChartComponent | async as BarChartComponent; else barChartLoading">
+                        <ng-container *ngComponentOutlet="BarChartComponent; injector: barChartInjector"></ng-container>
+                      </ng-container>
+                      <ng-template #barChartLoading><app-skeleton-block variant="chart"></app-skeleton-block></ng-template>
+                    </ng-container>
+                  </div>
+                  <div (click)="$event.stopPropagation()">
+                    <ng-container *ngIf="vm.expenseByCategory.length > 0">
+                      <ng-container *ngIf="pieChartComponent | async as PieChartComponent; else pieChartLoading">
+                        <ng-container *ngComponentOutlet="PieChartComponent; injector: pieChartInjector"></ng-container>
+                      </ng-container>
+                      <ng-template #pieChartLoading><app-skeleton-block variant="chart"></app-skeleton-block></ng-template>
+                    </ng-container>
+                  </div>
+                  <div (click)="$event.stopPropagation()">
+                    <ng-container *ngIf="vm.monthlyExpenses.length > 0">
+                      <ng-container *ngIf="lineChartComponent | async as LineChartComponent; else lineChartLoading">
+                        <ng-container *ngComponentOutlet="LineChartComponent; injector: lineChartInjector"></ng-container>
+                      </ng-container>
+                      <ng-template #lineChartLoading><app-skeleton-block variant="chart"></app-skeleton-block></ng-template>
+                    </ng-container>
+                  </div>
+                  <div (click)="$event.stopPropagation()">
+                    <ng-container *ngIf="vm.totalSalary > 0">
+                      <div class="salary-chart-container">
+                        <ng-container *ngIf="pieChartComponent | async as PieChartComponent; else pieChartLoading">
+                          <ng-container *ngComponentOutlet="PieChartComponent; injector: salaryBreakdownPieChartInjector"></ng-container>
                         </ng-container>
-                      </div>
-
-                      <!-- Expense by Category Pie Chart (Lazy) -->
-                      <div (click)="$event.stopPropagation()">
-                        <ng-container *ngIf="vm.expenseByCategory.length > 0">
-                          <ng-container
-                            *ngIf="
-                              pieChartComponent | async as PieChartComponent;
-                              else pieChartLoading
-                            "
+                        <ng-template #pieChartLoading><app-skeleton-block variant="chart"></app-skeleton-block></ng-template>
+                        <div class="salary-list ion-padding-top">
+                          <div
+                            *ngFor="let item of vm.salaryBreakdown; trackBy: trackByIndex"
+                            class="salary-item"
+                            [attr.aria-label]="item.name + ': ' + formatAmount(item.value)"
                           >
-                            <ng-container
-                              *ngComponentOutlet="
-                                PieChartComponent;
-                                injector: pieChartInjector
-                              "
-                            ></ng-container>
-                          </ng-container>
-                          <ng-template #pieChartLoading>
-                            <app-skeleton-block
-                              variant="chart"
-                            ></app-skeleton-block>
-                          </ng-template>
-                        </ng-container>
-                      </div>
-
-                      <!-- Monthly Expenses Line Chart (Lazy) -->
-                      <div (click)="$event.stopPropagation()">
-                        <ng-container *ngIf="vm.monthlyExpenses.length > 0">
-                          <ng-container
-                            *ngIf="
-                              lineChartComponent | async as LineChartComponent;
-                              else lineChartLoading
-                            "
-                          >
-                            <ng-container
-                              *ngComponentOutlet="
-                                LineChartComponent;
-                                injector: lineChartInjector
-                              "
-                            ></ng-container>
-                          </ng-container>
-                          <ng-template #lineChartLoading>
-                            <app-skeleton-block
-                              variant="chart"
-                            ></app-skeleton-block>
-                          </ng-template>
-                        </ng-container>
-                      </div>
-
-                      <!-- Salary Breakdown Section -->
-                      <div (click)="$event.stopPropagation()">
-                        <ng-container *ngIf="vm.totalSalary > 0">
-                          <!-- Salary Pie Chart -->
-                          <div class="salary-chart-container">
-                            <!-- chart -->
-                            <ng-container
-                              *ngIf="
-                                pieChartComponent | async as PieChartComponent;
-                                else pieChartLoading
-                              "
-                            >
-                              <ng-container
-                                *ngComponentOutlet="
-                                  PieChartComponent;
-                                  injector: salaryBreakdownPieChartInjector
-                                "
-                              ></ng-container>
-                            </ng-container>
-                            <ng-template #pieChartLoading>
-                              <app-skeleton-block
-                                variant="chart"
-                              ></app-skeleton-block>
-                            </ng-template>
-                            <!-- Detailed Salary List -->
-                            <div class="salary-list ion-padding-top">
-                              <div
-                                *ngFor="
-                                  let item of vm.salaryBreakdown;
-                                  trackBy: trackByIndex
-                                "
-                                class="salary-item"
-                                [attr.aria-label]="
-                                  item.name +
-                                  ': ' +
-                                  formatAmount(item.value) +
-                                  ' (' +
-                                  (item.percentage | percent : '1.0-0') +
-                                  ')'
-                                "
-                              >
-                                <div class="item-details">
-                                  <ion-icon
-                                    name="briefcase-outline"
-                                    class="item-icon"
-                                  ></ion-icon>
-                                  <div class="item-info">
-                                    <span class="salary-source">{{
-                                      item.name
-                                    }}</span>
-                                    <span class="salary-amount">{{
-                                      formatAmount(item.value)
-                                    }}</span>
-                                  </div>
-                                </div>
-                                <div class="item-progress">
-                                  <span class="progress-percentage">{{
-                                    item.percentage | percent : "1.0-0"
-                                  }}</span>
-                                  <div class="progress-bar-container">
-                                    <div
-                                      class="progress-bar"
-                                      [style.width]="item.percentage | percent"
-                                    ></div>
-                                  </div>
-                                </div>
+                            <div class="item-details">
+                              <ion-icon name="briefcase-outline" class="item-icon"></ion-icon>
+                              <div class="item-info">
+                                <span class="salary-source">{{ item.name }}</span>
+                                <span class="salary-amount">{{ formatAmount(item.value) }}</span>
+                              </div>
+                            </div>
+                            <div class="item-progress">
+                              <span class="progress-pct">{{ item.percentage | percent:"1.0-0" }}</span>
+                              <div class="progress-track">
+                                <div class="progress-fill" [style.width]="item.percentage | percent"></div>
                               </div>
                             </div>
                           </div>
-                        </ng-container>
+                        </div>
                       </div>
                     </ng-container>
-                    <ng-template #chartsSkeleton>
-                      <div class="chart-skeleton ion-margin-vertical">
-                        <app-skeleton-block
-                          variant="chart"
-                        ></app-skeleton-block>
-                        <app-skeleton-block
-                          variant="chart"
-                        ></app-skeleton-block>
-                        <app-skeleton-block
-                          variant="chart"
-                        ></app-skeleton-block>
-                      </div>
-                    </ng-template>
-                  </section>
-                </div>
-              </ng-container>
+                  </div>
+                </ng-container>
+                <ng-template #chartsSkeleton>
+                  <div class="chart-skeleton">
+                    <app-skeleton-block variant="chart"></app-skeleton-block>
+                    <app-skeleton-block variant="chart"></app-skeleton-block>
+                    <app-skeleton-block variant="chart"></app-skeleton-block>
+                  </div>
+                </ng-template>
+              </section>
+            </div>
+          </ng-container>
 
-              <!-- Summary Section (tab: summary) -->
-              <ng-container *ngIf="activeTab === 'summary'">
-                <div class="summary-view" [@tabAnimation]>
-                  <!-- Balance Summary -->
-                  <section
-                    class="card-section balance-card ion-margin-vertical"
-                    role="region"
-                    aria-live="polite"
-                    [attr.aria-label]="'HOME.BALANCE_SUMMARY' | translate"
-                    [class.interact]="cardStates['balance']"
-                    (mouseenter)="onCardHover('balance', true)"
-                    (mouseleave)="onCardHover('balance', false)"
-                    (click)="onCardClick('balance')"
-                  >
-                    <app-section-header
-                      icon="wallet-outline"
-                      [title]="'HOME.BALANCE_SUMMARY' | translate"
-                    ></app-section-header>
-                    <app-balance-card
-                      [isLoading]="vm.loading"
-                      [balance]="vm.totals.balance"
-                      [income]="vm.totals.income"
-                      [expenses]="vm.totals.expenses"
-                      [percentageChange]="percentageChange"
-                      [currency]="vm.currency"
-                    ></app-balance-card>
-                  </section>
+          <!-- ── Summary Tab ── -->
+          <ng-container *ngIf="activeTab === 'summary'">
+            <div class="tab-content" [@tabAnimation]>
+              <section
+                class="card-section balance-card"
+                role="region"
+                [attr.aria-label]="'HOME.BALANCE_SUMMARY' | translate"
+                [class.interact]="cardStates['balance']"
+                (mouseenter)="onCardHover('balance', true)"
+                (mouseleave)="onCardHover('balance', false)"
+                (click)="onCardClick('balance')"
+              >
+                <app-section-header icon="wallet-outline" [title]="'HOME.BALANCE_SUMMARY' | translate"></app-section-header>
+                <app-balance-card
+                  [isLoading]="vm.loading"
+                  [balance]="vm.totals.balance"
+                  [income]="vm.totals.income"
+                  [expenses]="vm.totals.expenses"
+                  [percentageChange]="percentageChange"
+                  [currency]="vm.currency"
+                ></app-balance-card>
+              </section>
 
-                  <!-- Recent Transactions -->
-                  <section
-                    class="card-section transactions-card ion-margin-vertical"
-                    role="region"
-                    aria-live="polite"
-                    [attr.aria-label]="'TRANSACTIONS.RECENT' | translate"
-                  >
-                    <app-section-header
-                      icon="list-outline"
-                      [title]="'TRANSACTIONS.RECENT' | translate"
-                      [ctaText]="'COMMON.VIEW_ALL' | translate"
-                      ctaIcon="arrow-forward"
-                      [ctaRouterLink]="'/transactions'"
-                    ></app-section-header>
-                    <app-transactions
-                      #transactionsComponent
-                      [limit]="5"
-                      [month]="selectedMonth.month"
-                      [year]="selectedMonth.year"
-                    ></app-transactions>
-                  </section>
-                </div>
-              </ng-container>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
+              <section class="card-section transactions-card" role="region" [attr.aria-label]="'TRANSACTIONS.RECENT' | translate">
+                <app-section-header
+                  icon="list-outline"
+                  [title]="'TRANSACTIONS.RECENT' | translate"
+                  [ctaText]="'COMMON.VIEW_ALL' | translate"
+                  ctaIcon="arrow-forward"
+                  [ctaRouterLink]="'/transactions'"
+                ></app-section-header>
+                <app-transactions
+                  #transactionsComponent
+                  [limit]="5"
+                  [month]="selectedMonth.month"
+                  [year]="selectedMonth.year"
+                ></app-transactions>
+              </section>
+            </div>
+          </ng-container>
+
+        </div><!-- /dashboard -->
       </ng-template>
+
     </ng-template>
   </ng-container>
 </ion-content>

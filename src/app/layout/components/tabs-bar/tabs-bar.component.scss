@@ -1,20 +1,28 @@
 @import "src/theme/variables";
 
 ion-tab-bar {
-  --background: var(--ion-color-primary-contrast);
-  backdrop-filter: var(--ew-backdrop-filter);
+  --background: var(--glass-background, rgba(255, 255, 255, 0.8));
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
   --border: none;
   --color: var(--ion-text-color);
-  --color-selected: var(--ion-color-primary);
-  height: var(--ew-size-16);
-  padding: var(--ew-space-2);
-  border-start-start-radius: var(--ew-radius-xl);
-  border-start-end-radius: var(--ew-radius-xl);
-  box-shadow: var(--ew-shadow-elevated);
+  
+  /* Make it floating */
+  position: absolute;
+  bottom: var(--ew-space-5);
+  left: var(--ew-space-5);
+  right: var(--ew-space-5);
+  width: auto;
+  border-radius: var(--ew-radius-pill);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0 var(--ew-space-2);
+  height: 64px;
   display: flex;
   justify-content: space-around;
   align-items: center;
-  transition: var(--ew-transition-all-medium);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 100;
 
   &::before {
     display: none;
@@ -22,70 +30,72 @@ ion-tab-bar {
 }
 
 ion-tab-button {
-  --color: var(--ew-text-color-secondary);
+  /* Use Ionic's own custom properties — these penetrate the shadow DOM */
+  --color: rgba(var(--ion-color-primary-rgb), 0.45);
   --color-selected: var(--ion-color-primary);
   --padding-top: var(--ew-space-1);
-  --padding-bottom: var(--ew-space-2);
-  transition: all 0.3s ease-in-out;
-  opacity: 0.8;
-  border-radius: var(--ew-radius-lg);
+  --padding-bottom: var(--ew-space-1);
+  --background: transparent;
+  --background-focused: transparent;
+  --background-hover: transparent;
+
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  overflow: visible;
+  max-width: 80px;
+  border-radius: 999px;
 
   ion-icon {
-    font-size: var(--ew-font-size-xl);
-    transition: transform 0.3s ease-in-out;
+    font-size: 24px;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    margin-bottom: 2px;
   }
 
   ion-label {
-    font-size: var(--ew-font-sm);
-    font-weight: var(--ew-font-weight-medium);
-    margin-top: var(--ew-space-1);
-    transition: all 0.3s ease-in-out;
+    font-size: 11px;
+    font-weight: 500;
+    transition: all 0.3s ease;
   }
 
-  &:hover {
-    opacity: 1;
+  &:hover:not(.tab-selected) {
+    --color: rgba(var(--ion-color-primary-rgb), 0.75);
     transform: translateY(-2px);
-    background: var(--ew-item-background-color-hover);
-  }
-
-  &:focus-visible {
-    outline: var(--ew-border-width-md) solid var(--ion-color-primary);
-    outline-offset: 2px;
-    background: rgba(var(--ion-color-primary-rgb), 0.18);
-    box-shadow: var(--ew-shadow-focus);
-    z-index: 2;
   }
 
   &.tab-selected {
-    opacity: 1;
-    transform: translateY(-4px) scale(1.05);
-    color: var(--ion-color-primary-contrast);
-    background-color: var(--ion-color-primary);
-    border-radius: var(--ew-radius-xl);
-    box-shadow: var(--ew-shadow-card);
+    /* Ionic uses --color-selected for the text/icon in selected state.
+       We also add a pill background using a pseudo-element since
+       Ionic's background CSS var doesn't always work reliably. */
+    --color-selected: var(--ion-color-primary);
+    transform: translateY(-2px);
+
+    /* Pill background via actual background property */
+    background: rgba(var(--ion-color-primary-rgb), 0.15) !important;
 
     ion-icon {
-      transform: scale(1.1);
+      transform: scale(1.2);
+      filter: drop-shadow(0 0 6px rgba(var(--ion-color-primary-rgb), 0.5));
     }
 
     ion-label {
-      font-weight: var(--ew-font-weight-semibold);
+      font-weight: 700;
     }
   }
 }
 
 /* Dark Mode Styles */
-:host-context(.dark) {
+:host-context(.dark), body.dark {
+  ion-tab-bar {
+    --background: rgba(18, 18, 30, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+  }
+
   ion-tab-button {
-    &:hover {
-      background: var(--ew-item-background-color-hover);
-    }
+    --color: rgba(255, 255, 255, 0.35);
+    --color-selected: var(--ion-color-primary);
 
     &.tab-selected {
-      background-color: var(--ion-color-primary);
-      color: var(--ion-color-primary-contrast);
+      background: rgba(var(--ion-color-primary-rgb), 0.18) !important;
     }
   }
 }
@@ -101,25 +111,18 @@ ion-tab-button {
 /* Responsive Adjustments */
 @media (max-width: 768px) {
   ion-tab-bar {
-    height: var(--ew-size-15);
-    padding: var(--ew-space-2) 0;
-  }
-
-  ion-tab-button {
-    font-size: var(--ew-font-sm);
+    height: 60px;
+    bottom: var(--ew-space-4);
+    left: var(--ew-space-4);
+    right: var(--ew-space-4);
   }
 }
 
 @media (max-width: 480px) {
   ion-tab-bar {
-    height: var(--ew-size-14);
-    padding: var(--ew-space-1) 0;
-  }
-
-  ion-tab-button {
-    font-size: var(--ew-font-size-xs);
-    ion-label {
-      display: none; // Hide label on very small screens to save space
-    }
+    height: 56px;
+    bottom: var(--ew-space-3);
+    left: var(--ew-space-3);
+    right: var(--ew-space-3);
   }
 }

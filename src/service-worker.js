@@ -3,13 +3,7 @@ const CACHE_NAME = 'expenses-wallet-cache-v1';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/assets/icons/icon-48.webp',
-  '/assets/icons/icon-72.webp',
-  '/assets/icons/icon-96.webp',
-  '/assets/icons/icon-128.webp',
-  '/assets/icons/icon-192.webp',
-  '/assets/icons/icon-256.webp',
-  '/assets/icons/icon-512.webp',
+  '/assets/icon/icon.png',
   // Add more assets/routes as needed
 ];
 

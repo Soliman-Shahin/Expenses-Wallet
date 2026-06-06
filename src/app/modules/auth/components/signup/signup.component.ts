@@ -121,7 +121,7 @@ export class SignupComponent extends BaseComponent implements OnInit {
         if (/[^A-Za-z0-9]/.test(password)) strength += 1;
 
         // Calculate strength percentage (0-100)
-        this.passwordStrength = Math.min(100, Math.round((strength / 7) * 100));
+        this.passwordStrength = Math.min(100, Math.round((strength / 6) * 100));
 
         // Set strength message
         if (password.length < 8) {

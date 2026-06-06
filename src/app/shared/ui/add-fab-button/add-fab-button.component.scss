@@ -2,6 +2,10 @@
   display: contents;
 }
 
+ion-fab {
+  margin-bottom: calc(50px + var(--ew-space-7)); // Push it above the floating tab bar
+}
+
 .fab-add {
   // Use CSS variables for easy theming and consistency.
   --background: var(--ion-color-primary);

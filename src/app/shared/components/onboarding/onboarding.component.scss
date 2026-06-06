@@ -1,3 +1,5 @@
+@import "src/theme/variables";
+
 :host {
   display: block;
   height: 100%;
@@ -8,69 +10,128 @@
   z-index: 9999;
   background: var(--ion-background-color);
   overflow: hidden;
+  font-family: var(--ew-font-family-base);
 }
 
-.onboarding-container {
+.onboarding-page {
+  position: relative;
   height: 100%;
   width: 100%;
-  position: relative;
   display: flex;
   flex-direction: column;
 }
 
-.background-shapes {
+// ── Ambient Background ──────────────────────────────────────────
+.ambient-bg {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
+  inset: 0;
   z-index: 0;
-  pointer-events: none;
+  overflow: hidden;
+  background: #0d1525; // Base dark/rich tone
+  
+  .dark & {
+    background: #060a10;
+  }
+}
 
-  .shape {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.6;
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.7;
+
+  &--1 {
+    width: 350px;
+    height: 350px;
+    background: var(--ion-color-primary);
+    top: -100px;
+    right: -100px;
+    animation: drift 14s ease-in-out infinite;
   }
 
-  .shape-1 {
-    top: -10%;
-    right: -10%;
+  &--2 {
     width: 300px;
     height: 300px;
-    background: var(--ion-color-primary);
-    animation: float 15s infinite ease-in-out;
+    background: var(--ion-color-secondary);
+    bottom: -50px;
+    left: -100px;
+    animation: drift 18s ease-in-out infinite reverse;
   }
 
-  .shape-2 {
-    bottom: -10%;
-    left: -10%;
+  &--3 {
     width: 250px;
     height: 250px;
-    background: var(--ion-color-secondary);
-    animation: float 12s infinite ease-in-out reverse;
-  }
-
-  .shape-3 {
-    top: 40%;
-    left: 30%;
-    width: 150px;
-    height: 150px;
     background: var(--ion-color-tertiary);
-    animation: float 10s infinite ease-in-out 2s;
+    top: 40%;
+    left: 20%;
+    animation: drift 12s ease-in-out infinite 3s;
+    opacity: 0.5;
   }
 }
 
-.content-wrapper {
+.noise-overlay {
+  position: absolute;
+  inset: 0;
+  background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)" opacity="0.05"/%3E%3C/svg%3E');
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+@keyframes drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(30px, -40px) scale(1.1); }
+  66%       { transform: translate(-20px, 30px) scale(0.9); }
+}
+
+// ── Top Bar ───────────────────────────────────────────────────────
+.top-bar {
   position: relative;
-  z-index: 1;
-  height: 100%;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: calc(env(safe-area-inset-top, 20px) + 16px) 24px 0;
+  animation: fadeInDown 0.6s ease both;
+}
+
+.glass-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 99px;
+  padding: 8px 16px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+
+  ion-icon { font-size: 16px; }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+  }
+
+  &.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+// ── Slides Viewport ───────────────────────────────────────────────
+.slides-viewport {
+  position: relative;
+  z-index: 5;
+  flex: 1;
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
+  overflow: hidden;
 }
 
 .slides-container {
@@ -80,9 +141,7 @@
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   scrollbar-width: none;
-  &::-webkit-scrollbar {
-    display: none;
-  }
+  &::-webkit-scrollbar { display: none; }
 }
 
 .slide {
@@ -93,223 +152,259 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: 24px;
 }
 
 .slide-content {
   text-align: center;
-  max-width: 320px;
-  animation: fadeInUp 0.6s ease-out;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0.4;
+  transform: scale(0.9) translateY(20px);
+  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
 
-  .icon-wrapper {
-    width: 120px;
-    height: 120px;
-    margin: 0 auto 2rem;
-    background: linear-gradient(
-      135deg,
-      rgba(var(--ion-color-primary-rgb), 0.2),
-      rgba(var(--ion-color-secondary-rgb), 0.2)
-    );
-    border-radius: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    position: relative;
-    overflow: hidden;
+.active-slide .slide-content {
+  opacity: 1;
+  transform: scale(1) translateY(0);
 
-    &::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(
-        45deg,
-        transparent,
-        rgba(255, 255, 255, 0.2),
-        transparent
-      );
-      transform: translateX(-100%);
-      animation: shine 3s infinite;
-    }
-
-    ion-icon {
-      font-size: 4rem;
-      color: var(--ion-color-primary);
-      filter: drop-shadow(0 4px 8px rgba(var(--ion-color-primary-rgb), 0.4));
-    }
+  .app-logo-wrap {
+    animation: logoFloat 4s ease-in-out infinite;
+  }
+  
+  .logo-aura {
+    animation: auraPulse 3s ease-in-out infinite;
   }
 
-  .title {
-    font-size: 2rem;
-    font-weight: 800;
-    margin-bottom: 1rem;
-    color: var(--ion-text-color);
-    background: linear-gradient(
-      45deg,
-      var(--ion-color-primary),
-      var(--ion-color-secondary)
-    );
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  .description {
-    font-size: 1.1rem;
-    line-height: 1.6;
-    color: var(--ion-color-medium);
+  .icon-crystal {
+    animation: crystalFloat 4s ease-in-out infinite;
   }
 }
 
-.controls {
-  padding: 2rem;
-  background: linear-gradient(
-    to top,
-    var(--ion-background-color) 20%,
-    transparent
-  );
+@keyframes logoFloat {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-15px); }
+}
+
+@keyframes crystalFloat {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-12px); }
+}
+
+// ── App Logo ───────────────────────────────────────────────────
+.app-logo-wrap {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  margin-bottom: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .onboarding-logo {
+    width: 130px;
+    height: 130px;
+    border-radius: 30px;
+    position: relative;
+    z-index: 2;
+    box-shadow: 
+      0 16px 48px rgba(0, 0, 0, 0.3),
+      0 4px 12px rgba(255, 255, 255, 0.1);
+  }
+
+  .logo-aura {
+    position: absolute;
+    inset: 10px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(var(--ion-color-primary-rgb), 0.6), transparent 70%);
+    filter: blur(24px);
+    z-index: 1;
+    opacity: 0.6;
+  }
+}
+
+@keyframes auraPulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50%       { transform: scale(1.2); opacity: 0.9; }
+}
+
+// ── Icon Crystal ──────────────────────────────────────────────────
+.icon-crystal {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  margin-bottom: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  .crystal-inner {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.02) 100%);
+    backdrop-filter: blur(24px) saturate(200%);
+    -webkit-backdrop-filter: blur(24px) saturate(200%);
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 
+      0 24px 48px rgba(0,0,0,0.2),
+      inset 0 4px 12px rgba(255,255,255,0.6),
+      inset 0 -4px 12px rgba(0,0,0,0.1);
+    position: relative;
+    z-index: 2;
+    transform: rotate(-5deg);
+    transition: transform 0.5s ease;
+
+    ion-icon {
+      font-size: 64px;
+      color: #fff;
+      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+      transform: rotate(5deg); // Counter-rotate the icon
+    }
+  }
+
+  .crystal-glow {
+    position: absolute;
+    inset: 10px;
+    background: var(--ion-color-primary);
+    border-radius: 40px;
+    filter: blur(24px);
+    opacity: 0.6;
+    z-index: 1;
+    animation: pulseGlow 3s ease-in-out infinite;
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50%       { transform: scale(1.15); opacity: 0.8; }
+}
+
+// ── Text ──────────────────────────────────────────────────────────
+.slide-title {
+  font-size: clamp(2rem, 8vw, 2.8rem);
+  font-weight: 800;
+  font-family: var(--ew-font-family-heading);
+  color: #fff;
+  margin: 0 0 16px;
+  line-height: 1.1;
+  letter-spacing: -1px;
+  text-shadow: 0 4px 24px rgba(0,0,0,0.3);
+}
+
+.slide-desc {
+  font-size: 16px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  font-weight: 400;
+  max-width: 90%;
+}
+
+// ── Floating Controls Dock ────────────────────────────────────────
+.controls-dock {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 32px calc(env(safe-area-inset-bottom, 24px) + 24px);
+  background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%);
 }
 
 .pagination {
   display: flex;
-  justify-content: center;
+  align-items: center;
   gap: 8px;
-  margin-bottom: 2rem;
 
-  .dot {
+  .dot-indicator {
     width: 8px;
     height: 8px;
-    border-radius: 4px;
-    background: var(--ion-color-medium);
-    opacity: 0.3;
-    transition: all 0.3s ease;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.3);
     cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 
     &.active {
-      width: 24px;
-      background: var(--ion-color-primary);
-      opacity: 1;
+      width: 28px;
+      background: #fff;
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
     }
   }
 }
 
-.buttons {
+.next-btn {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 1rem;
+  gap: 16px;
+  padding-block: 8px;
+  padding-inline-start: 24px;
+  padding-inline-end: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 99px;
+  color: #fff;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 
-  button {
-    border: none;
-    outline: none;
-    background: none;
-    font-family: inherit;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-
-  .btn-skip {
-    color: var(--ion-color-medium);
-    font-size: 1rem;
-    font-weight: 500;
-    padding: 0.5rem 1rem;
-
-    &:hover {
-      color: var(--ion-text-color);
-    }
-  }
-
-  .btn-next {
-    background: var(--ion-color-primary);
-    color: var(--ion-color-primary-contrast);
-    padding: 1rem 2rem;
-    border-radius: 16px;
-    font-size: 1rem;
-    font-weight: 600;
+  .icon-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #fff;
+    color: var(--ion-color-primary);
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    box-shadow: 0 4px 15px rgba(var(--ion-color-primary-rgb), 0.3);
+    justify-content: center;
+    transition: transform 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(var(--ion-color-primary-rgb), 0.4);
+    ion-icon {
+      font-size: 22px;
     }
-
-    &:active {
-      transform: translateY(0);
-    }
-  }
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translate(0, 0);
-  }
-  50% {
-    transform: translate(20px, -20px);
-  }
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes shine {
-  0% {
-    transform: translateX(-100%);
-  }
-  20% {
-    transform: translateX(100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-.language-toggle {
-  position: absolute;
-  top: 2rem;
-  right: 2rem;
-  z-index: 10;
-  background: rgba(var(--ion-color-light-rgb), 0.2);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(var(--ion-color-medium-rgb), 0.2);
-  border-radius: 12px;
-  padding: 0.5rem 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--ion-text-color);
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-
-  ion-icon {
-    font-size: 1.2rem;
-    color: var(--ion-color-primary);
   }
 
   &:hover {
-    background: rgba(var(--ion-color-light-rgb), 0.3);
+    background: rgba(255, 255, 255, 0.2);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    
+    .icon-circle {
+      transform: translateX(4px);
+      
+      [dir="rtl"] & {
+        transform: translateX(-4px);
+      }
+    }
   }
 
   &:active {
-    transform: translateY(0);
+    transform: scale(0.96);
   }
+
+  &.start-btn {
+    background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-secondary));
+    border-color: transparent;
+    box-shadow: 0 12px 32px rgba(var(--ion-color-primary-rgb), 0.4);
+
+    .icon-circle {
+      color: var(--ion-color-primary);
+    }
+  }
+}
+
+// ── Animations ────────────────────────────────────────────────────
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to   { opacity: 1; transform: translateY(0); }
 }

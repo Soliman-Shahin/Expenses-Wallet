@@ -4,8 +4,8 @@
 
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:3000/v1',
-  // apiUrl: 'https://expenses-wallet.up.railway.app/v1',
+  // apiUrl: 'http://localhost:3000/v1',
+  apiUrl: 'https://expenses-wallet.up.railway.app/v1',
 
   // Encryption settings
   // NOTE: Full payload encryption for login/signup requests

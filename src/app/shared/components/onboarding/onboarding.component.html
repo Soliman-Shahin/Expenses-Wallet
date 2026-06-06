@@ -1,53 +1,67 @@
-<div class="onboarding-container">
-  <div class="background-shapes">
-    <div class="shape shape-1"></div>
-    <div class="shape shape-2"></div>
-    <div class="shape shape-3"></div>
+<div class="onboarding-page" [dir]="translationService.getCurrentLanguage() === 'ar' ? 'rtl' : 'ltr'">
+  
+  <!-- Ambient Background Orbs -->
+  <div class="ambient-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="noise-overlay"></div>
   </div>
 
-  <!-- Language Toggle Button -->
-  <button class="language-toggle" (click)="toggleLanguage()">
-    <ion-icon name="language-outline"></ion-icon>
-    <span>{{
-      translationService.getCurrentLanguage() === "ar" ? "English" : "عربي"
-    }}</span>
-  </button>
+  <!-- Top Actions -->
+  <div class="top-bar">
+    <button class="glass-pill lang-btn" (click)="toggleLanguage()">
+      <ion-icon name="globe-outline"></ion-icon>
+      <span>{{ translationService.getCurrentLanguage() === "ar" ? "English" : "عربي" }}</span>
+    </button>
+    <button class="glass-pill skip-btn" (click)="skip()" [class.hidden]="isLastStep">
+      {{ "ONBOARDING.SKIP" | translate }}
+    </button>
+  </div>
 
-  <div class="content-wrapper">
+  <!-- Slides -->
+  <div class="slides-viewport">
     <div class="slides-container" #slidesContainer (scroll)="onScroll($event)">
-      <div class="slide" *ngFor="let step of steps; let i = index">
+      <div class="slide" *ngFor="let step of steps; let i = index" [class.active-slide]="i === currentStepIndex">
         <div class="slide-content">
-          <div class="icon-wrapper">
-            <ion-icon [name]="step.icon"></ion-icon>
+          <!-- First Step: App Logo -->
+          <div class="app-logo-wrap" *ngIf="i === 0">
+            <img src="assets/icon/icon.png" alt="Expenses Wallet" class="onboarding-logo" />
+            <div class="logo-aura"></div>
           </div>
-          <h2 class="title">{{ step.title | translate }}</h2>
-          <p class="description">{{ step.description | translate }}</p>
+
+          <!-- Other Steps: Crystal Icon -->
+          <div class="icon-crystal" *ngIf="i > 0">
+            <div class="crystal-inner">
+              <ion-icon [name]="step.icon"></ion-icon>
+            </div>
+            <div class="crystal-glow"></div>
+          </div>
+          <h2 class="slide-title">{{ step.title | translate }}</h2>
+          <p class="slide-desc">{{ step.description | translate }}</p>
         </div>
       </div>
     </div>
-
-    <div class="controls">
-      <div class="pagination">
-        <div
-          class="dot"
-          *ngFor="let step of steps; let i = index"
-          [class.active]="i === currentStepIndex"
-          (click)="goToStep(i)"
-        ></div>
-      </div>
-
-      <div class="buttons">
-        <button class="btn-skip" (click)="skip()" *ngIf="!isLastStep">
-          {{ "ONBOARDING.SKIP" | translate }}
-        </button>
-
-        <button class="btn-next" (click)="next()">
-          <span *ngIf="!isLastStep">{{ "ONBOARDING.NEXT" | translate }}</span>
-          <span *ngIf="isLastStep">{{ "ONBOARDING.START" | translate }}</span>
-          <ion-icon name="arrow-forward-outline" *ngIf="!isLastStep"></ion-icon>
-          <ion-icon name="rocket-outline" *ngIf="isLastStep"></ion-icon>
-        </button>
-      </div>
-    </div>
   </div>
+
+  <!-- Floating Controls Dock -->
+  <div class="controls-dock">
+    <div class="pagination">
+      <div 
+        class="dot-indicator" 
+        *ngFor="let step of steps; let i = index"
+        [class.active]="i === currentStepIndex"
+        (click)="goToStep(i)"
+      ></div>
+    </div>
+    
+    <button class="next-btn" (click)="next()" [class.start-btn]="isLastStep">
+      <span class="btn-text" *ngIf="!isLastStep">{{ "ONBOARDING.NEXT" | translate }}</span>
+      <span class="btn-text" *ngIf="isLastStep">{{ "ONBOARDING.START" | translate }}</span>
+      <div class="icon-circle">
+        <ion-icon [name]="isLastStep ? 'rocket' : 'arrow-forward'"></ion-icon>
+      </div>
+    </button>
+  </div>
+
 </div>
