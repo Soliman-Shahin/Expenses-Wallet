@@ -8,7 +8,6 @@
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: var(--ew-shadow-md) !important;
   }
 
   &:active {
@@ -52,13 +51,11 @@
   flex-wrap: wrap;
 
   .amount {
-    font-size: var(--ew-font-size-3xl);
-    font-weight: var(--ew-font-weight-bold);
-    letter-spacing: var(--tracking-tight);
-    background: var(--brand-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-size: clamp(2rem, 8vw, 2.8rem);
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: var(--ion-text-color);
+    text-shadow: 0 4px 16px rgba(0,0,0,0.06);
     animation: fadeIn var(--ew-duration-base) var(--ew-ease-in-out);
   }
 
@@ -80,11 +77,12 @@
 .balance-item {
   display: flex;
   align-items: center;
-  gap: var(--ew-space-3);
-  background: var(--glass-background, rgba(0,0,0,0.03));
-  border: var(--glass-border, 1px solid rgba(255,255,255,0.05));
-  padding: var(--ew-space-4);
-  border-radius: var(--ew-radius-lg);
+  justify-content: flex-start;
+  gap: 12px;
+  background: rgba(var(--ion-text-color-rgb), 0.02);
+  border: 1px solid rgba(var(--ion-text-color-rgb), 0.06);
+  padding: 12px 14px;
+  border-radius: 16px;
   transition: var(--ew-transition-base);
   position: relative;
   overflow: hidden;
@@ -96,20 +94,19 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: var(--shimmer-gradient);
+    background: linear-gradient(135deg, rgba(255,255,255,0.05), transparent);
     opacity: 0;
     transition: opacity var(--ew-duration-base);
   }
 
   &:hover,
   &:focus-within {
-    background: var(--primary-alpha-20);
+    background: rgba(var(--ion-text-color-rgb), 0.04);
     transform: translateY(-2px);
-    border-color: rgba(var(--ion-color-primary-rgb), 0.3);
+    border-color: rgba(var(--ion-text-color-rgb), 0.1);
 
     &::before {
-      opacity: 0.1;
-      animation: shimmer 2s infinite;
+      opacity: 1;
     }
   }
 
@@ -118,71 +115,100 @@
   }
 
   ion-icon {
-    font-size: var(--ew-size-10);
+    font-size: var(--ew-size-6);
     flex-shrink: 0;
     transition: transform var(--ew-duration-base) var(--ew-ease-in-out);
   }
 
   &.income {
+    background: rgba(var(--ion-color-success-rgb), 0.04);
+    border-color: rgba(var(--ion-color-success-rgb), 0.15);
     ion-icon {
-      color: var(--color-income);
-
-      &:hover {
-        transform: translateY(-2px);
-      }
+      color: var(--ion-color-success);
+      &:hover { transform: translateY(-2px); }
     }
   }
 
   &.expenses {
+    background: rgba(var(--ion-color-danger-rgb), 0.04);
+    border-color: rgba(var(--ion-color-danger-rgb), 0.15);
     ion-icon {
-      color: var(--color-expense);
-
-      &:hover {
-        transform: translateY(2px);
-      }
+      color: var(--ion-color-danger);
+      &:hover { transform: translateY(2px); }
     }
   }
 
   &.savings {
-    background: var(--glass-background);
+    background: linear-gradient(135deg, rgba(var(--ion-color-success-rgb), 0.06), transparent);
     backdrop-filter: blur(10px);
-    border: var(--glass-border);
-    padding: var(--ew-space-4);
+    border: 1px solid rgba(var(--ion-color-success-rgb), 0.12);
+    padding: 16px;
 
     &.positive {
-      background: var(--success-alpha-10);
-      border-color: var(--ion-color-success);
+      background: linear-gradient(135deg, rgba(var(--ion-color-success-rgb), 0.06), transparent);
+      border-color: rgba(var(--ion-color-success-rgb), 0.15);
     }
 
     &.negative {
-      background: var(--warning-alpha-10);
-      border-color: var(--ion-color-warning);
+      background: linear-gradient(135deg, rgba(var(--ion-color-warning-rgb), 0.06), transparent);
+      border-color: rgba(var(--ion-color-warning-rgb), 0.15);
     }
 
     ion-icon {
-      font-size: var(--ew-size-12);
+      font-size: 32px;
+      color: var(--ion-color-success);
+    }
+    
+    &.negative ion-icon {
+      color: var(--ion-color-warning);
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 12px;
+      background: rgba(var(--ion-color-success-rgb), 0.15);
+      color: var(--ion-color-success);
+      
+      &.badge-warning {
+        background: rgba(var(--ion-color-warning-rgb), 0.15);
+        color: var(--ion-color-warning);
+      }
     }
   }
 
   .item-details {
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
     flex: 1;
-    gap: var(--ew-space-1);
+    min-width: 0; /* Prevents flex blowout */
+    gap: 2px;
 
     .label {
-      font-size: var(--ew-font-size-sm);
-      color: var(--ew-text-color-secondary);
-      font-weight: var(--ew-font-weight-medium);
+      font-size: 12px;
+      color: rgba(var(--ion-text-color-rgb), 0.6);
+      font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: var(--tracking-wide);
+      letter-spacing: 0.5px;
+      width: 100%;
     }
 
     .amount {
-      font-size: var(--ew-font-size-lg);
-      font-weight: var(--ew-font-weight-semibold);
-      color: var(--ew-text-color-primary);
-      letter-spacing: var(--tracking-tight);
+      font-size: clamp(14px, 4vw, 16px);
+      font-weight: 700;
+      color: var(--ion-text-color);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+    }
+    
+    /* Ensure the wrapper inside savings stretches */
+    > div {
+      width: 100%;
     }
   }
 }
