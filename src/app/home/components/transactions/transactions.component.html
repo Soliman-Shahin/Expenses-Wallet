@@ -42,6 +42,7 @@
               <span
                 *ngIf="getCategoryName(t) as cat"
                 class="transaction-category"
+                [style.display]="cat === '—' || cat === '-' ? 'none' : 'flex'"
               >
                 <ion-icon name="pricetag-outline"></ion-icon>
                 {{ cat }}
@@ -50,7 +51,8 @@
           </ion-label>
           <ion-note
             slot="end"
-            [color]="getCategoryType(t) === 'income' ? 'success' : 'primary'"
+            class="transaction-amount"
+            [ngClass]="getCategoryType(t) === 'income' ? 'is-income' : 'is-expense'"
           >
             {{ getCategoryType(t) === "income" ? "+" : ""
             }}{{

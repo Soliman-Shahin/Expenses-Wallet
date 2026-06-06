@@ -28,7 +28,6 @@ ion-fab {
 
   // Hover state: change color and lift the button
   &:hover {
-    --background: var(--ion-color-secondary);
     transform: translateY(-4px) scale(1.1);
     animation: none; // Stop pulse on interaction
   }
