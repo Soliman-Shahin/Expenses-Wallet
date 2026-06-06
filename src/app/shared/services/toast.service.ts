@@ -4,6 +4,7 @@ import {
   Animation,
   AnimationController,
 } from '@ionic/angular';
+import { TranslateService } from '@ngx-translate/core';
 
 // Custom Toast Animations (fade/slide/scale)
 export const customToastEnterAnimation = (baseEl: HTMLElement): Animation => {
@@ -81,6 +82,7 @@ export const customToastLeaveAnimation = (baseEl: HTMLElement): Animation => {
 })
 export class ToastService {
   toastController = inject(ToastController);
+  private translate = inject(TranslateService);
   private activeToast?: HTMLIonToastElement | null;
 
   constructor() {}
@@ -102,8 +104,10 @@ export class ToastService {
   ): Promise<HTMLIonToastElement | void> {
     await this.dismissActiveToast();
 
+    const translatedMessage = this.translate.instant(message);
+
     let toast = await this.toastController.create({
-      message,
+      message: translatedMessage,
       duration: opts?.duration ?? 2000,
       color,
       position,
@@ -127,7 +131,7 @@ export class ToastService {
       // Fallback without custom animations (e.g., during rapid route changes)
       try {
         toast = await this.toastController.create({
-          message,
+          message: translatedMessage,
           duration: opts?.duration ?? 2000,
           color,
           position,

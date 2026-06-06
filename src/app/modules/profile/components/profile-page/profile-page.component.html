@@ -1,403 +1,226 @@
 <ng-container *ngIf="vm$ | async as vm">
-  <ion-content class="ion-padding" [fullscreen]="true">
-    <div class="profile-page">
-      <header class="profile-header animate-in" aria-label="Profile overview">
-        <div class="header-text">
-          <h1>{{ "PROFILE.TITLE" | translate }}</h1>
+  <ion-content class="profile-content" [fullscreen]="true">
+    
+    <!-- ── Hero Header ── -->
+    <div class="profile-hero">
+      <div class="hero-bg">
+        <div class="hero-orb hero-orb--left"></div>
+        <div class="hero-orb hero-orb--right"></div>
+        <div class="hero-noise"></div>
+      </div>
+      
+      <div class="hero-content">
+        <div class="hero-badges">
         </div>
-        <div class="header-chips" *ngIf="vm.profile as profile">
-          <ion-chip color="primary" *ngIf="profile.email">
-            <ion-icon name="mail-outline"></ion-icon>
-            <ion-label>{{ profile.email }}</ion-label>
-          </ion-chip>
-          <ion-chip color="tertiary">
-            <ion-icon name="wallet-outline"></ion-icon>
-            <ion-label>
-              {{ "PROFILE.SALARY.TOTAL" | translate }}:
-              {{ totalSalary | number : "1.0-2" }}
-              {{ salaryForm.get("currency")?.value }}
-            </ion-label>
-          </ion-chip>
-        </div>
-      </header>
+      </div>
+    </div>
 
-      <!-- Profile Completion & Stats Section -->
-      <div class="stats-section animate-in" *ngIf="vm.profile as profile">
-        <!-- Profile Completion Card -->
-        <div class="completion-card slide-in-up">
-          <div class="completion-header">
-            <div class="icon-wrapper">
-              <ion-icon name="checkmark-circle" color="success"></ion-icon>
-            </div>
-            <div>
-              <h3>{{ "PROFILE.COMPLETION.TITLE" | translate }}</h3>
-              <p class="subtitle">
-                {{ "PROFILE.COMPLETION.SUBTITLE" | translate }}
-              </p>
-            </div>
+    <!-- ── Main Container ── -->
+    <div class="profile-main">
+      
+      <!-- ── Avatar Section (Overlapping Hero) ── -->
+      <div class="avatar-section">
+        <div class="avatar-wrapper" [class.loading]="vm.isLoadingAvatar">
+          <div class="avatar-rings"></div>
+          <div class="avatar-image" 
+               [style.background-image]="vm.profile?.avatarUrl ? 'url(' + vm.profile?.avatarUrl + ')' : ''"
+               [attr.aria-label]="'PROFILE.AVATAR' | translate">
+            <ion-spinner *ngIf="vm.isLoadingAvatar" color="light"></ion-spinner>
+            <ion-icon *ngIf="!vm.profile?.avatarUrl && !vm.isLoadingAvatar" name="person"></ion-icon>
           </div>
-          <div class="progress-wrapper">
-            <div class="progress-bar">
-              <div
-                class="progress-fill"
-                [style.width.%]="profileCompletion"
-              ></div>
-            </div>
-            <span class="progress-text">{{ profileCompletion }}%</span>
+          <button class="edit-avatar-btn" (click)="triggerAvatarFile()" [attr.aria-label]="'PROFILE.EDIT_AVATAR' | translate">
+            <ion-icon name="camera"></ion-icon>
+          </button>
+          <input #avatarInput type="file" accept="image/*" hidden (change)="onAvatarSelected($event)" />
+        </div>
+        <h2 class="user-name" *ngIf="personalForm.get('username')?.value">{{ personalForm.get('username')?.value }}</h2>
+      </div>
+
+      <!-- ── Profile Completion Strip ── -->
+      <div class="completion-strip" *ngIf="vm.profile as profile">
+        <div class="strip-info">
+          <div class="strip-icon"><ion-icon name="checkmark-circle"></ion-icon></div>
+          <div class="strip-text">
+            <strong>{{ "PROFILE.COMPLETION.TITLE" | translate }}</strong>
+            <span>{{ "PROFILE.COMPLETION.SUBTITLE" | translate }}</span>
           </div>
         </div>
-
-        <!-- Stats Cards -->
-        <div class="stats-grid">
-          <div class="stat-card slide-in-up" style="--delay: 0.1s">
-            <div class="stat-icon primary">
-              <ion-icon name="trending-up-outline"></ion-icon>
-            </div>
-            <div class="stat-content">
-              <p class="stat-label">
-                {{ "PROFILE.STATS.INCOME_SOURCES" | translate }}
-              </p>
-              <h4 class="stat-value">{{ details.length }}</h4>
-            </div>
-          </div>
-
-          <div class="stat-card slide-in-up" style="--delay: 0.2s">
-            <div class="stat-icon success">
-              <ion-icon name="wallet-outline"></ion-icon>
-            </div>
-            <div class="stat-content">
-              <p class="stat-label">
-                {{ "PROFILE.STATS.TOTAL_INCOME" | translate }}
-              </p>
-              <h4 class="stat-value">
-                {{ totalSalary | number : "1.0-0" }}
-                {{ salaryForm.get("currency")?.value }}
-              </h4>
-            </div>
-          </div>
-
-          <div class="stat-card slide-in-up" style="--delay: 0.3s">
-            <div class="stat-icon tertiary">
-              <ion-icon name="time-outline"></ion-icon>
-            </div>
-            <div class="stat-content">
-              <p class="stat-label">
-                {{ "PROFILE.STATS.MEMBER_SINCE" | translate }}
-              </p>
-              <h4 class="stat-value">{{ getMemberSince() }}</h4>
+        <div class="strip-progress">
+          <span class="progress-pct">{{ profileCompletion }}%</span>
+          <div class="progress-track">
+            <div class="progress-fill" [style.width.%]="profileCompletion">
+              <div class="progress-glow"></div>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="profile-grid">
-        <!-- Left Column -->
-        <div class="column column-left">
-          <!-- Avatar Section -->
-          <section
-            class="card avatar-card animate-in"
-            aria-labelledby="avatar-title"
-          >
-            <div class="avatar-row">
-              <div
-                class="avatar pulse-on-change"
-                [style.background-image]="
-                  vm.profile?.avatarUrl
-                    ? 'url(' + vm.profile?.avatarUrl + ')'
-                    : ''
-                "
-                [attr.aria-label]="'PROFILE.AVATAR' | translate"
-              >
-                <ion-spinner *ngIf="vm.isLoadingAvatar"></ion-spinner>
-                <ion-icon
-                  *ngIf="!vm.profile?.avatarUrl && !vm.isLoadingAvatar"
-                  name="person-circle-outline"
-                  aria-hidden="true"
-                ></ion-icon>
-              </div>
-              <div class="avatar-actions">
-                <h2 id="avatar-title">
-                  {{ "PROFILE.AVATAR_TITLE" | translate }}
-                </h2>
-                <p class="subtitle">
-                  {{ "PROFILE.AVATAR_SUBTITLE" | translate }}
-                </p>
-                <div class="actions">
-                  <ion-button
-                    fill="solid"
-                    (click)="triggerAvatarFile()"
-                    class="slide-in-up"
-                  >
-                    <ion-icon slot="start" name="camera-outline"></ion-icon>
-                    {{ "PROFILE.EDIT_AVATAR" | translate }}
-                  </ion-button>
-                  <input
-                    #avatarInput
-                    type="file"
-                    accept="image/*"
-                    hidden
-                    (change)="onAvatarSelected($event)"
-                  />
-                </div>
-              </div>
-            </div>
-          </section>
+      <!-- ── Quick Stats Grid ── -->
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-icon icon-blue"><ion-icon name="trending-up-outline"></ion-icon></div>
+          <div class="stat-data">
+            <span class="stat-lbl">{{ "PROFILE.STATS.INCOME_SOURCES" | translate }}</span>
+            <span class="stat-val">{{ details.length }}</span>
+          </div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-icon icon-teal"><ion-icon name="wallet-outline"></ion-icon></div>
+          <div class="stat-data">
+            <span class="stat-lbl">{{ "PROFILE.STATS.TOTAL_INCOME" | translate }}</span>
+            <span class="stat-val">{{ totalSalary | number : "1.0-0" }} {{ salaryForm.get("currency")?.value }}</span>
+          </div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-icon icon-purple"><ion-icon name="time-outline"></ion-icon></div>
+          <div class="stat-data">
+            <span class="stat-lbl">{{ "PROFILE.STATS.MEMBER_SINCE" | translate }}</span>
+            <span class="stat-val">{{ getMemberSince() }}</span>
+          </div>
+        </div>
+      </div>
 
-          <!-- Personal Info Section -->
-          <section
-            class="card animate-in"
-            aria-labelledby="personal-info-title"
-          >
+      <!-- ── Forms Layout ── -->
+      <div class="forms-layout">
+        
+        <!-- Left: Personal Info -->
+        <div class="form-column">
+          <section class="premium-card" aria-labelledby="personal-info-title">
             <div class="card-header">
-              <h2 id="personal-info-title">
-                {{ "PROFILE.PERSONAL_INFO.TITLE" | translate }}
-              </h2>
-              <p class="subtitle">
-                {{ "PROFILE.PERSONAL_INFO.SUBTITLE" | translate }}
-              </p>
+              <div class="header-icon"><ion-icon name="person-outline"></ion-icon></div>
+              <div class="header-titles">
+                <h2 id="personal-info-title">{{ "PROFILE.PERSONAL_INFO.TITLE" | translate }}</h2>
+                <p>{{ "PROFILE.PERSONAL_INFO.SUBTITLE" | translate }}</p>
+              </div>
             </div>
 
-            <form
-              [formGroup]="personalForm"
-              (ngSubmit)="savePersonal()"
-              class="form-grid"
-              novalidate
-            >
+            <form [formGroup]="personalForm" (ngSubmit)="savePersonal()" class="form-grid" novalidate>
               <app-ui-input
                 formControlName="username"
                 [label]="'PROFILE.PERSONAL_INFO.FULL_NAME' | translate"
-                [placeholder]="
-                  'PROFILE.PERSONAL_INFO.FULL_NAME_PLACEHOLDER' | translate
-                "
+                [placeholder]="'PROFILE.PERSONAL_INFO.FULL_NAME_PLACEHOLDER' | translate"
                 required
                 [clearable]="true"
                 [maxLength]="50"
-                class="slide-in-up"
               ></app-ui-input>
 
               <app-ui-input
                 formControlName="email"
                 type="email"
                 [label]="'PROFILE.PERSONAL_INFO.EMAIL' | translate"
-                [placeholder]="
-                  'PROFILE.PERSONAL_INFO.EMAIL_PLACEHOLDER' | translate
-                "
+                [placeholder]="'PROFILE.PERSONAL_INFO.EMAIL_PLACEHOLDER' | translate"
                 required
                 autocomplete="email"
                 endIcon="lock-closed-outline"
-                class="slide-in-up"
               ></app-ui-input>
 
               <app-ui-input
                 formControlName="phone"
                 type="text"
                 [label]="'PROFILE.PERSONAL_INFO.PHONE' | translate"
-                [placeholder]="
-                  'PROFILE.PERSONAL_INFO.PHONE_PLACEHOLDER' | translate
-                "
+                [placeholder]="'PROFILE.PERSONAL_INFO.PHONE_PLACEHOLDER' | translate"
                 inputmode="tel"
                 [clearable]="true"
                 [maxLength]="20"
-                class="slide-in-up"
               ></app-ui-input>
 
-              <div class="actions">
-                <ion-button
-                  type="submit"
-                  expand="block"
-                  [disabled]="personalForm.invalid || vm.isLoadingPersonal"
-                  class="pulse-on-change"
-                >
-                  <ion-spinner
-                    *ngIf="vm.isLoadingPersonal"
-                    name="crescent"
-                  ></ion-spinner>
-                  <span *ngIf="!vm.isLoadingPersonal">{{
-                    "PROFILE.PERSONAL_INFO.SAVE" | translate
-                  }}</span>
+              <div class="form-actions">
+                <ion-button type="submit" expand="block" class="btn-gradient" [disabled]="personalForm.invalid || vm.isLoadingPersonal">
+                  <ion-spinner *ngIf="vm.isLoadingPersonal" name="crescent"></ion-spinner>
+                  <span *ngIf="!vm.isLoadingPersonal">{{ "PROFILE.PERSONAL_INFO.SAVE" | translate }}</span>
                 </ion-button>
               </div>
             </form>
           </section>
         </div>
 
-        <!-- Right Column -->
-        <div class="column column-right">
-          <!-- Salary & Currency Section -->
-          <section class="card animate-in" aria-labelledby="salary-info-title">
+        <!-- Right: Salary Info -->
+        <div class="form-column">
+          <section class="premium-card" aria-labelledby="salary-info-title">
             <div class="card-header">
-              <h2 id="salary-info-title">
-                {{ "PROFILE.SALARY.TITLE" | translate }}
-              </h2>
-              <p class="subtitle">
-                {{ "PROFILE.SALARY.SUBTITLE" | translate }}
-              </p>
+              <div class="header-icon"><ion-icon name="cash-outline"></ion-icon></div>
+              <div class="header-titles">
+                <h2 id="salary-info-title">{{ "PROFILE.SALARY.TITLE" | translate }}</h2>
+                <p>{{ "PROFILE.SALARY.SUBTITLE" | translate }}</p>
+              </div>
             </div>
 
-            <form
-              [formGroup]="salaryForm"
-              (ngSubmit)="saveSalary()"
-              class="salary-form"
-              novalidate
-            >
+            <form [formGroup]="salaryForm" (ngSubmit)="saveSalary()" class="salary-form" novalidate>
               <div formArrayName="details" class="salary-details-group">
-                <div
-                  class="array-error"
-                  *ngIf="salaryForm.get('details')?.errors?.['duplicateLabels']"
-                >
+                
+                <div class="array-error" *ngIf="salaryForm.get('details')?.errors?.['duplicateLabels']">
                   <ion-icon name="warning-outline"></ion-icon>
-                  <ion-text color="danger">{{
-                    "PROFILE.SALARY.DUPLICATE_LABELS" | translate
-                  }}</ion-text>
+                  <span>{{ "PROFILE.SALARY.DUPLICATE_LABELS" | translate }}</span>
                 </div>
 
-                <!-- Salary Items List -->
                 <div class="salary-items-list">
-                  <ion-reorder-group
-                    [disabled]="false"
-                    (ionItemReorder)="onReorder($event)"
-                  >
-                    <div
-                      class="salary-item slide-in-up"
-                      *ngFor="
-                        let grp of details.controls;
-                        let i = index;
-                        trackBy: trackByIndex
-                      "
-                      [formGroupName]="i"
-                    >
-                      <!-- Reorder Handle -->
-                      <div class="reorder-handle">
-                        <ion-reorder
-                          [attr.aria-label]="'COMMON.REORDER' | translate"
-                        >
-                          <ion-icon name="reorder-two-outline"></ion-icon>
-                        </ion-reorder>
-                      </div>
+                  <ion-reorder-group [disabled]="false" (ionItemReorder)="onReorder($event)">
+                    
+                    <div class="salary-item" *ngFor="let grp of details.controls; let i = index; trackBy: trackByIndex" [formGroupName]="i">
+                      <div class="salary-item-main">
+                        <div class="reorder-handle">
+                          <ion-reorder [attr.aria-label]="'COMMON.REORDER' | translate">
+                            <ion-icon name="reorder-two-outline"></ion-icon>
+                          </ion-reorder>
+                        </div>
 
-                      <!-- Item Content -->
-                      <div class="salary-item-content">
-                        <div class="salary-item-fields">
-                          <!-- Label Field -->
-                          <div class="salary-field label-field">
-                            <app-ui-input
-                              formControlName="label"
-                              type="text"
-                              [label]="'PROFILE.SALARY.LABEL' | translate"
-                              [placeholder]="
-                                'PROFILE.SALARY.LABEL_PLACEHOLDER' | translate
-                              "
-                              startIcon="pricetag-outline"
-                              [clearable]="true"
-                            ></app-ui-input>
+                        <div class="salary-fields-row">
+                          <div class="field-col slim-input">
+                            <div class="input-wrapper">
+                              <ion-icon name="pricetag-outline"></ion-icon>
+                              <div class="input-content">
+                                <span class="floating-label">{{ "PROFILE.SALARY.LABEL" | translate }}</span>
+                                <input type="text" formControlName="label" [placeholder]="'PROFILE.SALARY.LABEL_PLACEHOLDER' | translate" />
+                              </div>
+                            </div>
                           </div>
-
-                          <!-- Amount Field -->
-                          <div class="salary-field amount-field">
-                            <app-ui-input
-                              formControlName="amount"
-                              type="number"
-                              inputmode="decimal"
-                              [label]="'PROFILE.SALARY.AMOUNT' | translate"
-                              [placeholder]="'0.00'"
-                              startIcon="cash-outline"
-                            ></app-ui-input>
+                          <div class="field-col slim-input">
+                            <div class="input-wrapper">
+                              <ion-icon name="cash-outline"></ion-icon>
+                              <div class="input-content">
+                                <span class="floating-label">{{ "PROFILE.SALARY.AMOUNT" | translate }}</span>
+                                <input type="number" inputmode="decimal" formControlName="amount" placeholder="0.00" />
+                              </div>
+                            </div>
                           </div>
                         </div>
 
-                        <!-- Error Message -->
-                        <div
-                          class="field-error"
-                          *ngIf="
-                            grp.get('label')?.touched &&
-                            grp.get('label')?.hasError('duplicateLabel')
-                          "
-                        >
-                          <ion-icon name="alert-circle-outline"></ion-icon>
-                          <ion-text color="danger">{{
-                            "PROFILE.SALARY.DUPLICATE_LABEL" | translate
-                          }}</ion-text>
-                        </div>
+                        <button type="button" class="delete-item-btn" (click)="removeDetail(grp.get('id')?.value)" [disabled]="details.length <= 1" [attr.aria-label]="'COMMON.REMOVE' | translate">
+                          <ion-icon name="trash-outline"></ion-icon>
+                        </button>
                       </div>
 
-                      <!-- Delete Button -->
-                      <div class="salary-item-actions">
-                        <ion-button
-                          type="button"
-                          color="danger"
-                          fill="clear"
-                          size="small"
-                          (click)="removeDetail(grp.get('id')?.value)"
-                          [disabled]="details.length <= 1"
-                          class="delete-btn"
-                          [attr.aria-label]="'COMMON.REMOVE' | translate"
-                        >
-                          <ion-icon
-                            name="trash-outline"
-                            slot="icon-only"
-                          ></ion-icon>
-                        </ion-button>
+                      <div class="field-error" *ngIf="grp.get('label')?.touched && grp.get('label')?.hasError('duplicateLabel')">
+                        <ion-icon name="alert-circle-outline"></ion-icon>
+                        <span>{{ "PROFILE.SALARY.DUPLICATE_LABEL" | translate }}</span>
                       </div>
                     </div>
+
                   </ion-reorder-group>
                 </div>
 
-                <!-- Add New Item Button -->
-                <div class="add-detail-section">
-                  <ion-button
-                    type="button"
-                    (click)="addDetail()"
-                    expand="block"
-                    fill="outline"
-                    class="add-detail-btn"
-                  >
-                    <ion-icon slot="start" name="add-circle-outline"></ion-icon>
-                    {{ "COMMON.ADD" | translate }}
-                  </ion-button>
-                </div>
+                <button type="button" class="add-detail-btn" (click)="addDetail()">
+                  <ion-icon name="add-circle-outline"></ion-icon>
+                  <span>{{ "COMMON.ADD" | translate }}</span>
+                </button>
               </div>
 
               <!-- Currency Selection -->
               <div class="currency-section">
-                <ion-label class="currency-label">{{
-                  "PROFILE.SALARY.CURRENCY" | translate
-                }}</ion-label>
-                <ion-item class="currency-select-item" lines="none">
-                  <ion-icon
-                    name="cash-outline"
-                    slot="start"
-                    color="primary"
-                  ></ion-icon>
-                  <ion-select
-                    interface="popover"
-                    [interfaceOptions]="{ cssClass: 'currency-popover' }"
-                    formControlName="currency"
-                    [placeholder]="'PROFILE.SALARY.SELECT_CURRENCY' | translate"
-                  >
-                    <ion-select-option
-                      *ngFor="let c of currencies"
-                      [value]="c"
-                      >{{ c }}</ion-select-option
-                    >
+                <label class="currency-label">{{ "PROFILE.SALARY.CURRENCY" | translate }}</label>
+                <div class="currency-picker-wrap">
+                  <ion-icon name="cash-outline" class="currency-icon"></ion-icon>
+                  <ion-select interface="popover" formControlName="currency" [placeholder]="'PROFILE.SALARY.SELECT_CURRENCY' | translate" [interfaceOptions]="{ cssClass: 'premium-popover' }">
+                    <ion-select-option *ngFor="let c of currencies" [value]="c">{{ c }}</ion-select-option>
                   </ion-select>
-                </ion-item>
+                  <ion-icon name="chevron-down-outline" class="dropdown-icon"></ion-icon>
+                </div>
               </div>
 
-              <!-- Save Button -->
-              <div class="salary-actions">
-                <ion-button
-                  type="submit"
-                  expand="block"
-                  [disabled]="salaryForm.invalid || vm.isLoadingSalary"
-                  class="save-salary-btn"
-                >
-                  <ion-spinner
-                    *ngIf="vm.isLoadingSalary"
-                    name="crescent"
-                  ></ion-spinner>
-                  <span *ngIf="!vm.isLoadingSalary">{{
-                    "PROFILE.SALARY.SAVE" | translate
-                  }}</span>
+              <div class="form-actions">
+                <ion-button type="submit" expand="block" class="btn-gradient" [disabled]="salaryForm.invalid || vm.isLoadingSalary">
+                  <ion-spinner *ngIf="vm.isLoadingSalary" name="crescent"></ion-spinner>
+                  <span *ngIf="!vm.isLoadingSalary">{{ "PROFILE.SALARY.SAVE" | translate }}</span>
                 </ion-button>
               </div>
             </form>
@@ -405,48 +228,36 @@
         </div>
       </div>
 
-      <!-- Backup & Restore Section -->
-      <section class="card animate-in">
-        <app-backup-restore></app-backup-restore>
-      </section>
+      <!-- ── System & Security ── -->
+      <div class="system-layout">
+        <section class="premium-card" aria-label="Backup and Restore">
+          <app-backup-restore></app-backup-restore>
+        </section>
 
-      <!-- Security Section -->
-      <section
-        class="card security-card animate-in"
-        aria-labelledby="security-title"
-      >
-        <div class="card-header">
-          <h2 id="security-title">
-            {{ "PROFILE.SECURITY.TITLE" | translate }}
-          </h2>
-          <p class="subtitle">{{ "PROFILE.SECURITY.SUBTITLE" | translate }}</p>
-        </div>
-
-        <div class="security-content">
-          <ul class="security-list">
-            <li>
-              {{ "PROFILE.SECURITY.POINTS.KEEP_DEVICE_SECURE" | translate }}
-            </li>
-            <li>
-              {{
-                "PROFILE.SECURITY.POINTS.AVOID_SHARING_CREDENTIALS" | translate
-              }}
-            </li>
-            <li>
-              {{ "PROFILE.SECURITY.POINTS.LOGOUT_SHARED_DEVICES" | translate }}
-            </li>
-          </ul>
-
-          <div class="actions">
-            <ion-button color="danger" expand="block" (click)="logOut()">
-              <ion-icon name="log-out-outline" slot="start"></ion-icon>
-              {{ "AUTH.SIGN_OUT" | translate }}
-            </ion-button>
+        <section class="premium-card danger-card" aria-labelledby="security-title">
+          <div class="card-header">
+            <div class="header-icon"><ion-icon name="shield-checkmark-outline"></ion-icon></div>
+            <div class="header-titles">
+              <h2 id="security-title">{{ "PROFILE.SECURITY.TITLE" | translate }}</h2>
+              <p>{{ "PROFILE.SECURITY.SUBTITLE" | translate }}</p>
+            </div>
           </div>
-        </div>
-      </section>
+          
+          <div class="security-content">
+            <ul class="security-list">
+              <li><ion-icon name="checkmark-circle"></ion-icon><span>{{ "PROFILE.SECURITY.POINTS.KEEP_DEVICE_SECURE" | translate }}</span></li>
+              <li><ion-icon name="checkmark-circle"></ion-icon><span>{{ "PROFILE.SECURITY.POINTS.AVOID_SHARING_CREDENTIALS" | translate }}</span></li>
+              <li><ion-icon name="checkmark-circle"></ion-icon><span>{{ "PROFILE.SECURITY.POINTS.LOGOUT_SHARED_DEVICES" | translate }}</span></li>
+            </ul>
+            
+            <button class="logout-btn" (click)="logOut()">
+              <ion-icon name="log-out-outline"></ion-icon>
+              <span>{{ "AUTH.SIGN_OUT" | translate }}</span>
+            </button>
+          </div>
+        </section>
+      </div>
 
-      <div class="spacer"></div>
-    </div>
+    </div> <!-- /profile-main -->
   </ion-content>
 </ng-container>

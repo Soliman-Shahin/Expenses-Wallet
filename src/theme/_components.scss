@@ -443,13 +443,13 @@ ion-button.btn-outline {
 
 /* Avatar Component */
 .avatar {
-  width: 40px;
-  height: 40px;
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
   overflow: hidden;
   display: flex;
   align-items: center;
-  justify-content: center;
+  // justify-content: center;
   background: var(--primary-alpha-10);
   color: var(--ion-color-primary);
   font-weight: var(--font-weight-semibold);

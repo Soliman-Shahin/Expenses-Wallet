@@ -22,12 +22,14 @@
           (click)="closeMenu()"
         >
           <div class="avatar">
-            <ion-avatar>
+            <div class="avatar-circle">
               <img
-                [src]="vm.profile.user?.image || defaultAvatar"
+                #img
+                [src]="vm.profile.user?.avatarUrl || vm.profile.user?.image || defaultAvatar"
+                (error)="img.src = defaultAvatar"
                 [alt]="'USER_AVATAR' | translate"
               />
-            </ion-avatar>
+            </div>
           </div>
           <div class="user-details">
             <h3>
