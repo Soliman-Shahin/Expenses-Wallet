@@ -1,17 +1,15 @@
 .icon-selector-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
-  gap: 8px;
-  padding: 0;
+  grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+  gap: 10px;
+  padding: var(--ew-space-2) 0;
   background: transparent;
   border: none;
-  border-radius: 12px;
-  margin: 8px 0;
-  max-height: 300px;
+  margin: var(--ew-space-2) 0;
+  max-height: 260px;
   overflow-y: auto;
   overflow-x: hidden;
   width: 100%;
-  min-width: 300px;
   animation: fadeInScale 0.5s ease-out;
 
   .icon {
@@ -19,65 +17,65 @@
     
     @for $i from 1 through 50 {
       &:nth-child(#{$i}) {
-        animation-delay: #{$i * 0.02}s;
+        animation-delay: #{$i * 0.015}s;
       }
     }
   }
 
+  // Thin custom scrollbar for the icon grid
   &::-webkit-scrollbar {
-    width: 6px;
+    width: 4px;
   }
 
   &::-webkit-scrollbar-track {
-    background: var(--ion-color-step-100);
-    border-radius: 3px;
+    background: transparent;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: var(--ion-color-primary);
-    border-radius: 3px;
+    background: rgba(var(--ion-text-color-rgb), 0.12);
+    border-radius: 10px;
     transition: background 0.3s ease;
 
     &:hover {
-      background: var(--ion-color-primary-shade);
+      background: rgba(var(--ion-text-color-rgb), 0.22);
     }
   }
 }
 
 .icon {
-  width: 50px;
-  height: 50px;
+  width: 52px;
+  height: 52px;
   cursor: pointer;
-  border: 2px solid transparent;
-  border-radius: 12px;
-  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  border: 1px solid rgba(var(--ion-text-color-rgb), 0.08);
+  border-radius: 12px; // Matching squircle theme
+  transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--ion-color-step-100);
-  color: var(--ion-color-medium);
-  box-shadow: 0 2px 4px var(--ion-color-step-200);
+  background: rgba(var(--ion-text-color-rgb), 0.03);
+  color: var(--ew-text-color-secondary);
   position: relative;
   overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 
   &::before {
     content: '';
     position: absolute;
     top: 0;
-    inset-inline-start: 0;
-    inset-inline-end: 0;
+    left: 0;
+    right: 0;
     bottom: 0;
-    background: radial-gradient(circle at center, var(--ion-color-primary-tint) 0%, transparent 70%);
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
     opacity: 0;
     transition: opacity 0.3s ease;
   }
 
   &:hover {
-    background: var(--ion-color-primary-tint);
-    color: var(--ion-color-primary-contrast);
-    border-color: var(--ion-color-primary);
-    transform: translateY(-3px) rotate(5deg);
-    box-shadow: 0 6px 20px var(--ion-color-primary-shade);
+    background: rgba(var(--ion-color-primary-rgb), 0.08);
+    color: var(--ion-color-primary);
+    border-color: rgba(var(--ion-color-primary-rgb), 0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.12);
 
     &::before {
       opacity: 0.3;
@@ -85,15 +83,15 @@
   }
 
   &:active {
-    transform: translateY(-1px) scale(0.95);
+    transform: translateY(0) scale(0.95);
   }
 
   &.selected {
-    background: var(--ion-color-primary);
-    color: var(--ion-color-primary-contrast);
-    border-color: var(--ion-color-primary-shade);
-    transform: scale(1.05);
-    box-shadow: 0 0 0 3px var(--ion-color-primary-tint);
+    background: var(--brand-gradient) !important;
+    color: #ffffff !important;
+    border-color: transparent !important;
+    transform: scale(1.06);
+    box-shadow: 0 4px 14px rgba(var(--ion-color-primary-rgb), 0.3);
     animation: iconBounce 0.6s ease-out;
 
     &::before {
@@ -104,17 +102,17 @@
 
 @keyframes iconBounce {
   0% { transform: scale(1); }
-  50% { transform: scale(1.2) rotate(-5deg); }
-  100% { transform: scale(1.05); }
+  50% { transform: scale(1.15) rotate(-5deg); }
+  100% { transform: scale(1.06); }
 }
 
 @keyframes iconStagger {
   from {
     opacity: 0;
-    transform: translateY(30px) scale(0.7) rotate(-10deg);
+    transform: translateY(15px) scale(0.85);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1) rotate(0deg);
+    transform: translateY(0) scale(1);
   }
 }

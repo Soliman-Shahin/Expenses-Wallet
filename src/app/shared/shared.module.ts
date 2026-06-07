@@ -29,7 +29,7 @@ import { ThemeToggleComponent } from './components/theme-toggle/theme-toggle.com
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    IonicModule.forRoot(),
+    IonicModule,
     RouterModule.forChild([]),
     TranslateModule.forChild(),
     DatePipe,

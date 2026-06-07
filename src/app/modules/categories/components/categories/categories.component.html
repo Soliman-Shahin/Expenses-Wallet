@@ -1,36 +1,36 @@
-<ng-container *ngIf="vm$ | async as vm">
-  <ion-header mode="ios" class="category-ion-header">
-    <ion-toolbar>
-      <ion-title>{{ "SIDEBAR.CATEGORIES" | translate }}</ion-title>
-    </ion-toolbar>
-    <ion-toolbar>
-      <ion-searchbar
-        class="modern-searchbar"
-        animated="true"
-        [placeholder]="'SEARCH' | translate"
-        [debounce]="500"
-        show-clear-button="always"
-        (ionInput)="filter($event)"
-      ></ion-searchbar>
-    </ion-toolbar>
-    <ion-toolbar class="segment-toolbar">
-      <ion-segment value="all" (ionChange)="filterByType($event)">
-        <ion-segment-button value="all" layout="icon-start">
-          <ion-icon name="options-outline"></ion-icon>
-          <ion-label>{{ "COMMON.ALL" | translate }}</ion-label>
-        </ion-segment-button>
-        <ion-segment-button value="outcome" layout="icon-start">
-          <ion-icon name="trending-up-outline"></ion-icon>
-          <ion-label>{{ "COMMON.OUTCOME" | translate }}</ion-label>
-        </ion-segment-button>
-        <ion-segment-button value="income" layout="icon-start">
-          <ion-icon name="trending-down-outline"></ion-icon>
-          <ion-label>{{ "COMMON.INCOME" | translate }}</ion-label>
-        </ion-segment-button>
-      </ion-segment>
-    </ion-toolbar>
-  </ion-header>
+<ion-header mode="ios" class="category-ion-header">
+  <ion-toolbar class="title-toolbar">
+    <ion-title>{{ "SIDEBAR.CATEGORIES" | translate }}</ion-title>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-searchbar
+      class="modern-searchbar"
+      animated="true"
+      [placeholder]="'SEARCH' | translate"
+      [debounce]="500"
+      show-clear-button="always"
+      (ionInput)="filter($event)"
+    ></ion-searchbar>
+  </ion-toolbar>
+  <ion-toolbar class="segment-toolbar">
+    <ion-segment value="all" (ionChange)="filterByType($event)">
+      <ion-segment-button value="all" layout="icon-start">
+        <ion-icon name="options-outline"></ion-icon>
+        <ion-label>{{ "COMMON.ALL" | translate }}</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="outcome" layout="icon-start">
+        <ion-icon name="trending-up-outline"></ion-icon>
+        <ion-label>{{ "COMMON.OUTCOME" | translate }}</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="income" layout="icon-start">
+        <ion-icon name="trending-down-outline"></ion-icon>
+        <ion-label>{{ "COMMON.INCOME" | translate }}</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
 
+<ng-container *ngIf="vm$ | async as vm">
   <ion-content class="ion-padding">
     <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
       <ion-refresher-content></ion-refresher-content>
@@ -57,7 +57,6 @@
           lines="none"
           *ngFor="let item of vm.response.data; let index"
           [style.--animation-order]="index"
-          detail
         >
           <span
             class="category-icon"
@@ -68,6 +67,12 @@
           </span>
           <ion-label>
             <h3 class="title">{{ item.title }}</h3>
+            <p class="subtitle">
+              <span class="type-indicator" [ngClass]="item.type">
+                <ion-icon [name]="item.type === 'income' ? 'trending-down-outline' : 'trending-up-outline'"></ion-icon>
+                {{ (item.type === 'income' ? 'COMMON.INCOME' : 'COMMON.OUTCOME') | translate }}
+              </span>
+            </p>
           </ion-label>
           <ion-buttons slot="end">
             <ion-button (click)="presentActionSheet(item)">

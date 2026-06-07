@@ -13,17 +13,25 @@
 
     <!-- Live Preview -->
     <div class="preview-container ion-padding" [class.bump]="animatePreview">
-      <div class="category-item-preview">
+      <div class="category-item-preview card-glass">
         <div
           class="category-icon-preview"
           [style.background]="categoryForm.get('color')?.value"
         >
           <ion-icon [name]="categoryForm.get('icon')?.value"></ion-icon>
         </div>
-        <div class="category-title-preview">
-          {{
-            categoryForm.get("title")?.value || ("CATEGORY.ITEM" | translate)
-          }}
+        <div class="category-details-preview">
+          <div class="category-title-preview">
+            {{
+              categoryForm.get("title")?.value || ("CATEGORY.ITEM" | translate)
+            }}
+          </div>
+          <p class="subtitle" *ngIf="categoryForm.get('type')?.value as type">
+            <span class="type-indicator" [ngClass]="type">
+              <ion-icon [name]="type === 'income' ? 'trending-down-outline' : 'trending-up-outline'"></ion-icon>
+              {{ (type === 'income' ? 'COMMON.INCOME' : 'COMMON.OUTCOME') | translate }}
+            </span>
+          </p>
         </div>
       </div>
     </div>

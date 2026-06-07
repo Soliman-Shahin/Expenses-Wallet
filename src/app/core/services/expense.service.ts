@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { shareReplay, tap } from 'rxjs/operators';
+import { Observable, throwError } from 'rxjs';
+import { catchError, shareReplay, tap } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { Expense } from 'src/app/shared/models/expense.model';
 import { AuthService } from 'src/app/modules/auth/services/auth.service';
@@ -45,6 +45,10 @@ export class ExpenseService {
       this.expensesCache$ = this.apiService
         .get<Expense[]>(this.endpoint)
         .pipe(
+          catchError((error: unknown) => {
+            this.expensesCache$ = null;
+            return throwError(() => error);
+          }),
           // Do not cache error emissions
           shareReplay({ bufferSize: 1, refCount: true })
         );
@@ -101,6 +105,10 @@ export class ExpenseService {
         params
       )
       .pipe(
+        catchError((error: unknown) => {
+          this.totalsCache.delete(key);
+          return throwError(() => error);
+        }),
         // Do not cache error emissions
         shareReplay({ bufferSize: 1, refCount: true })
       );

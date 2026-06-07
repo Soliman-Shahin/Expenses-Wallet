@@ -229,6 +229,13 @@
   --ew-font-size-3xl: clamp(1.88rem, 1.58rem + 1.48vw, 2.50rem);   /* ~30px -> 40px */
   --ew-font-size-4xl: clamp(2.25rem, 1.85rem + 2.04vw, 3.13rem);   /* ~36px -> 50px */
 
+  // --- Font Size Aliases (for compatibility) ---
+  --ew-font-xs: var(--ew-font-size-xs);
+  --ew-font-sm: var(--ew-font-size-sm);
+  --ew-font-base: var(--ew-font-size-base);
+  --ew-font-lg: var(--ew-font-size-lg);
+  --ew-font-xl: var(--ew-font-size-xl);
+
   // --- Line Heights ---
   --ew-line-height-tight: 1.25;
   --ew-line-height-normal: 1.5;

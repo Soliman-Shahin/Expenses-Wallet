@@ -1,120 +1,124 @@
 :host {
   // ===================================================================
-  //  Modern Header & Toolbar Styling
+  //  Modern Header & Toolbar Styling (Fixed Safe Area / Notch Collision)
   // ===================================================================
   ion-header {
-    // Remove default Ionic borders and shadows for a cleaner, modern look.
     &::after {
       display: none;
     }
+    background: var(--ion-background-color);
 
-    ion-toolbar {
-      // Use semantic background colors from the master design tokens.
+    // Apply fixed safe padding-top to the title toolbar to clear the simulator/real device notch
+    .title-toolbar {
       --background: var(--ion-background-color);
-      // Remove default padding to allow for custom spacing.
-      --padding-start: 0;
-      --padding-end: 0;
+      --padding-start: var(--ew-space-4);
+      --padding-end: var(--ew-space-4);
+      --padding-top: 48px !important; // Forces title down to completely clear notch/dynamic island
+      --padding-bottom: var(--ew-space-2);
+    }
+
+    // Remaining toolbars for search and segments (no safe area padding top needed)
+    ion-toolbar {
+      --background: var(--ion-background-color);
+      --padding-start: var(--ew-space-4);
+      --padding-end: var(--ew-space-4);
       --padding-top: 0;
       --padding-bottom: 0;
-      // Use consistent spacing tokens for a balanced layout.
-      padding: var(--ew-space-2) var(--ew-space-4);
     }
 
     ion-title {
-      // Apply custom heading font styles for better typography.
       font-family: var(--ew-font-family-heading);
-      font-weight: var(--ew-font-weight-bold);
-      font-size: var(--ew-font-size-2xl);
+      font-weight: 800;
+      font-size: 28px;
       color: var(--ew-text-color-primary);
-      // Ensure title is properly aligned.
       padding: 0 !important;
       text-align: start;
+      letter-spacing: -0.5px;
     }
   }
 
   // ===================================================================
-  //  Search Bar Overhaul
+  //  Search Bar Overhaul (Fixed Double-Bordering)
   // ===================================================================
   ion-searchbar {
-    // Use consistent spacing tokens.
-    padding: var(--ew-space-2) var(--ew-space-4) !important;
+    --background: transparent; // Make searchbar wrapper transparent
+    --border-radius: var(--ew-radius-pill) !important;
+    --box-shadow: none;
+    --color: var(--ew-text-color-primary);
+    --placeholder-color: var(--ew-text-color-muted);
+    --icon-color: var(--ew-text-color-muted);
+    --clear-button-color: var(--ew-text-color-muted);
+    
+    // Position search bar with margins instead of padding to avoid double-borders
+    padding: 0 !important;
+    margin: var(--ew-space-2) 0;
 
-    // Style the input field to match the modern design system.
-    .searchbar-input-container {
-      .searchbar-input {
-        border-radius: var(--ew-radius-lg) !important; // 16px
-        background-color: var(--ion-item-background) !important;
-        color: var(--ew-text-color-primary) !important;
-        border: var(--ew-border-width-sm) solid var(--ion-border-color);
-        box-shadow: var(--ew-shadow-sm) !important;
-        font-family: var(--ew-font-family-base);
-        font-weight: var(--ew-font-weight-regular);
-        transition: var(--ew-transition-base);
-
-        // Modern focus state with primary color accent.
-        &:focus {
-          border-color: var(--ion-color-primary);
-          box-shadow: var(--ew-shadow-focus) !important;
-        }
-      }
+    // Apply single border and background to the searchbar input wrapper directly
+    &::part(container) {
+      border: 1px solid rgba(var(--ion-text-color-rgb), 0.08);
+      border-radius: var(--ew-radius-pill);
+      background: rgba(var(--ion-text-color-rgb), 0.03) !important;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     }
 
-    // Ensure clear and search icons are properly colored.
-    .searchbar-clear-icon,
-    .searchbar-search-icon {
-      color: var(--ew-text-color-muted) !important;
+    &.searchbar-has-focus::part(container) {
+      border-color: var(--ion-color-primary);
+      background: var(--ion-item-background) !important;
+      box-shadow: 0 0 0 3px rgba(var(--ion-color-primary-rgb), 0.15);
     }
   }
 
   // ===================================================================
-  //  Segment (Filter) Overhaul
+  //  Segment (Filter) Overhaul - Full Width Sliding Line
   // ===================================================================
+  .segment-toolbar {
+    --padding-start: 0px !important;
+    --padding-end: 0px !important;
+    padding: 0 !important;
+  }
+
   ion-segment {
-    // Use consistent spacing tokens.
-    width: 100%;
-    background: var(--background);
+    width: 100% !important;
+    background: var(--ion-background-color) !important;
+    border-radius: 0 !important;
+    border: none;
+    border-bottom: 1px solid rgba(var(--ion-text-color-rgb), 0.08);
+    margin: 0;
+    padding: 0;
+
+    // Premium bottom sliding indicator line
+    &::part(indicator) {
+      background: var(--brand-gradient) !important;
+      border-radius: 99px !important;
+      height: 3px !important;
+      box-shadow: none;
+    }
 
     ion-segment-button {
-      --indicator-height: 4px;
-      --padding-end: 8px;
-      --padding-top: 8px;
-      --padding-bottom: 8px;
       --color: var(--ew-text-color-muted);
-      --color-checked: var(--ew-color-primary);
-      --indicator-color: var(--ew-color-primary);
-      text-transform: none;
-      letter-spacing: 0.5px;
-      font-weight: 500;
-      transition: var(--ew-transition-base);
-      --indicator-color: transparent !important; // Disable default indicator.
+      --color-checked: var(--ion-color-primary) !important;
+      --border-radius: 0 !important;
+      --indicator-color: transparent !important; // Hide standard indicator
+      min-height: 48px;
+      margin: 0;
+      font-weight: var(--ew-font-weight-semibold);
+      background: transparent !important;
+      transition: all 0.3s ease;
 
-      // Ensure consistent height and remove default margins.
-      transition: var(--ew-transition-base);
-
-      // Vertically and horizontally center the icon and label
-      ion-label,
-      ion-icon {
-        display: flex;
-        align-items: center;
-        margin: 0 var(--ew-space-1);
+      &.segment-button-checked {
+        font-weight: var(--ew-font-weight-bold);
       }
 
       ion-label {
         font-family: var(--ew-font-family-base);
-        font-weight: var(--ew-font-weight-semibold);
-        font-size: var(--ew-font-size-sm);
+        font-weight: var(--ew-font-weight-bold);
+        font-size: var(--ew-font-size-sm) !important;
+        margin: 0 var(--ew-space-1);
       }
 
       ion-icon {
         font-size: 18px;
-      }
-
-      // Add a subtle hover effect for better interactivity.
-      &:hover:not(.segment-button-checked) {
-        background: var(--ew-color-gray-100);
-        .dark & {
-          background: var(--ew-color-gray-200);
-        }
+        margin: 0 var(--ew-space-1);
       }
     }
   }
@@ -122,35 +126,136 @@
   // ===================================================================
   //  General List & Item Styling
   // ===================================================================
-  ion-list {
+  .categories-list {
     background: transparent;
-    padding: 0 var(--ew-space-2);
+    padding: var(--ew-space-2) 0 90px !important;
   }
 
+  .category-item {
+    --background: var(--ion-item-background);
+    border: 1px solid rgba(var(--ion-text-color-rgb), 0.05);
+    border-radius: 20px;
+    margin: 0 0 14px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    --min-height: 78px;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    
+    --ripple-color: rgba(var(--ion-color-primary-rgb), 0.1);
 
-  // Style for the circular category icon
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+      border-color: rgba(var(--ion-color-primary-rgb), 0.25);
+    }
+    
+    &:active {
+      transform: scale(0.985);
+    }
+
+    .title {
+      font-family: var(--ew-font-family-base);
+      font-weight: var(--ew-font-weight-bold);
+      font-size: var(--ew-font-size-base);
+      color: var(--ew-text-color-primary);
+      margin: 0;
+    }
+
+    .subtitle {
+      margin: var(--ew-space-1) 0 0 0;
+      display: flex;
+      align-items: center;
+      gap: var(--ew-space-1);
+      
+      .type-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
+        font-weight: var(--ew-font-weight-semibold);
+        padding: 2px 8px;
+        border-radius: var(--ew-radius-sm);
+        line-height: 1.2;
+        
+        &.income {
+          background: var(--success-alpha-10);
+          color: var(--ion-color-success);
+        }
+        
+        &.outcome {
+          background: var(--danger-alpha-10);
+          color: var(--ion-color-danger);
+        }
+
+        ion-icon {
+          font-size: 12px;
+        }
+      }
+    }
+  }
+
+  // Squircle category icon with customized glow
   .category-icon {
-    height: 44px !important;
-    width: 44px !important;
-    min-width: 44px !important;
-    border-radius: var(--ew-radius-full);
+    height: 46px !important;
+    width: 46px !important;
+    min-width: 46px !important;
+    border-radius: 14px;
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-inline-end: var(--ew-space-3);
+    margin-inline-end: var(--ew-space-4);
     color: white;
     flex-shrink: 0;
+    position: relative;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: inherit;
+      border-radius: inherit;
+      filter: blur(8px);
+      opacity: 0.45;
+      z-index: -1;
+      transform: translateY(3px) scale(0.9);
+    }
 
     ion-icon {
       font-size: 24px;
     }
-
-    /* The background is set dynamically via inline style, so no dark mode override is needed here. */
   }
 
-  .reorder-icon {
-    font-size: 24px;
+  ion-buttons[slot="end"] {
+    margin-inline-end: 8px;
+    
+    ion-button {
+      --color: var(--ew-text-color-muted);
+      --background-hover: rgba(var(--ion-text-color-rgb), 0.06);
+      --border-radius: 50%;
+      height: 38px;
+      width: 38px;
+      margin: 0;
+      
+      &:hover {
+        --color: var(--ion-color-primary);
+      }
+    }
+  }
+
+  ion-reorder {
     color: var(--ew-text-color-muted);
+    opacity: 0.35;
+    transition: opacity 0.2s ease, color 0.2s ease;
+    margin-inline-end: 4px;
+    font-size: 20px;
+    
+    &:hover {
+      opacity: 0.8;
+      color: var(--ion-color-primary);
+    }
   }
 
   // ===================================================================
@@ -161,22 +266,14 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: calc(100vh - 300px); // Adjust based on header/footer height
+    height: calc(100vh - 300px);
     text-align: center;
     padding: var(--ew-space-6);
 
     ion-icon {
-      font-size: var(--ew-size-20); // 80px
+      font-size: var(--ew-size-20);
       color: var(--ew-text-color-muted);
       margin-bottom: var(--ew-space-4);
-    }
-
-    h2 {
-      font-family: var(--ew-font-family-heading);
-      font-weight: var(--ew-font-weight-bold);
-      font-size: var(--ew-font-size-xl);
-      color: var(--ew-text-color-primary);
-      margin-bottom: var(--ew-space-2);
     }
 
     p {
