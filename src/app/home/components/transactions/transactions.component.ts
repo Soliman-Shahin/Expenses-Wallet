@@ -18,6 +18,7 @@ import {
   finalize,
   map,
   of,
+  take,
   shareReplay,
   startWith,
   switchMap,
@@ -119,13 +120,15 @@ export class TransactionsComponent extends BaseComponent implements OnChanges {
           return filtered.slice(0, Math.max(0, params.limit || 5));
         }),
         catchError((error) => {
+          console.error('Failed to load transactions:', error);
           this.handleError('Failed to load transactions', error, true);
           return of([]);
         }),
-        finalize(() => this.setLoading(false))
+        finalize(() => this.setLoading(false)),
+        take(1)
       );
     }),
-    shareReplay(1)
+    shareReplay({ bufferSize: 1, refCount: true })
   );
 
   readonly vm$ = combineLatest({
