@@ -10,7 +10,7 @@
       </div>
     </ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="toggleFilters()" aria-label="Toggle filters">
+      <ion-button (click)="toggleFilters()" [attr.aria-label]="'TRANSACTIONS.TOGGLE_FILTERS' | translate">
         <ion-icon
           [name]="showFilters ? 'close-outline' : 'filter-outline'"
         ></ion-icon>
@@ -125,13 +125,13 @@
     <div class="cat-popover-inner">
       <!-- Header -->
       <div class="cat-popover-header">
-        <span class="cat-popover-title">Filter by Category</span>
+        <span class="cat-popover-title">{{ "TRANSACTIONS.FILTER_BY_CATEGORY" | translate }}</span>
         <button
           class="cat-clear-btn"
           *ngIf="selectedCategories.length > 0"
           (click)="toggleCategory('')"
         >
-          Clear
+          {{ "TRANSACTIONS.CLEAR" | translate }}
         </button>
       </div>
 
@@ -144,7 +144,7 @@
         <span class="cat-option-icon" style="background: rgba(var(--ion-text-color-rgb), 0.07)">
           <ion-icon name="apps-outline" style="color: var(--ew-text-color-muted)"></ion-icon>
         </span>
-        <span class="cat-option-name">All Categories</span>
+        <span class="cat-option-name">{{ "TRANSACTIONS.ALL_CATEGORIES" | translate }}</span>
         <ion-icon
           *ngIf="isCategorySelected('')"
           name="checkmark-circle"
@@ -273,7 +273,7 @@
           >
             <div class="option-content">
               <ion-icon name="create-outline"></ion-icon>
-              <span>{{ "Edit" | translate }}</span>
+              <span>{{ "TRANSACTIONS.EDIT" | translate }}</span>
             </div>
           </ion-item-option>
           <ion-item-option
@@ -283,7 +283,7 @@
           >
             <div class="option-content">
               <ion-icon name="trash-outline"></ion-icon>
-              <span>{{ "Delete" | translate }}</span>
+              <span>{{ "TRANSACTIONS.DELETE" | translate }}</span>
             </div>
           </ion-item-option>
         </ion-item-options>

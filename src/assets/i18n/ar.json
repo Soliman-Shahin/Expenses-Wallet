@@ -89,7 +89,17 @@
     "DATE_RANGE": "نطاق التاريخ",
     "START_DATE": "تاريخ البداية",
     "END_DATE": "تاريخ النهاية",
-    "ADD_NEW": "إضافة معاملة جديدة"
+    "ADD_NEW": "إضافة معاملة جديدة",
+    "FILTER_BY_CATEGORY": "تصفية حسب الفئة",
+    "ALL_CATEGORIES": "كل الفئات",
+    "CLEAR": "مسح",
+    "TOGGLE_FILTERS": "إظهار/إخفاء الفلاتر",
+    "CURRENT_MONTH": "الشهر الحالي",
+    "EDIT": "تعديل",
+    "DELETE": "حذف",
+    "FROM": "من",
+    "UNTIL": "حتى",
+    "TO": "إلى"
   },
   "ABOUT": "حول التطبيق",
   "LOGIN": "تسجيل الدخول",
@@ -136,6 +146,7 @@
     "CONFIRM": "تأكيد",
     "DELETE_CONFIRM": "هل أنت متأكد أنك تريد الحذف؟",
     "DELETE_CONFIRM_ITEM": "هل أنت متأكد أنك تريد حذف {{item}}؟",
+    "SELECTED": "محدد",
     "ERRORS": {
       "LOAD_DATA": "فشل تحميل البيانات. يرجى المحاولة مرة أخرى.",
       "DEFAULT": "حدث خطأ غير متوقع."
@@ -156,6 +167,7 @@
     "CONFIRM_DELETE": "هل أنت متأكد من حذف هذا الفئة؟",
     "SUCCESSFULLY_ADDED": "تم إضافة الفئة بنجاح.",
     "SUCCESSFULLY_UPDATED": "تم تحديث الفئة بنجاح.",
+    "SUCCESSFULLY_DELETED": "تم حذف الفئة بنجاح!",
     "ITEM": "عنصر الفئة",
     "TITLE": "عنوان الفئة",
     "TITLE_PLACEHOLDER": "أدخل عنوان الفئة",
@@ -191,7 +203,9 @@
     "UPDATE_SUCCESS": "تم تحديث المعاملة بنجاح.",
     "CREATE_SUCCESS": "تم إنشاء المعاملة بنجاح.",
     "UPDATE_ERROR": "فشل تحديث المعاملة.",
-    "CREATE_ERROR": "فشل إنشاء المعاملة."
+    "CREATE_ERROR": "فشل إنشاء المعاملة.",
+    "DELETE_SUCCESS_TOAST": "تم حذف المعاملة بنجاح.",
+    "DELETE_ERROR_TOAST": "خطأ في حذف المعاملة. يرجى المحاولة مرة أخرى."
   },
   "SETTINGS": {
     "GENERAL": "عام",
@@ -221,6 +235,13 @@
     "MISCELLANEOUS": "متفردة",
     "FOOD_AND_DRINK": "طعام و المشروبات",
     "TRANSPORTATION": "نقل"
+  },
+  "FILTERS": {
+    "TITLE": "الفلاتر",
+    "APPLY_FILTERS": "تطبيق الفلاتر",
+    "CLEAR_FILTERS": "مسح الفلاتر",
+    "FILTER_BY": "تصفية حسب",
+    "SORT_BY": "ترتيب حسب"
   },
   "VALIDATION": {
     "REQUIRED": "هذا الحقل مطلوب",

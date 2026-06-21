@@ -340,6 +340,13 @@ export class HomePageComponent
   }
 
   /**
+   * Refresh data when returning to the page
+   */
+  ionViewWillEnter(): void {
+    this.refreshData();
+  }
+
+  /**
    * Handles month change from the month selector
    */
   onMonthChange(monthYear: MonthYear): void {

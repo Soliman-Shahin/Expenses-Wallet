@@ -301,13 +301,13 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
 
   getSelectedCategoryText(): string {
     if (this.selectedCategories.length === 0) {
-      return 'All Categories';
+      return this.translateService.instant('TRANSACTIONS.ALL_CATEGORIES');
     }
     if (this.selectedCategories.length === 1) {
       const cat = this.categories.find(c => c._id === this.selectedCategories[0]);
-      return cat?.title || 'Category';
+      return cat?.title || this.translateService.instant('TRANSACTIONS.CATEGORY');
     }
-    return `${this.selectedCategories.length} selected`;
+    return `${this.selectedCategories.length} ${this.translateService.instant('COMMON.SELECTED')}`;
   }
 
   getSelectedCategoryIcon(): string {
@@ -481,13 +481,13 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
     if (this.startDate && this.endDate) {
       const start = new Date(this.startDate).toLocaleDateString();
       const end = new Date(this.endDate).toLocaleDateString();
-      return `${start} - ${end}`;
+      return `${start} ${this.translateService.instant('TRANSACTIONS.TO')} ${end}`;
     } else if (this.startDate) {
-      return `From ${new Date(this.startDate).toLocaleDateString()}`;
+      return `${this.translateService.instant('TRANSACTIONS.FROM')} ${new Date(this.startDate).toLocaleDateString()}`;
     } else if (this.endDate) {
-      return `Until ${new Date(this.endDate).toLocaleDateString()}`;
+      return `${this.translateService.instant('TRANSACTIONS.UNTIL')} ${new Date(this.endDate).toLocaleDateString()}`;
     }
-    return 'Current Month';
+    return this.translateService.instant('TRANSACTIONS.CURRENT_MONTH');
   }
 
   // Navigation
@@ -544,14 +544,14 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
             next: async () => {
               await this.toastService.presentSuccessToast(
                 'bottom',
-                'Transaction deleted successfully.'
+                this.translateService.instant('EXPENSE.DELETE_SUCCESS_TOAST')
               );
               this.loadTransactions(); // Refresh list
             },
             error: async (err) => {
               await this.toastService.presentErrorToast(
                 'bottom',
-                'Error deleting transaction. Please try again.'
+                this.translateService.instant('EXPENSE.DELETE_ERROR_TOAST')
               );
               console.error(err);
             },

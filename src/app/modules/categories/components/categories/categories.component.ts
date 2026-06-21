@@ -232,7 +232,7 @@ export class CategoriesComponent
             });
             this.toastService.presentSuccessToast(
               'bottom',
-              'Category successfully deleted!'
+              this.translateService.instant('CATEGORY.SUCCESSFULLY_DELETED')
             );
           }
         }

@@ -89,7 +89,17 @@
     "DATE_RANGE": "Date range",
     "START_DATE": "Start date",
     "END_DATE": "End date",
-    "ADD_NEW": "Add new transaction"
+    "ADD_NEW": "Add new transaction",
+    "FILTER_BY_CATEGORY": "Filter by Category",
+    "ALL_CATEGORIES": "All Categories",
+    "CLEAR": "Clear",
+    "TOGGLE_FILTERS": "Toggle filters",
+    "CURRENT_MONTH": "Current Month",
+    "EDIT": "Edit",
+    "DELETE": "Delete",
+    "FROM": "From",
+    "UNTIL": "Until",
+    "TO": "to"
   },
   "ABOUT": "About",
   "LOGIN": "Login",
@@ -104,6 +114,13 @@
   "ARABIC": "Arabic",
   "LIGHT_MODE": "Light mode",
   "DARK_MODE": "Dark mode",
+  "FILTERS": {
+    "TITLE": "Filters",
+    "APPLY_FILTERS": "Apply Filters",
+    "CLEAR_FILTERS": "Clear Filters",
+    "FILTER_BY": "Filter by",
+    "SORT_BY": "Sort by"
+  },
   "VALIDATION": {
     "REQUIRED": "This field is required",
     "MIN_LENGTH": "Minimum length is {{min}} characters",
@@ -151,6 +168,7 @@
     "CONFIRM": "Confirm",
     "DELETE_CONFIRM": "Are you sure you want to delete this?",
     "DELETE_CONFIRM_ITEM": "Are you sure you want to delete {{item}}?",
+    "SELECTED": "selected",
     "ERRORS": {
       "LOAD_DATA": "Failed to load data. Please try again.",
       "DEFAULT": "An unexpected error occurred."
@@ -169,6 +187,7 @@
     "CONFIRM_DELETE": "Are you sure you want to delete this category? This action cannot be undone.",
     "SUCCESSFULLY_ADDED": "Category successfully added!",
     "SUCCESSFULLY_UPDATED": "Category successfully updated!",
+    "SUCCESSFULLY_DELETED": "Category successfully deleted!",
     "ITEM": "Category item",
     "TITLE": "Category title",
     "TITLE_PLACEHOLDER": "Enter category title",
@@ -206,7 +225,9 @@
     "UPDATE_SUCCESS": "Transaction updated successfully.",
     "CREATE_SUCCESS": "Transaction created successfully.",
     "UPDATE_ERROR": "Failed to update transaction.",
-    "CREATE_ERROR": "Failed to create transaction."
+    "CREATE_ERROR": "Failed to create transaction.",
+    "DELETE_SUCCESS_TOAST": "Transaction deleted successfully.",
+    "DELETE_ERROR_TOAST": "Error deleting transaction. Please try again."
   },
   "SETTINGS": {
     "GENERAL": "General settings",
