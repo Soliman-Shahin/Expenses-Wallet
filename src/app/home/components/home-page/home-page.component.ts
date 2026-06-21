@@ -290,7 +290,7 @@ export class HomePageComponent
         currency: data.profile?.currency || 'USD',
       };
     }),
-    shareReplay({ bufferSize: 1, refCount: true })
+    shareReplay(1)
   );
 
   // trackBy helpers
@@ -424,38 +424,40 @@ export class HomePageComponent
     this.monthSelection$.next({ ...this.selectedMonth });
   }
 
+  private isOpeningModal = false;
+
   // FAB: open expense form modal
   async openExpenseModal(expense?: Expense): Promise<void> {
+    if (this.isOpeningModal) return;
+    this.isOpeningModal = true;
     try {
       const modal = await this.modalCtrl.create({
         component: ExpenseFormComponent,
         componentProps: { expense, onClose: () => modal.dismiss() },
-        initialBreakpoint: 0.9,
-        breakpoints: [0, 0.9, 1],
         backdropDismiss: false,
-        presentingElement: document.querySelector('ion-router-outlet') as
-          | HTMLElement
-          | undefined,
-      });
-
-      // Listen for modal dismissal to refresh data
-      modal.onDidDismiss().then((result) => {
-        if (result.role === 'confirm' || result.data) {
-          // Refresh data after successful save
-          this.refreshData();
-        }
       });
 
       await modal.present();
+
+      const result = await modal.onDidDismiss();
+      if (result.role === 'confirm' || result.role === 'delete') {
+        this.refreshData();
+      }
     } catch (err: any) {
       this.handleError('COMMON.ERRORS.DEFAULT', err, true);
+    } finally {
+      this.isOpeningModal = false;
     }
   }
 
   // Refresh data method
   private refreshData(): void {
     // Trigger data refresh by re-emitting current month
-    this.monthSelection$.next({ ...this.selectedMonth });
+    // Create new object to trigger change detection
+    this.monthSelection$.next({ 
+      month: this.selectedMonth.month,
+      year: this.selectedMonth.year
+    });
 
     // Also refresh transactions component if available
     if (this.transactionsComponent) {

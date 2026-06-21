@@ -1,4 +1,9 @@
-import { Component, ChangeDetectionStrategy, inject, OnInit } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  inject,
+  OnInit,
+} from '@angular/core';
 import {
   AlertController,
   InfiniteScrollCustomEvent,
@@ -23,7 +28,7 @@ import { Category, CategoryParams } from '../../models';
   selector: 'app-categories',
   templateUrl: './categories.component.html',
   styleUrls: ['./categories.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CategoriesComponent
   extends BaseListComponent<Category>
@@ -86,7 +91,7 @@ export class CategoriesComponent
           this.errorMessage.next('');
         }),
         switchMap((params) =>
-          this.categoryService.getCategories(params).pipe(
+          this.categoryService.getCategories(params, true).pipe( // forceRefresh = true
             finalize(() => this.loading.next(false)),
             catchError((err) => {
               this.errorMessage.next(err.message);
@@ -146,9 +151,12 @@ export class CategoriesComponent
     if (currentResponse) {
       const movedItem = currentResponse.data.splice(ev.detail.from, 1)[0];
       currentResponse.data.splice(ev.detail.to, 0, movedItem);
+      // Use 'categoryId' instead of 'id' to avoid the HTTP encryption interceptor
+      // from double-encrypting the MongoDB ObjectId (interceptor encrypts fields
+      // named 'id' and '_id', causing a key mismatch error on the backend)
       const reorderedCategories = currentResponse.data.map(
         (category, index) => ({
-          id: category._id as string,
+          categoryId: category._id as string,
           order: index,
         })
       );

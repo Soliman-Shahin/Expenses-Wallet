@@ -1,6 +1,6 @@
-<ng-container *ngIf="vm$ | async as vm">
+<ng-container>
   <!-- Skeleton while loading -->
-  <ion-list *ngIf="vm.loading" class="skeleton-list">
+  <ion-list *ngIf="txLoading" class="skeleton-list">
     <app-skeleton-block
       *ngFor="let i of [1, 2, 3, 4, 5]"
       variant="list-item-avatar"
@@ -8,7 +8,7 @@
   </ion-list>
 
   <!-- Error State -->
-  <div *ngIf="vm.error" class="ion-text-center ion-padding">
+  <div *ngIf="loadError && !txLoading" class="ion-text-center ion-padding">
     <ion-icon
       name="warning-outline"
       style="font-size: 28px; opacity: 0.6"
@@ -17,57 +17,86 @@
   </div>
 
   <!-- Content after loading -->
-  <ng-container *ngIf="!vm.loading && !vm.error">
+  <ng-container *ngIf="!txLoading && !loadError">
     <ion-list
       class="transactions-list list-fade-in"
-      *ngIf="vm.transactions.length > 0; else empty"
+      *ngIf="transactions.length > 0; else empty"
     >
-      <ion-item-sliding *ngFor="let t of vm.transactions; trackBy: trackById">
-        <ion-item class="transaction-item item-card" lines="none" button>
-          <span
-            class="category-icon"
-            [style.background]="getCategoryColor(t)"
-            aria-hidden="true"
-          >
-            <ion-icon size="large" [name]="getCategoryIcon(t)"></ion-icon>
-          </span>
-          <ion-label>
-            <h3 class="ion-text-wrap transaction-title">
-              {{ getOperationName(t) }}
-            </h3>
-            <p class="transaction-meta">
-              <span class="transaction-date">{{
-                getDateValue(t) | date : "mediumDate"
-              }}</span>
+      <ion-item-sliding
+        class="transaction-sliding"
+        *ngFor="let t of transactions; let i = index; trackBy: trackById"
+        [style.--animation-order]="i"
+      >
+        <ion-item
+          class="transaction-item item-card"
+          lines="none"
+          button
+          detail="false"
+          (click)="onEdit(t)"
+        >
+          <div class="transaction-icon" slot="start">
+            <span
+              class="category-icon"
+              [style.background]="getCategoryColor(t)"
+              aria-hidden="true"
+            >
+              <ion-icon [name]="getCategoryIcon(t)"></ion-icon>
+            </span>
+          </div>
+          
+          <div class="transaction-content">
+            <div class="transaction-header">
+              <h3 class="transaction-title">
+                {{ getOperationName(t) }}
+              </h3>
+              <div class="transaction-amount">
+                <span
+                  class="amount-value"
+                  [ngClass]="getCategoryType(t) === 'income' ? 'amount-income' : 'amount-expense'"
+                >
+                  {{ getCategoryType(t) === "income" ? "+" : "-"}}{{
+                    getAmountValue(t) | currency : userCurrency : "symbol" : "1.0-0"
+                  }}
+                </span>
+              </div>
+            </div>
+            
+            <div class="transaction-meta">
+              <span class="transaction-date">
+                <ion-icon name="calendar-outline"></ion-icon>
+                {{ getDateValue(t) | date : "MMM d, y" }}
+              </span>
               <span
                 *ngIf="getCategoryName(t) as cat"
                 class="transaction-category"
-                [style.display]="cat === '—' || cat === '-' ? 'none' : 'flex'"
+                [style.display]="cat === '—' || cat === '-' ? 'none' : 'inline-flex'"
               >
                 <ion-icon name="pricetag-outline"></ion-icon>
                 {{ cat }}
               </span>
-            </p>
-          </ion-label>
-          <ion-note
-            slot="end"
-            class="transaction-amount"
-            [ngClass]="getCategoryType(t) === 'income' ? 'is-income' : 'is-expense'"
-          >
-            {{ getCategoryType(t) === "income" ? "+" : ""
-            }}{{
-              getAmountValue(t) | currency : userCurrency : "symbol" : "1.0-0"
-            }}
-          </ion-note>
+            </div>
+          </div>
         </ion-item>
-        <ion-item-options side="end">
-          <ion-item-option (click)="onEdit(t)">
-            <ion-icon slot="start" name="create-outline"></ion-icon>
-            Edit
+        
+        <ion-item-options side="end" class="custom-item-options">
+          <ion-item-option
+            class="option-btn option-edit"
+            (click)="onEdit(t)"
+          >
+            <div class="option-content">
+              <ion-icon name="create-outline"></ion-icon>
+              <span>{{ "Edit" | translate }}</span>
+            </div>
           </ion-item-option>
-          <ion-item-option color="danger" (click)="onDelete(t)">
-            <ion-icon slot="start" name="trash-outline"></ion-icon>
-            Delete
+          <ion-item-option
+            class="option-btn option-delete"
+            color="danger"
+            (click)="onDelete(t)"
+          >
+            <div class="option-content">
+              <ion-icon name="trash-outline"></ion-icon>
+              <span>{{ "Delete" | translate }}</span>
+            </div>
           </ion-item-option>
         </ion-item-options>
       </ion-item-sliding>

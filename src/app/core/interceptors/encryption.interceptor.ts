@@ -6,8 +6,8 @@ import {
   HttpInterceptor,
   HttpResponse,
 } from '@angular/common/http';
-import { Observable, from } from 'rxjs';
-import { switchMap, map } from 'rxjs/operators';
+import { Observable, from, of } from 'rxjs';
+import { switchMap, mergeMap, map } from 'rxjs/operators';
 import { EncryptionAdvancedService } from '../services/encryption-advanced.service';
 import { environment } from 'src/environments/environment';
 
@@ -107,11 +107,11 @@ export class EncryptionAdvancedInterceptor implements HttpInterceptor {
     next: HttpHandler
   ): Observable<HttpEvent<unknown>> {
     return next.handle(request).pipe(
-      switchMap((event) => {
+      mergeMap((event) => {
         if (event instanceof HttpResponse && event.body) {
           return from(this.decryptResponse(event));
         }
-        return Promise.resolve(event);
+        return of(event);
       })
     );
   }

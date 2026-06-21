@@ -36,9 +36,7 @@ export function HttpLoaderFactory(http: HttpClient) {
     BrowserModule,
     BrowserAnimationsModule,
     AppRoutingModule,
-    IonicModule.forRoot({
-      mode: 'ios'
-    }),
+    IonicModule.forRoot(),
     TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,

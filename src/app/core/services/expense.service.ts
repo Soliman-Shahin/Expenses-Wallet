@@ -37,6 +37,11 @@ export class ExpenseService {
         }
       });
       
+      // Add cache-busting parameter if forceRefresh is true
+      if (forceRefresh) {
+        httpParams = httpParams.set('_t', Date.now().toString());
+      }
+      
       return this.apiService.get<Expense[]>(this.endpoint, httpParams);
     }
 

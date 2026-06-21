@@ -12,7 +12,7 @@ import { ApiService } from 'src/app/core/services';
 export class CategoryService {
   private apiService = inject(ApiService);
 
-  getCategories(params: CategoryParams): Observable<{ data: Category[]; total: number }> {
+  getCategories(params: CategoryParams, forceRefresh = false): Observable<{ data: Category[]; total: number }> {
     let httpParams = new HttpParams()
       .set('skip', params.skip.toString())
       .set('limit', params.limit.toString())
@@ -24,6 +24,11 @@ export class CategoryService {
 
     if (params.type) {
       httpParams = httpParams.set('type', params.type);
+    }
+
+    // Add cache-busting parameter if forceRefresh is true
+    if (forceRefresh) {
+      httpParams = httpParams.set('_t', Date.now().toString());
     }
 
     return this.apiService.get<{ data: Category[]; total: number }>(
@@ -54,7 +59,7 @@ export class CategoryService {
     return this.apiService.delete<void>(`/categories/delete/${id}`);
   }
 
-  updateOrder(categories: { id:string; order: number }[]): Observable<void> {
+  updateOrder(categories: { categoryId: string; order: number }[]): Observable<void> {
     return this.apiService.put<void>('/categories/update-order', {
       categories,
     });

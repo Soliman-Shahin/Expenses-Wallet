@@ -45,16 +45,20 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
 
   // Search and filters
   searchTerm = '';
-  selectedCategory = '';
+  selectedCategories: string[] = []; // Multi-select: array of selected category IDs
   selectedType = '';
   startDate: string | null = null;
   endDate: string | null = null;
+  tempStartDate: string | null = null;
+  tempEndDate: string | null = null;
   today = new Date().toISOString();
 
   // UI state
   showSearch = false;
   showFilters = false;
   showDatePicker = false;
+  showCategoryPopover = false;
+  categoryPopoverEvent: any = null;
 
   private searchSubject = new Subject<string>();
 
@@ -78,15 +82,21 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
   }
 
   async openAddTransactionModal() {
-    const modal = await this.modalController.create({
-      component: ExpenseFormComponent,
-      cssClass: 'main-modal',
-    });
-    await modal.present();
+    if (this.isOpeningModal) return;
+    this.isOpeningModal = true;
+    try {
+      const modal = await this.modalController.create({
+        component: ExpenseFormComponent,
+        cssClass: 'main-modal',
+      });
+      await modal.present();
 
-    const { data } = await modal.onDidDismiss();
-    if (data && data.success) {
-      this.loadTransactions(); // Refresh the list after adding a new transaction
+      const { role } = await modal.onDidDismiss();
+      if (role === 'confirm' || role === 'delete') {
+        this.loadTransactions(); // Refresh the list after adding/deleting a new transaction
+      }
+    } finally {
+      this.isOpeningModal = false;
     }
   }
 
@@ -125,13 +135,27 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
     // Build query parameters for filtering
     const params: any = {};
     if (this.searchTerm) params.search = this.searchTerm;
-    if (this.selectedCategory) params.category = this.selectedCategory;
+    // Send selected categories as comma-separated string (or single value if only one)
+    if (this.selectedCategories.length === 1) {
+      params.category = this.selectedCategories[0];
+    } else if (this.selectedCategories.length > 1) {
+      params.categories = this.selectedCategories.join(',');
+    }
     if (this.selectedType) params.type = this.selectedType;
     if (this.startDate) params.startDate = this.startDate;
+    else {
+      const now = new Date();
+      params.startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    }
+    
     if (this.endDate) params.endDate = this.endDate;
+    else {
+      const now = new Date();
+      params.endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999).toISOString();
+    }
 
     this.expenseService
-      .getExpenses(params)
+      .getExpenses(params, true) // forceRefresh = true to bypass cache
       .pipe(
         takeUntil(this.destroy$),
         finalize(() => {
@@ -242,6 +266,66 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
     this.loadTransactions();
   }
 
+  // ── Category Popover (Multi-Select) ─────────────────────────────
+
+  openCategoryPopover(event: Event) {
+    this.categoryPopoverEvent = event;
+    this.showCategoryPopover = true;
+  }
+
+  closeCategoryPopover() {
+    this.showCategoryPopover = false;
+    this.categoryPopoverEvent = null;
+  }
+
+  toggleCategory(catId: string) {
+    if (catId === '') {
+      // "All" clears all selections
+      this.selectedCategories = [];
+    } else {
+      const idx = this.selectedCategories.indexOf(catId);
+      if (idx === -1) {
+        this.selectedCategories = [...this.selectedCategories, catId];
+      } else {
+        this.selectedCategories = this.selectedCategories.filter(id => id !== catId);
+      }
+    }
+    this.loadTransactions();
+    this.cdr.markForCheck();
+  }
+
+  isCategorySelected(catId: string): boolean {
+    if (catId === '') return this.selectedCategories.length === 0;
+    return this.selectedCategories.includes(catId);
+  }
+
+  getSelectedCategoryText(): string {
+    if (this.selectedCategories.length === 0) {
+      return 'All Categories';
+    }
+    if (this.selectedCategories.length === 1) {
+      const cat = this.categories.find(c => c._id === this.selectedCategories[0]);
+      return cat?.title || 'Category';
+    }
+    return `${this.selectedCategories.length} selected`;
+  }
+
+  getSelectedCategoryIcon(): string {
+    if (this.selectedCategories.length === 1) {
+      const cat = this.categories.find(c => c._id === this.selectedCategories[0]);
+      return cat?.icon || 'pricetag-outline';
+    }
+    return 'pricetag-outline';
+  }
+
+  getSelectedCategoryColor(): string | null {
+    if (this.selectedCategories.length === 1) {
+      const cat = this.categories.find(c => c._id === this.selectedCategories[0]);
+      return cat?.color || null;
+    }
+    return null;
+  }
+
   toggleFilters() {
     this.showFilters = !this.showFilters;
   }
@@ -254,8 +338,122 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
     }
   }
 
+  // --- Custom Date Range Picker ---
+  currentCalendarDate: Date = new Date();
+  
+  private isOpeningModal = false;
+  private isProcessingAction = false;
+  calendarWeeks: Date[][] = [];
+  weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  generateCalendar(baseDate: Date) {
+    const year = baseDate.getFullYear();
+    const month = baseDate.getMonth();
+    const firstDayOfMonth = new Date(year, month, 1);
+    const lastDayOfMonth = new Date(year, month + 1, 0);
+    
+    const startDate = new Date(firstDayOfMonth);
+    startDate.setDate(startDate.getDate() - startDate.getDay()); // Go back to Sunday
+    
+    const endDate = new Date(lastDayOfMonth);
+    if (endDate.getDay() !== 6) {
+      endDate.setDate(endDate.getDate() + (6 - endDate.getDay())); // Go forward to Saturday
+    }
+
+    const weeks: Date[][] = [];
+    let currentWeek: Date[] = [];
+    let currentDate = new Date(startDate);
+
+    while (currentDate <= endDate) {
+      currentWeek.push(new Date(currentDate));
+      if (currentWeek.length === 7) {
+        weeks.push(currentWeek);
+        currentWeek = [];
+      }
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    this.calendarWeeks = weeks;
+  }
+
+  prevMonth() {
+    this.currentCalendarDate = new Date(this.currentCalendarDate.getFullYear(), this.currentCalendarDate.getMonth() - 1, 1);
+    this.generateCalendar(this.currentCalendarDate);
+  }
+
+  nextMonth() {
+    this.currentCalendarDate = new Date(this.currentCalendarDate.getFullYear(), this.currentCalendarDate.getMonth() + 1, 1);
+    this.generateCalendar(this.currentCalendarDate);
+  }
+
+  selectDate(date: Date) {
+    // If both start and end are selected, reset and start over
+    if (this.tempStartDate && this.tempEndDate) {
+      this.tempStartDate = date.toISOString();
+      this.tempEndDate = null;
+      return;
+    }
+    // If only start is selected
+    if (this.tempStartDate && !this.tempEndDate) {
+      const start = new Date(this.tempStartDate);
+      if (date < start) {
+        // If selected date is before start date, it becomes the new start date
+        this.tempStartDate = date.toISOString();
+      } else {
+        // Selected date is after start date, so it's the end date
+        const end = new Date(date);
+        end.setHours(23, 59, 59, 999);
+        this.tempEndDate = end.toISOString();
+      }
+      return;
+    }
+    // If nothing is selected
+    this.tempStartDate = date.toISOString();
+  }
+
+  isDateSelectedStart(date: Date): boolean {
+    if (!this.tempStartDate) return false;
+    const start = new Date(this.tempStartDate);
+    return date.getFullYear() === start.getFullYear() && date.getMonth() === start.getMonth() && date.getDate() === start.getDate();
+  }
+
+  isDateSelectedEnd(date: Date): boolean {
+    if (!this.tempEndDate) return false;
+    const end = new Date(this.tempEndDate);
+    return date.getFullYear() === end.getFullYear() && date.getMonth() === end.getMonth() && date.getDate() === end.getDate();
+  }
+
+  isDateInRange(date: Date): boolean {
+    if (!this.tempStartDate || !this.tempEndDate) return false;
+    const start = new Date(this.tempStartDate);
+    start.setHours(0,0,0,0);
+    const end = new Date(this.tempEndDate);
+    end.setHours(23,59,59,999);
+    return date > start && date < end;
+  }
+  
+  isToday(date: Date): boolean {
+    const today = new Date();
+    return date.getFullYear() === today.getFullYear() && date.getMonth() === today.getMonth() && date.getDate() === today.getDate();
+  }
+
+  isCurrentMonthDay(date: Date): boolean {
+    return date.getMonth() === this.currentCalendarDate.getMonth();
+  }
+
   // Date picker methods
   openDatePicker() {
+    this.tempStartDate = this.startDate;
+    this.tempEndDate = this.endDate;
+    
+    // Default calendar view to tempStartDate if available, otherwise current month
+    if (this.tempStartDate) {
+      this.currentCalendarDate = new Date(this.tempStartDate);
+    } else {
+      this.currentCalendarDate = new Date();
+    }
+    this.generateCalendar(this.currentCalendarDate);
+    
     this.showDatePicker = true;
   }
 
@@ -264,6 +462,8 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
   }
 
   applyDateFilter() {
+    this.startDate = this.tempStartDate;
+    this.endDate = this.tempEndDate;
     this.showDatePicker = false;
     this.loadTransactions();
   }
@@ -271,33 +471,10 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
   clearDateFilter() {
     this.startDate = null;
     this.endDate = null;
-  }
-
-  get datePickerValue(): (string | null)[] | null {
-    if (this.startDate || this.endDate) {
-      return [this.startDate, this.endDate];
-    }
-    return null;
-  }
-
-  onDateChange(event: any) {
-    const dates = event.detail.value;
-    if (Array.isArray(dates)) {
-      if (dates.length === 0) {
-        this.startDate = null;
-        this.endDate = null;
-      } else {
-        const sortedDates = dates.sort();
-        this.startDate = sortedDates[0];
-        this.endDate =
-          sortedDates.length > 1
-            ? sortedDates[sortedDates.length - 1]
-            : sortedDates[0];
-      }
-    } else if (typeof dates === 'string') {
-      this.startDate = dates;
-      this.endDate = dates;
-    }
+    this.tempStartDate = null;
+    this.tempEndDate = null;
+    this.showDatePicker = false;
+    this.loadTransactions();
   }
 
   getDateRangeText(): string {
@@ -310,7 +487,7 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
     } else if (this.endDate) {
       return `Until ${new Date(this.endDate).toLocaleDateString()}`;
     }
-    return 'Date Range';
+    return 'Current Month';
   }
 
   // Navigation
@@ -334,43 +511,55 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
   }
 
   async onEdit(item: Expense) {
-    const modal = await this.modalController.create({
-      component: ExpenseFormComponent,
-      componentProps: {
-        expense: item,
-      },
-      cssClass: 'main-modal',
-    });
-    await modal.present();
+    if (this.isOpeningModal) return;
+    this.isOpeningModal = true;
+    try {
+      const modal = await this.modalController.create({
+        component: ExpenseFormComponent,
+        componentProps: {
+          expense: item,
+        },
+        cssClass: 'main-modal',
+      });
+      await modal.present();
 
-    const { data } = await modal.onDidDismiss();
-    if (data && data.success) {
-      this.loadTransactions();
+      const { role } = await modal.onDidDismiss();
+      if (role === 'confirm' || role === 'delete') {
+        this.loadTransactions();
+      }
+    } finally {
+      this.isOpeningModal = false;
     }
   }
 
   async onDelete(item: Expense) {
-    const transactionName = item.description || 'Transaction';
-    const confirmed = await this.alertService.showDeleteConfirm(
-      transactionName,
-      async () => {
-        this.expenseService.deleteExpense(item._id).subscribe({
-          next: async () => {
-            await this.toastService.presentSuccessToast(
-              'bottom',
-              'Transaction deleted successfully.'
-            );
-            this.loadTransactions(); // Refresh list
-          },
-          error: async (err) => {
-            await this.toastService.presentErrorToast(
-              'bottom',
-              'Error deleting transaction. Please try again.'
-            );
-            console.error(err);
-          },
-        });
-      }
-    );
+    if (this.isProcessingAction) return;
+    this.isProcessingAction = true;
+    try {
+      const transactionName = item.description || 'Transaction';
+      const confirmed = await this.alertService.showDeleteConfirm(
+        transactionName,
+        async () => {
+          this.expenseService.deleteExpense(item._id).subscribe({
+            next: async () => {
+              await this.toastService.presentSuccessToast(
+                'bottom',
+                'Transaction deleted successfully.'
+              );
+              this.loadTransactions(); // Refresh list
+            },
+            error: async (err) => {
+              await this.toastService.presentErrorToast(
+                'bottom',
+                'Error deleting transaction. Please try again.'
+              );
+              console.error(err);
+            },
+          });
+        }
+      );
+    } finally {
+      this.isProcessingAction = false;
+    }
   }
 }

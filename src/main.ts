@@ -17,6 +17,11 @@ initWebVitalsTracking();
 // Register Arabic locale data for DatePipe month/day names
 registerLocaleData(localeAr);
 
-platformBrowserDynamic()
-  .bootstrapModule(AppModule)
-  .catch((err) => console.log(err));
+// Prevent double bootstrapping (in case of multiple browser tabs/windows)
+if (!(window as any).__appBootstrapped) {
+  (window as any).__appBootstrapped = true;
+
+  platformBrowserDynamic()
+    .bootstrapModule(AppModule)
+    .catch((err) => console.error('Bootstrap error:', err));
+}
