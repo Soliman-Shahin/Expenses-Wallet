@@ -4,6 +4,7 @@ import { map, catchError, switchMap, tap } from 'rxjs/operators';
 import { OfflineStorageService } from './offline-storage.service';
 import { EncryptionService } from './encryption.service';
 import { StorageService } from 'src/app/modules/auth/services/storage.service';
+import { GoogleDriveService } from './google-drive.service';
 
 export interface BackupData {
   version: string;
@@ -42,12 +43,20 @@ export class BackupService {
   private readonly BACKUP_STORAGE_KEY = 'backup_history';
   private readonly MAX_BACKUP_HISTORY = 10;
   private readonly SETTINGS_KEY = 'app_settings';
+  private readonly AUTO_BACKUP_KEY = 'auto_backup_settings';
+  private readonly AUTO_BACKUP_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+  private readonly GOOGLE_DRIVE_SETTINGS_KEY = 'google_drive_backup_settings';
+  
+  private autoBackupTimer: any;
 
   constructor(
     private offlineStorage: OfflineStorageService,
     private encryptionService: EncryptionService,
-    private storageService: StorageService
-  ) {}
+    private storageService: StorageService,
+    private googleDriveService: GoogleDriveService
+  ) {
+    this.initAutoBackup();
+  }
 
   /**
    * Create a full backup of all user data including profile image
@@ -57,9 +66,9 @@ export class BackupService {
     password?: string
   ): Observable<BackupData> {
     return forkJoin({
-      expenses: from(this.offlineStorage['getEntitiesSync']('expense')),
-      categories: from(this.offlineStorage['getEntitiesSync']('category')),
-      user: from(this.offlineStorage['getEntitiesSync']('user')),
+      expenses: this.offlineStorage.getAllEntitiesForBackup('expense'),
+      categories: this.offlineStorage.getAllEntitiesForBackup('category'),
+      user: this.offlineStorage.getAllEntitiesForBackup('user'),
       settings: of(this.getSettings()),
       profileImage: from(this.getProfileImage()),
     }).pipe(
@@ -157,10 +166,10 @@ export class BackupService {
   ): Observable<boolean> {
     return from(
       Promise.all([
-        this.offlineStorage['setEntities']('expense', backup.data.expenses),
-        this.offlineStorage['setEntities']('category', backup.data.categories),
+        this.offlineStorage.setEntities('expense', backup.data.expenses),
+        this.offlineStorage.setEntities('category', backup.data.categories),
         backup.data.user
-          ? this.offlineStorage['setEntities']('user', [backup.data.user])
+          ? this.offlineStorage.setEntities('user', [backup.data.user])
           : Promise.resolve(),
         backup.data.settings
           ? this.saveSettings(backup.data.settings)
@@ -314,6 +323,198 @@ export class BackupService {
 
   private generateId(): string {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
+  }
+
+  /**
+   * Initialize auto backup functionality
+   */
+  private initAutoBackup(): void {
+    const autoBackupSettings = this.getAutoBackupSettings();
+    if (autoBackupSettings.enabled) {
+      this.scheduleAutoBackup();
+    }
+  }
+
+  /**
+   * Get auto backup settings
+   */
+  getAutoBackupSettings(): { enabled: boolean; frequency: number; lastBackup?: Date } {
+    const settings = this.storageService.get<{ enabled: boolean; frequency: number; lastBackup?: Date }>(this.AUTO_BACKUP_KEY);
+    return settings || { enabled: false, frequency: this.AUTO_BACKUP_INTERVAL };
+  }
+
+  /**
+   * Enable or disable auto backup
+   */
+  setAutoBackupEnabled(enabled: boolean, frequency?: number): void {
+    const settings = this.getAutoBackupSettings();
+    settings.enabled = enabled;
+    if (frequency) {
+      settings.frequency = frequency;
+    }
+    this.storageService.set(this.AUTO_BACKUP_KEY, settings);
+
+    if (enabled) {
+      this.scheduleAutoBackup();
+    } else {
+      this.cancelAutoBackup();
+    }
+  }
+
+  /**
+   * Schedule automatic backup
+   */
+  private scheduleAutoBackup(): void {
+    this.cancelAutoBackup(); // Clear any existing timer
+
+    const settings = this.getAutoBackupSettings();
+    const now = new Date().getTime();
+    const lastBackup = settings.lastBackup ? new Date(settings.lastBackup).getTime() : 0;
+    const timeSinceLastBackup = now - lastBackup;
+    const timeUntilNextBackup = Math.max(0, settings.frequency - timeSinceLastBackup);
+
+    this.autoBackupTimer = setTimeout(() => {
+      this.performAutoBackup();
+      // Schedule next backup
+      this.autoBackupTimer = setInterval(() => {
+        this.performAutoBackup();
+      }, settings.frequency);
+    }, timeUntilNextBackup);
+  }
+
+  /**
+   * Cancel scheduled auto backup
+   */
+  private cancelAutoBackup(): void {
+    if (this.autoBackupTimer) {
+      clearTimeout(this.autoBackupTimer);
+      clearInterval(this.autoBackupTimer);
+      this.autoBackupTimer = null;
+    }
+  }
+
+  /**
+   * Perform automatic backup
+   */
+  private performAutoBackup(): void {
+    this.createFullBackup(false).subscribe({
+      next: (backup) => {
+        // Save backup to local storage
+        const backupJson = JSON.stringify(backup, null, 2);
+        const blob = new Blob([backupJson], { type: 'application/json' });
+        
+        // Store in IndexedDB or localStorage
+        this.storageService.set('last_auto_backup', {
+          timestamp: new Date(),
+          size: blob.size,
+          data: backupJson
+        });
+
+        // Update last backup time
+        const settings = this.getAutoBackupSettings();
+        settings.lastBackup = new Date();
+        this.storageService.set(this.AUTO_BACKUP_KEY, settings);
+
+        // Upload to Google Drive if enabled
+        const driveSettings = this.getGoogleDriveSettings();
+        if (driveSettings.enabled && this.googleDriveService.isSignedIn()) {
+          const fileName = `auto-backup-${new Date().toISOString()}.json`;
+          this.googleDriveService.uploadBackup(fileName, backupJson).subscribe({
+            next: (file) => {
+              console.log('✅ Auto backup uploaded to Google Drive:', file.name);
+            },
+            error: (error) => {
+              console.error('❌ Failed to upload backup to Google Drive:', error);
+            }
+          });
+        }
+
+        console.log('✅ Auto backup completed successfully');
+      },
+      error: (error) => {
+        console.error('❌ Auto backup failed:', error);
+      }
+    });
+  }
+
+  /**
+   * Get last auto backup
+   */
+  getLastAutoBackup(): { timestamp: Date; size: number; data: string } | null {
+    return this.storageService.get('last_auto_backup') || null;
+  }
+
+  /**
+   * Get Google Drive backup settings
+   */
+  getGoogleDriveSettings(): { enabled: boolean; email?: string } {
+    const settings = this.storageService.get<{ enabled: boolean; email?: string }>(this.GOOGLE_DRIVE_SETTINGS_KEY);
+    return settings || { enabled: false };
+  }
+
+  /**
+   * Enable or disable Google Drive backup
+   */
+  setGoogleDriveEnabled(enabled: boolean): void {
+    const email = this.googleDriveService.getUserEmail();
+    this.storageService.set(this.GOOGLE_DRIVE_SETTINGS_KEY, {
+      enabled,
+      email: email || undefined
+    });
+  }
+
+  /**
+   * Initialize Google Drive
+   */
+  async initializeGoogleDrive(clientId: string): Promise<void> {
+    await this.googleDriveService.initializeGoogleDrive(clientId);
+  }
+
+  /**
+   * Sign in to Google Drive
+   */
+  async signInToGoogleDrive(): Promise<boolean> {
+    const success = await this.googleDriveService.signIn();
+    if (success) {
+      this.setGoogleDriveEnabled(true);
+    }
+    return success;
+  }
+
+  /**
+   * Sign out from Google Drive
+   */
+  async signOutFromGoogleDrive(): Promise<void> {
+    await this.googleDriveService.signOut();
+    this.setGoogleDriveEnabled(false);
+  }
+
+  /**
+   * Check if signed in to Google Drive
+   */
+  isSignedInToGoogleDrive(): boolean {
+    return this.googleDriveService.isSignedIn();
+  }
+
+  /**
+   * List backups from Google Drive
+   */
+  listGoogleDriveBackups(): Observable<any[]> {
+    return this.googleDriveService.listBackups();
+  }
+
+  /**
+   * Download backup from Google Drive
+   */
+  downloadGoogleDriveBackup(fileId: string): Observable<string> {
+    return this.googleDriveService.downloadBackup(fileId);
+  }
+
+  /**
+   * Delete backup from Google Drive
+   */
+  deleteGoogleDriveBackup(fileId: string): Observable<boolean> {
+    return this.googleDriveService.deleteBackup(fileId);
   }
 
   /**

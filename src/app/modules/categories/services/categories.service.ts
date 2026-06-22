@@ -1,16 +1,18 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 import { Category } from 'src/app/shared/models';
 import { CategoryParams } from '../models';
 import { ApiService } from 'src/app/core/services';
+import { OfflineStorageService } from 'src/app/core/services/offline-storage.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CategoryService {
   private apiService = inject(ApiService);
+  private offlineStorage = inject(OfflineStorageService);
 
   getCategories(params: CategoryParams, forceRefresh = false): Observable<{ data: Category[]; total: number }> {
     let httpParams = new HttpParams()
@@ -34,6 +36,13 @@ export class CategoryService {
     return this.apiService.get<{ data: Category[]; total: number }>(
       '/categories/list',
       httpParams
+    ).pipe(
+      tap(response => {
+        // Save categories to offline storage for backup
+        if (response?.data && response.data.length > 0) {
+          this.offlineStorage.setEntities('category', response.data as any[]);
+        }
+      })
     );
   }
 
@@ -42,7 +51,12 @@ export class CategoryService {
   }
 
   createCategory(categoryData: Partial<Category>): Observable<Category> {
-    return this.apiService.post<Category>('/categories/create', categoryData);
+    return this.apiService.post<Category>('/categories/create', categoryData).pipe(
+      tap(category => {
+        // Save to offline storage
+        this.offlineStorage.saveEntity('category', category as any).subscribe();
+      })
+    );
   }
 
   updateCategory(
@@ -52,6 +66,11 @@ export class CategoryService {
     return this.apiService.put<Category>(
       `/categories/update/${id}`,
       categoryData
+    ).pipe(
+      tap(category => {
+        // Update in offline storage
+        this.offlineStorage.saveEntity('category', category as any).subscribe();
+      })
     );
   }
 

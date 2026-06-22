@@ -19,6 +19,12 @@ export const environment = {
       '358709669585-0td9nf2p58ncgtoreopgqkq7vosco473.apps.googleusercontent.com',
   },
 
+  // Google Drive for Backup
+  // يمكنك استخدام نفس webClientId أو إنشاء Client ID منفصل
+  // إذا استخدمت نفسه، تأكد من إضافة scope: 'https://www.googleapis.com/auth/drive.file'
+  // Follow instructions in GOOGLE_DRIVE_SETUP.md
+  googleDriveClientId: '358709669585-0td9nf2p58ncgtoreopgqkq7vosco473.apps.googleusercontent.com',
+
   // Feature flags
   features: {
     expenses: {

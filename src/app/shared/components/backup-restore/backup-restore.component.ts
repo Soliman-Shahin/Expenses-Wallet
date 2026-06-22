@@ -1,4 +1,5 @@
 import { Component, ChangeDetectionStrategy, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { AlertController } from '@ionic/angular';
 import {
   BackupService,
   BackupMetadata,
@@ -16,14 +17,124 @@ export class BackupRestoreComponent extends BaseComponent implements OnInit {
 
   backupHistory: BackupMetadata[] = [];
   loadingMessage = '';
+  autoBackupEnabled = false;
+  autoBackupFrequency = 24; // hours
+  lastAutoBackup: { timestamp: Date; size: number } | null = null;
+  
+  // Google Drive
+  googleDriveEnabled = false;
+  googleDriveEmail: string | null = null;
+  isSignedInToGoogleDrive = false;
 
-  constructor(private backupService: BackupService) {
+  constructor(
+    private backupService: BackupService,
+    private alertController: AlertController
+  ) {
     super();
   }
 
   override ngOnInit() {
     super.ngOnInit();
     this.loadHistory();
+    this.loadAutoBackupSettings();
+    this.loadGoogleDriveSettings();
+  }
+
+  loadAutoBackupSettings() {
+    const settings = this.backupService.getAutoBackupSettings();
+    this.autoBackupEnabled = settings.enabled;
+    this.autoBackupFrequency = settings.frequency / (60 * 60 * 1000); // Convert ms to hours
+    
+    const lastBackup = this.backupService.getLastAutoBackup();
+    if (lastBackup) {
+      this.lastAutoBackup = {
+        timestamp: new Date(lastBackup.timestamp),
+        size: lastBackup.size
+      };
+    }
+  }
+
+  toggleAutoBackup(event: any) {
+    this.autoBackupEnabled = event.detail.checked;
+    const frequencyMs = this.autoBackupFrequency * 60 * 60 * 1000; // Convert hours to ms
+    this.backupService.setAutoBackupEnabled(this.autoBackupEnabled, frequencyMs);
+    
+    if (this.autoBackupEnabled) {
+      this.toastService.presentSuccessToast(
+        'bottom',
+        this.translateService.instant('BACKUP.AUTO_BACKUP_ENABLED')
+      );
+    } else {
+      this.toastService.presentInfoToast(
+        'bottom',
+        this.translateService.instant('BACKUP.AUTO_BACKUP_DISABLED')
+      );
+    }
+  }
+
+  updateAutoBackupFrequency(event: any) {
+    this.autoBackupFrequency = event.detail.value;
+    if (this.autoBackupEnabled) {
+      const frequencyMs = this.autoBackupFrequency * 60 * 60 * 1000;
+      this.backupService.setAutoBackupEnabled(true, frequencyMs);
+    }
+  }
+
+  loadGoogleDriveSettings() {
+    const settings = this.backupService.getGoogleDriveSettings();
+    this.googleDriveEnabled = settings.enabled;
+    this.googleDriveEmail = settings.email || null;
+    this.isSignedInToGoogleDrive = this.backupService.isSignedInToGoogleDrive();
+  }
+
+  async toggleGoogleDrive(event: any) {
+    const enabled = event.detail.checked;
+    
+    if (enabled) {
+      // Sign in to Google Drive
+      const loadingMsg = this.translateService.instant('BACKUP.CONNECTING_GOOGLE_DRIVE');
+      this.loadingService.show(loadingMsg);
+      
+      try {
+        const success = await this.backupService.signInToGoogleDrive();
+        if (success) {
+          this.googleDriveEnabled = true;
+          this.isSignedInToGoogleDrive = true;
+          this.googleDriveEmail = this.backupService.getGoogleDriveSettings().email || null;
+          
+          this.toastService.presentSuccessToast(
+            'bottom',
+            this.translateService.instant('BACKUP.GOOGLE_DRIVE_CONNECTED')
+          );
+        } else {
+          this.googleDriveEnabled = false;
+          this.toastService.presentErrorToast(
+            'bottom',
+            this.translateService.instant('BACKUP.GOOGLE_DRIVE_FAILED')
+          );
+        }
+      } catch (error) {
+        console.error('Error connecting to Google Drive:', error);
+        this.googleDriveEnabled = false;
+        this.toastService.presentErrorToast(
+          'bottom',
+          this.translateService.instant('BACKUP.GOOGLE_DRIVE_FAILED')
+        );
+      } finally {
+        this.loadingService.hide(loadingMsg);
+      }
+    } else {
+      // Sign out from Google Drive
+      await this.backupService.signOutFromGoogleDrive();
+      this.googleDriveEnabled = false;
+      this.isSignedInToGoogleDrive = false;
+      this.googleDriveEmail = null;
+      
+      this.toastService.presentInfoToast(
+        'bottom',
+        this.translateService.instant('BACKUP.GOOGLE_DRIVE_DISCONNECTED')
+      );
+    }
   }
 
   loadHistory() {
@@ -31,34 +142,31 @@ export class BackupRestoreComponent extends BaseComponent implements OnInit {
   }
 
   async createBackup() {
-    const alert = await this.modalCtrl.create({
-      component: 'ion-alert',
+    const alert = await this.alertController.create({
+      header: this.translateService.instant('BACKUP.CREATE_ALERT_TITLE'),
+      message: this.translateService.instant('BACKUP.CREATE_ALERT_MSG'),
       cssClass: 'custom-alert',
-      componentProps: {
-        header: this.translateService.instant('BACKUP.CREATE_ALERT_TITLE'),
-        message: this.translateService.instant('BACKUP.CREATE_ALERT_MSG'),
-        inputs: [
-          {
-            name: 'password',
-            type: 'password',
-            placeholder: this.translateService.instant(
-              'BACKUP.PASSWORD_PLACEHOLDER'
-            ),
+      inputs: [
+        {
+          name: 'password',
+          type: 'password',
+          placeholder: this.translateService.instant(
+            'BACKUP.PASSWORD_PLACEHOLDER'
+          ),
+        },
+      ],
+      buttons: [
+        {
+          text: this.translateService.instant('COMMON.CANCEL'),
+          role: 'cancel',
+        },
+        {
+          text: this.translateService.instant('COMMON.CREATE'),
+          handler: (data: any) => {
+            this.performBackup(!!data.password, data.password);
           },
-        ],
-        buttons: [
-          {
-            text: this.translateService.instant('COMMON.CANCEL'),
-            role: 'cancel',
-          },
-          {
-            text: this.translateService.instant('COMMON.CREATE'),
-            handler: (data: any) => {
-              this.performBackup(!!data.password, data.password);
-            },
-          },
-        ],
-      },
+        },
+      ],
     });
 
     await alert.present();
@@ -133,24 +241,10 @@ export class BackupRestoreComponent extends BaseComponent implements OnInit {
 
       if (backupData.encrypted) {
         // For encrypted backup, show password prompt
-        this.toastService.presentInfoToast(
-          'bottom',
-          this.translateService.instant('BACKUP.DECRYPT_ALERT_MSG')
-        );
-        // TODO: Implement proper password dialog
-        const password = prompt(
-          this.translateService.instant('BACKUP.PASSWORD_PLACEHOLDER')
-        );
-        if (password) {
-          await this.performRestore(content, password);
-        }
+        await this.showPasswordPrompt(content);
       } else {
         // For unencrypted backup, ask for confirmation
-        if (
-          confirm(this.translateService.instant('BACKUP.RESTORE_CONFIRM_MSG'))
-        ) {
-          await this.performRestore(content);
-        }
+        await this.showRestoreConfirmation(content);
       }
     } catch (error) {
       this.toastService.presentErrorToast(
@@ -214,5 +308,67 @@ export class BackupRestoreComponent extends BaseComponent implements OnInit {
 
   formatSize(bytes: number): string {
     return this.backupService.formatFileSize(bytes);
+  }
+
+  private async showPasswordPrompt(content: string) {
+    const alert = await this.alertController.create({
+      header: this.translateService.instant('BACKUP.DECRYPT_ALERT_TITLE'),
+      message: this.translateService.instant('BACKUP.DECRYPT_ALERT_MSG'),
+      cssClass: 'custom-alert',
+      inputs: [
+        {
+          name: 'password',
+          type: 'password',
+          placeholder: this.translateService.instant(
+            'BACKUP.PASSWORD_PLACEHOLDER'
+          ),
+        },
+      ],
+      buttons: [
+        {
+          text: this.translateService.instant('COMMON.CANCEL'),
+          role: 'cancel',
+        },
+        {
+          text: this.translateService.instant('COMMON.RESTORE'),
+          handler: (data: any) => {
+            if (data.password) {
+              this.performRestore(content, data.password);
+              return true;
+            } else {
+              this.toastService.presentWarningToast(
+                'bottom',
+                this.translateService.instant('BACKUP.PASSWORD_REQUIRED')
+              );
+              return false;
+            }
+          },
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+
+  private async showRestoreConfirmation(content: string) {
+    const alert = await this.alertController.create({
+      header: this.translateService.instant('BACKUP.RESTORE_CONFIRM_TITLE'),
+      message: this.translateService.instant('BACKUP.RESTORE_CONFIRM_MSG'),
+      cssClass: 'custom-alert',
+      buttons: [
+        {
+          text: this.translateService.instant('COMMON.CANCEL'),
+          role: 'cancel',
+        },
+        {
+          text: this.translateService.instant('COMMON.RESTORE'),
+          handler: () => {
+            this.performRestore(content);
+          },
+        },
+      ],
+    });
+
+    await alert.present();
   }
 }

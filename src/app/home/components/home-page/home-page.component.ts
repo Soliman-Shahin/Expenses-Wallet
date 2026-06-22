@@ -149,10 +149,17 @@ export class HomePageComponent
     super();
   }
 
-  // Reactive month selection for totals
-  private readonly monthSelection$ = new BehaviorSubject<MonthYear>(
+  // Reactive month selection for Summary tab (current month only)
+  private readonly summaryMonthSelection$ = new BehaviorSubject<MonthYear>(
     this.selectedMonth
   );
+
+  // Reactive month selection for Charts tab (supports custom date ranges)
+  private readonly chartsMonthSelection$ = new BehaviorSubject<MonthYear>({
+    ...this.selectedMonth,
+    startDate: new Date(new Date().getFullYear(), new Date().getMonth() - 6, new Date().getDate()).toISOString(),
+    endDate: new Date().toISOString()
+  });
 
   private readonly dashboard = inject(DashboardFacade);
 
@@ -180,15 +187,59 @@ export class HomePageComponent
     shareReplay(1)
   );
 
+  // Totals for Summary tab (always current month)
   private readonly totalsByMonth$ = combineLatest([
-    this.monthSelection$,
+    this.summaryMonthSelection$,
     this.dashboardProfile$,
   ]).pipe(
     switchMap(([month, profile]) => {
       if (!profile) {
         return of({ income: 0, expenses: 0, balance: 0 });
       }
-      return this.dashboard.totalsForMonth(month.month, month.year).pipe(
+      
+      // Summary tab always uses month/year (no custom ranges)
+      const totals$ = this.dashboard.totalsForMonth(month.month, month.year);
+      
+      return totals$.pipe(
+        map((totals) => {
+          const base = totals ?? { income: 0, expenses: 0, balance: 0 };
+          const salaryDetails = Array.isArray(profile?.salary)
+            ? profile.salary
+            : [];
+          const totalSalary = salaryDetails.reduce(
+            (sum, item) => sum + (Number(item?.amount) || 0),
+            0
+          );
+
+          if ((base.income ?? 0) === 0 && totalSalary > 0) {
+            const income = totalSalary;
+            const expenses = base.expenses ?? 0;
+            return { income, expenses, balance: income - expenses };
+          }
+          return base;
+        })
+      );
+    }),
+    catchError(() => of({ income: 0, expenses: 0, balance: 0 })),
+    shareReplay(1)
+  );
+
+  // Totals for Charts tab (supports custom date ranges)
+  private readonly totalsByCharts$ = combineLatest([
+    this.chartsMonthSelection$,
+    this.dashboardProfile$,
+  ]).pipe(
+    switchMap(([month, profile]) => {
+      if (!profile) {
+        return of({ income: 0, expenses: 0, balance: 0 });
+      }
+      
+      // Use custom date range if provided, otherwise use month/year
+      const totals$ = month.startDate && month.endDate
+        ? this.dashboard.totalsForRange(new Date(month.startDate), new Date(month.endDate))
+        : this.dashboard.totalsForMonth(month.month, month.year);
+      
+      return totals$.pipe(
         map((totals) => {
           const base = totals ?? { income: 0, expenses: 0, balance: 0 };
           const salaryDetails = Array.isArray(profile?.salary)
@@ -213,12 +264,16 @@ export class HomePageComponent
   );
 
   private readonly expenseByCategoryByMonth$ = combineLatest([
-    this.monthSelection$,
+    this.chartsMonthSelection$,
     this.dashboardProfile$,
   ]).pipe(
     switchMap(([m, profile]) => {
       if (!profile) {
         return of([]);
+      }
+      // Use custom date range if provided
+      if (m.startDate && m.endDate) {
+        return this.dashboard.expenseByCategoryForRange(new Date(m.startDate), new Date(m.endDate));
       }
       return this.dashboard.expenseByCategoryForMonth(m.month, m.year);
     }),
@@ -227,21 +282,25 @@ export class HomePageComponent
   );
 
   private readonly monthlyExpensesByMonth$ = combineLatest([
-    this.monthSelection$,
+    this.chartsMonthSelection$,
     this.dashboardProfile$,
   ]).pipe(
     switchMap(([m, profile]) => {
       if (!profile) {
         return of([]);
       }
+      // Use custom date range if provided
+      if (m.startDate && m.endDate) {
+        return this.dashboard.monthlyExpensesForRange(new Date(m.startDate), new Date(m.endDate));
+      }
       return this.dashboard.monthlyExpensesForMonth(m.month, m.year);
     }),
     catchError(() => of([])),
     startWith([])
   );
-  // Derive income vs expenses for the selected month from totalsByMonth$
+  // Derive income vs expenses for Charts tab from totalsByCharts$
   private readonly incomeVsExpenseByMonth$ = combineLatest([
-    this.totalsByMonth$,
+    this.totalsByCharts$,
     this.translateService.onLangChange.pipe(
       startWith({ lang: this.translateService.currentLang })
     ),
@@ -351,8 +410,8 @@ export class HomePageComponent
    */
   onMonthChange(monthYear: MonthYear): void {
     this.selectedMonth = monthYear;
-    // Notify reactive totals stream
-    this.monthSelection$.next(monthYear);
+    // Notify Summary tab stream only
+    this.summaryMonthSelection$.next(monthYear);
   }
 
   /**
@@ -368,9 +427,42 @@ export class HomePageComponent
    * Handles date range change from the selector
    */
   onRangeChange(range: DateRange): void {
+    // Save the selected range so it persists when switching tabs
     this.selectedRange = range;
-    // TODO: Wire up data fetching based on the new range
-    // Future implementation will handle data fetching for the selected range.
+    
+    // Calculate date range based on selection
+    const now = new Date();
+    let startDate: Date;
+    
+    switch (range) {
+      case '1m':
+        // Last 1 month
+        startDate = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+        break;
+      case '6m':
+        // Last 6 months
+        startDate = new Date(now.getFullYear(), now.getMonth() - 6, now.getDate());
+        break;
+      case '1y':
+        // Last 1 year
+        startDate = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+        break;
+      case 'all':
+      default:
+        // All time - use a very old date
+        startDate = new Date(2020, 0, 1);
+        break;
+    }
+    
+    // Update the Charts tab selection to trigger data refresh
+    // This will cause the charts to update with the new date range
+    this.chartsMonthSelection$.next({
+      month: now.getMonth() + 1,
+      year: now.getFullYear(),
+      startDate: startDate.toISOString(),
+      endDate: now.toISOString()
+    });
+    
     this.cdr.markForCheck();
   }
 
@@ -428,7 +520,10 @@ export class HomePageComponent
 
   // Retry handler from template: re-emit current month to refresh streams
   retry(): void {
-    this.monthSelection$.next({ ...this.selectedMonth });
+    this.summaryMonthSelection$.next({ ...this.selectedMonth });
+    // Also refresh charts with current selection
+    const currentCharts = this.chartsMonthSelection$.getValue();
+    this.chartsMonthSelection$.next({ ...currentCharts });
   }
 
   private isOpeningModal = false;
@@ -459,12 +554,15 @@ export class HomePageComponent
 
   // Refresh data method
   private refreshData(): void {
-    // Trigger data refresh by re-emitting current month
+    // Trigger data refresh by re-emitting current month for Summary
     // Create new object to trigger change detection
-    this.monthSelection$.next({ 
+    this.summaryMonthSelection$.next({ 
       month: this.selectedMonth.month,
       year: this.selectedMonth.year
     });
+    // Also refresh charts with current selection
+    const currentCharts = this.chartsMonthSelection$.getValue();
+    this.chartsMonthSelection$.next({ ...currentCharts });
 
     // Also refresh transactions component if available
     if (this.transactionsComponent) {

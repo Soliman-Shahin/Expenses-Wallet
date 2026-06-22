@@ -190,7 +190,7 @@
           <!-- ── Charts Tab ── -->
           <ng-container *ngIf="activeTab === 'charts'">
             <div class="tab-content" [@tabAnimation]>
-              <app-date-range-selector (rangeChange)="onRangeChange($event)"></app-date-range-selector>
+              <app-date-range-selector [selectedRange]="selectedRange" (rangeChange)="onRangeChange($event)"></app-date-range-selector>
 
               <section class="card-section charts-card" role="region" [attr.aria-label]="'HOME.CHARTS' | translate">
                 <app-section-header icon="analytics-outline" [title]="'HOME.CHARTS' | translate"></app-section-header>

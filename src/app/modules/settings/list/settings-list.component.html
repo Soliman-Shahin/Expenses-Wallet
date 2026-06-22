@@ -1,29 +1,227 @@
-<ion-header mode="ios" class="settings-ion-header">
+<ion-header mode="ios" class="settings-header">
   <ion-toolbar>
     <ion-title>{{ "SIDEBAR.SETTINGS" | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
-<ion-content class="ion-padding">
-  <!-- Sync Status Component -->
-  <app-sync-status></app-sync-status>
 
-  <!-- Biometric Settings -->
-  <ion-list *ngIf="biometricAvailable" inset="true" class="settings-list">
-    <ion-item lines="none">
-      <ion-icon
-        slot="start"
-        name="finger-print-outline"
-        color="primary"
-      ></ion-icon>
-      <ion-label>
-        <h2>{{ "SETTINGS.BIOMETRIC" | translate }}</h2>
-        <p>{{ "SETTINGS.BIOMETRIC_DESC" | translate }}</p>
-      </ion-label>
-      <ion-toggle
-        slot="end"
-        [checked]="biometricEnabled"
-        (ionChange)="toggleBiometric($event)"
-      ></ion-toggle>
-    </ion-item>
-  </ion-list>
+<ion-content class="settings-content">
+  <div class="settings-container">
+    <!-- General Settings Section -->
+    <div class="settings-section">
+      <div class="section-header">
+        <ion-icon name="settings-outline" class="section-icon"></ion-icon>
+        <h2 class="section-title">{{ "SETTINGS.GENERAL" | translate }}</h2>
+      </div>
+
+      <ion-list class="settings-list" lines="none">
+        <!-- Language Setting -->
+        <ion-item class="setting-item">
+          <ion-icon
+            slot="start"
+            name="language-outline"
+            color="primary"
+          ></ion-icon>
+          <ion-label>
+            <h3>{{ "SETTINGS.LANGUAGE" | translate }}</h3>
+            <p>{{ "SETTINGS.LANGUAGE_DESC" | translate }}</p>
+          </ion-label>
+          <ion-select
+            slot="end"
+            [value]="currentLanguage"
+            (ionChange)="onLanguageChange($event)"
+            interface="popover"
+            class="language-select"
+          >
+            <ion-select-option
+              *ngFor="let lang of languages"
+              [value]="lang.code"
+            >
+              {{ lang.flag }} {{ lang.name }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <!-- Theme Setting -->
+        <ion-item class="setting-item">
+          <ion-icon
+            slot="start"
+            name="contrast-outline"
+            color="primary"
+          ></ion-icon>
+          <ion-label>
+            <h3>{{ "SETTINGS.THEME" | translate }}</h3>
+            <p>{{ "SETTINGS.THEME_DESC" | translate }}</p>
+          </ion-label>
+          <ion-select
+            slot="end"
+            [value]="selectedTheme"
+            (ionChange)="onThemeChange($event)"
+            interface="popover"
+            class="theme-select"
+          >
+            <ion-select-option
+              *ngFor="let theme of themes"
+              [value]="theme.value"
+            >
+              <ion-icon [name]="theme.icon"></ion-icon>
+              {{ theme.label | translate }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <!-- Notifications Setting -->
+        <ion-item class="setting-item">
+          <ion-icon
+            slot="start"
+            name="notifications-outline"
+            color="primary"
+          ></ion-icon>
+          <ion-label>
+            <h3>{{ "SETTINGS.NOTIFICATIONS" | translate }}</h3>
+            <p>{{ "SETTINGS.NOTIFICATIONS_DESC" | translate }}</p>
+          </ion-label>
+          <ion-toggle
+            slot="end"
+            [checked]="notificationsEnabled"
+            (ionChange)="toggleNotifications($event)"
+            color="success"
+          ></ion-toggle>
+        </ion-item>
+      </ion-list>
+    </div>
+
+    <!-- Security Section -->
+    <div class="settings-section" *ngIf="biometricAvailable">
+      <div class="section-header">
+        <ion-icon
+          name="shield-checkmark-outline"
+          class="section-icon"
+        ></ion-icon>
+        <h2 class="section-title">{{ "SETTINGS.SECURITY" | translate }}</h2>
+      </div>
+
+      <ion-list class="settings-list" lines="none">
+        <!-- Biometric Settings -->
+        <ion-item class="setting-item">
+          <ion-icon
+            slot="start"
+            name="finger-print-outline"
+            color="primary"
+          ></ion-icon>
+          <ion-label>
+            <h3>{{ "SETTINGS.BIOMETRIC" | translate }}</h3>
+            <p>{{ "SETTINGS.BIOMETRIC_DESC" | translate }}</p>
+          </ion-label>
+          <ion-toggle
+            slot="end"
+            [checked]="biometricEnabled"
+            (ionChange)="toggleBiometric($event)"
+            color="success"
+          ></ion-toggle>
+        </ion-item>
+      </ion-list>
+    </div>
+
+    <!-- Data & Backup Section -->
+    <div class="settings-section">
+      <div class="section-header">
+        <ion-icon name="cloud-upload-outline" class="section-icon"></ion-icon>
+        <h2 class="section-title">{{ "SETTINGS.DATA_BACKUP" | translate }}</h2>
+      </div>
+
+      <ion-list class="settings-list" lines="none">
+        <!-- Auto Backup Setting -->
+        <ion-item class="setting-item">
+          <ion-icon slot="start" name="save-outline" color="primary"></ion-icon>
+          <ion-label>
+            <h3>{{ "SETTINGS.AUTO_BACKUP" | translate }}</h3>
+            <p>{{ "SETTINGS.AUTO_BACKUP_DESC" | translate }}</p>
+          </ion-label>
+          <ion-toggle
+            slot="end"
+            [checked]="autoBackupEnabled"
+            (ionChange)="toggleAutoBackup($event)"
+            color="success"
+          ></ion-toggle>
+        </ion-item>
+
+        <!-- Backup & Restore Button -->
+        <ion-item
+          class="setting-item action-item"
+          button
+          (click)="navigateToBackup()"
+        >
+          <ion-icon
+            slot="start"
+            name="archive-outline"
+            color="primary"
+          ></ion-icon>
+          <ion-label>
+            <h3>{{ "SETTINGS.BACKUP_RESTORE" | translate }}</h3>
+            <p>{{ "SETTINGS.BACKUP_RESTORE_DESC" | translate }}</p>
+          </ion-label>
+          <ion-icon
+            slot="end"
+            name="chevron-forward-outline"
+            class="chevron-icon"
+          ></ion-icon>
+        </ion-item>
+
+        <!-- Sync Settings Button -->
+        <ion-item
+          class="setting-item action-item"
+          button
+          (click)="navigateToSync()"
+        >
+          <ion-icon slot="start" name="sync-outline" color="primary"></ion-icon>
+          <ion-label>
+            <h3>{{ "SETTINGS.SYNC_SETTINGS" | translate }}</h3>
+            <p>{{ "SETTINGS.SYNC_SETTINGS_DESC" | translate }}</p>
+          </ion-label>
+          <ion-icon
+            slot="end"
+            name="chevron-forward-outline"
+            class="chevron-icon"
+          ></ion-icon>
+        </ion-item>
+      </ion-list>
+    </div>
+
+    <!-- Advanced Section -->
+    <div class="settings-section">
+      <div class="section-header">
+        <ion-icon name="construct-outline" class="section-icon"></ion-icon>
+        <h2 class="section-title">{{ "SETTINGS.ADVANCED" | translate }}</h2>
+      </div>
+
+      <ion-list class="settings-list" lines="none">
+        <!-- Clear Cache Button -->
+        <ion-item
+          class="setting-item action-item"
+          button
+          (click)="clearCache()"
+        >
+          <ion-icon slot="start" name="trash-outline" color="danger"></ion-icon>
+          <ion-label>
+            <h3>{{ "SETTINGS.CLEAR_CACHE" | translate }}</h3>
+            <p>{{ "SETTINGS.CLEAR_CACHE_DESC" | translate }}</p>
+          </ion-label>
+          <ion-icon
+            slot="end"
+            name="chevron-forward-outline"
+            class="chevron-icon"
+          ></ion-icon>
+        </ion-item>
+      </ion-list>
+    </div>
+
+    <!-- App Info Section -->
+    <div class="settings-section app-info">
+      <div class="info-content">
+        <ion-icon name="wallet-outline" class="app-icon"></ion-icon>
+        <h3 class="app-name">Expenses Wallet</h3>
+        <p class="app-version">{{ "SETTINGS.VERSION" | translate }}: 1.0.0</p>
+      </div>
+    </div>
+  </div>
 </ion-content>

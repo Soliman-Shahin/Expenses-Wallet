@@ -4,6 +4,67 @@
     <p>{{ "BACKUP.SUBTITLE" | translate }}</p>
   </div>
 
+  <!-- Google Drive Section -->
+  <div class="google-drive-section">
+    <div class="section-header">
+      <div class="header-content">
+        <ion-icon name="logo-google"></ion-icon>
+        <div>
+          <h3>{{ "BACKUP.GOOGLE_DRIVE" | translate }}</h3>
+          <p>{{ "BACKUP.GOOGLE_DRIVE_DESC" | translate }}</p>
+          <span class="email-badge" *ngIf="googleDriveEmail">{{ googleDriveEmail }}</span>
+        </div>
+      </div>
+      <ion-toggle
+        [checked]="googleDriveEnabled"
+        (ionChange)="toggleGoogleDrive($event)"
+      ></ion-toggle>
+    </div>
+  </div>
+
+  <!-- Auto Backup Section -->
+  <div class="auto-backup-section">
+    <div class="section-header">
+      <div class="header-content">
+        <ion-icon name="sync-outline"></ion-icon>
+        <div>
+          <h3>{{ "BACKUP.AUTO_BACKUP" | translate }}</h3>
+          <p>{{ "BACKUP.AUTO_BACKUP_DESC" | translate }}</p>
+        </div>
+      </div>
+      <ion-toggle
+        [checked]="autoBackupEnabled"
+        (ionChange)="toggleAutoBackup($event)"
+      ></ion-toggle>
+    </div>
+
+    <div class="auto-backup-settings" *ngIf="autoBackupEnabled">
+      <div class="setting-item">
+        <label>{{ "BACKUP.FREQUENCY" | translate }}</label>
+        <ion-select
+          [value]="autoBackupFrequency"
+          (ionChange)="updateAutoBackupFrequency($event)"
+          interface="popover"
+        >
+          <ion-select-option [value]="6">{{ "BACKUP.EVERY_6_HOURS" | translate }}</ion-select-option>
+          <ion-select-option [value]="12">{{ "BACKUP.EVERY_12_HOURS" | translate }}</ion-select-option>
+          <ion-select-option [value]="24">{{ "BACKUP.EVERY_24_HOURS" | translate }}</ion-select-option>
+          <ion-select-option [value]="48">{{ "BACKUP.EVERY_48_HOURS" | translate }}</ion-select-option>
+          <ion-select-option [value]="168">{{ "BACKUP.EVERY_WEEK" | translate }}</ion-select-option>
+        </ion-select>
+      </div>
+
+      <div class="last-backup-info" *ngIf="lastAutoBackup">
+        <ion-icon name="checkmark-circle-outline"></ion-icon>
+        <div>
+          <span class="label">{{ "BACKUP.LAST_AUTO_BACKUP" | translate }}:</span>
+          <span class="value">{{ lastAutoBackup.timestamp | date: 'short' }}</span>
+          <span class="size">({{ formatSize(lastAutoBackup.size) }})</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="actions-grid">
     <div class="action-card create" (click)="createBackup()">
       <div class="icon-box">

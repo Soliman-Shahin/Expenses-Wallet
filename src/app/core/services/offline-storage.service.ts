@@ -78,6 +78,13 @@ export class OfflineStorageService {
   }
 
   /**
+   * Get all entities including deleted ones (for backup purposes)
+   */
+  getAllEntitiesForBackup<T extends SyncEntity>(entityType: string): Observable<T[]> {
+    return from(this.getEntitiesSync<T>(entityType));
+  }
+
+  /**
    * Replace all entities of a specific type (used during sync pull)
    */
   replaceEntities<T extends SyncEntity>(entityType: string, entities: T[]): Observable<boolean> {
@@ -273,7 +280,10 @@ export class OfflineStorageService {
     return keyMap[entityType] || `offline_${entityType}`;
   }
 
-  private setEntities<T>(entityType: string, entities: T[]): Promise<void> {
+  /**
+   * Set all entities of a specific type (public for backup/restore)
+   */
+  setEntities<T>(entityType: string, entities: T[]): Promise<void> {
     return new Promise((resolve) => {
       try {
         const key = this.getStorageKey(entityType);

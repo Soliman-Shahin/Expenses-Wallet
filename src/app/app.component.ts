@@ -6,6 +6,8 @@ import { TranslateService } from '@ngx-translate/core';
 import { OnboardingService } from './core/services/onboarding.service';
 import { BiometricService } from './core/services/biometric.service';
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
+import { BackupService } from './core/services/backup.service';
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-root',
@@ -21,7 +23,8 @@ export class AppComponent extends BaseComponent implements OnInit {
     private translate: TranslateService,
     private directionService: DirectionService,
     public onboardingService: OnboardingService,
-    private biometricService: BiometricService
+    private biometricService: BiometricService,
+    private backupService: BackupService
   ) {
     super();
     this.translate.setDefaultLang('en');
@@ -33,6 +36,9 @@ export class AppComponent extends BaseComponent implements OnInit {
 
     // Initialize GoogleAuth for web/development
     this.initializeGoogleAuth();
+
+    // Initialize Google Drive for Backup
+    this.initializeGoogleDrive();
 
     // Check biometric on startup
     this.checkBiometric();
@@ -111,6 +117,19 @@ export class AppComponent extends BaseComponent implements OnInit {
       console.log('✅ GoogleAuth initialized successfully');
     } catch (error) {
       console.warn('⚠️ GoogleAuth initialization failed (normal on native):', error);
+    }
+  }
+
+  private async initializeGoogleDrive() {
+    try {
+      if (environment.googleDriveClientId && environment.googleDriveClientId !== 'YOUR_CLIENT_ID_HERE.apps.googleusercontent.com') {
+        await this.backupService.initializeGoogleDrive(environment.googleDriveClientId);
+        console.log('✅ Google Drive initialized successfully');
+      } else {
+        console.warn('⚠️ Google Drive Client ID not configured. Please add it to environment files.');
+      }
+    } catch (error) {
+      console.error('❌ Failed to initialize Google Drive:', error);
     }
   }
 

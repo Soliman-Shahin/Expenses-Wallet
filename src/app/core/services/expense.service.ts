@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError, shareReplay, tap } from 'rxjs/operators';
+import { catchError, shareReplay, tap, switchMap } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { Expense } from 'src/app/shared/models/expense.model';
 import { AuthService } from 'src/app/modules/auth/services/auth.service';
+import { OfflineStorageService } from './offline-storage.service';
 
 @Injectable({
   providedIn: 'root',
@@ -19,7 +20,11 @@ export class ExpenseService {
     Observable<{ income: number; expenses: number }>
   >();
 
-  constructor(private apiService: ApiService, private auth: AuthService) {
+  constructor(
+    private apiService: ApiService,
+    private auth: AuthService,
+    private offlineStorage: OfflineStorageService
+  ) {
     // Clear caches when auth user changes (login/logout) to avoid stale/unauthenticated results
     this.auth.userChanges.subscribe(() => {
       this.expensesCache$ = null;
@@ -50,6 +55,12 @@ export class ExpenseService {
       this.expensesCache$ = this.apiService
         .get<Expense[]>(this.endpoint)
         .pipe(
+          tap(expenses => {
+            // Save to offline storage for backup
+            if (expenses && expenses.length > 0) {
+              this.offlineStorage.setEntities('expense', expenses as any[]);
+            }
+          }),
           catchError((error: unknown) => {
             this.expensesCache$ = null;
             return throwError(() => error);
@@ -67,18 +78,22 @@ export class ExpenseService {
 
   createExpense(expense: Partial<Expense>): Observable<Expense> {
     return this.apiService.post<Expense>(`${this.endpoint}`, expense).pipe(
-      tap(() => {
+      tap(createdExpense => {
         this.expensesCache$ = null;
         this.totalsCache.clear();
+        // Save to offline storage
+        this.offlineStorage.saveEntity('expense', createdExpense as any).subscribe();
       })
     );
   }
 
   updateExpense(id: string, expense: Partial<Expense>): Observable<Expense> {
     return this.apiService.put<Expense>(`${this.endpoint}/${id}`, expense).pipe(
-      tap(() => {
+      tap(updatedExpense => {
         this.expensesCache$ = null;
         this.totalsCache.clear();
+        // Update in offline storage
+        this.offlineStorage.saveEntity('expense', updatedExpense as any).subscribe();
       })
     );
   }
