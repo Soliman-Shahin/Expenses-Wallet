@@ -79,8 +79,21 @@ export class SyncService {
   // ==================== INITIALIZATION ====================
 
   constructor() {
+    this.loadConfig();
     this.initializeNetworkMonitoring();
     this.initializeAutoSync();
+  }
+
+  private async loadConfig() {
+    try {
+      const stored = localStorage.getItem('sync_config');
+      if (stored) {
+        this.syncConfig = { ...this.syncConfig, ...JSON.parse(stored) };
+        console.log('⚙️ Loaded sync config:', this.syncConfig);
+      }
+    } catch (e) {
+      console.warn('Could not load sync config', e);
+    }
   }
 
   /**
@@ -485,10 +498,13 @@ export class SyncService {
 
   updateConfig(config: Partial<SyncConfig>): void {
     this.syncConfig = { ...this.syncConfig, ...config };
+    localStorage.setItem('sync_config', JSON.stringify(this.syncConfig));
     console.log('⚙️ Sync config updated:', this.syncConfig);
   }
 
   getConfig(): SyncConfig {
+    // Try to load from storage if needed, but for now we just return the in-memory one
+    // Let's assume it's loaded during initialization.
     return { ...this.syncConfig };
   }
 

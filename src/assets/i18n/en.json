@@ -273,7 +273,8 @@
     "CLEAR_CACHE_MESSAGE": "This will clear all cached data. Are you sure?",
     "CACHE_CLEARED": "Cache cleared successfully",
     "VERSION": "Version",
-    "BACKUP": "Backup & Restore"
+    "BACKUP": "Backup & Restore",
+    "MANAGE_PROFILE": "Profile Management"
   },
   "BUDGET": {
     "TITLE": "Budget"

@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { BaseComponent } from 'src/app/shared/base/base.component';
 import { BiometricService } from 'src/app/core/services/biometric.service';
+import { AuthService } from 'src/app/modules/auth/services/auth.service';
+import { User } from 'src/app/modules/auth/models';
 
 @Component({
   selector: 'app-settings-list',
@@ -16,15 +18,17 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
   notificationsEnabled = true;
   autoBackupEnabled = false;
 
+  currentUser: User | null = null;
+
   languages = [
     { code: 'en', name: 'English', flag: '🇺🇸' },
     { code: 'ar', name: 'العربية', flag: '🇸🇦' },
   ];
 
   themes = [
-    { value: 'light', label: 'SETTINGS.THEME_LIGHT', icon: 'sunny-outline' },
-    { value: 'dark', label: 'SETTINGS.THEME_DARK', icon: 'moon-outline' },
-    { value: 'auto', label: 'SETTINGS.THEME_AUTO', icon: 'contrast-outline' },
+    { value: 'light', label: 'SETTINGS.THEME_LIGHT' },
+    { value: 'dark', label: 'SETTINGS.THEME_DARK' },
+    { value: 'auto', label: 'SETTINGS.THEME_AUTO' },
   ];
 
   constructor(private biometricService: BiometricService) {
@@ -33,6 +37,13 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
 
   override async ngOnInit() {
     super.ngOnInit();
+
+    // Subscribe to current user changes
+    this.authService.user$.subscribe((user) => {
+      this.currentUser = user;
+      this.cdr.markForCheck();
+    });
+
     await this.loadSettings();
   }
 
@@ -141,7 +152,12 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
   }
 
   navigateToBackup() {
-    this.router.navigate(['/backup-restore']);
+    // Show a toast message since this feature is currently a mockup and doesn't have a module
+    this.toastService.presentSuccessToast(
+      'bottom',
+      this.translateService.instant('COMMON.COMING_SOON') ||
+        'Backup & Restore is coming soon!'
+    );
   }
 
   navigateToSync() {
