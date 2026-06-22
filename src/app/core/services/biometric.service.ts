@@ -21,7 +21,8 @@ export class BiometricService {
 
   async isAvailable(): Promise<boolean> {
     if (!this.platform.is('capacitor')) {
-      return false;
+      // Mock availability for web testing
+      return true;
     }
     try {
       const result = await NativeBiometric.isAvailable();
@@ -36,7 +37,13 @@ export class BiometricService {
     reason: string = 'Please authenticate to continue'
   ): Promise<boolean> {
     if (!this.platform.is('capacitor')) {
-      return true; // Skip on web
+      // Simulate biometric prompt on web
+      return new Promise((resolve) => {
+        const confirmed = window.confirm(
+          `[Web Simulation] Biometric Scan Required\n\n${reason}\n\nClick OK to simulate a successful fingerprint/face scan.`
+        );
+        resolve(confirmed);
+      });
     }
 
     try {

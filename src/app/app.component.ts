@@ -17,6 +17,7 @@ import { environment } from '../environments/environment';
 })
 export class AppComponent extends BaseComponent implements OnInit {
   isLocked = false;
+  private isAuthenticating = false;
 
   constructor(
     private zone: NgZone,
@@ -134,16 +135,28 @@ export class AppComponent extends BaseComponent implements OnInit {
   }
 
   async checkBiometric() {
+    if (this.isAuthenticating) return;
+
     if (
       this.biometricService.isEnabled &&
       (await this.biometricService.isAvailable())
     ) {
       this.isLocked = true;
+      this.isAuthenticating = true;
+      this.cdr.markForCheck();
+      
       // Small delay to ensure UI updates
       setTimeout(async () => {
-        const authenticated = await this.biometricService.verifyIdentity();
-        if (authenticated) {
-          this.isLocked = false;
+        try {
+          const authenticated = await this.biometricService.verifyIdentity();
+          if (authenticated) {
+            this.isLocked = false;
+          }
+        } catch (e) {
+          console.error('Biometric check failed', e);
+        } finally {
+          this.isAuthenticating = false;
+          this.cdr.markForCheck();
         }
       }, 100);
     }

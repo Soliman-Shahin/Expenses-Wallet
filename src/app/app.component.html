@@ -1,7 +1,5 @@
-<ng-container *ngIf="!isLocked">
-  <app-layout />
-  <app-onboarding *ngIf="onboardingService.shouldShowOnboarding()" />
-</ng-container>
+<app-layout [style.visibility]="isLocked ? 'hidden' : 'visible'"></app-layout>
+<app-onboarding *ngIf="onboardingService.shouldShowOnboarding()" [style.visibility]="isLocked ? 'hidden' : 'visible'"></app-onboarding>
 
 <div *ngIf="isLocked" class="lock-screen">
   <div class="lock-content">
