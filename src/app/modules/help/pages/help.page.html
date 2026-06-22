@@ -1,0 +1,79 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar class="transparent-toolbar">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>{{ "HELP_PAGE.TITLE" | translate }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding help-content">
+  <div class="header-section">
+    <h2>{{ "HELP_PAGE.SUPPORT_CENTER" | translate }}</h2>
+    <p>{{ "HELP_PAGE.SUPPORT_SUBTITLE" | translate }}</p>
+  </div>
+
+  <!-- Contact Cards -->
+  <div class="contact-grid">
+    <div class="contact-card email" (click)="openEmail()" button>
+      <div class="icon-box">
+        <ion-icon name="mail-outline"></ion-icon>
+      </div>
+      <h3>{{ "HELP_PAGE.EMAIL" | translate }}</h3>
+      <p>support&#64;expenses-wallet.com</p>
+    </div>
+
+    <div class="contact-card whatsapp" (click)="openWhatsApp()" button>
+      <div class="icon-box">
+        <ion-icon name="logo-whatsapp"></ion-icon>
+      </div>
+      <h3>{{ "HELP_PAGE.WHATSAPP" | translate }}</h3>
+      <p>{{ "HELP_PAGE.REPLY_FAST" | translate }}</p>
+    </div>
+
+    <div class="contact-card website" (click)="openWebsite()" button>
+      <div class="icon-box">
+        <ion-icon name="globe-outline"></ion-icon>
+      </div>
+      <h3>{{ "HELP_PAGE.WEBSITE" | translate }}</h3>
+      <p>www.expenses-wallet.com</p>
+    </div>
+  </div>
+
+  <!-- FAQ Section -->
+  <div class="faq-section">
+    <div class="section-title">
+      <h3>{{ "HELP_PAGE.FAQ_TITLE" | translate }}</h3>
+    </div>
+
+    <ion-accordion-group>
+      <ion-accordion *ngFor="let faq of faqs; let i = index" [value]="'faq-' + i">
+        <ion-item slot="header" color="light">
+          <ion-label class="ion-text-wrap">{{ faq.question | translate }}</ion-label>
+        </ion-item>
+        <div class="ion-padding faq-answer" slot="content">
+          <p>{{ faq.answer | translate }}</p>
+        </div>
+      </ion-accordion>
+    </ion-accordion-group>
+  </div>
+
+  <!-- Legal & Version -->
+  <div class="legal-section">
+    <ion-list lines="none" class="legal-list">
+      <ion-item button detail="true">
+        <ion-icon name="document-text-outline" slot="start"></ion-icon>
+        <ion-label>{{ "HELP_PAGE.TERMS" | translate }}</ion-label>
+      </ion-item>
+      <ion-item button detail="true">
+        <ion-icon name="shield-checkmark-outline" slot="start"></ion-icon>
+        <ion-label>{{ "HELP_PAGE.PRIVACY" | translate }}</ion-label>
+      </ion-item>
+    </ion-list>
+    
+    <div class="version-info">
+      <p>{{ "VERSION" | translate }} 1.0.0</p>
+      <p class="copyright">© 2026 Expenses Wallet</p>
+    </div>
+  </div>
+</ion-content>

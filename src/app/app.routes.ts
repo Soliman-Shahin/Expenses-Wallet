@@ -52,6 +52,11 @@ export const routes: Routes = [
     canLoad: [AuthGuardService],
   },
   {
+    path: 'help',
+    loadChildren: () =>
+      import('./modules/help/help.module').then((m) => m.HelpModule),
+  },
+  {
     path: '**',
     redirectTo: '',
     pathMatch: 'full',
