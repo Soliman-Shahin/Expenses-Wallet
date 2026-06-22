@@ -25,6 +25,8 @@ export class BackupRestoreComponent extends BaseComponent implements OnInit {
   googleDriveEnabled = false;
   googleDriveEmail: string | null = null;
   isSignedInToGoogleDrive = false;
+  googleDriveBackups: any[] = [];
+  isLoadingDriveBackups = false;
 
   constructor(
     private backupService: BackupService,
@@ -85,6 +87,10 @@ export class BackupRestoreComponent extends BaseComponent implements OnInit {
     this.googleDriveEnabled = settings.enabled;
     this.googleDriveEmail = settings.email || null;
     this.isSignedInToGoogleDrive = this.backupService.isSignedInToGoogleDrive();
+    
+    if (this.isSignedInToGoogleDrive) {
+      this.loadGoogleDriveBackups();
+    }
   }
 
   async toggleGoogleDrive(event: any) {
@@ -106,6 +112,8 @@ export class BackupRestoreComponent extends BaseComponent implements OnInit {
             'bottom',
             this.translateService.instant('BACKUP.GOOGLE_DRIVE_CONNECTED')
           );
+          
+          this.loadGoogleDriveBackups();
         } else {
           this.googleDriveEnabled = false;
           this.toastService.presentErrorToast(
@@ -139,6 +147,97 @@ export class BackupRestoreComponent extends BaseComponent implements OnInit {
 
   loadHistory() {
     this.backupHistory = this.backupService.getBackupHistory();
+  }
+
+  loadGoogleDriveBackups() {
+    if (!this.isSignedInToGoogleDrive) return;
+    this.isLoadingDriveBackups = true;
+    this.cdr.markForCheck();
+    
+    this.backupService.listGoogleDriveBackups().subscribe({
+      next: (backups) => {
+        this.googleDriveBackups = backups;
+        this.isLoadingDriveBackups = false;
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Failed to load Google Drive backups:', error);
+        this.isLoadingDriveBackups = false;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  async restoreFromDrive(fileId: string) {
+    const alert = await this.alertController.create({
+      header: this.translateService.instant('BACKUP.RESTORE_CONFIRM_TITLE'),
+      message: this.translateService.instant('BACKUP.RESTORE_CONFIRM_MSG'),
+      cssClass: 'custom-alert',
+      buttons: [
+        {
+          text: this.translateService.instant('COMMON.CANCEL'),
+          role: 'cancel',
+        },
+        {
+          text: this.translateService.instant('COMMON.RESTORE'),
+          handler: () => {
+            this.setLoading(true);
+            this.loadingMessage = this.translateService.instant('COMMON.LOADING');
+            this.backupService.downloadGoogleDriveBackup(fileId).subscribe({
+              next: (content) => {
+                this.setLoading(false);
+                this.processImport(content);
+              },
+              error: (err) => {
+                this.setLoading(false);
+                this.toastService.presentErrorToast('bottom', this.translateService.instant('BACKUP.FAILED_RESTORE'));
+                console.error(err);
+              }
+            });
+          },
+        },
+      ],
+    });
+    await alert.present();
+  }
+
+  async deleteFromDrive(fileId: string, event: Event) {
+    event.stopPropagation();
+    const alert = await this.alertController.create({
+      header: this.translateService.instant('COMMON.DELETE_CONFIRM'),
+      message: this.translateService.instant('CONFIRM.DELETE_MESSAGE'),
+      cssClass: 'custom-alert',
+      buttons: [
+        {
+          text: this.translateService.instant('COMMON.CANCEL'),
+          role: 'cancel',
+        },
+        {
+          text: this.translateService.instant('COMMON.DELETE'),
+          role: 'destructive',
+          handler: () => {
+            this.setLoading(true);
+            this.backupService.deleteGoogleDriveBackup(fileId).subscribe({
+              next: (success) => {
+                this.setLoading(false);
+                if (success) {
+                  this.toastService.presentSuccessToast('bottom', this.translateService.instant('TOAST.DELETE_SUCCESS'));
+                  this.loadGoogleDriveBackups();
+                } else {
+                  this.toastService.presentErrorToast('bottom', 'Failed to delete backup');
+                }
+              },
+              error: (err) => {
+                this.setLoading(false);
+                console.error(err);
+                this.toastService.presentErrorToast('bottom', 'Error deleting backup');
+              }
+            });
+          },
+        },
+      ],
+    });
+    await alert.present();
   }
 
   async createBackup() {

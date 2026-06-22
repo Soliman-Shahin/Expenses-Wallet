@@ -12,7 +12,9 @@
         <div>
           <h3>{{ "BACKUP.GOOGLE_DRIVE" | translate }}</h3>
           <p>{{ "BACKUP.GOOGLE_DRIVE_DESC" | translate }}</p>
-          <span class="email-badge" *ngIf="googleDriveEmail">{{ googleDriveEmail }}</span>
+          <span class="email-badge" *ngIf="googleDriveEmail">{{
+            googleDriveEmail
+          }}</span>
         </div>
       </div>
       <ion-toggle
@@ -46,19 +48,33 @@
           (ionChange)="updateAutoBackupFrequency($event)"
           interface="popover"
         >
-          <ion-select-option [value]="6">{{ "BACKUP.EVERY_6_HOURS" | translate }}</ion-select-option>
-          <ion-select-option [value]="12">{{ "BACKUP.EVERY_12_HOURS" | translate }}</ion-select-option>
-          <ion-select-option [value]="24">{{ "BACKUP.EVERY_24_HOURS" | translate }}</ion-select-option>
-          <ion-select-option [value]="48">{{ "BACKUP.EVERY_48_HOURS" | translate }}</ion-select-option>
-          <ion-select-option [value]="168">{{ "BACKUP.EVERY_WEEK" | translate }}</ion-select-option>
+          <ion-select-option [value]="6">{{
+            "BACKUP.EVERY_6_HOURS" | translate
+          }}</ion-select-option>
+          <ion-select-option [value]="12">{{
+            "BACKUP.EVERY_12_HOURS" | translate
+          }}</ion-select-option>
+          <ion-select-option [value]="24">{{
+            "BACKUP.EVERY_24_HOURS" | translate
+          }}</ion-select-option>
+          <ion-select-option [value]="48">{{
+            "BACKUP.EVERY_48_HOURS" | translate
+          }}</ion-select-option>
+          <ion-select-option [value]="168">{{
+            "BACKUP.EVERY_WEEK" | translate
+          }}</ion-select-option>
         </ion-select>
       </div>
 
       <div class="last-backup-info" *ngIf="lastAutoBackup">
         <ion-icon name="checkmark-circle-outline"></ion-icon>
         <div>
-          <span class="label">{{ "BACKUP.LAST_AUTO_BACKUP" | translate }}:</span>
-          <span class="value">{{ lastAutoBackup.timestamp | date: 'short' }}</span>
+          <span class="label"
+            >{{ "BACKUP.LAST_AUTO_BACKUP" | translate }}:</span
+          >
+          <span class="value">{{
+            lastAutoBackup.timestamp | date : "short"
+          }}</span>
           <span class="size">({{ formatSize(lastAutoBackup.size) }})</span>
         </div>
       </div>
@@ -132,6 +148,72 @@
             <ion-icon name="share-social-outline"></ion-icon>
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Google Drive Backups Section -->
+<div class="history-section drive-history" *ngIf="isSignedInToGoogleDrive">
+  <div class="section-title">
+    <h3>
+      <ion-icon
+        name="logo-google"
+        style="margin-inline-end: 8px; color: var(--ion-color-danger)"
+      ></ion-icon>
+      Google Drive Backups
+    </h3>
+    <ion-spinner *ngIf="isLoadingDriveBackups" name="crescent"></ion-spinner>
+    <span
+      class="badge"
+      *ngIf="!isLoadingDriveBackups && googleDriveBackups.length > 0"
+      >{{ googleDriveBackups.length }}</span
+    >
+  </div>
+
+  <div
+    class="empty-state"
+    *ngIf="!isLoadingDriveBackups && googleDriveBackups.length === 0"
+  >
+    <ion-icon name="cloud-offline-outline"></ion-icon>
+    <p>No backups found on Google Drive</p>
+  </div>
+
+  <div
+    class="history-list"
+    *ngIf="!isLoadingDriveBackups && googleDriveBackups.length > 0"
+  >
+    <div class="history-item" *ngFor="let backup of googleDriveBackups">
+      <div class="item-icon">
+        <ion-icon name="cloud-done-outline" color="primary"></ion-icon>
+      </div>
+
+      <div
+        class="item-details"
+        style="flex: 1; cursor: pointer"
+        (click)="restoreFromDrive(backup.id)"
+      >
+        <h4 style="font-weight: 600; font-size: 0.95rem; margin-bottom: 4px">
+          {{ backup.name }}
+        </h4>
+        <div
+          class="meta"
+          style="font-size: 0.8rem; color: var(--ion-color-medium)"
+        >
+          <span class="date">{{ backup.modifiedTime | date : "medium" }}</span>
+          <span class="separator" style="margin: 0 4px">•</span>
+          <span class="size">{{ formatSize(backup.size) }}</span>
+        </div>
+      </div>
+
+      <div class="item-actions">
+        <button
+          class="btn-icon"
+          (click)="deleteFromDrive(backup.id, $event)"
+          color="danger"
+        >
+          <ion-icon name="trash-outline" color="danger"></ion-icon>
+        </button>
       </div>
     </div>
   </div>
