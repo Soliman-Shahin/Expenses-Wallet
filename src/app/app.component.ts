@@ -49,6 +49,11 @@ export class AppComponent extends BaseComponent implements OnInit {
 
     // Check on resume
     App.addListener('resume', () => {
+      // Ignore resume if it happened within 2 seconds of a biometric prompt finishing.
+      // This prevents the infinite loop caused by the biometric dialog itself triggering a pause/resume cycle.
+      if (Date.now() - this.biometricService.lastBiometricTime < 2000) {
+        return;
+      }
       this.checkBiometric();
     });
 

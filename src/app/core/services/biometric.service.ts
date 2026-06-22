@@ -8,6 +8,7 @@ import { StorageService } from '../../modules/auth/services/storage.service';
 })
 export class BiometricService {
   private readonly BIOMETRIC_ENABLED_KEY = 'biometric_enabled';
+  public lastBiometricTime = 0;
 
   constructor(private platform: Platform, private storage: StorageService) {}
 
@@ -53,9 +54,11 @@ export class BiometricService {
         subtitle: 'Log in with your biometric',
         description: reason,
       });
+      this.lastBiometricTime = Date.now();
       return true;
     } catch (e) {
       console.error('Biometric verification failed', e);
+      this.lastBiometricTime = Date.now();
       return false;
     }
   }

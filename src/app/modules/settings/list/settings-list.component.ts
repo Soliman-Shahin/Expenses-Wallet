@@ -1,8 +1,33 @@
 import { Component, OnInit } from '@angular/core';
 import { BaseComponent } from 'src/app/shared/base/base.component';
+import { Subscription } from 'rxjs';
 import { BiometricService } from 'src/app/core/services/biometric.service';
+import { ModalController } from '@ionic/angular';
 import { AuthService } from 'src/app/modules/auth/services/auth.service';
 import { User } from 'src/app/modules/auth/models';
+
+@Component({
+  selector: 'app-backup-modal',
+  template: `
+    <ion-header class="ion-no-border">
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-button (click)="close()">
+            <ion-icon name="close"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+        <ion-title>{{ 'SETTINGS.BACKUP_RESTORE' | translate }}</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <app-backup-restore></app-backup-restore>
+    </ion-content>
+  `
+})
+export class BackupModalComponent {
+  constructor(private modalCtrl: ModalController) {}
+  close() { this.modalCtrl.dismiss(); }
+}
 
 @Component({
   selector: 'app-settings-list',
@@ -151,13 +176,11 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
     this.cdr.markForCheck();
   }
 
-  navigateToBackup() {
-    // Show a toast message since this feature is currently a mockup and doesn't have a module
-    this.toastService.presentSuccessToast(
-      'bottom',
-      this.translateService.instant('COMMON.COMING_SOON') ||
-        'Backup & Restore is coming soon!'
-    );
+  async navigateToBackup() {
+    const modal = await this.modalCtrl.create({
+      component: BackupModalComponent,
+    });
+    await modal.present();
   }
 
   navigateToSync() {
