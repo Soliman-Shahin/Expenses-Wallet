@@ -19,7 +19,7 @@ const config: CapacitorConfig = {
       launchShowDuration: 1500,
     },
     GoogleAuth: {
-      scopes: ['profile', 'email'],
+      scopes: ['profile', 'email', 'https://www.googleapis.com/auth/drive.file'],
       serverClientId:
         '358709669585-0td9nf2p58ncgtoreopgqkq7vosco473.apps.googleusercontent.com',
       forceCodeForRefreshToken: true,

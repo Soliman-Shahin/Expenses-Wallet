@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Observable, from, throwError } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
-
-declare const gapi: any;
+import { Observable, from } from 'rxjs';
+import { Capacitor } from '@capacitor/core';
+import { environment } from 'src/environments/environment';
 
 export interface DriveFile {
   id: string;
@@ -17,42 +16,40 @@ export interface DriveFile {
   providedIn: 'root',
 })
 export class GoogleDriveService {
-  private readonly DISCOVERY_DOCS = [
-    'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest',
-  ];
-  private readonly SCOPES = 'https://www.googleapis.com/auth/drive.file';
   private readonly FOLDER_NAME = 'Expenses-Wallet-Backups';
   
   private isInitialized = false;
   private folderId: string = '';
+  private accessToken: string | null = null;
+  private userEmail: string | null = null;
 
   constructor() {}
 
+  private get GoogleAuth(): any {
+    return (window as any)?.Capacitor?.Plugins?.GoogleAuth || (window as any)?.GoogleAuth;
+  }
+
   /**
-   * Initialize Google Drive API
+   * Initialize Google Drive API (and GoogleAuth)
    */
   async initializeGoogleDrive(clientId: string): Promise<void> {
     if (this.isInitialized) {
       return;
     }
 
-    return new Promise((resolve, reject) => {
-      gapi.load('client:auth2', async () => {
-        try {
-          await gapi.client.init({
-            clientId: clientId,
-            discoveryDocs: this.DISCOVERY_DOCS,
-            scope: this.SCOPES,
-          });
-
-          this.isInitialized = true;
-          resolve();
-        } catch (error) {
-          console.error('Error initializing Google Drive:', error);
-          reject(error);
-        }
-      });
-    });
+    try {
+      if (this.GoogleAuth && typeof this.GoogleAuth.initialize === 'function') {
+        await this.GoogleAuth.initialize({
+          clientId: clientId,
+          scopes: ['profile', 'email', 'https://www.googleapis.com/auth/drive.file'],
+          grantOfflineAccess: true,
+        });
+      }
+      this.isInitialized = true;
+    } catch (error) {
+      console.error('Error initializing Google Drive (GoogleAuth):', error);
+      throw error;
+    }
   }
 
   /**
@@ -60,11 +57,16 @@ export class GoogleDriveService {
    */
   async signIn(): Promise<boolean> {
     try {
-      const auth = gapi.auth2.getAuthInstance();
-      if (!auth.isSignedIn.get()) {
-        await auth.signIn();
+      if (!this.GoogleAuth) {
+        console.error('GoogleAuth plugin not available');
+        return false;
       }
-      return true;
+      const user = await this.GoogleAuth.signIn();
+      // GoogleAuth plugin returns authentication object with accessToken
+      this.accessToken = user.authentication?.accessToken || user.accessToken;
+      this.userEmail = user.email || null;
+      
+      return !!this.accessToken;
     } catch (error) {
       console.error('Error signing in to Google Drive:', error);
       return false;
@@ -76,10 +78,11 @@ export class GoogleDriveService {
    */
   async signOut(): Promise<void> {
     try {
-      const auth = gapi.auth2.getAuthInstance();
-      if (auth.isSignedIn.get()) {
-        await auth.signOut();
+      if (this.GoogleAuth) {
+        await this.GoogleAuth.signOut();
       }
+      this.accessToken = null;
+      this.userEmail = null;
       this.folderId = '';
     } catch (error) {
       console.error('Error signing out from Google Drive:', error);
@@ -90,12 +93,34 @@ export class GoogleDriveService {
    * Check if user is signed in
    */
   isSignedIn(): boolean {
-    try {
-      const auth = gapi.auth2.getAuthInstance();
-      return auth && auth.isSignedIn.get();
-    } catch (error) {
-      return false;
+    return !!this.accessToken;
+  }
+
+  /**
+   * Get user's Google Drive email
+   */
+  getUserEmail(): string | null {
+    return this.userEmail;
+  }
+
+  /**
+   * Helper method for Google Drive API calls
+   */
+  private async fetchDriveApi(url: string, options: RequestInit = {}): Promise<Response> {
+    if (!this.accessToken) {
+      throw new Error('Not signed in to Google Drive');
     }
+
+    const headers = new Headers(options.headers || {});
+    headers.set('Authorization', `Bearer ${this.accessToken}`);
+
+    const res = await fetch(url, { ...options, headers });
+    if (res.status === 401) {
+      // Token might be expired, try to sign in again silently (or clear token)
+      this.accessToken = null;
+      throw new Error('Authentication expired. Please sign in again.');
+    }
+    return res;
   }
 
   /**
@@ -108,14 +133,17 @@ export class GoogleDriveService {
 
     try {
       // Search for existing folder
-      const response = await gapi.client.drive.files.list({
-        q: `name='${this.FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
-        fields: 'files(id, name)',
-        spaces: 'drive',
-      });
+      const query = encodeURIComponent(`name='${this.FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
+      const searchRes = await this.fetchDriveApi(`https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name)&spaces=drive`);
+      
+      if (!searchRes.ok) {
+        throw new Error('Failed to search for folder');
+      }
 
-      if (response.result.files && response.result.files.length > 0) {
-        this.folderId = response.result.files[0].id;
+      const searchData = await searchRes.json();
+      
+      if (searchData.files && searchData.files.length > 0) {
+        this.folderId = searchData.files[0].id;
         return this.folderId;
       }
 
@@ -125,12 +153,18 @@ export class GoogleDriveService {
         mimeType: 'application/vnd.google-apps.folder',
       };
 
-      const folder = await gapi.client.drive.files.create({
-        resource: folderMetadata,
-        fields: 'id',
+      const createRes = await this.fetchDriveApi('https://www.googleapis.com/drive/v3/files', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(folderMetadata)
       });
 
-      this.folderId = folder.result.id;
+      if (!createRes.ok) {
+        throw new Error('Failed to create folder');
+      }
+
+      const createData = await createRes.json();
+      this.folderId = createData.id;
       return this.folderId;
     } catch (error) {
       console.error('Error getting/creating folder:', error);
@@ -147,10 +181,6 @@ export class GoogleDriveService {
 
   private async uploadBackupAsync(fileName: string, content: string): Promise<DriveFile> {
     try {
-      if (!this.isSignedIn()) {
-        throw new Error('Not signed in to Google Drive');
-      }
-
       const folderId = await this.getOrCreateFolder();
 
       const file = new Blob([content], { type: 'application/json' });
@@ -164,9 +194,8 @@ export class GoogleDriveService {
       form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
       form.append('file', file);
 
-      const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,mimeType,size,createdTime,modifiedTime', {
+      const response = await this.fetchDriveApi('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,mimeType,size,createdTime,modifiedTime', {
         method: 'POST',
-        headers: new Headers({ 'Authorization': 'Bearer ' + gapi.auth.getToken().access_token }),
         body: form,
       });
 
@@ -198,20 +227,17 @@ export class GoogleDriveService {
 
   private async listBackupsAsync(): Promise<DriveFile[]> {
     try {
-      if (!this.isSignedIn()) {
-        throw new Error('Not signed in to Google Drive');
-      }
-
       const folderId = await this.getOrCreateFolder();
 
-      const response = await gapi.client.drive.files.list({
-        q: `'${folderId}' in parents and trashed=false and mimeType='application/json'`,
-        fields: 'files(id, name, mimeType, size, createdTime, modifiedTime)',
-        orderBy: 'modifiedTime desc',
-        pageSize: 50,
-      });
+      const query = encodeURIComponent(`'${folderId}' in parents and trashed=false and mimeType='application/json'`);
+      const response = await this.fetchDriveApi(`https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name,mimeType,size,createdTime,modifiedTime)&orderBy=modifiedTime desc&pageSize=50`);
 
-      return response.result.files || [];
+      if (!response.ok) {
+        throw new Error('Failed to list backups');
+      }
+
+      const data = await response.json();
+      return data.files || [];
     } catch (error) {
       console.error('Error listing backups from Google Drive:', error);
       throw error;
@@ -227,16 +253,13 @@ export class GoogleDriveService {
 
   private async downloadBackupAsync(fileId: string): Promise<string> {
     try {
-      if (!this.isSignedIn()) {
-        throw new Error('Not signed in to Google Drive');
+      const response = await this.fetchDriveApi(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to download backup');
       }
 
-      const response = await gapi.client.drive.files.get({
-        fileId: fileId,
-        alt: 'media',
-      });
-
-      return JSON.stringify(response.result);
+      return await response.text();
     } catch (error) {
       console.error('Error downloading backup from Google Drive:', error);
       throw error;
@@ -252,34 +275,14 @@ export class GoogleDriveService {
 
   private async deleteBackupAsync(fileId: string): Promise<boolean> {
     try {
-      if (!this.isSignedIn()) {
-        throw new Error('Not signed in to Google Drive');
-      }
-
-      await gapi.client.drive.files.delete({
-        fileId: fileId,
+      const response = await this.fetchDriveApi(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
+        method: 'DELETE'
       });
 
-      return true;
+      return response.ok;
     } catch (error) {
       console.error('Error deleting backup from Google Drive:', error);
       return false;
-    }
-  }
-
-  /**
-   * Get user's Google Drive email
-   */
-  getUserEmail(): string | null {
-    try {
-      const auth = gapi.auth2.getAuthInstance();
-      if (auth && auth.isSignedIn.get()) {
-        const profile = auth.currentUser.get().getBasicProfile();
-        return profile.getEmail();
-      }
-      return null;
-    } catch (error) {
-      return null;
     }
   }
 }
