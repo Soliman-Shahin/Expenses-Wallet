@@ -3,6 +3,7 @@ import {
   ErrorHandler,
   importProvidersFrom,
   provideZoneChangeDetection,
+  isDevMode,
 } from '@angular/core';
 import { initWebVitalsTracking } from './app/web-vitals';
 import { registerLocaleData } from '@angular/common';
@@ -25,12 +26,20 @@ import { errorInterceptor } from './app/core/interceptors/error.interceptor';
 
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { provideRouter, withPreloading, PreloadAllModules, withInMemoryScrolling, withRouterConfig, withComponentInputBinding } from '@angular/router';
+import {
+  provideRouter,
+  withPreloading,
+  PreloadAllModules,
+  withInMemoryScrolling,
+  withRouterConfig,
+  withComponentInputBinding,
+} from '@angular/router';
 import { routes } from './app/app.routes';
 import { IonicModule } from '@ionic/angular';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { AppComponent } from './app/app.component';
+import { provideServiceWorker } from '@angular/service-worker';
 
 export function HttpLoaderFactory(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -52,7 +61,10 @@ if (!(window as any).__appBootstrapped) {
       provideRouter(
         routes,
         withPreloading(PreloadAllModules),
-        withInMemoryScrolling({ scrollPositionRestoration: 'enabled', anchorScrolling: 'enabled' }),
+        withInMemoryScrolling({
+          scrollPositionRestoration: 'enabled',
+          anchorScrolling: 'enabled',
+        }),
         withRouterConfig({ onSameUrlNavigation: 'reload' }),
         withComponentInputBinding()
       ),
@@ -80,6 +92,10 @@ if (!(window as any).__appBootstrapped) {
         useClass: GlobalErrorHandler,
       },
       provideAnimations(),
+      provideServiceWorker('ngsw-worker.js', {
+        enabled: !isDevMode(),
+        registrationStrategy: 'registerWhenStable:30000',
+      }),
     ],
   }).catch((err: any) => console.error('Bootstrap error:', err));
 }

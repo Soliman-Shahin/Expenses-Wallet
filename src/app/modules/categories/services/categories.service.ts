@@ -40,7 +40,7 @@ export class CategoryService {
       tap(response => {
         // Save categories to offline storage for backup
         if (response?.data && response.data.length > 0) {
-          this.offlineStorage.setEntities('category', response.data as any[]);
+          this.offlineStorage.replaceEntities('category', response.data as any[]).subscribe();
         }
       })
     );

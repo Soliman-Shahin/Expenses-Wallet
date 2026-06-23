@@ -58,7 +58,7 @@ export class ExpenseService {
           tap(expenses => {
             // Save to offline storage for backup
             if (expenses && expenses.length > 0) {
-              this.offlineStorage.setEntities('expense', expenses as any[]);
+              this.offlineStorage.replaceEntities('expense', expenses as any[]).subscribe();
             }
           }),
           catchError((error: unknown) => {

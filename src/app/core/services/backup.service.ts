@@ -166,10 +166,10 @@ export class BackupService {
   ): Observable<boolean> {
     return from(
       Promise.all([
-        this.offlineStorage.setEntities('expense', backup.data.expenses),
-        this.offlineStorage.setEntities('category', backup.data.categories),
+        this.offlineStorage.replaceEntities('expense', backup.data.expenses).toPromise(),
+        this.offlineStorage.replaceEntities('category', backup.data.categories).toPromise(),
         backup.data.user
-          ? this.offlineStorage.setEntities('user', [backup.data.user])
+          ? this.offlineStorage.replaceEntities('user', [backup.data.user]).toPromise()
           : Promise.resolve(),
         backup.data.settings
           ? this.saveSettings(backup.data.settings)
