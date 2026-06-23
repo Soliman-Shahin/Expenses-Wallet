@@ -1,5 +1,5 @@
 <div class="onboarding-page" [dir]="translationService.getCurrentLanguage() === 'ar' ? 'rtl' : 'ltr'">
-  
+
   <!-- Ambient Background Orbs -->
   <div class="ambient-bg">
     <div class="orb orb-1"></div>
@@ -22,42 +22,52 @@
   <!-- Slides -->
   <div class="slides-viewport">
     <div class="slides-container" #slidesContainer (scroll)="onScroll($event)">
-      <div class="slide" *ngFor="let step of steps; let i = index" [class.active-slide]="i === currentStepIndex">
-        <div class="slide-content">
-          <!-- First Step: App Logo -->
-          <div class="app-logo-wrap" *ngIf="i === 0">
-            <img src="assets/icon/icon.png" alt="Expenses Wallet" class="onboarding-logo" />
-            <div class="logo-aura"></div>
+      @for (step of steps; track step; let i = $index) {
+        <div class="slide" [class.active-slide]="i === currentStepIndex">
+          <div class="slide-content">
+            <!-- First Step: App Logo -->
+            @if (i === 0) {
+              <div class="app-logo-wrap">
+                <img src="assets/icon/icon.png" alt="Expenses Wallet" class="onboarding-logo" />
+                <div class="logo-aura"></div>
+              </div>
+            }
+            <!-- Other Steps: Crystal Icon -->
+            @if (i > 0) {
+              <div class="icon-crystal">
+                <div class="crystal-inner">
+                  <ion-icon [name]="step.icon"></ion-icon>
+                </div>
+                <div class="crystal-glow"></div>
+              </div>
+            }
+            <h2 class="slide-title">{{ step.title | translate }}</h2>
+            <p class="slide-desc">{{ step.description | translate }}</p>
           </div>
-
-          <!-- Other Steps: Crystal Icon -->
-          <div class="icon-crystal" *ngIf="i > 0">
-            <div class="crystal-inner">
-              <ion-icon [name]="step.icon"></ion-icon>
-            </div>
-            <div class="crystal-glow"></div>
-          </div>
-          <h2 class="slide-title">{{ step.title | translate }}</h2>
-          <p class="slide-desc">{{ step.description | translate }}</p>
         </div>
-      </div>
+      }
     </div>
   </div>
 
   <!-- Floating Controls Dock -->
   <div class="controls-dock">
     <div class="pagination">
-      <div 
-        class="dot-indicator" 
-        *ngFor="let step of steps; let i = index"
-        [class.active]="i === currentStepIndex"
-        (click)="goToStep(i)"
-      ></div>
+      @for (step of steps; track step; let i = $index) {
+        <div
+          class="dot-indicator"
+          [class.active]="i === currentStepIndex"
+          (click)="goToStep(i)"
+        ></div>
+      }
     </div>
-    
+
     <button class="next-btn" (click)="next()" [class.start-btn]="isLastStep">
-      <span class="btn-text" *ngIf="!isLastStep">{{ "ONBOARDING.NEXT" | translate }}</span>
-      <span class="btn-text" *ngIf="isLastStep">{{ "ONBOARDING.START" | translate }}</span>
+      @if (!isLastStep) {
+        <span class="btn-text">{{ "ONBOARDING.NEXT" | translate }}</span>
+      }
+      @if (isLastStep) {
+        <span class="btn-text">{{ "ONBOARDING.START" | translate }}</span>
+      }
       <div class="icon-circle">
         <ion-icon [name]="isLastStep ? 'rocket' : 'arrow-forward'"></ion-icon>
       </div>

@@ -19,7 +19,7 @@ import { SyncMetadata, SyncProgress } from 'src/app/shared/models/sync.model';
         <ion-title>🧪 Sync System Test</ion-title>
       </ion-toolbar>
     </ion-header>
-
+    
     <ion-content class="ion-padding">
       <!-- Network Status -->
       <ion-card>
@@ -32,7 +32,7 @@ import { SyncMetadata, SyncProgress } from 'src/app/shared/models/sync.model';
               [name]="metadata?.isOnline ? 'wifi' : 'wifi-outline'"
               [color]="metadata?.isOnline ? 'success' : 'danger'"
               slot="start"
-            >
+              >
             </ion-icon>
             <ion-label>
               <h2>{{ metadata?.isOnline ? 'Online' : 'Offline' }}</h2>
@@ -41,7 +41,7 @@ import { SyncMetadata, SyncProgress } from 'src/app/shared/models/sync.model';
           </ion-item>
         </ion-card-content>
       </ion-card>
-
+    
       <!-- Sync Status -->
       <ion-card>
         <ion-card-header>
@@ -53,14 +53,14 @@ import { SyncMetadata, SyncProgress } from 'src/app/shared/models/sync.model';
               [name]="metadata?.isSyncing ? 'sync' : 'sync-outline'"
               [color]="metadata?.isSyncing ? 'warning' : 'success'"
               slot="start"
-            >
+              >
             </ion-icon>
             <ion-label>
               <h2>{{ metadata?.isSyncing ? 'Syncing...' : 'Ready' }}</h2>
               <p>Sync operation status</p>
             </ion-label>
           </ion-item>
-
+    
           <ion-item>
             <ion-icon name="time-outline" slot="start"></ion-icon>
             <ion-label>
@@ -68,7 +68,7 @@ import { SyncMetadata, SyncProgress } from 'src/app/shared/models/sync.model';
               <p>{{ metadata?.lastSyncTime | date : 'medium' }}</p>
             </ion-label>
           </ion-item>
-
+    
           <ion-item>
             <ion-icon name="documents-outline" slot="start"></ion-icon>
             <ion-label>
@@ -76,7 +76,7 @@ import { SyncMetadata, SyncProgress } from 'src/app/shared/models/sync.model';
               <p>{{ metadata?.totalEntities || 0 }}</p>
             </ion-label>
           </ion-item>
-
+    
           <ion-item>
             <ion-icon
               name="hourglass-outline"
@@ -88,7 +88,7 @@ import { SyncMetadata, SyncProgress } from 'src/app/shared/models/sync.model';
               <p>{{ metadata?.pendingCount || 0 }} operations</p>
             </ion-label>
           </ion-item>
-
+    
           <ion-item>
             <ion-icon
               name="alert-circle-outline"
@@ -100,7 +100,7 @@ import { SyncMetadata, SyncProgress } from 'src/app/shared/models/sync.model';
               <p>{{ metadata?.conflictCount || 0 }} items</p>
             </ion-label>
           </ion-item>
-
+    
           <ion-item>
             <ion-icon
               name="close-circle-outline"
@@ -114,36 +114,39 @@ import { SyncMetadata, SyncProgress } from 'src/app/shared/models/sync.model';
           </ion-item>
         </ion-card-content>
       </ion-card>
-
+    
       <!-- Sync Progress -->
-      <ion-card *ngIf="progress && !progress.isComplete">
-        <ion-card-header>
-          <ion-card-title>📊 Sync Progress</ion-card-title>
-        </ion-card-header>
-        <ion-card-content>
-          <ion-item>
-            <ion-label>
-              <h2>{{ progress.currentOperation }}</h2>
-              <p>{{ progress.current }} / {{ progress.total }}</p>
-            </ion-label>
-          </ion-item>
-
-          <ion-progress-bar [value]="progress.percentage / 100" color="primary">
-          </ion-progress-bar>
-
-          <p class="ion-text-center ion-margin-top">
-            {{ progress.percentage }}%
-          </p>
-
-          <ion-list *ngIf="progress.errors.length > 0">
-            <ion-item color="danger" *ngFor="let error of progress.errors">
-              <ion-icon name="warning-outline" slot="start"></ion-icon>
-              <ion-label>{{ error }}</ion-label>
+      @if (progress && !progress.isComplete) {
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>📊 Sync Progress</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-item>
+              <ion-label>
+                <h2>{{ progress.currentOperation }}</h2>
+                <p>{{ progress.current }} / {{ progress.total }}</p>
+              </ion-label>
             </ion-item>
-          </ion-list>
-        </ion-card-content>
-      </ion-card>
-
+            <ion-progress-bar [value]="progress.percentage / 100" color="primary">
+            </ion-progress-bar>
+            <p class="ion-text-center ion-margin-top">
+              {{ progress.percentage }}%
+            </p>
+            @if (progress.errors.length > 0) {
+              <ion-list>
+                @for (error of progress.errors; track error) {
+                  <ion-item color="danger">
+                    <ion-icon name="warning-outline" slot="start"></ion-icon>
+                    <ion-label>{{ error }}</ion-label>
+                  </ion-item>
+                }
+              </ion-list>
+            }
+          </ion-card-content>
+        </ion-card>
+      }
+    
       <!-- Sync Actions -->
       <ion-card>
         <ion-card-header>
@@ -154,28 +157,28 @@ import { SyncMetadata, SyncProgress } from 'src/app/shared/models/sync.model';
             expand="block"
             (click)="forceSync()"
             [disabled]="metadata?.isSyncing || !metadata?.isOnline"
-          >
+            >
             <ion-icon name="sync" slot="start"></ion-icon>
             Force Sync
           </ion-button>
-
+    
           <ion-button expand="block" fill="outline" (click)="refreshMetadata()">
             <ion-icon name="refresh" slot="start"></ion-icon>
             Refresh
           </ion-button>
-
+    
           <ion-button
             expand="block"
             fill="outline"
             color="secondary"
             (click)="logStatus()"
-          >
+            >
             <ion-icon name="bug-outline" slot="start"></ion-icon>
             Log to Console
           </ion-button>
         </ion-card-content>
       </ion-card>
-
+    
       <!-- Console Output -->
       <ion-card>
         <ion-card-header>
@@ -188,7 +191,7 @@ import { SyncMetadata, SyncProgress } from 'src/app/shared/models/sync.model';
         </ion-card-content>
       </ion-card>
     </ion-content>
-  `,
+    `,
   styles: [
     `
       .console-output {

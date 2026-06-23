@@ -1,16 +1,20 @@
 import { Component, ChangeDetectionStrategy, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { AlertController } from '@ionic/angular';
+import { AlertController, IonicModule } from '@ionic/angular';
 import {
   BackupService,
   BackupMetadata,
 } from 'src/app/core/services/backup.service';
 import { BaseComponent } from '../../base/base.component';
+import { DatePipe } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
-  selector: 'app-backup-restore',
-  templateUrl: './backup-restore.component.html',
-  styleUrls: ['./backup-restore.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-backup-restore',
+    templateUrl: './backup-restore.component.html',
+    styleUrls: ['./backup-restore.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [IonicModule, DatePipe, TranslateModule]
 })
 export class BackupRestoreComponent extends BaseComponent implements OnInit {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;

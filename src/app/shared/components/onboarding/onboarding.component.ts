@@ -5,12 +5,16 @@ import {
   OnboardingStep,
 } from 'src/app/core/services/onboarding.service';
 import { BaseComponent } from '../../base/base.component';
+import { IonicModule } from '@ionic/angular';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
-  selector: 'app-onboarding',
-  templateUrl: './onboarding.component.html',
-  styleUrls: ['./onboarding.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-onboarding',
+    templateUrl: './onboarding.component.html',
+    styleUrls: ['./onboarding.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [IonicModule, TranslateModule]
 })
 export class OnboardingComponent extends BaseComponent implements OnInit {
   @ViewChild('slidesContainer') slidesContainer!: ElementRef;

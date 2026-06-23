@@ -1,11 +1,11 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, ChangeDetectionStrategy, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { ICONS } from '../../models';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, IonicModule],
+  imports: [IonicModule],
   selector: 'app-icon-selector',
   templateUrl: './icon-selector.component.html',
   styleUrls: ['./icon-selector.component.scss'],

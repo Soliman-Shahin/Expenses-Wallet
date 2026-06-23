@@ -6,27 +6,35 @@ import {
   ElementRef,
   inject,
 } from '@angular/core';
-import {
-  AbstractControl,
-  FormArray,
-  FormBuilder,
-  FormGroup,
-  ValidationErrors,
-  Validators,
-} from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, ValidationErrors, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ToastService } from 'src/app/shared/services/toast.service';
 import { BaseComponent } from 'src/app/shared/base/base.component';
 import { ProfileService } from '../../services/profile.service';
 import { UserProfile } from '../../models/profile.model';
 import { BehaviorSubject, combineLatest, takeUntil } from 'rxjs';
 import { catchError, finalize, tap } from 'rxjs/operators';
-import { ItemReorderEventDetail } from '@ionic/angular';
+import { ItemReorderEventDetail, IonicModule } from '@ionic/angular';
+import { UiInputComponent } from '../../../../shared/ui/ui-input/ui-input.component';
+import { BackupRestoreComponent } from '../../../../shared/components/backup-restore/backup-restore.component';
+import { AsyncPipe, DecimalPipe } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
-  selector: 'app-profile-page',
-  templateUrl: './profile-page.component.html',
-  styleUrls: ['./profile-page.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-profile-page',
+    templateUrl: './profile-page.component.html',
+    styleUrls: ['./profile-page.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [
+        IonicModule,
+        FormsModule,
+        ReactiveFormsModule,
+        UiInputComponent,
+        BackupRestoreComponent,
+        AsyncPipe,
+        DecimalPipe,
+        TranslateModule,
+    ],
 })
 export class ProfilePageComponent extends BaseComponent implements OnInit {
   personalForm!: FormGroup;

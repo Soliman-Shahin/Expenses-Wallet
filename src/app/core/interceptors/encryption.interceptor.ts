@@ -1,141 +1,97 @@
-import { Injectable } from '@angular/core';
+import { inject } from '@angular/core';
 import {
   HttpRequest,
-  HttpHandler,
+  HttpHandlerFn,
   HttpEvent,
-  HttpInterceptor,
+  HttpInterceptorFn,
   HttpResponse,
 } from '@angular/common/http';
 import { Observable, from, of } from 'rxjs';
-import { switchMap, mergeMap, map } from 'rxjs/operators';
+import { switchMap, mergeMap } from 'rxjs/operators';
 import { EncryptionAdvancedService } from '../services/encryption-advanced.service';
 import { environment } from 'src/environments/environment';
 
-/**
- * Advanced Encryption Interceptor
- * Compatible with backend AES-256-GCM encryption
- *
- * Features:
- * - Encrypts request bodies using AES-256-GCM
- * - Decrypts response bodies
- * - Skips encryption for assets and external URLs
- * - Configurable via environment settings
- */
-@Injectable()
-export class EncryptionAdvancedInterceptor implements HttpInterceptor {
-  private readonly SENSITIVE_FIELDS = ['id', '_id'];
+const SENSITIVE_FIELDS = ['id', '_id'];
 
-  constructor(private encryptionService: EncryptionAdvancedService) {}
+function shouldEncrypt(request: HttpRequest<unknown>, encryptionService: EncryptionAdvancedService): boolean {
+  if (!encryptionService.isEncryptionEnabled()) {
+    return false;
+  }
+  if (request.url.includes('assets/') || request.url.includes('/i18n/')) {
+    return false;
+  }
+  if (!request.url.startsWith(environment.apiUrl)) {
+    return false;
+  }
+  if (request.url.includes('/health')) {
+    return false;
+  }
+  return true;
+}
 
-  intercept(
-    request: HttpRequest<unknown>,
-    next: HttpHandler
-  ): Observable<HttpEvent<unknown>> {
-    // Skip encryption if disabled or for specific URLs
-    if (!this.shouldEncrypt(request)) {
-      return next.handle(request);
-    }
+async function encryptRequest(
+  request: HttpRequest<unknown>,
+  encryptionService: EncryptionAdvancedService
+): Promise<HttpRequest<unknown>> {
+  try {
+    const encryptedBody = await encryptionService.encryptFieldsDeep(
+      request.body,
+      SENSITIVE_FIELDS
+    );
+    return request.clone({ body: encryptedBody });
+  } catch (error) {
+    console.error('❌ Failed to encrypt request:', error);
+    return request;
+  }
+}
 
-    // Encrypt request body if present
-    if (request.body && !(request.body instanceof FormData)) {
-      return from(this.encryptRequest(request)).pipe(
-        switchMap((encryptedRequest) =>
-          this.handleResponse(encryptedRequest, next)
+async function decryptResponse(
+  response: HttpResponse<any>,
+  encryptionService: EncryptionAdvancedService
+): Promise<HttpResponse<any>> {
+  try {
+    const decryptedBody = await encryptionService.decryptFieldsDeep(
+      response.body,
+      SENSITIVE_FIELDS
+    );
+    return response.clone({ body: decryptedBody });
+  } catch (error) {
+    console.error('❌ Failed to decrypt response:', error);
+    return response;
+  }
+}
+
+export const encryptionAdvancedInterceptor: HttpInterceptorFn = (
+  req: HttpRequest<unknown>,
+  next: HttpHandlerFn
+): Observable<HttpEvent<unknown>> => {
+  const encryptionService = inject(EncryptionAdvancedService);
+
+  if (!shouldEncrypt(req, encryptionService)) {
+    return next(req);
+  }
+
+  if (req.body && !(req.body instanceof FormData)) {
+    return from(encryptRequest(req, encryptionService)).pipe(
+      switchMap((encryptedRequest) =>
+        next(encryptedRequest).pipe(
+          mergeMap((event) => {
+            if (event instanceof HttpResponse && event.body) {
+              return from(decryptResponse(event, encryptionService));
+            }
+            return of(event);
+          })
         )
-      );
-    }
-
-    // No body to encrypt, just handle response
-    return this.handleResponse(request, next);
-  }
-
-  /**
-   * Check if request should be encrypted
-   */
-  private shouldEncrypt(request: HttpRequest<unknown>): boolean {
-    // Skip if encryption is disabled
-    if (!this.encryptionService.isEncryptionEnabled()) {
-      return false;
-    }
-
-    // Skip for assets
-    if (request.url.includes('assets/') || request.url.includes('/i18n/')) {
-      return false;
-    }
-
-    // Skip for external URLs (not our API)
-    if (!request.url.startsWith(environment.apiUrl)) {
-      return false;
-    }
-
-    // Skip for health check endpoints
-    if (request.url.includes('/health')) {
-      return false;
-    }
-
-    return true;
-  }
-
-  /**
-   * Encrypt request body (Field Level)
-   */
-  private async encryptRequest(
-    request: HttpRequest<unknown>
-  ): Promise<HttpRequest<unknown>> {
-    try {
-      // Recursively encrypt sensitive fields
-      const encryptedBody = await this.encryptionService.encryptFieldsDeep(
-        request.body,
-        this.SENSITIVE_FIELDS
-      );
-
-      return request.clone({
-        body: encryptedBody,
-      });
-    } catch (error) {
-      console.error('❌ Failed to encrypt request:', error);
-      // Fall back to unencrypted request
-      return request;
-    }
-  }
-
-  /**
-   * Handle response and decrypt if needed
-   */
-  private handleResponse(
-    request: HttpRequest<unknown>,
-    next: HttpHandler
-  ): Observable<HttpEvent<unknown>> {
-    return next.handle(request).pipe(
-      mergeMap((event) => {
-        if (event instanceof HttpResponse && event.body) {
-          return from(this.decryptResponse(event));
-        }
-        return of(event);
-      })
+      )
     );
   }
 
-  /**
-   * Decrypt response body (Field Level)
-   */
-  private async decryptResponse(
-    response: HttpResponse<any>
-  ): Promise<HttpResponse<any>> {
-    try {
-      // Recursively decrypt sensitive fields
-      const decryptedBody = await this.encryptionService.decryptFieldsDeep(
-        response.body,
-        this.SENSITIVE_FIELDS
-      );
-
-      return response.clone({
-        body: decryptedBody,
-      });
-    } catch (error) {
-      console.error('❌ Failed to decrypt response:', error);
-      // Return original response if decryption fails
-      return response;
-    }
-  }
-}
+  return next(req).pipe(
+    mergeMap((event) => {
+      if (event instanceof HttpResponse && event.body) {
+        return from(decryptResponse(event, encryptionService));
+      }
+      return of(event);
+    })
+  );
+};

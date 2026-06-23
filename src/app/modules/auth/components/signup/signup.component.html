@@ -1,14 +1,12 @@
 <ion-content [fullscreen]="true">
-  <ng-container *ngIf="vm$ | async as vm">
+  @if (vm$ | async; as vm) {
     <div class="auth-page">
-
       <!-- ══ Hero / Brand Zone ══ -->
       <div class="auth-hero">
         <div class="orb orb--a"></div>
         <div class="orb orb--b"></div>
         <div class="orb orb--c"></div>
         <div class="hero-grid"></div>
-
         <div class="hero-content">
           <div class="logo-ring-wrap">
             <div class="logo-ring">
@@ -19,14 +17,11 @@
           <p class="app-tagline">{{ 'AUTH.APP_TAGLINE' | translate }}</p>
         </div>
       </div>
-
       <!-- ══ Form Sheet ══ -->
       <div class="auth-sheet">
         <div class="sheet-handle"></div>
-
         <h2 class="sheet-title">{{ "AUTH.CREATE_ACCOUNT" | translate }}</h2>
         <p class="sheet-subtitle">{{ "AUTH.SIGN_UP_TO_CONTINUE" | translate }}</p>
-
         <!-- Social Signup -->
         <div class="social-signup-buttons">
           <ion-button
@@ -35,26 +30,24 @@
             class="google-btn"
             (click)="signInWithGoogle()"
             [disabled]="vm.isLoading"
-          >
+            >
             <ion-icon slot="start" name="logo-google"></ion-icon>
             {{ "AUTH.SIGN_UP_WITH_GOOGLE" | translate }}
           </ion-button>
         </div>
-
         <div class="divider">
           <span class="divider-line"></span>
           <span class="divider-text">{{ "AUTH.OR_SIGN_UP_WITH" | translate }}</span>
           <span class="divider-line"></span>
         </div>
-
         <form [formGroup]="signupForm" (ngSubmit)="signup()" class="signup-form">
-
           <!-- Error message -->
-          <ion-note *ngIf="vm.errorMessage" color="danger" class="error-message">
-            <ion-icon name="alert-circle-outline"></ion-icon>
-            {{ vm.errorMessage }}
-          </ion-note>
-
+          @if (vm.errorMessage) {
+            <ion-note color="danger" class="error-message">
+              <ion-icon name="alert-circle-outline"></ion-icon>
+              {{ vm.errorMessage }}
+            </ion-note>
+          }
           <!-- Name Input -->
           <app-ui-input
             [formControlName]="formFields.name"
@@ -64,7 +57,6 @@
             [required]="true"
             startIcon="person-outline"
           ></app-ui-input>
-
           <!-- Email Input -->
           <app-ui-input
             id="signup-email"
@@ -76,7 +68,6 @@
             [required]="true"
             startIcon="mail-outline"
           ></app-ui-input>
-
           <!-- Password Input -->
           <app-ui-input
             id="signup-password"
@@ -88,23 +79,23 @@
             startIcon="lock-closed-outline"
             [togglePassword]="true"
           ></app-ui-input>
-
           <!-- Password Strength Meter -->
-          <div class="password-strength" *ngIf="passwordControl?.value">
-            <div class="strength-bars">
-              <span class="bar" [class.active]="passwordStrength >= 25" [class.weak]="passwordStrength < 50"></span>
-              <span class="bar" [class.active]="passwordStrength >= 50" [class.medium]="passwordStrength >= 50 && passwordStrength < 75"></span>
-              <span class="bar" [class.active]="passwordStrength >= 75" [class.strong]="passwordStrength >= 75"></span>
-              <span class="bar" [class.active]="passwordStrength >= 100" [class.strong]="passwordStrength >= 100"></span>
+          @if (passwordControl?.value) {
+            <div class="password-strength">
+              <div class="strength-bars">
+                <span class="bar" [class.active]="passwordStrength >= 25" [class.weak]="passwordStrength < 50"></span>
+                <span class="bar" [class.active]="passwordStrength >= 50" [class.medium]="passwordStrength >= 50 && passwordStrength < 75"></span>
+                <span class="bar" [class.active]="passwordStrength >= 75" [class.strong]="passwordStrength >= 75"></span>
+                <span class="bar" [class.active]="passwordStrength >= 100" [class.strong]="passwordStrength >= 100"></span>
+              </div>
+              <span class="strength-label"
+                [class.weak]="passwordStrength < 50"
+                [class.medium]="passwordStrength >= 50 && passwordStrength < 75"
+                [class.strong]="passwordStrength >= 75">
+                {{ passwordStrengthMessage }}
+              </span>
             </div>
-            <span class="strength-label"
-              [class.weak]="passwordStrength < 50"
-              [class.medium]="passwordStrength >= 50 && passwordStrength < 75"
-              [class.strong]="passwordStrength >= 75">
-              {{ passwordStrengthMessage }}
-            </span>
-          </div>
-
+          }
           <!-- Confirm Password -->
           <app-ui-input
             id="signup-confirm-password"
@@ -116,33 +107,34 @@
             startIcon="shield-checkmark-outline"
             [togglePassword]="true"
           ></app-ui-input>
-
           <!-- Password Mismatch Error -->
-          <div class="field-error" *ngIf="signupForm.hasError('passwordMismatch') && confirmPasswordControl?.dirty">
-            <ion-icon name="alert-circle-outline"></ion-icon>
-            {{ 'AUTH.PASSWORD_MISMATCH' | translate }}
-          </div>
-
+          @if (signupForm.hasError('passwordMismatch') && confirmPasswordControl?.dirty) {
+            <div class="field-error">
+              <ion-icon name="alert-circle-outline"></ion-icon>
+              {{ 'AUTH.PASSWORD_MISMATCH' | translate }}
+            </div>
+          }
           <!-- Password Requirements -->
-          <div class="password-requirements" *ngIf="passwordControl?.value">
-            <div class="req" [class.valid]="passwordControl?.value?.length >= 8">
-              <span class="req-dot"></span>
-              {{ "AUTH.PASSWORD_MIN_LENGTH" | translate }}
+          @if (passwordControl?.value) {
+            <div class="password-requirements">
+              <div class="req" [class.valid]="passwordControl?.value?.length >= 8">
+                <span class="req-dot"></span>
+                {{ "AUTH.PASSWORD_MIN_LENGTH" | translate }}
+              </div>
+              <div class="req" [class.valid]="passwordControl?.value?.match('.*[A-Z].*')">
+                <span class="req-dot"></span>
+                {{ "AUTH.PASSWORD_UPPERCASE" | translate }}
+              </div>
+              <div class="req" [class.valid]="passwordControl?.value?.match('.*[a-z].*')">
+                <span class="req-dot"></span>
+                {{ "AUTH.PASSWORD_LOWERCASE" | translate }}
+              </div>
+              <div class="req" [class.valid]="passwordControl?.value?.match('.*[0-9].*')">
+                <span class="req-dot"></span>
+                {{ "AUTH.PASSWORD_NUMBER" | translate }}
+              </div>
             </div>
-            <div class="req" [class.valid]="passwordControl?.value?.match('.*[A-Z].*')">
-              <span class="req-dot"></span>
-              {{ "AUTH.PASSWORD_UPPERCASE" | translate }}
-            </div>
-            <div class="req" [class.valid]="passwordControl?.value?.match('.*[a-z].*')">
-              <span class="req-dot"></span>
-              {{ "AUTH.PASSWORD_LOWERCASE" | translate }}
-            </div>
-            <div class="req" [class.valid]="passwordControl?.value?.match('.*[0-9].*')">
-              <span class="req-dot"></span>
-              {{ "AUTH.PASSWORD_NUMBER" | translate }}
-            </div>
-          </div>
-
+          }
           <!-- Terms -->
           <div class="form-options">
             <label class="terms-label">
@@ -153,18 +145,20 @@
               </span>
             </label>
           </div>
-
           <!-- Submit -->
           <ion-button
             type="submit"
             expand="block"
             [disabled]="signupForm.invalid || vm.isLoading"
             class="auth-submit-button"
-          >
-            <span *ngIf="!vm.isLoading">{{ "AUTH.SIGN_UP" | translate }}</span>
-            <ion-spinner *ngIf="vm.isLoading" name="crescent"></ion-spinner>
+            >
+            @if (!vm.isLoading) {
+              <span>{{ "AUTH.SIGN_UP" | translate }}</span>
+            }
+            @if (vm.isLoading) {
+              <ion-spinner name="crescent"></ion-spinner>
+            }
           </ion-button>
-
           <!-- Login Link -->
           <div class="login-link-container ion-text-center">
             {{ "AUTH.ALREADY_HAVE_ACCOUNT" | translate }}
@@ -174,7 +168,6 @@
           </div>
         </form>
       </div>
-
     </div>
-  </ng-container>
+  }
 </ion-content>

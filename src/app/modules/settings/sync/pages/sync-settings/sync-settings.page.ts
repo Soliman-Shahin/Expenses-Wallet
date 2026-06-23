@@ -1,15 +1,17 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { LoadingController } from '@ionic/angular';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { LoadingController, IonicModule } from '@ionic/angular';
 
 import { SyncService } from 'src/app/core/services/sync.service';
 import { OfflineStorageService } from 'src/app/core/services/offline-storage.service';
 import { SyncConfig } from 'src/app/shared/models/sync.model';
 import { BaseComponent } from 'src/app/shared/base';
+import { AsyncPipe, DecimalPipe } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
-  selector: 'app-sync-settings',
-  template: `
+    selector: 'app-sync-settings',
+    template: `
     <ion-header mode="ios">
       <ion-toolbar>
         <ion-buttons slot="start">
@@ -18,16 +20,16 @@ import { BaseComponent } from 'src/app/shared/base';
         <ion-title>{{ 'SYNC.SETTINGS_TITLE' | translate }}</ion-title>
       </ion-toolbar>
     </ion-header>
-
+    
     <ion-content class="settings-content" [fullscreen]="true">
       <ion-header collapse="condense">
         <ion-toolbar>
           <ion-title size="large">{{ 'SYNC.SETTINGS_TITLE' | translate }}</ion-title>
         </ion-toolbar>
       </ion-header>
-
+    
       <form [formGroup]="syncForm" (ngSubmit)="saveSettings()" class="settings-container">
-        
+    
         <div class="section-label">{{ 'SYNC.AUTO_SYNC' | translate }}</div>
         <ion-list inset="true" class="premium-list">
           <ion-item>
@@ -40,19 +42,21 @@ import { BaseComponent } from 'src/app/shared/base';
             </ion-label>
             <ion-toggle formControlName="autoSync" slot="end" color="success"></ion-toggle>
           </ion-item>
-
-          <ion-item *ngIf="syncForm.get('autoSync')?.value">
-            <ion-label>{{ 'SYNC.SYNC_INTERVAL' | translate }}</ion-label>
-            <ion-select formControlName="syncInterval" interface="popover" slot="end" class="modern-select">
-              <ion-select-option value="10000">{{ 'SYNC.EVERY_10_SECONDS' | translate }}</ion-select-option>
-              <ion-select-option value="30000">{{ 'SYNC.EVERY_30_SECONDS' | translate }}</ion-select-option>
-              <ion-select-option value="60000">{{ 'SYNC.EVERY_MINUTE' | translate }}</ion-select-option>
-              <ion-select-option value="300000">{{ 'SYNC.EVERY_5_MINUTES' | translate }}</ion-select-option>
-              <ion-select-option value="900000">{{ 'SYNC.EVERY_15_MINUTES' | translate }}</ion-select-option>
-            </ion-select>
-          </ion-item>
+    
+          @if (syncForm.get('autoSync')?.value) {
+            <ion-item>
+              <ion-label>{{ 'SYNC.SYNC_INTERVAL' | translate }}</ion-label>
+              <ion-select formControlName="syncInterval" interface="popover" slot="end" class="modern-select">
+                <ion-select-option value="10000">{{ 'SYNC.EVERY_10_SECONDS' | translate }}</ion-select-option>
+                <ion-select-option value="30000">{{ 'SYNC.EVERY_30_SECONDS' | translate }}</ion-select-option>
+                <ion-select-option value="60000">{{ 'SYNC.EVERY_MINUTE' | translate }}</ion-select-option>
+                <ion-select-option value="300000">{{ 'SYNC.EVERY_5_MINUTES' | translate }}</ion-select-option>
+                <ion-select-option value="900000">{{ 'SYNC.EVERY_15_MINUTES' | translate }}</ion-select-option>
+              </ion-select>
+            </ion-item>
+          }
         </ion-list>
-
+    
         <div class="section-label">{{ 'SYNC.CONFLICT_RESOLUTION' | translate }}</div>
         <ion-list inset="true" class="premium-list">
           <ion-item>
@@ -63,7 +67,7 @@ import { BaseComponent } from 'src/app/shared/base';
               <ion-select-option value="server">{{ 'SYNC.USE_SERVER' | translate }}</ion-select-option>
             </ion-select>
           </ion-item>
-
+    
           <ion-item>
             <div slot="start" class="icon-wrapper color-purple">
               <ion-icon name="cloud-offline"></ion-icon>
@@ -75,20 +79,20 @@ import { BaseComponent } from 'src/app/shared/base';
             <ion-toggle formControlName="enableOfflineMode" slot="end" color="success"></ion-toggle>
           </ion-item>
         </ion-list>
-
+    
         <div class="section-label">{{ 'SYNC.ADVANCED' | translate }}</div>
         <ion-list inset="true" class="premium-list">
           <ion-item>
             <ion-label>{{ 'SYNC.MAX_RETRIES' | translate }}</ion-label>
             <ion-input type="number" formControlName="maxRetries" min="1" max="10" slot="end" class="right-align-input"></ion-input>
           </ion-item>
-
+    
           <ion-item>
             <ion-label>{{ 'SYNC.BATCH_SIZE' | translate }}</ion-label>
             <ion-input type="number" formControlName="batchSize" min="1" max="50" slot="end" class="right-align-input"></ion-input>
           </ion-item>
         </ion-list>
-
+    
         <div class="section-label">{{ 'SYNC.STORAGE_INFO' | translate }}</div>
         <ion-list inset="true" class="premium-list">
           <ion-item>
@@ -100,7 +104,7 @@ import { BaseComponent } from 'src/app/shared/base';
               <p>{{ storageSize | async | number : '1.2-2' }} KB</p>
             </ion-label>
           </ion-item>
-
+    
           <ion-item>
             <div slot="start" class="icon-wrapper color-orange">
               <ion-icon name="cloud-upload"></ion-icon>
@@ -111,23 +115,23 @@ import { BaseComponent } from 'src/app/shared/base';
             </ion-label>
           </ion-item>
         </ion-list>
-
+    
         <div class="ion-padding">
           <ion-button expand="block" type="submit" class="ion-margin-bottom">
             <ion-icon name="save-outline" slot="start"></ion-icon>
             {{ 'COMMON.SAVE' | translate }}
           </ion-button>
-
+    
           <ion-button expand="block" fill="outline" (click)="forceSync()" class="ion-margin-bottom">
             <ion-icon name="sync-outline" slot="start"></ion-icon>
             {{ 'SYNC.SYNC_NOW' | translate }}
           </ion-button>
-
+    
           <ion-button expand="block" fill="outline" color="warning" (click)="createBackup()" class="ion-margin-bottom">
             <ion-icon name="download-outline" slot="start"></ion-icon>
             {{ 'SYNC.CREATE_BACKUP' | translate }}
           </ion-button>
-
+    
           <ion-button expand="block" fill="outline" color="danger" (click)="clearOfflineData()">
             <ion-icon name="trash-outline" slot="start"></ion-icon>
             {{ 'SYNC.CLEAR_OFFLINE_DATA' | translate }}
@@ -135,8 +139,8 @@ import { BaseComponent } from 'src/app/shared/base';
         </div>
       </form>
     </ion-content>
-  `,
-  styles: [`
+    `,
+    styles: [`
     .settings-content { --background: var(--ion-color-step-50, #f2f2f6); }
     .settings-container { padding: 0 0 100px 0; }
     .section-label {
@@ -175,7 +179,9 @@ import { BaseComponent } from 'src/app/shared/base';
     :host-context(body.dark) .settings-content { --background: #000000; }
     :host-context(body.dark) .section-label { color: #98989d; }
     :host-context(body.dark) .premium-list { background: #1c1c1e; box-shadow: none; }
-  `]
+  `],
+    standalone: true,
+    imports: [IonicModule, FormsModule, ReactiveFormsModule, AsyncPipe, DecimalPipe, TranslateModule]
 })
 export class SyncSettingsPage extends BaseComponent implements OnInit {
   private syncService = inject(SyncService);

@@ -4,12 +4,7 @@ import {
   inject,
   OnInit,
 } from '@angular/core';
-import {
-  AlertController,
-  InfiniteScrollCustomEvent,
-  ItemReorderEventDetail,
-  RefresherCustomEvent,
-} from '@ionic/angular';
+import { AlertController, InfiniteScrollCustomEvent, ItemReorderEventDetail, RefresherCustomEvent, IonicModule } from '@ionic/angular';
 import {
   BehaviorSubject,
   catchError,
@@ -20,15 +15,28 @@ import {
   takeUntil,
   tap,
 } from 'rxjs';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { BaseListComponent } from 'src/app/shared/base';
 import { Category, CategoryParams } from '../../models';
+import { SkeletonBlockComponent } from '../../../../shared/ui/skeleton-block/skeleton-block.component';
+import { NgClass, AsyncPipe, LowerCasePipe } from '@angular/common';
+import { AddFabButtonComponent } from '../../../../shared/ui/add-fab-button/add-fab-button.component';
 
 @Component({
-  selector: 'app-categories',
-  templateUrl: './categories.component.html',
-  styleUrls: ['./categories.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-categories',
+    templateUrl: './categories.component.html',
+    styleUrls: ['./categories.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [
+        IonicModule,
+        SkeletonBlockComponent,
+        NgClass,
+        AddFabButtonComponent,
+        AsyncPipe,
+        LowerCasePipe,
+        TranslateModule,
+    ],
 })
 export class CategoriesComponent
   extends BaseListComponent<Category>

@@ -9,7 +9,7 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { FormGroup, Validators } from '@angular/forms';
+import { FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Observable, combineLatest, BehaviorSubject } from 'rxjs';
 import { map, startWith, finalize, takeUntil, tap } from 'rxjs/operators';
 
@@ -17,12 +17,25 @@ import { BaseComponent } from 'src/app/shared/base/base.component';
 import { Expense, Category } from 'src/app/shared/models';
 import { ProfileService } from 'src/app/modules/profile/services/profile.service';
 import { trapFocus, releaseFocus } from 'src/app/shared/utils/focus-trap';
+import { IonicModule } from '@ionic/angular';
+import { NgClass, AsyncPipe, DatePipe } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
-  selector: 'app-expense-form',
-  templateUrl: './expense-form.component.html',
-  styleUrls: ['./expense-form.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-expense-form',
+    templateUrl: './expense-form.component.html',
+    styleUrls: ['./expense-form.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [
+        IonicModule,
+        FormsModule,
+        ReactiveFormsModule,
+        NgClass,
+        AsyncPipe,
+        DatePipe,
+        TranslateModule,
+    ],
 })
 export class ExpenseFormComponent
   extends BaseComponent

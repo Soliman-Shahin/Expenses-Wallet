@@ -4,26 +4,27 @@
     name="color-palette-outline"
     (click)="colorInput.click()"
     [title]="'CATEGORY.CUSTOM_COLOR' | translate"
-  >
+    >
     <input
       #colorInput
       class="color-input"
       type="color"
       (change)="selectColors($event)"
-    />
-  </ion-icon>
-  <span
-    *ngFor="let color of colors; trackBy: trackByColor"
-    class="color-button"
-    [class.selected]="selectedColor === color.colorCode"
-    [style.background-color]="color.colorCode"
-    [title]="color.name"
-    [attr.aria-label]="color.name"
-    [attr.aria-pressed]="selectedColor === color.colorCode"
-    role="radio"
-    tabindex="0"
-    (click)="selectColor(color)"
-    (keydown.enter)="selectColor(color)"
-    (keydown.space)="selectColor(color)"
-  ></span>
-</div>
+      />
+    </ion-icon>
+    @for (color of colors; track trackByColor($index, color)) {
+      <span
+        class="color-button"
+        [class.selected]="selectedColor === color.colorCode"
+        [style.background-color]="color.colorCode"
+        [title]="color.name"
+        [attr.aria-label]="color.name"
+        [attr.aria-pressed]="selectedColor === color.colorCode"
+        role="radio"
+        tabindex="0"
+        (click)="selectColor(color)"
+        (keydown.enter)="selectColor(color)"
+        (keydown.space)="selectColor(color)"
+      ></span>
+    }
+  </div>

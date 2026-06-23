@@ -1,20 +1,25 @@
-import { Component, ChangeDetectionStrategy, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, signal, computed, effect } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   Subject,
-  takeUntil,
   debounceTime,
   distinctUntilChanged,
   finalize,
+  takeUntil,
 } from 'rxjs';
 import { Router } from '@angular/router';
-import { ExpenseService } from 'src/app/core/services/expense.service';
 import { ProfileService } from 'src/app/modules/profile/services/profile.service';
 import { Expense } from 'src/app/shared/models/expense.model';
 import { Category } from 'src/app/shared/models/category.model';
 import { BaseComponent } from 'src/app/shared/base/base.component';
-import { ModalController } from '@ionic/angular';
+import { ModalController, IonicModule } from '@ionic/angular';
 import { ExpenseFormComponent } from 'src/app/home/components/expense-form/expense-form.component';
 import { ComponentStateService } from 'src/app/shared/services/component-state.service';
+import { FormsModule } from '@angular/forms';
+import { SkeletonBlockComponent } from '../../../../shared/ui/skeleton-block/skeleton-block.component';
+import { NgClass, LowerCasePipe, CurrencyPipe, DatePipe } from '@angular/common';
+import { AddFabButtonComponent } from '../../../../shared/ui/add-fab-button/add-fab-button.component';
+import { TranslateModule } from '@ngx-translate/core';
 
 interface TransactionItem {
   _id: string;
@@ -36,49 +41,73 @@ interface TransactionItem {
   styleUrls: ['./transactions-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [ComponentStateService],
+  standalone: true,
+  imports: [
+    IonicModule,
+    FormsModule,
+    SkeletonBlockComponent,
+    NgClass,
+    AddFabButtonComponent,
+    LowerCasePipe,
+    CurrencyPipe,
+    DatePipe,
+    TranslateModule,
+  ],
 })
 export class TransactionsListComponent extends BaseComponent implements OnInit {
-  transactions: TransactionItem[] = [];
-  categories: Category[] = [];
-  error: string | null = null;
-  userCurrency = 'USD';
+  // Signals for state management
+  transactions = signal<TransactionItem[]>([]);
+  categories = signal<Category[]>([]);
+  userCurrency = signal<string>('USD');
 
-  // Search and filters
-  searchTerm = '';
-  selectedCategories: string[] = []; // Multi-select: array of selected category IDs
-  selectedType = '';
-  startDate: string | null = null;
-  endDate: string | null = null;
+  // Filters signals
+  searchTerm = signal<string>('');
+  selectedCategories = signal<string[]>([]);
+  selectedType = signal<string>('');
+  startDate = signal<string | null>(null);
+  endDate = signal<string | null>(null);
+
+  // UI state signals
+  showSearch = signal<boolean>(false);
+  showFilters = signal<boolean>(false);
+  showDatePicker = signal<boolean>(false);
+  showCategoryPopover = signal<boolean>(false);
+
   tempStartDate: string | null = null;
   tempEndDate: string | null = null;
-  today = new Date().toISOString();
-
-  // UI state
-  showSearch = false;
-  showFilters = false;
-  showDatePicker = false;
-  showCategoryPopover = false;
   categoryPopoverEvent: any = null;
 
   private searchSubject = new Subject<string>();
+  private isOpeningModal = false;
+  private isProcessingAction = false;
+
+  currentCalendarDate: Date = new Date();
+  calendarWeeks: Date[][] = [];
+  weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   constructor(
     private readonly profileService: ProfileService,
     private readonly modalController: ModalController
   ) {
     super();
-    // Setup search debouncing
     this.searchSubject
-      .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
-      .subscribe((searchTerm) => {
-        this.searchTerm = searchTerm;
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        takeUntilDestroyed()
+      )
+      .subscribe((term) => {
+        this.searchTerm.set(term);
         this.loadTransactions();
       });
   }
 
   override ngOnInit() {
     super.ngOnInit();
-    this.loadInitialData();
+    this.loadUserCurrency();
+
+    this.loadCategories();
+    this.loadTransactions();
   }
 
   async openAddTransactionModal() {
@@ -90,25 +119,18 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
         cssClass: 'main-modal',
       });
       await modal.present();
-
       const { role } = await modal.onDidDismiss();
       if (role === 'confirm' || role === 'delete') {
-        this.loadTransactions(); // Refresh the list after adding/deleting a new transaction
+        this.loadTransactions();
       }
     } finally {
       this.isOpeningModal = false;
     }
   }
 
-  loadInitialData() {
-    this.loadUserCurrency();
-    this.loadCategories();
-    this.loadTransactions();
-  }
-
   loadUserCurrency() {
     const profile = this.profileService.getProfile();
-    this.userCurrency = profile?.currency || 'USD';
+    this.userCurrency.set(profile?.currency || 'USD');
   }
 
   loadCategories() {
@@ -120,72 +142,62 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
           const arr = Array.isArray(response)
             ? response
             : (response as any)?.data?.data || (response as any)?.data || [];
-          this.categories = arr;
+          this.categories.set(arr);
         },
-        error: (err: any) => {
-          console.error('Error loading categories:', err);
-        },
+        error: (err: any) => console.error('Error loading categories:', err),
       });
   }
 
   loadTransactions() {
     this.setLoading(true);
-    this.error = null;
+    this.setError(null);
 
-    // Build query parameters for filtering
     const params: any = {};
-    if (this.searchTerm) params.search = this.searchTerm;
-    // Send selected categories as comma-separated string (or single value if only one)
-    if (this.selectedCategories.length === 1) {
-      params.category = this.selectedCategories[0];
-    } else if (this.selectedCategories.length > 1) {
-      params.categories = this.selectedCategories.join(',');
+    if (this.searchTerm()) params.search = this.searchTerm();
+    
+    const selectedCats = this.selectedCategories();
+    if (selectedCats.length === 1) {
+      params.category = selectedCats[0];
+    } else if (selectedCats.length > 1) {
+      params.categories = selectedCats.join(',');
     }
-    if (this.selectedType) params.type = this.selectedType;
-    if (this.startDate) params.startDate = this.startDate;
+
+    if (this.selectedType()) params.type = this.selectedType();
+    
+    if (this.startDate()) params.startDate = this.startDate();
     else {
       const now = new Date();
       params.startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
     }
     
-    if (this.endDate) params.endDate = this.endDate;
+    if (this.endDate()) params.endDate = this.endDate();
     else {
       const now = new Date();
       params.endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999).toISOString();
     }
 
     this.expenseService
-      .getExpenses(params, true) // forceRefresh = true to bypass cache
+      .getExpenses(params, true)
       .pipe(
-        takeUntil(this.destroy$),
         finalize(() => {
           this.setLoading(false);
           this.cdr.markForCheck();
-        })
+        }),
+        takeUntil(this.destroy$)
       )
       .subscribe({
         next: (response: any) => {
           try {
             let rawExpenses: Expense[] = [];
-
-            // Handle both old format (array) and new format (object with data)
             if (response?.data && Array.isArray(response.data)) {
               rawExpenses = response.data;
             } else {
               rawExpenses = Array.isArray(response)
                 ? response
-                : (response as any)?.data?.data ||
-                  (response as any)?.data ||
-                  [];
+                : (response as any)?.data?.data || (response as any)?.data || [];
             }
-
-            // Map to ViewModel
             const items = rawExpenses.map((e) => this.mapToViewModel(e));
-
-            // Sort by date (newest first)
-            this.transactions = items.sort((a, b) => {
-              return b.date.getTime() - a.date.getTime();
-            });
+            this.transactions.set(items.sort((a, b) => b.date.getTime() - a.date.getTime()));
           } catch (err) {
             console.error('Error processing transactions:', err);
             this.setError('Failed to process data');
@@ -199,48 +211,30 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
   }
 
   private mapToViewModel(e: Expense): TransactionItem {
-    // Handle date normalization
     const dateVal = e.date || e.createdAt || new Date();
     let dateObj = new Date(dateVal);
+    if (isNaN(dateObj.getTime())) dateObj = new Date();
 
-    // Safety check for invalid dates
-    if (isNaN(dateObj.getTime())) {
-      dateObj = new Date(); // Fallback to current date
-    }
-
-    // Handle Category
-    // e.category can be string (ID) or object (populated)
     const cat = e.category;
     const isPopulated = cat && typeof cat !== 'string';
-
-    // Fallbacks
     const categoryName = isPopulated ? (cat as Category).title : '—';
-    const categoryColor = isPopulated
-      ? (cat as Category).color || '#ccc'
-      : '#ccc';
+    const categoryColor = isPopulated ? (cat as Category).color || '#ccc' : '#ccc';
 
-    // Icon logic
     let categoryIcon = 'pricetag-outline';
     let type: 'income' | 'outcome' = 'outcome';
 
     if (isPopulated) {
       const c = cat as Category;
       type = c.type;
-
-      if (c.icon) {
-        categoryIcon = c.icon;
-      } else {
+      if (c.icon) categoryIcon = c.icon;
+      else {
         if (c.type === 'income') categoryIcon = 'arrow-down-circle-outline';
         else if (c.type === 'outcome') categoryIcon = 'arrow-up-circle-outline';
       }
     }
 
-    // Amount
     const amount = Number(e.amount) || 0;
-
-    // Title/Description
-    const title =
-      e.description || (isPopulated ? (cat as Category).title : 'Transaction');
+    const title = e.description || (isPopulated ? (cat as Category).title : 'Transaction');
 
     return {
       _id: e._id,
@@ -257,94 +251,87 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
     };
   }
 
-  // Search and filter methods
   onSearchChange(event: any) {
     this.searchSubject.next(event.target.value);
   }
 
-  onFilterChange() {
+  onFilterChange(event?: any) {
+    if (event?.target) {
+      this.selectedType.set(event.target.value || '');
+    }
     this.loadTransactions();
   }
 
-  // ── Category Popover (Multi-Select) ─────────────────────────────
-
   openCategoryPopover(event: Event) {
     this.categoryPopoverEvent = event;
-    this.showCategoryPopover = true;
+    this.showCategoryPopover.set(true);
   }
 
   closeCategoryPopover() {
-    this.showCategoryPopover = false;
+    this.showCategoryPopover.set(false);
     this.categoryPopoverEvent = null;
   }
 
   toggleCategory(catId: string) {
+    const current = this.selectedCategories();
     if (catId === '') {
-      // "All" clears all selections
-      this.selectedCategories = [];
+      this.selectedCategories.set([]);
     } else {
-      const idx = this.selectedCategories.indexOf(catId);
+      const idx = current.indexOf(catId);
       if (idx === -1) {
-        this.selectedCategories = [...this.selectedCategories, catId];
+        this.selectedCategories.set([...current, catId]);
       } else {
-        this.selectedCategories = this.selectedCategories.filter(id => id !== catId);
+        this.selectedCategories.set(current.filter(id => id !== catId));
       }
     }
     this.loadTransactions();
-    this.cdr.markForCheck();
   }
 
   isCategorySelected(catId: string): boolean {
-    if (catId === '') return this.selectedCategories.length === 0;
-    return this.selectedCategories.includes(catId);
+    const current = this.selectedCategories();
+    if (catId === '') return current.length === 0;
+    return current.includes(catId);
   }
 
   getSelectedCategoryText(): string {
-    if (this.selectedCategories.length === 0) {
-      return this.translateService.instant('TRANSACTIONS.ALL_CATEGORIES');
-    }
-    if (this.selectedCategories.length === 1) {
-      const cat = this.categories.find(c => c._id === this.selectedCategories[0]);
+    const current = this.selectedCategories();
+    if (current.length === 0) return this.translateService.instant('TRANSACTIONS.ALL_CATEGORIES');
+    if (current.length === 1) {
+      const cat = this.categories().find(c => c._id === current[0]);
       return cat?.title || this.translateService.instant('TRANSACTIONS.CATEGORY');
     }
-    return `${this.selectedCategories.length} ${this.translateService.instant('COMMON.SELECTED')}`;
+    return `${current.length} ${this.translateService.instant('COMMON.SELECTED')}`;
   }
 
   getSelectedCategoryIcon(): string {
-    if (this.selectedCategories.length === 1) {
-      const cat = this.categories.find(c => c._id === this.selectedCategories[0]);
+    const current = this.selectedCategories();
+    if (current.length === 1) {
+      const cat = this.categories().find(c => c._id === current[0]);
       return cat?.icon || 'pricetag-outline';
     }
     return 'pricetag-outline';
   }
 
   getSelectedCategoryColor(): string | null {
-    if (this.selectedCategories.length === 1) {
-      const cat = this.categories.find(c => c._id === this.selectedCategories[0]);
+    const current = this.selectedCategories();
+    if (current.length === 1) {
+      const cat = this.categories().find(c => c._id === current[0]);
       return cat?.color || null;
     }
     return null;
   }
 
   toggleFilters() {
-    this.showFilters = !this.showFilters;
+    this.showFilters.set(!this.showFilters());
   }
 
   toggleSearch() {
-    this.showSearch = !this.showSearch;
-    if (!this.showSearch) {
-      this.searchTerm = '';
+    this.showSearch.set(!this.showSearch());
+    if (!this.showSearch()) {
+      this.searchTerm.set('');
       this.loadTransactions();
     }
   }
-
-  // --- Custom Date Range Picker ---
-  currentCalendarDate: Date = new Date();
-  
-  private isOpeningModal = false;
-  private isProcessingAction = false;
-  calendarWeeks: Date[][] = [];
-  weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   generateCalendar(baseDate: Date) {
     const year = baseDate.getFullYear();
@@ -353,11 +340,11 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
     const lastDayOfMonth = new Date(year, month + 1, 0);
     
     const startDate = new Date(firstDayOfMonth);
-    startDate.setDate(startDate.getDate() - startDate.getDay()); // Go back to Sunday
+    startDate.setDate(startDate.getDate() - startDate.getDay());
     
     const endDate = new Date(lastDayOfMonth);
     if (endDate.getDay() !== 6) {
-      endDate.setDate(endDate.getDate() + (6 - endDate.getDay())); // Go forward to Saturday
+      endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
     }
 
     const weeks: Date[][] = [];
@@ -372,7 +359,6 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
       }
       currentDate.setDate(currentDate.getDate() + 1);
     }
-    
     this.calendarWeeks = weeks;
   }
 
@@ -387,27 +373,22 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
   }
 
   selectDate(date: Date) {
-    // If both start and end are selected, reset and start over
     if (this.tempStartDate && this.tempEndDate) {
       this.tempStartDate = date.toISOString();
       this.tempEndDate = null;
       return;
     }
-    // If only start is selected
     if (this.tempStartDate && !this.tempEndDate) {
       const start = new Date(this.tempStartDate);
       if (date < start) {
-        // If selected date is before start date, it becomes the new start date
         this.tempStartDate = date.toISOString();
       } else {
-        // Selected date is after start date, so it's the end date
         const end = new Date(date);
         end.setHours(23, 59, 59, 999);
         this.tempEndDate = end.toISOString();
       }
       return;
     }
-    // If nothing is selected
     this.tempStartDate = date.toISOString();
   }
 
@@ -441,65 +422,59 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
     return date.getMonth() === this.currentCalendarDate.getMonth();
   }
 
-  // Date picker methods
   openDatePicker() {
-    this.tempStartDate = this.startDate;
-    this.tempEndDate = this.endDate;
+    this.tempStartDate = this.startDate();
+    this.tempEndDate = this.endDate();
     
-    // Default calendar view to tempStartDate if available, otherwise current month
     if (this.tempStartDate) {
       this.currentCalendarDate = new Date(this.tempStartDate);
     } else {
       this.currentCalendarDate = new Date();
     }
     this.generateCalendar(this.currentCalendarDate);
-    
-    this.showDatePicker = true;
+    this.showDatePicker.set(true);
   }
 
   closeDatePicker() {
-    this.showDatePicker = false;
+    this.showDatePicker.set(false);
   }
 
   applyDateFilter() {
-    this.startDate = this.tempStartDate;
-    this.endDate = this.tempEndDate;
-    this.showDatePicker = false;
+    this.startDate.set(this.tempStartDate);
+    this.endDate.set(this.tempEndDate);
+    this.showDatePicker.set(false);
     this.loadTransactions();
   }
 
   clearDateFilter() {
-    this.startDate = null;
-    this.endDate = null;
+    this.startDate.set(null);
+    this.endDate.set(null);
     this.tempStartDate = null;
     this.tempEndDate = null;
-    this.showDatePicker = false;
+    this.showDatePicker.set(false);
     this.loadTransactions();
   }
 
   getDateRangeText(): string {
-    if (this.startDate && this.endDate) {
-      const start = new Date(this.startDate).toLocaleDateString();
-      const end = new Date(this.endDate).toLocaleDateString();
-      return `${start} ${this.translateService.instant('TRANSACTIONS.TO')} ${end}`;
-    } else if (this.startDate) {
-      return `${this.translateService.instant('TRANSACTIONS.FROM')} ${new Date(this.startDate).toLocaleDateString()}`;
-    } else if (this.endDate) {
-      return `${this.translateService.instant('TRANSACTIONS.UNTIL')} ${new Date(this.endDate).toLocaleDateString()}`;
+    const sDate = this.startDate();
+    const eDate = this.endDate();
+    if (sDate && eDate) {
+      return `${new Date(sDate).toLocaleDateString()} ${this.translateService.instant('TRANSACTIONS.TO')} ${new Date(eDate).toLocaleDateString()}`;
+    } else if (sDate) {
+      return `${this.translateService.instant('TRANSACTIONS.FROM')} ${new Date(sDate).toLocaleDateString()}`;
+    } else if (eDate) {
+      return `${this.translateService.instant('TRANSACTIONS.UNTIL')} ${new Date(eDate).toLocaleDateString()}`;
     }
     return this.translateService.instant('TRANSACTIONS.CURRENT_MONTH');
   }
 
-  // Navigation
   addTransaction() {
     this.router.navigate(['/categories/create']);
   }
 
   onRefresh(event: any) {
     this.loadTransactions();
-    setTimeout(() => {
-      event.target.complete();
-    }, 1000);
+    setTimeout(() => event.target.complete(), 1000);
   }
 
   trackById(_: number, item: TransactionItem) {
@@ -516,13 +491,10 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
     try {
       const modal = await this.modalController.create({
         component: ExpenseFormComponent,
-        componentProps: {
-          expense: item,
-        },
+        componentProps: { expense: item },
         cssClass: 'main-modal',
       });
       await modal.present();
-
       const { role } = await modal.onDidDismiss();
       if (role === 'confirm' || role === 'delete') {
         this.loadTransactions();
@@ -537,7 +509,7 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
     this.isProcessingAction = true;
     try {
       const transactionName = item.description || 'Transaction';
-      const confirmed = await this.alertService.showDeleteConfirm(
+      await this.alertService.showDeleteConfirm(
         transactionName,
         async () => {
           this.expenseService.deleteExpense(item._id).subscribe({
@@ -546,7 +518,7 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
                 'bottom',
                 this.translateService.instant('EXPENSE.DELETE_SUCCESS_TOAST')
               );
-              this.loadTransactions(); // Refresh list
+              this.loadTransactions();
             },
             error: async (err) => {
               await this.toastService.presentErrorToast(

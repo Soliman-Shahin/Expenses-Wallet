@@ -47,14 +47,16 @@
     </div>
 
     <ion-accordion-group>
-      <ion-accordion *ngFor="let faq of faqs; let i = index" [value]="'faq-' + i">
-        <ion-item slot="header" color="light">
-          <ion-label class="ion-text-wrap">{{ faq.question | translate }}</ion-label>
-        </ion-item>
-        <div class="ion-padding faq-answer" slot="content">
-          <p>{{ faq.answer | translate }}</p>
-        </div>
-      </ion-accordion>
+      @for (faq of faqs; track faq; let i = $index) {
+        <ion-accordion [value]="'faq-' + i">
+          <ion-item slot="header" color="light">
+            <ion-label class="ion-text-wrap">{{ faq.question | translate }}</ion-label>
+          </ion-item>
+          <div class="ion-padding faq-answer" slot="content">
+            <p>{{ faq.answer | translate }}</p>
+          </div>
+        </ion-accordion>
+      }
     </ion-accordion-group>
   </div>
 
@@ -70,7 +72,7 @@
         <ion-label>{{ "HELP_PAGE.PRIVACY" | translate }}</ion-label>
       </ion-item>
     </ion-list>
-    
+
     <div class="version-info">
       <p>{{ "VERSION" | translate }} 1.0.0</p>
       <p class="copyright">© 2026 Expenses Wallet</p>

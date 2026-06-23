@@ -1,11 +1,15 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { BaseComponent } from 'src/app/shared/base/base.component';
+import { IonicModule } from '@ionic/angular';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
-  selector: 'app-help-page',
-  templateUrl: './help.page.html',
-  styleUrls: ['./help.page.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-help-page',
+    templateUrl: './help.page.html',
+    styleUrls: ['./help.page.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [IonicModule, TranslateModule]
 })
 export class HelpPageComponent extends BaseComponent {
   

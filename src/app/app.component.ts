@@ -2,18 +2,23 @@ import { Component, ChangeDetectionStrategy, NgZone, OnInit, inject } from '@ang
 import { App } from '@capacitor/app';
 import { BaseComponent } from './shared/base/base.component';
 import { DirectionService } from './core/services/direction.service';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { OnboardingService } from './core/services/onboarding.service';
 import { BiometricService } from './core/services/biometric.service';
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 import { BackupService } from './core/services/backup.service';
 import { environment } from '../environments/environment';
+import { LayoutComponent } from './layout/pages/layout-component/layout.component';
+import { OnboardingComponent } from './shared/components/onboarding/onboarding.component';
+import { IonicModule } from '@ionic/angular';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: 'app.component.html',
-  styleUrls: ['app.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-root',
+    templateUrl: 'app.component.html',
+    styleUrls: ['app.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [LayoutComponent, OnboardingComponent, IonicModule, TranslateModule]
 })
 export class AppComponent extends BaseComponent implements OnInit {
   isLocked = false;

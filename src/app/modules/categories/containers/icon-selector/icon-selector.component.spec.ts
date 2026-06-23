@@ -11,8 +11,8 @@ describe('IconSelectorComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ IconSelectorComponent ]
-    })
+    imports: [IconSelectorComponent]
+})
     .compileComponents();
   }));
 

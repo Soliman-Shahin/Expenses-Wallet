@@ -1,29 +1,32 @@
-<ng-container *ngIf="vm$ | async as vm">
+@if (vm$ | async; as vm) {
   <!-- If logged in, wrap the content in ion-tabs -->
-  <ion-tabs *ngIf="vm.isLoggedIn">
-    <!-- The main content (ion-router-outlet) from layout.component.html will be projected here -->
-    <ng-content></ng-content>
-
-    <!-- The actual tab bar -->
-    <ion-tab-bar slot="bottom">
-      <ng-container *ngFor="let tab of tabs">
-        <ion-tab-button
-          *ngIf="tab.visible"
-          (click)="navigateTab(tab.routerLink, $event)"
-          routerLinkActive="tab-selected"
-          [routerLinkActiveOptions]="{ exact: true }"
-        >
-          <ion-icon [name]="tab.icon"></ion-icon>
-          <ion-label *ngIf="tab.show_label">{{
-            tab.label ?? "" | translate
-          }}</ion-label>
-        </ion-tab-button>
-      </ng-container>
-    </ion-tab-bar>
-  </ion-tabs>
-
+  @if (vm.isLoggedIn) {
+    <ion-tabs>
+      <!-- The main content (ion-router-outlet) from layout.component.html will be projected here -->
+      <ng-content></ng-content>
+      <!-- The actual tab bar -->
+      <ion-tab-bar slot="bottom">
+        @for (tab of tabs; track tab) {
+          @if (tab.visible) {
+            <ion-tab-button
+              (click)="navigateTab(tab.routerLink, $event)"
+              routerLinkActive="tab-selected"
+              [routerLinkActiveOptions]="{ exact: true }"
+              >
+              <ion-icon [name]="tab.icon"></ion-icon>
+              @if (tab.show_label) {
+                <ion-label>{{
+                  tab.label ?? "" | translate
+                }}</ion-label>
+              }
+            </ion-tab-button>
+          }
+        }
+      </ion-tab-bar>
+    </ion-tabs>
+  }
   <!-- If not logged in, just show the content without tabs -->
-  <ng-container *ngIf="!vm.isLoggedIn">
+  @if (!vm.isLoggedIn) {
     <ng-content></ng-content>
-  </ng-container>
-</ng-container>
+  }
+}

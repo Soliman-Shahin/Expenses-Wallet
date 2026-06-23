@@ -1,125 +1,127 @@
-<ng-container *ngIf="vm$ | async as vm">
+@if (vm$ | async; as vm) {
   <ion-header mode="ios" class="category-ion-header" translucent="true">
     <ion-toolbar class="title-toolbar">
       <ion-title>
         <div class="header-title-container">
           <span class="main-title">{{ "SIDEBAR.CATEGORIES" | translate }}</span>
-          <span class="sub-title" *ngIf="vm.response"
-            >{{ vm.response.total }}
-            {{ "SIDEBAR.CATEGORIES" | translate | lowercase }}</span
+          @if (vm.response) {
+            <span class="sub-title"
+              >{{ vm.response.total }}
+              {{ "SIDEBAR.CATEGORIES" | translate | lowercase }}</span
+              >
+            }
+          </div>
+        </ion-title>
+      </ion-toolbar>
+      <ion-toolbar>
+        <ion-searchbar
+          class="modern-searchbar"
+          animated="true"
+          [placeholder]="'SEARCH' | translate"
+          [debounce]="500"
+          show-clear-button="always"
+          (ionInput)="filter($event)"
+        ></ion-searchbar>
+      </ion-toolbar>
+      <ion-toolbar class="segment-toolbar">
+        <ion-segment
+          value="all"
+          (ionChange)="filterByType($event)"
+          class="modern-segment"
           >
+          <ion-segment-button value="all" layout="icon-start">
+            <ion-icon name="options-outline"></ion-icon>
+            <ion-label>{{ "COMMON.ALL" | translate }}</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="outcome" layout="icon-start">
+            <ion-icon name="trending-up-outline"></ion-icon>
+            <ion-label>{{ "COMMON.OUTCOME" | translate }}</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="income" layout="icon-start">
+            <ion-icon name="trending-down-outline"></ion-icon>
+            <ion-label>{{ "COMMON.INCOME" | translate }}</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+        <ion-refresher-content></ion-refresher-content>
+      </ion-refresher>
+      <!-- Skeleton loaders while fetching -->
+      @if (vm.isLoading) {
+        <div class="skeleton-list">
+          @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+            <app-skeleton-block
+              variant="list-item-avatar"
+            ></app-skeleton-block>
+          }
         </div>
-      </ion-title>
-    </ion-toolbar>
-    <ion-toolbar>
-      <ion-searchbar
-        class="modern-searchbar"
-        animated="true"
-        [placeholder]="'SEARCH' | translate"
-        [debounce]="500"
-        show-clear-button="always"
-        (ionInput)="filter($event)"
-      ></ion-searchbar>
-    </ion-toolbar>
-    <ion-toolbar class="segment-toolbar">
-      <ion-segment
-        value="all"
-        (ionChange)="filterByType($event)"
-        class="modern-segment"
-      >
-        <ion-segment-button value="all" layout="icon-start">
-          <ion-icon name="options-outline"></ion-icon>
-          <ion-label>{{ "COMMON.ALL" | translate }}</ion-label>
-        </ion-segment-button>
-        <ion-segment-button value="outcome" layout="icon-start">
-          <ion-icon name="trending-up-outline"></ion-icon>
-          <ion-label>{{ "COMMON.OUTCOME" | translate }}</ion-label>
-        </ion-segment-button>
-        <ion-segment-button value="income" layout="icon-start">
-          <ion-icon name="trending-down-outline"></ion-icon>
-          <ion-label>{{ "COMMON.INCOME" | translate }}</ion-label>
-        </ion-segment-button>
-      </ion-segment>
-    </ion-toolbar>
-  </ion-header>
-
-  <ion-content class="ion-padding">
-    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
-      <ion-refresher-content></ion-refresher-content>
-    </ion-refresher>
-
-    <!-- Skeleton loaders while fetching -->
-    <div *ngIf="vm.isLoading" class="skeleton-list">
-      <app-skeleton-block
-        *ngFor="let i of [1, 2, 3, 4, 5, 6]"
-        variant="list-item-avatar"
-      ></app-skeleton-block>
-    </div>
-
-    <ion-list
-      class="categories-list"
-      *ngIf="!vm.isLoading && vm.response && vm.response.total > 0; else noData"
-    >
-      <ion-reorder-group
-        [disabled]="false"
-        (ionItemReorder)="handleReorder($any($event))"
-      >
-        <ion-item
-          class="category-item item-card"
-          lines="none"
-          *ngFor="let item of vm.response.data; let i = index"
-          [style.--animation-order]="i"
-        >
-          <span
-            class="category-icon"
-            [style.background]="item.color"
-            aria-hidden="true"
+      }
+      @if (!vm.isLoading && vm.response && vm.response.total > 0) {
+        <ion-list
+          class="categories-list"
           >
-            <ion-icon size="large" [name]="item.icon"></ion-icon>
-          </span>
-          <ion-label>
-            <h3 class="title">{{ item.title }}</h3>
-            <p class="subtitle">
-              <span class="type-indicator" [ngClass]="item.type">
-                <ion-icon
+          <ion-reorder-group
+            [disabled]="false"
+            (ionItemReorder)="handleReorder($any($event))"
+            >
+            @for (item of vm.response.data; track item; let i = $index) {
+              <ion-item
+                class="category-item item-card"
+                lines="none"
+                [style.--animation-order]="i"
+                >
+                <span
+                  class="category-icon"
+                  [style.background]="item.color"
+                  aria-hidden="true"
+                  >
+                  <ion-icon size="large" [name]="item.icon"></ion-icon>
+                </span>
+                <ion-label>
+                  <h3 class="title">{{ item.title }}</h3>
+                  <p class="subtitle">
+                    <span class="type-indicator" [ngClass]="item.type">
+                      <ion-icon
                   [name]="
                     item.type === 'income'
                       ? 'trending-down-outline'
                       : 'trending-up-outline'
                   "
-                ></ion-icon>
-                {{
-                  (item.type === "income" ? "COMMON.INCOME" : "COMMON.OUTCOME")
-                    | translate
-                }}
-              </span>
-            </p>
-          </ion-label>
-          <ion-buttons slot="end">
-            <ion-button (click)="presentActionSheet(item)">
-              <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
-            </ion-button>
-          </ion-buttons>
-          <ion-reorder slot="end"></ion-reorder>
-        </ion-item>
-      </ion-reorder-group>
-    </ion-list>
+                      ></ion-icon>
+                      {{
+                      (item.type === "income" ? "COMMON.INCOME" : "COMMON.OUTCOME")
+                      | translate
+                      }}
+                    </span>
+                  </p>
+                </ion-label>
+                <ion-buttons slot="end">
+                  <ion-button (click)="presentActionSheet(item)">
+                    <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
+                  </ion-button>
+                </ion-buttons>
+                <ion-reorder slot="end"></ion-reorder>
+              </ion-item>
+            }
+          </ion-reorder-group>
+        </ion-list>
+      } @else {
+        <div class="no_data">
+          <ion-icon size="large" name="sad"></ion-icon>
+          <p>{{ "NO_DATA" | translate }}</p>
+        </div>
+      }
+      <ion-infinite-scroll
+        [disabled]="vm.response && vm.response.data.length >= vm.response.total"
+        (ionInfinite)="onIonInfinite($event)"
+        >
+        <ion-infinite-scroll-content> </ion-infinite-scroll-content>
+      </ion-infinite-scroll>
+    </ion-content>
+  }
 
-    <ion-infinite-scroll
-      [disabled]="vm.response && vm.response.data.length >= vm.response.total"
-      (ionInfinite)="onIonInfinite($event)"
-    >
-      <ion-infinite-scroll-content> </ion-infinite-scroll-content>
-    </ion-infinite-scroll>
-  </ion-content>
-</ng-container>
+  <!-- Shared Floating Add Button -->
+  <app-add-fab-button (fabClick)="navigateToAdd()"></app-add-fab-button>
 
-<!-- Shared Floating Add Button -->
-<app-add-fab-button (fabClick)="navigateToAdd()"></app-add-fab-button>
-
-<ng-template #noData>
-  <div class="no_data">
-    <ion-icon size="large" name="sad"></ion-icon>
-    <p>{{ "NO_DATA" | translate }}</p>
-  </div>
-</ng-template>

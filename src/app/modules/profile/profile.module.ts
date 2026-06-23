@@ -9,15 +9,15 @@ import { UiInputComponent } from 'src/app/shared/ui/ui-input/ui-input.component'
 import { ProfileRoutingModule } from './profile.routing.module';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    IonicModule,
-    ReactiveFormsModule,
-    TranslateModule,
-    SharedModule,
-    ProfileRoutingModule,
-    UiInputComponent,
-  ],
-  declarations: [ProfilePageComponent],
+    imports: [
+        CommonModule,
+        IonicModule,
+        ReactiveFormsModule,
+        TranslateModule,
+        SharedModule,
+        ProfileRoutingModule,
+        UiInputComponent,
+        ProfilePageComponent,
+    ],
 })
 export class ProfileModule {}

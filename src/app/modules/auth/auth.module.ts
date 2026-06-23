@@ -11,17 +11,16 @@ import { TranslateModule } from '@ngx-translate/core';
 import { UiInputComponent } from 'src/app/shared/ui/ui-input/ui-input.component';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    AuthRoutingModule,
-    SharedModule,
-    UiInputComponent,
-    ReactiveFormsModule,
-    RouterModule,
-    IonicModule,
-    TranslateModule,
-  ],
-  declarations: [LoginComponent, SignupComponent],
-
+    imports: [
+        CommonModule,
+        AuthRoutingModule,
+        SharedModule,
+        UiInputComponent,
+        ReactiveFormsModule,
+        RouterModule,
+        IonicModule,
+        TranslateModule,
+        LoginComponent, SignupComponent,
+    ],
 })
 export class AuthModule {}

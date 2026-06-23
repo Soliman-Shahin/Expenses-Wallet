@@ -12,21 +12,19 @@ import { ConflictResolutionPage } from './sync/pages/conflict-resolution/conflic
 import { SettingsListComponent, BackupModalComponent } from './list/settings-list.component';
 
 @NgModule({
-  declarations: [
-    SyncSettingsPage,
-    ConflictResolutionPage,
-    SettingsListComponent,
-    BackupModalComponent
-  ],
-  imports: [
-    CommonModule,
-    IonicModule,
-    TranslateModule,
-    ReactiveFormsModule,
-    FormsModule,
-    SettingsRoutingModule,
-    SyncStatusComponent,
-    SharedModule,
-  ]
+    imports: [
+        CommonModule,
+        IonicModule,
+        TranslateModule,
+        ReactiveFormsModule,
+        FormsModule,
+        SettingsRoutingModule,
+        SyncStatusComponent,
+        SharedModule,
+        SyncSettingsPage,
+        ConflictResolutionPage,
+        SettingsListComponent,
+        BackupModalComponent,
+    ]
 })
 export class SettingsModule { }

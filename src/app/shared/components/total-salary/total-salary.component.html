@@ -1,7 +1,7 @@
 <ion-card
   class="monthly-summary-card fade-in-up"
   [class.is-loading]="isLoading"
->
+  >
   <ion-card-header>
     <ion-card-title>{{ "HOME.MONTHLY_SUMMARY" | translate }}</ion-card-title>
     <ion-button fill="clear" size="small">{{
@@ -10,7 +10,7 @@
   </ion-card-header>
 
   <ion-card-content>
-    <ng-container *ngIf="!isLoading; else loadingState">
+    @if (!isLoading) {
       <div class="chart-container">
         <div class="chart-placeholder"></div>
         <div class="total-amount">
@@ -20,18 +20,17 @@
           <span class="label">{{ "HOME.TOTAL_SALARY" | translate }}</span>
         </div>
       </div>
-
       <div class="details-list">
-        <div *ngFor="let detail of details" class="detail-item">
-          <span class="label">{{ detail.label }}</span>
-          <span class="amount">{{
-            detail.amount | currency : currency : "symbol" : "1.2-2"
-          }}</span>
-        </div>
+        @for (detail of details; track detail) {
+          <div class="detail-item">
+            <span class="label">{{ detail.label }}</span>
+            <span class="amount">{{
+              detail.amount | currency : currency : "symbol" : "1.2-2"
+            }}</span>
+          </div>
+        }
       </div>
-    </ng-container>
-
-    <ng-template #loadingState>
+    } @else {
       <div class="chart-container">
         <ion-skeleton-text
           animated
@@ -39,19 +38,22 @@
         ></ion-skeleton-text>
       </div>
       <div class="details-list">
-        <div class="detail-item" *ngFor="let i of [1, 2]">
-          <ion-skeleton-text
-            animated
-            style="width: 40%; height: 20px"
-            class="fade-in"
-          ></ion-skeleton-text>
-          <ion-skeleton-text
-            animated
-            style="width: 30%; height: 20px"
-            class="fade-in"
-          ></ion-skeleton-text>
-        </div>
+        @for (i of [1, 2]; track i) {
+          <div class="detail-item">
+            <ion-skeleton-text
+              animated
+              style="width: 40%; height: 20px"
+              class="fade-in"
+            ></ion-skeleton-text>
+            <ion-skeleton-text
+              animated
+              style="width: 30%; height: 20px"
+              class="fade-in"
+            ></ion-skeleton-text>
+          </div>
+        }
       </div>
-    </ng-template>
+    }
+
   </ion-card-content>
 </ion-card>

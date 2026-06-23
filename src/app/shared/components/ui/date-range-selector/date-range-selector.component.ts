@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Output, Input, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { TranslateModule } from '@ngx-translate/core';
 
 export type DateRange = '1m' | '6m' | '1y' | 'all';
@@ -7,7 +7,7 @@ export type DateRange = '1m' | '6m' | '1y' | 'all';
 @Component({
   selector: 'app-date-range-selector',
   standalone: true,
-  imports: [CommonModule, TranslateModule],
+  imports: [TranslateModule],
   templateUrl: './date-range-selector.component.html',
   styleUrls: ['./date-range-selector.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

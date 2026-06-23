@@ -1,5 +1,5 @@
 <ion-content>
-  <ng-container *ngIf="vm$ | async as vm">
+  @if (vm$ | async; as vm) {
     <div class="header-container">
       <ion-back-button
         defaultHref="/categories/list"
@@ -10,41 +10,42 @@
         {{ (editMode ? "CATEGORY.EDIT" : "CATEGORY.ADD") | translate }}
       </h1>
     </div>
-
     <!-- Live Preview -->
     <div class="preview-container ion-padding" [class.bump]="animatePreview">
       <div class="category-item-preview card-glass">
         <div
           class="category-icon-preview"
           [style.background]="categoryForm.get('color')?.value"
-        >
+          >
           <ion-icon [name]="categoryForm.get('icon')?.value"></ion-icon>
         </div>
         <div class="category-details-preview">
           <div class="category-title-preview">
             {{
-              categoryForm.get("title")?.value || ("CATEGORY.ITEM" | translate)
+            categoryForm.get("title")?.value || ("CATEGORY.ITEM" | translate)
             }}
           </div>
-          <p class="subtitle" *ngIf="categoryForm.get('type')?.value as type">
-            <span class="type-indicator" [ngClass]="type">
-              <ion-icon [name]="type === 'income' ? 'trending-down-outline' : 'trending-up-outline'"></ion-icon>
-              {{ (type === 'income' ? 'COMMON.INCOME' : 'COMMON.OUTCOME') | translate }}
-            </span>
-          </p>
+          @if (categoryForm.get('type')?.value; as type) {
+            <p class="subtitle">
+              <span class="type-indicator" [ngClass]="type">
+                <ion-icon [name]="type === 'income' ? 'trending-down-outline' : 'trending-up-outline'"></ion-icon>
+                {{ (type === 'income' ? 'COMMON.INCOME' : 'COMMON.OUTCOME') | translate }}
+              </span>
+            </p>
+          }
         </div>
       </div>
     </div>
-
     <div class="form-container ion-padding">
-      <ion-note
-        *ngIf="vm.errorMessage"
-        color="danger"
-        class="error-message ion-padding-start ion-padding-end"
-      >
-        <ion-icon name="alert-circle-outline"></ion-icon>
-        {{ vm.errorMessage }}
-      </ion-note>
+      @if (vm.errorMessage) {
+        <ion-note
+          color="danger"
+          class="error-message ion-padding-start ion-padding-end"
+          >
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          {{ vm.errorMessage }}
+        </ion-note>
+      }
       <form [formGroup]="categoryForm">
         <ion-grid class="form-grid">
           <ion-row>
@@ -58,7 +59,6 @@
               ></app-ui-input>
             </ion-col>
           </ion-row>
-
           <ion-row>
             <ion-col size="12">
               <div class="section-title">
@@ -68,7 +68,7 @@
                 formControlName="type"
                 value="outcome"
                 class="type-segment"
-              >
+                >
                 <ion-segment-button value="outcome">
                   <ion-icon
                     name="arrow-up-outline"
@@ -86,7 +86,6 @@
               </ion-segment>
             </ion-col>
           </ion-row>
-
           <ion-row class="mt-4">
             <ion-col size="12">
               <div class="section-title">
@@ -101,7 +100,6 @@
               ></app-color-selector>
             </ion-col>
           </ion-row>
-
           <ion-row class="mt-4">
             <ion-col size="12">
               <div class="section-title">
@@ -116,7 +114,6 @@
               ></app-icon-selector>
             </ion-col>
           </ion-row>
-
           <ion-row class="mt-4">
             <ion-col>
               <ion-button
@@ -131,25 +128,29 @@
                 [attr.aria-label]="
                   (editMode ? 'COMMON.UPDATE' : 'COMMON.CREATE') | translate
                 "
-              >
-                <ion-spinner *ngIf="vm.isLoading" name="crescent"></ion-spinner>
-                <ion-icon
-                  *ngIf="formSubmitted && !vm.isLoading"
-                  name="checkmark-done-outline"
-                  class="success-icon animated-icon"
                 >
-                </ion-icon>
-                <span
-                  *ngIf="!vm.isLoading && !(formSubmitted && !vm.isLoading)"
-                  class="button-text"
-                >
-                  {{ (editMode ? 'COMMON.UPDATE' : 'COMMON.CREATE') | translate }}
-                </span>
+                @if (vm.isLoading) {
+                  <ion-spinner name="crescent"></ion-spinner>
+                }
+                @if (formSubmitted && !vm.isLoading) {
+                  <ion-icon
+                    name="checkmark-done-outline"
+                    class="success-icon animated-icon"
+                    >
+                  </ion-icon>
+                }
+                @if (!vm.isLoading && !(formSubmitted && !vm.isLoading)) {
+                  <span
+                    class="button-text"
+                    >
+                    {{ (editMode ? 'COMMON.UPDATE' : 'COMMON.CREATE') | translate }}
+                  </span>
+                }
               </ion-button>
             </ion-col>
           </ion-row>
         </ion-grid>
       </form>
     </div>
-  </ng-container>
+  }
 </ion-content>

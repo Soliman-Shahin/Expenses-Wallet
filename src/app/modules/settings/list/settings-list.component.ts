@@ -2,13 +2,15 @@ import { Component, OnInit } from '@angular/core';
 import { BaseComponent } from 'src/app/shared/base/base.component';
 import { Subscription } from 'rxjs';
 import { BiometricService } from 'src/app/core/services/biometric.service';
-import { ModalController } from '@ionic/angular';
+import { ModalController, IonicModule } from '@ionic/angular';
 import { AuthService } from 'src/app/modules/auth/services/auth.service';
 import { User } from 'src/app/modules/auth/models';
+import { TranslateModule } from '@ngx-translate/core';
+import { BackupRestoreComponent } from '../../../shared/components/backup-restore/backup-restore.component';
 
 @Component({
-  selector: 'app-backup-modal',
-  template: `
+    selector: 'app-backup-modal',
+    template: `
     <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-buttons slot="start">
@@ -22,7 +24,9 @@ import { User } from 'src/app/modules/auth/models';
     <ion-content class="ion-padding">
       <app-backup-restore></app-backup-restore>
     </ion-content>
-  `
+  `,
+    standalone: true,
+    imports: [IonicModule, BackupRestoreComponent, TranslateModule]
 })
 export class BackupModalComponent {
   constructor(private modalCtrl: ModalController) {}
@@ -30,9 +34,11 @@ export class BackupModalComponent {
 }
 
 @Component({
-  selector: 'app-settings-list',
-  templateUrl: './settings-list.component.html',
-  styleUrls: ['./settings-list.component.scss'],
+    selector: 'app-settings-list',
+    templateUrl: './settings-list.component.html',
+    styleUrls: ['./settings-list.component.scss'],
+    standalone: true,
+    imports: [IonicModule, TranslateModule],
 })
 export class SettingsListComponent extends BaseComponent implements OnInit {
   biometricAvailable = false;

@@ -12,7 +12,7 @@
   </ion-header>
 
   <div class="settings-container">
-    
+
     <!-- Profile Banner -->
     <ion-list inset="true" class="premium-list">
       <ion-item button detail="true" (click)="navigateToProfile()" class="profile-item" lines="none">
@@ -43,13 +43,14 @@
           (ionChange)="onLanguageChange($event)"
           interface="popover"
           class="modern-select"
-        >
-          <ion-select-option
-            *ngFor="let lang of languages"
-            [value]="lang.code"
           >
-            {{ lang.flag }} {{ lang.name }}
-          </ion-select-option>
+          @for (lang of languages; track lang) {
+            <ion-select-option
+              [value]="lang.code"
+              >
+              {{ lang.flag }} {{ lang.name }}
+            </ion-select-option>
+          }
         </ion-select>
       </ion-item>
 
@@ -67,13 +68,14 @@
           (ionChange)="onThemeChange($event)"
           interface="popover"
           class="modern-select"
-        >
-          <ion-select-option
-            *ngFor="let theme of themes"
-            [value]="theme.value"
           >
-            {{ theme.label | translate }}
-          </ion-select-option>
+          @for (theme of themes; track theme) {
+            <ion-select-option
+              [value]="theme.value"
+              >
+              {{ theme.label | translate }}
+            </ion-select-option>
+          }
         </ion-select>
       </ion-item>
     </ion-list>
@@ -99,21 +101,23 @@
       </ion-item>
 
       <!-- Biometric Settings -->
-      <ion-item *ngIf="biometricAvailable" lines="none">
-        <div slot="start" class="icon-wrapper color-green">
-          <ion-icon name="finger-print"></ion-icon>
-        </div>
-        <ion-label>
-          <h3>{{ "SETTINGS.BIOMETRIC" | translate }}</h3>
-          <p>{{ "SETTINGS.BIOMETRIC_DESC" | translate }}</p>
-        </ion-label>
-        <ion-toggle
-          slot="end"
-          [checked]="biometricEnabled"
-          (ionChange)="toggleBiometric($event)"
-          color="success"
-        ></ion-toggle>
-      </ion-item>
+      @if (biometricAvailable) {
+        <ion-item lines="none">
+          <div slot="start" class="icon-wrapper color-green">
+            <ion-icon name="finger-print"></ion-icon>
+          </div>
+          <ion-label>
+            <h3>{{ "SETTINGS.BIOMETRIC" | translate }}</h3>
+            <p>{{ "SETTINGS.BIOMETRIC_DESC" | translate }}</p>
+          </ion-label>
+          <ion-toggle
+            slot="end"
+            [checked]="biometricEnabled"
+            (ionChange)="toggleBiometric($event)"
+            color="success"
+          ></ion-toggle>
+        </ion-item>
+      }
     </ion-list>
 
     <!-- Data & Backup Section -->

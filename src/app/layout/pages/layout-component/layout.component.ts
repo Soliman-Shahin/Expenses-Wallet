@@ -3,12 +3,19 @@ import { OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { BaseComponent } from 'src/app/shared/base/base.component';
+import { IonicModule } from '@ionic/angular';
+import { SideMenuComponent } from '../../components/side-menu/side-menu.component';
+import { TabsBarComponent } from '../../components/tabs-bar/tabs-bar.component';
+import { AsyncPipe } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
-  selector: 'app-layout',
-  templateUrl: './layout.component.html',
-  styleUrls: ['./layout.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-layout',
+    templateUrl: './layout.component.html',
+    styleUrls: ['./layout.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [IonicModule, SideMenuComponent, TabsBarComponent, AsyncPipe, TranslateModule]
 })
 export class LayoutComponent
   extends BaseComponent

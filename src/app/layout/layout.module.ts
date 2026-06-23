@@ -5,8 +5,7 @@ import { SideMenuComponent, TabsBarComponent } from './components';
 import { LayoutComponent } from './pages';
 
 @NgModule({
-  imports: [CommonModule, SharedModule, TabsBarComponent],
-  exports: [LayoutComponent],
-  declarations: [SideMenuComponent, LayoutComponent],
+    imports: [CommonModule, SharedModule, TabsBarComponent, SideMenuComponent, LayoutComponent],
+    exports: [LayoutComponent],
 })
 export class LayoutModule {}

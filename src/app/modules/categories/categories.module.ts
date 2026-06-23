@@ -10,18 +10,18 @@ import { AddCategoryComponent, CategoriesComponent } from './components';
 import { ColorSelectorComponent, IconSelectorComponent } from './containers';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    SharedModule,
-    IonicModule,
-    CategoriesRoutingModule,
-    ColorSelectorComponent,
-    IconSelectorComponent,
-    SkeletonBlockComponent,
-    AddFabButtonComponent,
-    UiInputComponent,
-  ],
-  declarations: [CategoriesComponent, AddCategoryComponent],
-  providers: [],
+    imports: [
+        CommonModule,
+        SharedModule,
+        IonicModule,
+        CategoriesRoutingModule,
+        ColorSelectorComponent,
+        IconSelectorComponent,
+        SkeletonBlockComponent,
+        AddFabButtonComponent,
+        UiInputComponent,
+        CategoriesComponent, AddCategoryComponent,
+    ],
+    providers: [],
 })
 export class CategoriesModule {}

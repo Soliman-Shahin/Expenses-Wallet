@@ -1,9 +1,9 @@
 <ion-content class="expense-modal-content" [fullscreen]="true">
   <form [formGroup]="expenseForm" (ngSubmit)="onSubmit($event)" class="form-container">
-    
+
     <!-- Top Hero Section (Dynamic Background based on type) -->
     <div class="top-hero" [ngClass]="expenseForm.get('type')?.value || 'outcome'">
-      
+
       <!-- Integrated Header inside Hero for seamless look -->
       <ion-header class="ion-no-border transparent-header">
         <ion-toolbar>
@@ -22,18 +22,18 @@
         <!-- Custom Premium Segment -->
         <div class="custom-segment-container">
           <div class="custom-segment">
-            <div 
-              class="segment-btn" 
+            <div
+              class="segment-btn"
               [class.active]="expenseForm.get('type')?.value === 'outcome'"
               (click)="changeType('outcome')"
-            >
+              >
               {{ 'COMMON.OUTCOME' | translate }}
             </div>
-            <div 
-              class="segment-btn" 
+            <div
+              class="segment-btn"
               [class.active]="expenseForm.get('type')?.value === 'income'"
               (click)="changeType('income')"
-            >
+              >
               {{ 'COMMON.INCOME' | translate }}
             </div>
           </div>
@@ -55,7 +55,7 @@
     <!-- Bottom Form Section -->
     <div class="bottom-sheet">
       <div class="sheet-indicator"></div>
-      
+
       <ion-list class="grouped-fields-list">
         <!-- Category -->
         <ion-item class="form-field" lines="full" [button]="true" [detail]="false" id="cat-select-trigger" (click)="openCategoryPopover($event)">
@@ -88,7 +88,7 @@
             {{ (expenseForm.get('date')?.value | date:'longDate') || ('EXPENSE.DATE' | translate) }}
           </ion-label>
         </ion-item>
-        
+
         <ion-popover trigger="date-picker-trigger" cssClass="date-popover">
           <ng-template>
             <ion-datetime
@@ -103,26 +103,31 @@
 
       <!-- Action Buttons -->
       <div class="form-actions-row">
-        <ion-button
-          *ngIf="isEditMode"
-          fill="clear"
-          color="danger"
-          class="delete-btn"
-          (click)="onDelete()"
-        >
-          <ion-icon slot="icon-only" name="trash"></ion-icon>
-        </ion-button>
-        
+        @if (isEditMode) {
+          <ion-button
+            fill="clear"
+            color="danger"
+            class="delete-btn"
+            (click)="onDelete()"
+            >
+            <ion-icon slot="icon-only" name="trash"></ion-icon>
+          </ion-button>
+        }
+
         <ion-button
           type="submit"
           [disabled]="expenseForm.invalid || (vm$ | async)?.isLoading"
           class="submit-btn"
           expand="block"
-        >
-          <ion-spinner *ngIf="(vm$ | async)?.isLoading" name="crescent"></ion-spinner>
-          <span *ngIf="!(vm$ | async)?.isLoading">
-            {{ (isEditMode ? 'COMMON.SAVE' : 'COMMON.CREATE') | translate }}
-          </span>
+          >
+          @if ((vm$ | async)?.isLoading) {
+            <ion-spinner name="crescent"></ion-spinner>
+          }
+          @if (!(vm$ | async)?.isLoading) {
+            <span>
+              {{ (isEditMode ? 'COMMON.SAVE' : 'COMMON.CREATE') | translate }}
+            </span>
+          }
         </ion-button>
       </div>
     </div>
@@ -135,30 +140,35 @@
       cssClass="custom-cat-popover"
       alignment="start"
       side="bottom"
-    >
+      >
       <ng-template>
         <div class="popover-content">
           <div class="popover-header">
             <h3>{{ 'EXPENSE.CATEGORY' | translate }}</h3>
           </div>
           <div class="popover-options">
-            <div
-              class="popover-item"
-              *ngFor="let category of filteredCategories$ | async"
-              (click)="selectCategory(category._id!)"
-              [class.selected]="expenseForm.get('category')?.value === category._id"
-            >
-              <div class="popover-item-icon" [style.background]="category.color">
-                <ion-icon [name]="category.icon"></ion-icon>
+            @for (category of filteredCategories$ | async; track category) {
+              <div
+                class="popover-item"
+                (click)="selectCategory(category._id!)"
+                [class.selected]="expenseForm.get('category')?.value === category._id"
+                >
+                <div class="popover-item-icon" [style.background]="category.color">
+                  <ion-icon [name]="category.icon"></ion-icon>
+                </div>
+                <span class="popover-item-text">{{ category.title }}</span>
+                @if (expenseForm.get('category')?.value === category._id) {
+                  <ion-icon name="checkmark-circle" class="check-icon"></ion-icon>
+                }
               </div>
-              <span class="popover-item-text">{{ category.title }}</span>
-              <ion-icon *ngIf="expenseForm.get('category')?.value === category._id" name="checkmark-circle" class="check-icon"></ion-icon>
-            </div>
-            
-            <div class="popover-empty" *ngIf="(filteredCategories$ | async)?.length === 0">
-              <ion-icon name="layers-outline"></ion-icon>
-              <p>No categories found.</p>
-            </div>
+            }
+
+            @if ((filteredCategories$ | async)?.length === 0) {
+              <div class="popover-empty">
+                <ion-icon name="layers-outline"></ion-icon>
+                <p>No categories found.</p>
+              </div>
+            }
           </div>
         </div>
       </ng-template>

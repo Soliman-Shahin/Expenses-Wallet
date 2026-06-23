@@ -17,20 +17,20 @@ import {
 import { DateRangeSelectorComponent } from 'src/app/shared/components/ui/date-range-selector/date-range-selector.component';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    SharedModule,
-    IonicModule,
-    HomeRoutingModule,
-    ReactiveFormsModule,
-    TranslateModule,
-    SectionHeaderComponent,
-    ActionTileComponent,
-    SkeletonBlockComponent,
-    EmptyStateComponent,
-    DateRangeSelectorComponent,
-    AddFabButtonComponent,
-  ],
-  declarations: [ExpenseFormComponent],
+    imports: [
+        CommonModule,
+        SharedModule,
+        IonicModule,
+        HomeRoutingModule,
+        ReactiveFormsModule,
+        TranslateModule,
+        SectionHeaderComponent,
+        ActionTileComponent,
+        SkeletonBlockComponent,
+        EmptyStateComponent,
+        DateRangeSelectorComponent,
+        AddFabButtonComponent,
+        ExpenseFormComponent,
+    ],
 })
 export class HomePageModule {}

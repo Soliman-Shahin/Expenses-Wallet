@@ -10,17 +10,14 @@ import { TransactionsRoutingModule } from './transactions-routing.module';
 import { TransactionsListComponent } from './components/transactions-list/transactions-list.component';
 
 @NgModule({
-  declarations: [
-    TransactionsListComponent
-  ],
-  imports: [
-    CommonModule,
-    FormsModule,
-    IonicModule,
-    TranslateModule,
-    SharedModule,
-    AddFabButtonComponent,
-    TransactionsRoutingModule
-  ]
+    imports: [
+        CommonModule,
+        FormsModule,
+        IonicModule,
+        TranslateModule,
+        SharedModule,
+        AddFabButtonComponent,
+        TransactionsRoutingModule
+    ]
 })
 export class TransactionsModule { }

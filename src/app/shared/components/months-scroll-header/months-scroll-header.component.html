@@ -6,21 +6,22 @@
   (pointerup)="onPointerUp()"
   (pointercancel)="onPointerUp()"
   (wheel)="onUserWheel()"
->
-  <div
-    *ngFor="let month of months"
-    class="month-item"
-    [class.selected]="isSelected(month)"
-    (click)="selectMonth(month)"
-    (keydown)="onKeydown($event, month)"
-    tabindex="0"
-    [attr.aria-label]="getAriaLabel(month)"
   >
-    <div class="month-name">
-      {{ getDate(month) | date : "MMM" : undefined : locale }}
+  @for (month of months; track month) {
+    <div
+      class="month-item"
+      [class.selected]="isSelected(month)"
+      (click)="selectMonth(month)"
+      (keydown)="onKeydown($event, month)"
+      tabindex="0"
+      [attr.aria-label]="getAriaLabel(month)"
+      >
+      <div class="month-name">
+        {{ getDate(month) | date : "MMM" : undefined : locale }}
+      </div>
+      <div class="year">
+        {{ getDate(month) | date : "yyyy" : undefined : locale }}
+      </div>
     </div>
-    <div class="year">
-      {{ getDate(month) | date : "yyyy" : undefined : locale }}
-    </div>
-  </div>
+  }
 </div>

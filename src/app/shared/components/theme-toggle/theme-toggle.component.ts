@@ -7,12 +7,16 @@ import { Component, ChangeDetectionStrategy, OnInit,
   inject, } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { BaseComponent } from 'src/app/shared/base/base.component';
+import { IonicModule } from '@ionic/angular';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
-  selector: 'app-theme-toggle',
-  templateUrl: './theme-toggle.component.html',
-  styleUrls: ['./theme-toggle.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-theme-toggle',
+    templateUrl: './theme-toggle.component.html',
+    styleUrls: ['./theme-toggle.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [IonicModule, TranslateModule]
 })
 export class ThemeToggleComponent extends BaseComponent implements OnInit {
   private destroyRef = inject(DestroyRef);

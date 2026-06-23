@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, OnInit, OnDestroy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { IonicModule } from '@ionic/angular';
 import { TranslateModule } from '@ngx-translate/core';
 import { Observable, combineLatest, takeUntil } from 'rxjs';
@@ -14,171 +14,184 @@ import { BaseComponent } from 'src/app/shared/base';
 @Component({
   selector: 'app-sync-status',
   standalone: true,
-  imports: [CommonModule, IonicModule, TranslateModule],
+  imports: [IonicModule, TranslateModule],
   template: `
-    <ion-item
-      *ngIf="showSyncStatus"
-      class="sync-status-item"
-      [class.syncing]="metadata?.isSyncing"
-      [class.offline]="!metadata?.isOnline"
-      [class.has-conflicts]="(metadata?.conflictCount || 0) > 0"
-      [class.has-errors]="(metadata?.errorCount || 0) > 0"
-      button
-      (click)="toggleDetails()"
-    >
-      <ion-icon
-        slot="start"
-        [name]="getStatusIcon()"
-        [color]="getStatusColor()"
-      >
-      </ion-icon>
-
-      <ion-label>
-        <h3>{{ getStatusText() }}</h3>
-        <p *ngIf="!metadata?.isSyncing && metadata?.isOnline">
-          {{ 'SYNC.LAST_SYNC' | translate }}: {{ getLastSyncTime() }}
-        </p>
-        <p *ngIf="metadata?.isSyncing">
-          {{ 'SYNC.SYNCING' | translate }}... {{ progress?.percentage || 0 }}%
-        </p>
-        <p *ngIf="!metadata?.isOnline">
-          {{ 'SYNC.OFFLINE_MODE' | translate }}
-        </p>
-      </ion-label>
-
-      <ion-badge
-        *ngIf="(metadata?.pendingCount || 0) > 0"
-        slot="end"
-        color="warning"
-      >
-        {{ metadata?.pendingCount }}
-      </ion-badge>
-
-      <ion-badge
-        *ngIf="(metadata?.conflictCount || 0) > 0"
-        slot="end"
-        color="danger"
-      >
-        {{ metadata?.conflictCount }}
-      </ion-badge>
-
-      <ion-button
-        *ngIf="metadata?.isOnline && !metadata?.isSyncing"
-        slot="end"
-        fill="clear"
-        size="small"
-        (click)="forceSync($event)"
-      >
-        <ion-icon name="refresh" slot="icon-only"></ion-icon>
-      </ion-button>
-
-      <ion-icon
-        slot="end"
-        [name]="showDetails ? 'chevron-up' : 'chevron-down'"
-        *ngIf="!metadata?.isSyncing"
-      >
-      </ion-icon>
-    </ion-item>
-
-    <!-- Sync Details -->
-    <ion-card *ngIf="showDetails && showSyncStatus" class="sync-details-card">
-      <ion-card-header>
-        <ion-card-title>{{ 'SYNC.DETAILS' | translate }}</ion-card-title>
-      </ion-card-header>
-
-      <ion-card-content>
-        <!-- Progress Bar -->
-        <div *ngIf="metadata?.isSyncing" class="sync-progress">
-          <ion-progress-bar
-            [value]="(progress?.percentage || 0) / 100"
-            [color]="getProgressColor()"
+    @if (showSyncStatus) {
+      <ion-item
+        class="sync-status-item"
+        [class.syncing]="metadata?.isSyncing"
+        [class.offline]="!metadata?.isOnline"
+        [class.has-conflicts]="(metadata?.conflictCount || 0) > 0"
+        [class.has-errors]="(metadata?.errorCount || 0) > 0"
+        button
+        (click)="toggleDetails()"
+        >
+        <ion-icon
+          slot="start"
+          [name]="getStatusIcon()"
+          [color]="getStatusColor()"
           >
-          </ion-progress-bar>
-          <p class="progress-text">
-            {{ progress?.currentOperation || '' }}
-          </p>
-        </div>
-
-        <!-- Sync Statistics -->
-        <div class="sync-stats">
-          <div class="stat-item">
-            <ion-icon name="checkmark-circle" color="success"></ion-icon>
-            <span
-              >{{ 'SYNC.SYNCED' | translate }}:
-              {{ metadata?.totalEntities || 0 }}</span
-            >
-          </div>
-
-          <div class="stat-item" *ngIf="(metadata?.pendingCount || 0) > 0">
-            <ion-icon name="time" color="warning"></ion-icon>
-            <span
-              >{{ 'SYNC.PENDING' | translate }}:
-              {{ metadata?.pendingCount || 0 }}</span
-            >
-          </div>
-
-          <div class="stat-item" *ngIf="(metadata?.conflictCount || 0) > 0">
-            <ion-icon name="warning" color="danger"></ion-icon>
-            <span
-              >{{ 'SYNC.CONFLICTS' | translate }}:
-              {{ metadata?.conflictCount || 0 }}</span
-            >
-          </div>
-
-          <div class="stat-item" *ngIf="(metadata?.errorCount || 0) > 0">
-            <ion-icon name="alert-circle" color="danger"></ion-icon>
-            <span
-              >{{ 'SYNC.ERRORS' | translate }}:
-              {{ metadata?.errorCount || 0 }}</span
-            >
-          </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="sync-actions">
-          <ion-button
-            *ngIf="metadata?.isOnline && !metadata?.isSyncing"
-            fill="solid"
-            color="primary"
-            (click)="forceSync()"
-          >
-            <ion-icon name="refresh" slot="start"></ion-icon>
-            {{ 'SYNC.SYNC_NOW' | translate }}
-          </ion-button>
-
-          <ion-button
-            *ngIf="(metadata?.conflictCount || 0) > 0"
-            fill="outline"
+        </ion-icon>
+        <ion-label>
+          <h3>{{ getStatusText() }}</h3>
+          @if (!metadata?.isSyncing && metadata?.isOnline) {
+            <p>
+              {{ 'SYNC.LAST_SYNC' | translate }}: {{ getLastSyncTime() }}
+            </p>
+          }
+          @if (metadata?.isSyncing) {
+            <p>
+              {{ 'SYNC.SYNCING' | translate }}... {{ progress?.percentage || 0 }}%
+            </p>
+          }
+          @if (!metadata?.isOnline) {
+            <p>
+              {{ 'SYNC.OFFLINE_MODE' | translate }}
+            </p>
+          }
+        </ion-label>
+        @if ((metadata?.pendingCount || 0) > 0) {
+          <ion-badge
+            slot="end"
             color="warning"
-            (click)="resolveConflicts()"
-          >
-            <ion-icon name="construct" slot="start"></ion-icon>
-            {{ 'SYNC.RESOLVE_CONFLICTS' | translate }}
+            >
+            {{ metadata?.pendingCount }}
+          </ion-badge>
+        }
+        @if ((metadata?.conflictCount || 0) > 0) {
+          <ion-badge
+            slot="end"
+            color="danger"
+            >
+            {{ metadata?.conflictCount }}
+          </ion-badge>
+        }
+        @if (metadata?.isOnline && !metadata?.isSyncing) {
+          <ion-button
+            slot="end"
+            fill="clear"
+            size="small"
+            (click)="forceSync($event)"
+            >
+            <ion-icon name="refresh" slot="icon-only"></ion-icon>
           </ion-button>
-
-          <ion-button fill="clear" color="medium" (click)="openSyncSettings()">
-            <ion-icon name="settings" slot="start"></ion-icon>
-            {{ 'SYNC.SETTINGS' | translate }}
-          </ion-button>
-        </div>
-
-        <!-- Error Messages -->
-        <div *ngIf="(progress?.errors || []).length > 0" class="sync-errors">
-          <h4>{{ 'SYNC.ERRORS' | translate }}</h4>
-          <ion-list>
-            <ion-item *ngFor="let error of progress?.errors">
-              <ion-icon
-                name="alert-circle"
-                color="danger"
-                slot="start"
-              ></ion-icon>
-              <ion-label>{{ error }}</ion-label>
-            </ion-item>
-          </ion-list>
-        </div>
-      </ion-card-content>
-    </ion-card>
-  `,
+        }
+        @if (!metadata?.isSyncing) {
+          <ion-icon
+            slot="end"
+            [name]="showDetails ? 'chevron-up' : 'chevron-down'"
+            >
+          </ion-icon>
+        }
+      </ion-item>
+    }
+    
+    <!-- Sync Details -->
+    @if (showDetails && showSyncStatus) {
+      <ion-card class="sync-details-card">
+        <ion-card-header>
+          <ion-card-title>{{ 'SYNC.DETAILS' | translate }}</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <!-- Progress Bar -->
+          @if (metadata?.isSyncing) {
+            <div class="sync-progress">
+              <ion-progress-bar
+                [value]="(progress?.percentage || 0) / 100"
+                [color]="getProgressColor()"
+                >
+              </ion-progress-bar>
+              <p class="progress-text">
+                {{ progress?.currentOperation || '' }}
+              </p>
+            </div>
+          }
+          <!-- Sync Statistics -->
+          <div class="sync-stats">
+            <div class="stat-item">
+              <ion-icon name="checkmark-circle" color="success"></ion-icon>
+              <span
+                >{{ 'SYNC.SYNCED' | translate }}:
+                {{ metadata?.totalEntities || 0 }}</span
+                >
+              </div>
+              @if ((metadata?.pendingCount || 0) > 0) {
+                <div class="stat-item">
+                  <ion-icon name="time" color="warning"></ion-icon>
+                  <span
+                    >{{ 'SYNC.PENDING' | translate }}:
+                    {{ metadata?.pendingCount || 0 }}</span
+                    >
+                  </div>
+                }
+                @if ((metadata?.conflictCount || 0) > 0) {
+                  <div class="stat-item">
+                    <ion-icon name="warning" color="danger"></ion-icon>
+                    <span
+                      >{{ 'SYNC.CONFLICTS' | translate }}:
+                      {{ metadata?.conflictCount || 0 }}</span
+                      >
+                    </div>
+                  }
+                  @if ((metadata?.errorCount || 0) > 0) {
+                    <div class="stat-item">
+                      <ion-icon name="alert-circle" color="danger"></ion-icon>
+                      <span
+                        >{{ 'SYNC.ERRORS' | translate }}:
+                        {{ metadata?.errorCount || 0 }}</span
+                        >
+                      </div>
+                    }
+                  </div>
+                  <!-- Action Buttons -->
+                  <div class="sync-actions">
+                    @if (metadata?.isOnline && !metadata?.isSyncing) {
+                      <ion-button
+                        fill="solid"
+                        color="primary"
+                        (click)="forceSync()"
+                        >
+                        <ion-icon name="refresh" slot="start"></ion-icon>
+                        {{ 'SYNC.SYNC_NOW' | translate }}
+                      </ion-button>
+                    }
+                    @if ((metadata?.conflictCount || 0) > 0) {
+                      <ion-button
+                        fill="outline"
+                        color="warning"
+                        (click)="resolveConflicts()"
+                        >
+                        <ion-icon name="construct" slot="start"></ion-icon>
+                        {{ 'SYNC.RESOLVE_CONFLICTS' | translate }}
+                      </ion-button>
+                    }
+                    <ion-button fill="clear" color="medium" (click)="openSyncSettings()">
+                      <ion-icon name="settings" slot="start"></ion-icon>
+                      {{ 'SYNC.SETTINGS' | translate }}
+                    </ion-button>
+                  </div>
+                  <!-- Error Messages -->
+                  @if ((progress?.errors || []).length > 0) {
+                    <div class="sync-errors">
+                      <h4>{{ 'SYNC.ERRORS' | translate }}</h4>
+                      <ion-list>
+                        @for (error of progress?.errors; track error) {
+                          <ion-item>
+                            <ion-icon
+                              name="alert-circle"
+                              color="danger"
+                              slot="start"
+                            ></ion-icon>
+                            <ion-label>{{ error }}</ion-label>
+                          </ion-item>
+                        }
+                      </ion-list>
+                    </div>
+                  }
+                </ion-card-content>
+              </ion-card>
+            }
+    `,
   styles: [
     `
       .sync-status-item {

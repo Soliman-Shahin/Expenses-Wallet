@@ -1,12 +1,12 @@
 import { Component, ChangeDetectionStrategy, EventEmitter, Input, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { IonicModule } from '@ionic/angular';
 import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-action-tile',
   standalone: true,
-  imports: [CommonModule, IonicModule, RouterModule],
+  imports: [IonicModule, RouterModule],
   templateUrl: './action-tile.component.html',
   styleUrls: ['./action-tile.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
