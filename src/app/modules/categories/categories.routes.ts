@@ -1,10 +1,9 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { APP_ROUTES } from 'src/app/core/constants';
 import { AddCategoryComponent, CategoriesComponent } from './components';
 
-const categoriesRoutes: Routes = [
+export const routes: Routes = [
   {
     path: '',
     redirectTo: APP_ROUTES.CATEGORIES.LIST,
@@ -30,17 +29,3 @@ const categoriesRoutes: Routes = [
     data: { title: 'CATEGORY.EDIT', action: 'save', icon: 'save' },
   },
 ];
-
-@NgModule({
-  imports: [
-    IonicModule,
-    RouterModule.forChild([
-      {
-        path: '',
-        children: categoriesRoutes,
-      },
-    ]),
-  ],
-  exports: [RouterModule],
-})
-export class CategoriesRoutingModule {}

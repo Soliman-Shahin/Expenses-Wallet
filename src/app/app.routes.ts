@@ -11,50 +11,46 @@ export const routes: Routes = [
   {
     path: APP_ROUTES.HOME,
     loadChildren: () =>
-      import('./home/home.module').then((m) => m.HomePageModule),
+      import('./home/home.routes').then(m => m.routes),
     // Home is public; it contains CTAs to sign in
   },
   {
     path: APP_ROUTES.AUTH.INDEX,
     loadChildren: () =>
-      import('./modules/auth/auth.module').then((m) => m.AuthModule),
+      import('./modules/auth/auth.routes').then(m => m.routes),
   },
   {
     path: APP_ROUTES.CATEGORIES.INDEX,
     loadChildren: () =>
-      import('./modules/categories/categories.module').then(
-        (m) => m.CategoriesModule
-      ),
+      import('./modules/categories/categories.routes').then(m => m.routes),
     canActivate: [AuthGuard],
     canLoad: [AuthGuardService],
   },
   {
     path: APP_ROUTES.PROFILE.INDEX,
     loadChildren: () =>
-      import('./modules/profile/profile.module').then((m) => m.ProfileModule),
+      import('./modules/profile/profile.routes').then(m => m.routes),
     canActivate: [AuthGuard],
     canLoad: [AuthGuardService],
   },
   {
     path: APP_ROUTES.TRANSACTIONS.INDEX,
     loadChildren: () =>
-      import('./modules/transactions/transactions.module').then(
-        (m) => m.TransactionsModule
-      ),
+      import('./modules/transactions/transactions.routes').then(m => m.routes),
     canActivate: [AuthGuard],
     canLoad: [AuthGuardService],
   },
   {
     path: APP_ROUTES.SETTINGS.INDEX,
     loadChildren: () =>
-      import('./modules/settings/settings.module').then((m) => m.SettingsModule),
+      import('./modules/settings/settings.routes').then(m => m.routes),
     canActivate: [AuthGuard],
     canLoad: [AuthGuardService],
   },
   {
     path: 'help',
     loadChildren: () =>
-      import('./modules/help/help.module').then((m) => m.HelpModule),
+      import('./modules/help/help.routes').then(m => m.routes),
   },
   {
     path: '**',

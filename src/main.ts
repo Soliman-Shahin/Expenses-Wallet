@@ -25,13 +25,11 @@ import { errorInterceptor } from './app/core/interceptors/error.interceptor';
 
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { AppRoutingModule } from './app/app-routing.module';
+import { provideRouter, withPreloading, PreloadAllModules, withInMemoryScrolling, withRouterConfig, withComponentInputBinding } from '@angular/router';
+import { routes } from './app/app.routes';
 import { IonicModule } from '@ionic/angular';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
-import { SharedModule } from './app/shared/shared.module';
-import { CoreModule } from './app/core/core.module';
-import { LayoutModule } from './app/layout/layout.module';
 import { AppComponent } from './app/app.component';
 
 export function HttpLoaderFactory(http: HttpClient) {
@@ -51,8 +49,14 @@ if (!(window as any).__appBootstrapped) {
   bootstrapApplication(AppComponent, {
     providers: [
       provideZoneChangeDetection({ eventCoalescing: true }),
+      provideRouter(
+        routes,
+        withPreloading(PreloadAllModules),
+        withInMemoryScrolling({ scrollPositionRestoration: 'enabled', anchorScrolling: 'enabled' }),
+        withRouterConfig({ onSameUrlNavigation: 'reload' }),
+        withComponentInputBinding()
+      ),
       importProvidersFrom(
-        AppRoutingModule,
         IonicModule.forRoot(),
         TranslateModule.forRoot({
           loader: {
@@ -60,10 +64,7 @@ if (!(window as any).__appBootstrapped) {
             useFactory: HttpLoaderFactory,
             deps: [HttpClient],
           },
-        }),
-        SharedModule,
-        CoreModule,
-        LayoutModule
+        })
       ),
       provideHttpClient(
         withInterceptors([

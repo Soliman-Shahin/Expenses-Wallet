@@ -1,9 +1,8 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 import { LoginComponent, SignupComponent } from './components';
 import { AuthCallbackComponent } from './pages/auth-callback/auth-callback.component';
 
-const routes: Routes = [
+export const routes: Routes = [
   { path: '', redirectTo: 'app', pathMatch: 'full' },
   {
     path: 'login',
@@ -18,9 +17,3 @@ const routes: Routes = [
     component: AuthCallbackComponent,
   },
 ];
-
-@NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule],
-})
-export class AuthRoutingModule {}

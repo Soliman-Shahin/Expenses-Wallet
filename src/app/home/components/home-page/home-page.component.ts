@@ -31,7 +31,6 @@ import {
 import { ExpenseFormComponent } from '../expense-form/expense-form.component';
 import { TransactionsComponent } from '../transactions/transactions.component';
 import { ReactiveFormsModule } from '@angular/forms';
-import { SharedModule } from 'src/app/shared/shared.module';
 import { formatCurrency } from 'src/app/shared/utils';
 import { MonthYear } from '../../models';
 import {
@@ -47,6 +46,8 @@ import { User } from 'src/app/modules/auth/models';
 import { AuthService } from 'src/app/modules/auth/services/auth.service';
 import { DashboardFacade } from 'src/app/shared/facades';
 import { Expense } from 'src/app/shared/models';
+import { BalanceCardComponent } from 'src/app/shared/components/balance-card/balance-card.component';
+import { MonthsScrollHeaderComponent } from 'src/app/shared/components/months-scroll-header/months-scroll-header.component';
 
 @Component({
   standalone: true,
@@ -56,7 +57,7 @@ import { Expense } from 'src/app/shared/models';
   imports: [
     CommonModule,
     IonicModule,
-    SharedModule,
+    
     ReactiveFormsModule,
     TranslateModule,
     TransactionsComponent,
@@ -64,7 +65,8 @@ import { Expense } from 'src/app/shared/models';
     AddFabButtonComponent,
     SkeletonBlockComponent,
     SectionHeaderComponent,
-    // Charts components are lazy-loaded
+    BalanceCardComponent,
+    MonthsScrollHeaderComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [
