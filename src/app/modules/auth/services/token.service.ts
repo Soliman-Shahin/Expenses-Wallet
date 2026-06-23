@@ -1,5 +1,4 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
 import { LocalStorageKeys, User } from 'src/app/modules/auth/models';
 import { StorageService } from './storage.service';
 import { SecureStorageService } from './secure-storage.service';
@@ -16,14 +15,14 @@ export class TokenService {
     userLang: 'user-lang',
   };
 
-  user$ = new BehaviorSubject<User | null>(null);
+  user = signal<User | null>(null);
 
   constructor(
     private storage: StorageService,
     private secure: SecureStorageService
   ) {
     const user = this.getUser();
-    if (user) this.user$.next(user);
+    if (user) this.user.set(user);
   }
 
   // Use StorageService for all storage operations
@@ -73,7 +72,7 @@ export class TokenService {
 
   setUser(user: User): void {
     this.setItem<User>(this.localStorageKeys.user, user);
-    this.user$.next(user);
+    this.user.set(user);
   }
 
   setUserLang(userLang: string): void {
@@ -96,7 +95,7 @@ export class TokenService {
     // Remove tokens from secure storage
     this.secure.remove(this.localStorageKeys.accessToken);
     this.secure.remove(this.localStorageKeys.refreshToken);
-    this.user$.next(null);
+    this.user.set(null);
   }
 
   getPayload(): any {

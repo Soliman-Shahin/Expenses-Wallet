@@ -1,5 +1,6 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, fromEvent, merge, of } from 'rxjs';
+import { Injectable, signal, computed } from '@angular/core';
+import { Observable, fromEvent, merge, of } from 'rxjs';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { map, debounceTime } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
@@ -23,11 +24,13 @@ export interface ConnectionStatus {
   providedIn: 'root',
 })
 export class ConnectionService {
-  private connectionStatus$ = new BehaviorSubject<ConnectionStatus>({
+  private connectionStatusSignal = signal<ConnectionStatus>({
     online: navigator.onLine,
     backendReachable: false,
     lastChecked: new Date(),
   });
+
+  private connectionStatus$ = toObservable(this.connectionStatusSignal);
 
   private healthCheckInterval: any;
   private readonly HEALTH_CHECK_INTERVAL = 60000; // 1 minute
@@ -41,28 +44,28 @@ export class ConnectionService {
    * Get connection status as observable
    */
   getConnectionStatus(): Observable<ConnectionStatus> {
-    return this.connectionStatus$.asObservable();
+    return this.connectionStatus$;
   }
 
   /**
    * Get current connection status
    */
   getCurrentStatus(): ConnectionStatus {
-    return this.connectionStatus$.value;
+    return this.connectionStatusSignal();
   }
 
   /**
    * Check if online
    */
   isOnline(): boolean {
-    return this.connectionStatus$.value.online;
+    return this.connectionStatusSignal().online;
   }
 
   /**
    * Check if backend is reachable
    */
   isBackendReachable(): boolean {
-    return this.connectionStatus$.value.backendReachable;
+    return this.connectionStatusSignal().backendReachable;
   }
 
   /**
@@ -139,11 +142,11 @@ export class ConnectionService {
    * Update connection status
    */
   private updateConnectionStatus(updates: Partial<ConnectionStatus>): void {
-    this.connectionStatus$.next({
-      ...this.connectionStatus$.value,
+    this.connectionStatusSignal.update(status => ({
+      ...status,
       ...updates,
       lastChecked: new Date(),
-    });
+    }));
   }
 
   /**
