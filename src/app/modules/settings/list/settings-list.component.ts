@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { BaseComponent } from 'src/app/shared/base/base.component';
 import { Subscription } from 'rxjs';
 import { BiometricService } from 'src/app/core/services/biometric.service';
@@ -29,7 +29,7 @@ import { BackupRestoreComponent } from '../../../shared/components/backup-restor
     imports: [IonicModule, BackupRestoreComponent, TranslateModule]
 })
 export class BackupModalComponent {
-  constructor(private modalCtrl: ModalController) {}
+  private modalCtrl = inject(ModalController);
   close() { this.modalCtrl.dismiss(); }
 }
 
@@ -62,7 +62,9 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
     { value: 'auto', label: 'SETTINGS.THEME_AUTO' },
   ];
 
-  constructor(private biometricService: BiometricService) {
+  private biometricService = inject(BiometricService);
+
+  constructor() {
     super();
   }
 

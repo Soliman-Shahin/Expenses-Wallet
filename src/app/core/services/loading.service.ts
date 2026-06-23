@@ -15,16 +15,12 @@ export class LoadingService {
   /**
    * Observable that emits the current loading state
    */
-  get isLoading$(): Observable<boolean> {
-    return toObservable(this.loadingSignal);
-  }
+  readonly isLoading$: Observable<boolean> = toObservable(this.loadingSignal);
 
   /**
    * Observable for the current loader message (if any)
    */
-  get message$(): Observable<string | null> {
-    return toObservable(this.messageSignal);
-  }
+  readonly message$: Observable<string | null> = toObservable(this.messageSignal);
 
   /**
    * Set loading state for a specific loading task

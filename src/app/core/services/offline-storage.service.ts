@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { StorageService } from 'src/app/modules/auth/services/storage.service';
 import { SyncEntity, SyncStatus, OfflineData, SyncOperation, SyncQueue } from 'src/app/shared/models/sync.model';
 import { Observable, BehaviorSubject, from, of } from 'rxjs';
@@ -27,7 +27,9 @@ export class OfflineStorageService {
 
   public syncQueue$ = this.syncQueueSubject.asObservable();
 
-  constructor(private storageService: StorageService) {
+  private storageService = inject(StorageService);
+
+  constructor() {
     this.loadSyncQueue();
   }
 

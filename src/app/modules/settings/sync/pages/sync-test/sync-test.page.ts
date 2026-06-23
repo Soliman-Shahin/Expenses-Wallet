@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { SyncService } from 'src/app/core/services/sync.service';
@@ -228,7 +228,7 @@ export class SyncTestPage implements OnInit, OnDestroy {
   progress: SyncProgress | null = null;
   consoleOutput: string = 'Waiting for sync operations...\n';
 
-  constructor(private syncService: SyncService) {}
+  private syncService = inject(SyncService);
 
   ngOnInit(): void {
     this.log('🧪 Sync Test Page initialized');

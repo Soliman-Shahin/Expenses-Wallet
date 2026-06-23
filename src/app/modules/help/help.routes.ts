@@ -1,9 +1,8 @@
 import { Routes } from '@angular/router';
-import { HelpPageComponent } from './pages/help.page';
 
 export const routes: Routes = [
   {
     path: '',
-    component: HelpPageComponent,
+    loadComponent: () => import('./pages/help.page').then(m => m.HelpPageComponent),
   },
 ];

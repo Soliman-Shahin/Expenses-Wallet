@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { APP_ROUTES } from 'src/app/core/constants';
-import { AddCategoryComponent, CategoriesComponent } from './components';
 
 export const routes: Routes = [
   {
@@ -11,7 +10,7 @@ export const routes: Routes = [
   },
   {
     path: APP_ROUTES.CATEGORIES.LIST,
-    component: CategoriesComponent,
+    loadComponent: () => import('./components').then(m => m.CategoriesComponent),
     data: {
       title: 'SIDEBAR.CATEGORIES',
       action: 'add',
@@ -20,12 +19,12 @@ export const routes: Routes = [
   },
   {
     path: APP_ROUTES.CATEGORIES.CREATE,
-    component: AddCategoryComponent,
+    loadComponent: () => import('./components').then(m => m.AddCategoryComponent),
     data: { title: 'CATEGORY.ADD', action: 'save', icon: 'save' },
   },
   {
     path: APP_ROUTES.CATEGORIES.EDIT,
-    component: AddCategoryComponent,
+    loadComponent: () => import('./components').then(m => m.AddCategoryComponent),
     data: { title: 'CATEGORY.EDIT', action: 'save', icon: 'save' },
   },
 ];

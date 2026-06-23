@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { TransactionsListComponent } from './components/transactions-list/transactions-list.component';
+
 import { APP_ROUTES } from 'src/app/core/constants';
 
 export const routes: Routes = [
@@ -10,6 +10,6 @@ export const routes: Routes = [
   },
   {
     path: APP_ROUTES.TRANSACTIONS.LIST,
-    component: TransactionsListComponent
+    loadComponent: () => import('./components/transactions-list/transactions-list.component').then(m => m.TransactionsListComponent)
   }
 ];

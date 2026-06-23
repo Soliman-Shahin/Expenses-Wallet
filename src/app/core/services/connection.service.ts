@@ -1,4 +1,4 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { Observable, fromEvent, merge, of } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { map, debounceTime } from 'rxjs/operators';
@@ -35,7 +35,9 @@ export class ConnectionService {
   private healthCheckInterval: any;
   private readonly HEALTH_CHECK_INTERVAL = 60000; // 1 minute
 
-  constructor(private http: HttpClient) {
+  private http = inject(HttpClient);
+
+  constructor() {
     this.initializeConnectionMonitoring();
     this.startHealthCheck();
   }

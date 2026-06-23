@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { NativeBiometric } from '@capgo/capacitor-native-biometric';
 import { Platform } from '@ionic/angular';
 import { StorageService } from '../../modules/auth/services/storage.service';
@@ -10,7 +10,8 @@ export class BiometricService {
   private readonly BIOMETRIC_ENABLED_KEY = 'biometric_enabled';
   public lastBiometricTime = 0;
 
-  constructor(private platform: Platform, private storage: StorageService) {}
+  private platform = inject(Platform);
+  private storage = inject(StorageService);
 
   get isEnabled(): boolean {
     return !!this.storage.get(this.BIOMETRIC_ENABLED_KEY);

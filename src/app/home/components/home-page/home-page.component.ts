@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import { Observable, defer } from 'rxjs';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { IonicModule } from '@ionic/angular';
 import { AddFabButtonComponent } from 'src/app/shared/ui/add-fab-button/add-fab-button.component';
@@ -56,6 +57,7 @@ import { MonthsScrollHeaderComponent } from 'src/app/shared/components/months-sc
   styleUrls: ['./home-page.component.scss'],
   imports: [
     CommonModule,
+    RouterModule,
     IonicModule,
     
     ReactiveFormsModule,
