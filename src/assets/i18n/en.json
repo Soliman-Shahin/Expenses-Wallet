@@ -16,6 +16,7 @@
   "COLOR": "Color",
   "ICON": "Icon",
   "VERSION": "vs 1.1.0",
+  "HELP": "Help",
   "NO_DATA": "No data available",
   "TOTAL_SALARY": "Total salary",
   "TOTAL_EXPENSES": "Total expenses",
@@ -567,7 +568,11 @@
     "EXPENSE_CONFLICT": "Expense conflict",
     "CATEGORY_CONFLICT": "Category conflict",
     "USER_CONFLICT": "User conflict",
-    "UNKNOWN_CONFLICT": "Unknown conflict"
+    "UNKNOWN_CONFLICT": "Unknown conflict",
+    "OFFLINE": "Offline",
+    "BACKEND_CONNECTED": "Connected to server",
+    "BACKEND_UNREACHABLE": "Server unreachable",
+    "NO_INTERNET": "No internet connection"
   },
   "ERROR_CODES": {
     "AUTH_MISSING_OR_INVALID_HEADER": "Authentication header is missing or invalid.",

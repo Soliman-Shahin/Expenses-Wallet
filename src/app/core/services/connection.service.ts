@@ -1,6 +1,5 @@
-import { Injectable, signal, computed, inject } from '@angular/core';
-import { Observable, fromEvent, merge, of } from 'rxjs';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Injectable, inject } from '@angular/core';
+import { Observable, BehaviorSubject, fromEvent, merge, of } from 'rxjs';
 import { map, debounceTime } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
@@ -24,13 +23,13 @@ export interface ConnectionStatus {
   providedIn: 'root',
 })
 export class ConnectionService {
-  private connectionStatusSignal = signal<ConnectionStatus>({
+  private connectionStatusSubject = new BehaviorSubject<ConnectionStatus>({
     online: navigator.onLine,
     backendReachable: false,
     lastChecked: new Date(),
   });
 
-  private connectionStatus$ = toObservable(this.connectionStatusSignal);
+  private connectionStatus$ = this.connectionStatusSubject.asObservable();
 
   private healthCheckInterval: any;
   private readonly HEALTH_CHECK_INTERVAL = 60000; // 1 minute
@@ -53,28 +52,48 @@ export class ConnectionService {
    * Get current connection status
    */
   getCurrentStatus(): ConnectionStatus {
-    return this.connectionStatusSignal();
+    return this.connectionStatusSubject.value;
   }
 
   /**
    * Check if online
    */
   isOnline(): boolean {
-    return this.connectionStatusSignal().online;
+    return this.connectionStatusSubject.value.online;
   }
 
   /**
    * Check if backend is reachable
    */
   isBackendReachable(): boolean {
-    return this.connectionStatusSignal().backendReachable;
+    return this.connectionStatusSubject.value.backendReachable;
   }
 
   /**
    * Initialize connection monitoring
    */
-  private initializeConnectionMonitoring(): void {
-    // Monitor browser online/offline events
+  private async initializeConnectionMonitoring(): Promise<void> {
+    const { Network } = await import('@capacitor/network');
+    
+    // Initial status
+    try {
+      const status = await Network.getStatus();
+      this.updateConnectionStatus({ online: status.connected });
+    } catch (e) {
+      console.warn('Network getStatus failed, falling back to navigator', e);
+    }
+
+    // Native listener
+    Network.addListener('networkStatusChange', status => {
+      this.updateConnectionStatus({ online: status.connected });
+      if (status.connected) {
+        this.checkBackendHealth();
+      } else {
+        this.updateConnectionStatus({ backendReachable: false });
+      }
+    });
+
+    // Monitor browser online/offline events (Fallback for web)
     merge(
       of(navigator.onLine),
       fromEvent(window, 'online').pipe(map(() => true)),
@@ -100,11 +119,9 @@ export class ConnectionService {
     // Initial check
     this.checkBackendHealth();
 
-    // Periodic checks
+    // Periodic checks: Try regardless of isOnline() to recover from stuck offline states
     this.healthCheckInterval = setInterval(() => {
-      if (this.isOnline()) {
-        this.checkBackendHealth();
-      }
+      this.checkBackendHealth();
     }, this.HEALTH_CHECK_INTERVAL);
   }
 
@@ -119,7 +136,7 @@ export class ConnectionService {
         .get<any>(healthUrl, {
           observe: 'response',
           // Don't retry health checks
-          headers: { 'X-Skip-Retry': 'true' },
+          headers: { 'X-Skip-Retry': 'true', 'X-Silent-Error': 'true' },
         })
         .toPromise();
 
@@ -128,6 +145,8 @@ export class ConnectionService {
 
       this.updateConnectionStatus({
         backendReachable: isHealthy,
+        // If the backend is reachable, we must be online, overriding any buggy OS states
+        ...(isHealthy ? { online: true } : {})
       });
 
       return isHealthy;
@@ -144,11 +163,12 @@ export class ConnectionService {
    * Update connection status
    */
   private updateConnectionStatus(updates: Partial<ConnectionStatus>): void {
-    this.connectionStatusSignal.update(status => ({
-      ...status,
+    const current = this.connectionStatusSubject.value;
+    this.connectionStatusSubject.next({
+      ...current,
       ...updates,
       lastChecked: new Date(),
-    }));
+    });
   }
 
   /**

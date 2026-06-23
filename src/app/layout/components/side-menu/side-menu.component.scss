@@ -170,6 +170,12 @@
       background: var(--side-menu-background);
       border-top: 1px solid var(--side-menu-border-color);
 
+      .sync-status-wrapper {
+        margin-bottom: 12px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--side-menu-border-color);
+      }
+
       ion-item {
         --min-height: 48px;
         margin-bottom: 4px;

@@ -105,6 +105,16 @@ async function handleError(
       errorMessage = error.error?.message || error.message || errorMessage;
   }
 
+  // Hide toasts for background processes and polling
+  if (
+    request.url.includes('/health') ||
+    request.url.includes('/sync') ||
+    request.headers.has('X-Skip-Retry') ||
+    request.headers.has('X-Silent-Error')
+  ) {
+    shouldShowToast = false;
+  }
+
   console.error('HTTP Error:', {
     status: error.status,
     message: errorMessage,

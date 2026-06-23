@@ -1,5 +1,11 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  FormsModule,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { LoadingController, IonicModule } from '@ionic/angular';
 
 import { SyncService } from 'src/app/core/services/sync.service';
@@ -10,8 +16,8 @@ import { AsyncPipe, DecimalPipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
-    selector: 'app-sync-settings',
-    template: `
+  selector: 'app-sync-settings',
+  template: `
     <ion-header mode="ios">
       <ion-toolbar>
         <ion-buttons slot="start">
@@ -20,16 +26,21 @@ import { TranslateModule } from '@ngx-translate/core';
         <ion-title>{{ 'SYNC.SETTINGS_TITLE' | translate }}</ion-title>
       </ion-toolbar>
     </ion-header>
-    
+
     <ion-content class="settings-content" [fullscreen]="true">
       <ion-header collapse="condense">
         <ion-toolbar>
-          <ion-title size="large">{{ 'SYNC.SETTINGS_TITLE' | translate }}</ion-title>
+          <ion-title size="large">{{
+            'SYNC.SETTINGS_TITLE' | translate
+          }}</ion-title>
         </ion-toolbar>
       </ion-header>
-    
-      <form [formGroup]="syncForm" (ngSubmit)="saveSettings()" class="settings-container">
-    
+
+      <form
+        [formGroup]="syncForm"
+        (ngSubmit)="saveSettings()"
+        class="settings-container"
+      >
         <div class="section-label">{{ 'SYNC.AUTO_SYNC' | translate }}</div>
         <ion-list inset="true" class="premium-list">
           <ion-item>
@@ -40,34 +51,60 @@ import { TranslateModule } from '@ngx-translate/core';
               <h3>{{ 'SYNC.ENABLE_AUTO_SYNC' | translate }}</h3>
               <p>{{ 'SYNC.AUTO_SYNC_DESC' | translate }}</p>
             </ion-label>
-            <ion-toggle formControlName="autoSync" slot="end" color="success"></ion-toggle>
+            <ion-toggle
+              formControlName="autoSync"
+              slot="end"
+              color="success"
+            ></ion-toggle>
           </ion-item>
-    
+
           @if (syncForm.get('autoSync')?.value) {
-            <ion-item>
-              <ion-label>{{ 'SYNC.SYNC_INTERVAL' | translate }}</ion-label>
-              <ion-select formControlName="syncInterval" interface="popover" slot="end" class="modern-select">
-                <ion-select-option value="10000">{{ 'SYNC.EVERY_10_SECONDS' | translate }}</ion-select-option>
-                <ion-select-option value="30000">{{ 'SYNC.EVERY_30_SECONDS' | translate }}</ion-select-option>
-                <ion-select-option value="60000">{{ 'SYNC.EVERY_MINUTE' | translate }}</ion-select-option>
-                <ion-select-option value="300000">{{ 'SYNC.EVERY_5_MINUTES' | translate }}</ion-select-option>
-                <ion-select-option value="900000">{{ 'SYNC.EVERY_15_MINUTES' | translate }}</ion-select-option>
-              </ion-select>
-            </ion-item>
+          <ion-item>
+            <ion-label>{{ 'SYNC.SYNC_INTERVAL' | translate }}</ion-label>
+            <ion-select
+              formControlName="syncInterval"
+              interface="popover"
+              slot="end"
+              class="modern-select"
+            >
+              <ion-select-option value="60000">{{
+                'SYNC.EVERY_MINUTE' | translate
+              }}</ion-select-option>
+              <ion-select-option value="300000">{{
+                'SYNC.EVERY_5_MINUTES' | translate
+              }}</ion-select-option>
+              <ion-select-option value="900000">{{
+                'SYNC.EVERY_15_MINUTES' | translate
+              }}</ion-select-option>
+            </ion-select>
+          </ion-item>
           }
         </ion-list>
-    
-        <div class="section-label">{{ 'SYNC.CONFLICT_RESOLUTION' | translate }}</div>
+
+        <div class="section-label">
+          {{ 'SYNC.CONFLICT_RESOLUTION' | translate }}
+        </div>
         <ion-list inset="true" class="premium-list">
           <ion-item>
             <ion-label>{{ 'SYNC.CONFLICT_STRATEGY' | translate }}</ion-label>
-            <ion-select formControlName="conflictResolution" interface="popover" slot="end" class="modern-select">
-              <ion-select-option value="prompt">{{ 'SYNC.ASK_ME' | translate }}</ion-select-option>
-              <ion-select-option value="local">{{ 'SYNC.USE_LOCAL' | translate }}</ion-select-option>
-              <ion-select-option value="server">{{ 'SYNC.USE_SERVER' | translate }}</ion-select-option>
+            <ion-select
+              formControlName="conflictResolution"
+              interface="popover"
+              slot="end"
+              class="modern-select"
+            >
+              <ion-select-option value="prompt">{{
+                'SYNC.ASK_ME' | translate
+              }}</ion-select-option>
+              <ion-select-option value="local">{{
+                'SYNC.USE_LOCAL' | translate
+              }}</ion-select-option>
+              <ion-select-option value="server">{{
+                'SYNC.USE_SERVER' | translate
+              }}</ion-select-option>
             </ion-select>
           </ion-item>
-    
+
           <ion-item>
             <div slot="start" class="icon-wrapper color-purple">
               <ion-icon name="cloud-offline"></ion-icon>
@@ -76,23 +113,41 @@ import { TranslateModule } from '@ngx-translate/core';
               <h3>{{ 'SYNC.OFFLINE_MODE' | translate }}</h3>
               <p>{{ 'SYNC.OFFLINE_MODE_DESC' | translate }}</p>
             </ion-label>
-            <ion-toggle formControlName="enableOfflineMode" slot="end" color="success"></ion-toggle>
+            <ion-toggle
+              formControlName="enableOfflineMode"
+              slot="end"
+              color="success"
+            ></ion-toggle>
           </ion-item>
         </ion-list>
-    
+
         <div class="section-label">{{ 'SYNC.ADVANCED' | translate }}</div>
         <ion-list inset="true" class="premium-list">
           <ion-item>
             <ion-label>{{ 'SYNC.MAX_RETRIES' | translate }}</ion-label>
-            <ion-input type="number" formControlName="maxRetries" min="1" max="10" slot="end" class="right-align-input"></ion-input>
+            <ion-input
+              type="number"
+              formControlName="maxRetries"
+              min="1"
+              max="10"
+              slot="end"
+              class="right-align-input"
+            ></ion-input>
           </ion-item>
-    
+
           <ion-item>
             <ion-label>{{ 'SYNC.BATCH_SIZE' | translate }}</ion-label>
-            <ion-input type="number" formControlName="batchSize" min="1" max="50" slot="end" class="right-align-input"></ion-input>
+            <ion-input
+              type="number"
+              formControlName="batchSize"
+              min="1"
+              max="50"
+              slot="end"
+              class="right-align-input"
+            ></ion-input>
           </ion-item>
         </ion-list>
-    
+
         <div class="section-label">{{ 'SYNC.STORAGE_INFO' | translate }}</div>
         <ion-list inset="true" class="premium-list">
           <ion-item>
@@ -104,7 +159,7 @@ import { TranslateModule } from '@ngx-translate/core';
               <p>{{ storageSize | async | number : '1.2-2' }} KB</p>
             </ion-label>
           </ion-item>
-    
+
           <ion-item>
             <div slot="start" class="icon-wrapper color-orange">
               <ion-icon name="cloud-upload"></ion-icon>
@@ -115,73 +170,137 @@ import { TranslateModule } from '@ngx-translate/core';
             </ion-label>
           </ion-item>
         </ion-list>
-    
+
         <div class="ion-padding">
           <ion-button expand="block" type="submit" class="ion-margin-bottom">
             <ion-icon name="save-outline" slot="start"></ion-icon>
             {{ 'COMMON.SAVE' | translate }}
           </ion-button>
-    
-          <ion-button expand="block" fill="outline" (click)="forceSync()" class="ion-margin-bottom">
+
+          <ion-button
+            expand="block"
+            fill="outline"
+            (click)="forceSync()"
+            class="ion-margin-bottom"
+          >
             <ion-icon name="sync-outline" slot="start"></ion-icon>
             {{ 'SYNC.SYNC_NOW' | translate }}
           </ion-button>
-    
-          <ion-button expand="block" fill="outline" color="warning" (click)="createBackup()" class="ion-margin-bottom">
+
+          <ion-button
+            expand="block"
+            fill="outline"
+            color="warning"
+            (click)="createBackup()"
+            class="ion-margin-bottom"
+          >
             <ion-icon name="download-outline" slot="start"></ion-icon>
             {{ 'SYNC.CREATE_BACKUP' | translate }}
           </ion-button>
-    
-          <ion-button expand="block" fill="outline" color="danger" (click)="clearOfflineData()">
+
+          <ion-button
+            expand="block"
+            fill="outline"
+            color="danger"
+            (click)="clearOfflineData()"
+          >
             <ion-icon name="trash-outline" slot="start"></ion-icon>
             {{ 'SYNC.CLEAR_OFFLINE_DATA' | translate }}
           </ion-button>
         </div>
       </form>
     </ion-content>
+  `,
+  styles: [
+    `
+      .settings-content {
+        --background: var(--ion-color-step-50, #f2f2f6);
+      }
+      .settings-container {
+        padding: 0 0 100px 0;
+      }
+      .section-label {
+        margin: 20px 20px 8px;
+        margin-inline-start: 32px;
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: var(--ion-color-medium);
+        letter-spacing: 0.5px;
+      }
+      .premium-list {
+        margin-bottom: 24px;
+        border-radius: 12px;
+        background: var(--ion-item-background, #ffffff);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+      }
+      .premium-list ion-item {
+        --padding-start: 16px;
+        --inner-padding-end: 16px;
+        --min-height: 60px;
+      }
+      .premium-list ion-item h3 {
+        font-weight: 500;
+        font-size: 16px;
+        letter-spacing: -0.2px;
+      }
+      .premium-list ion-item p {
+        font-size: 13px;
+        color: var(--ion-color-medium);
+        margin-top: 4px;
+      }
+      .icon-wrapper {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-inline-end: 16px;
+      }
+      .icon-wrapper ion-icon {
+        font-size: 20px;
+        color: #ffffff;
+      }
+      .color-cyan {
+        background: #32ade6;
+      }
+      .color-purple {
+        background: #5856d6;
+      }
+      .color-dark {
+        background: #8e8e93;
+      }
+      .modern-select {
+        width: 100%;
+        max-width: 150px;
+        justify-content: flex-end;
+        color: var(--ion-color-medium);
+      }
+      .right-align-input {
+        text-align: end;
+      }
+      :host-context(body.dark) .settings-content {
+        --background: #000000;
+      }
+      :host-context(body.dark) .section-label {
+        color: #98989d;
+      }
+      :host-context(body.dark) .premium-list {
+        background: #1c1c1e;
+        box-shadow: none;
+      }
     `,
-    styles: [`
-    .settings-content { --background: var(--ion-color-step-50, #f2f2f6); }
-    .settings-container { padding: 0 0 100px 0; }
-    .section-label {
-      margin: 20px 20px 8px;
-      margin-inline-start: 32px;
-      font-size: 13px;
-      font-weight: 600;
-      text-transform: uppercase;
-      color: var(--ion-color-medium);
-      letter-spacing: 0.5px;
-    }
-    .premium-list {
-      margin-bottom: 24px;
-      border-radius: 12px;
-      background: var(--ion-item-background, #ffffff);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.04);
-    }
-    .premium-list ion-item {
-      --padding-start: 16px;
-      --inner-padding-end: 16px;
-      --min-height: 60px;
-    }
-    .premium-list ion-item h3 { font-weight: 500; font-size: 16px; letter-spacing: -0.2px; }
-    .premium-list ion-item p { font-size: 13px; color: var(--ion-color-medium); margin-top: 4px; }
-    .icon-wrapper {
-      width: 32px; height: 32px; border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      margin-inline-end: 16px;
-    }
-    .icon-wrapper ion-icon { font-size: 20px; color: #ffffff; }
-    .color-cyan { background: #32ade6; }
-    .color-purple { background: #5856d6; }
-    .color-dark { background: #8e8e93; }
-    .modern-select { width: 100%; max-width: 150px; justify-content: flex-end; color: var(--ion-color-medium); }
-    .right-align-input { text-align: end; }
-    :host-context(body.dark) .settings-content { --background: #000000; }
-    :host-context(body.dark) .section-label { color: #98989d; }
-    :host-context(body.dark) .premium-list { background: #1c1c1e; box-shadow: none; }
-  `],
-    standalone: true,
-    imports: [IonicModule, FormsModule, ReactiveFormsModule, AsyncPipe, DecimalPipe, TranslateModule]
+  ],
+  standalone: true,
+  imports: [
+    IonicModule,
+    FormsModule,
+    ReactiveFormsModule,
+    AsyncPipe,
+    DecimalPipe,
+    TranslateModule,
+  ],
 })
 export class SyncSettingsPage extends BaseComponent implements OnInit {
   private syncService = inject(SyncService);
@@ -198,9 +317,9 @@ export class SyncSettingsPage extends BaseComponent implements OnInit {
     const config = this.syncService.getConfig();
     this.syncForm = this.formBuilder.group({
       autoSync: [config.autoSync ?? true],
-      syncInterval: [config.syncInterval?.toString() ?? '10000'],
+      syncInterval: [config.syncInterval?.toString() ?? '300000'],
       conflictResolution: [config.conflictResolution ?? 'prompt'],
-      enableOfflineMode: [false],
+      enableOfflineMode: [config.enableOfflineMode ?? false],
       maxRetries: [
         config.maxRetries ?? 3,
         [Validators.required, Validators.min(1), Validators.max(10)],
@@ -237,7 +356,7 @@ export class SyncSettingsPage extends BaseComponent implements OnInit {
   async forceSync(): Promise<void> {
     const loading = await this.loadingController.create({
       message: this.translateService.instant('SYNC.SYNCING') || 'Syncing...',
-      spinner: 'circles'
+      spinner: 'circles',
     });
     await loading.present();
 
@@ -268,8 +387,9 @@ export class SyncSettingsPage extends BaseComponent implements OnInit {
 
     if (confirmed) {
       const loading = await this.loadingController.create({
-        message: this.translateService.instant('COMMON.LOADING') || 'Clearing...',
-        spinner: 'circles'
+        message:
+          this.translateService.instant('COMMON.LOADING') || 'Clearing...',
+        spinner: 'circles',
       });
       await loading.present();
 
@@ -296,8 +416,10 @@ export class SyncSettingsPage extends BaseComponent implements OnInit {
 
   async createBackup(): Promise<void> {
     const loading = await this.loadingController.create({
-      message: this.translateService.instant('SYNC.CREATING_BACKUP') || 'Creating Backup...',
-      spinner: 'circles'
+      message:
+        this.translateService.instant('SYNC.CREATING_BACKUP') ||
+        'Creating Backup...',
+      spinner: 'circles',
     });
     await loading.present();
 
@@ -306,14 +428,18 @@ export class SyncSettingsPage extends BaseComponent implements OnInit {
         loading.dismiss();
         if (backup) {
           try {
-            const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+            const blob = new Blob([JSON.stringify(backup, null, 2)], {
+              type: 'application/json',
+            });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `expenses_backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.download = `expenses_backup_${
+              new Date().toISOString().split('T')[0]
+            }.json`;
             a.click();
             window.URL.revokeObjectURL(url);
-            
+
             this.toastService.presentSuccessToast(
               'bottom',
               'SYNC.BACKUP_CREATED'

@@ -16,6 +16,7 @@
   "COLOR": "لون",
   "ICON": "رمز",
   "VERSION": "إصدار 1.1.0 ",
+  "HELP": "مساعدة",
   "NO_DATA": "لا يوجد بيانات متوفرة",
   "TOTAL_SALARY": "كل الراتب",
   "TOTAL_EXPENSES": "كل المصروفات",
@@ -122,7 +123,6 @@
     "FAQ_3_Q": "هل بياناتي آمنة؟",
     "FAQ_3_A": "نعم! يتم تخزين بياناتك محلياً على جهازك. وإذا استخدمت ميزة النسخ الاحتياطي، يمكنك اختيار تشفير الملف بكلمة مرور."
   },
-  "HELP": "مساعدة",
   "USER_AVATAR": "صورة المستخدم",
   "USER": {
     "DEFAULT_NAME": "مستخدم",
@@ -554,7 +554,11 @@
     "EXPENSE_CONFLICT": "تعارض في المصروف",
     "CATEGORY_CONFLICT": "تعارض في الفئة",
     "USER_CONFLICT": "تعارض في المستخدم",
-    "UNKNOWN_CONFLICT": "تعارض غير معروف"
+    "UNKNOWN_CONFLICT": "تعارض غير معروف",
+    "OFFLINE": "غير متصل",
+    "BACKEND_CONNECTED": "متصل بالخادم",
+    "BACKEND_UNREACHABLE": "الخادم غير متاح",
+    "NO_INTERNET": "لا يوجد اتصال بالإنترنت"
   },
   "ERROR_CODES": {
     "AUTH_MISSING_OR_INVALID_HEADER": "رأس التوثيق مفقود أو غير صالح.",

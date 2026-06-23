@@ -1,0 +1,371 @@
+// ════════════════════════════════════════════════
+// Sync Status Component – Premium Glassmorphism UI
+// ════════════════════════════════════════════════
+
+:host {
+  display: block;
+  font-family: var(--ion-font-family, "Inter", sans-serif);
+}
+
+// ── Status-based CSS variables ──────────────────
+.sync-wrapper {
+  --status-color: hsl(217, 91%, 60%);
+  --status-bg: hsla(217, 91%, 60%, 0.12);
+  --status-border: hsla(217, 91%, 60%, 0.28);
+  --status-glow: hsla(217, 91%, 60%, 0.2);
+
+  &.state-offline {
+    --status-color: hsl(220, 13%, 60%);
+    --status-bg: hsla(220, 13%, 60%, 0.1);
+    --status-border: hsla(220, 13%, 60%, 0.22);
+    --status-glow: transparent;
+  }
+
+  &.state-syncing {
+    --status-color: hsl(204, 94%, 52%);
+    --status-bg: hsla(204, 94%, 52%, 0.12);
+    --status-border: hsla(204, 94%, 52%, 0.3);
+    --status-glow: hsla(204, 94%, 52%, 0.25);
+  }
+
+  &.state-pending {
+    --status-color: hsl(38, 92%, 50%);
+    --status-bg: hsla(38, 92%, 50%, 0.12);
+    --status-border: hsla(38, 92%, 50%, 0.28);
+    --status-glow: hsla(38, 92%, 50%, 0.18);
+  }
+
+  &.state-conflict,
+  &.state-error {
+    --status-color: hsl(0, 84%, 60%);
+    --status-bg: hsla(0, 84%, 60%, 0.12);
+    --status-border: hsla(0, 84%, 60%, 0.28);
+    --status-glow: hsla(0, 84%, 60%, 0.18);
+  }
+
+  &.state-synced {
+    --status-color: hsl(142, 70%, 45%);
+    --status-bg: hsla(142, 70%, 45%, 0.12);
+    --status-border: hsla(142, 70%, 45%, 0.28);
+    --status-glow: hsla(142, 70%, 45%, 0.18);
+  }
+}
+
+// ── Pill Button ─────────────────────────────────
+.sync-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 9px 14px;
+  border: 1px solid var(--status-border);
+  border-radius: 14px;
+  background: var(--status-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 0 16px var(--status-glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  color: var(--ion-text-color);
+  font-size: 0.82rem;
+  font-weight: 500;
+  text-align: start;
+
+  &:hover {
+    background: color-mix(in srgb, var(--status-bg) 140%, transparent);
+    box-shadow: 0 0 24px var(--status-glow),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// ── Icon ────────────────────────────────────────
+.pill-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--status-color);
+  color: #fff;
+  font-size: 13px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px var(--status-glow);
+
+  &.spin ion-icon {
+    animation: spin 1.4s linear infinite;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// ── Label ───────────────────────────────────────
+.pill-label {
+  flex: 1;
+  color: var(--status-color);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+// ── Badges ──────────────────────────────────────
+.pill-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+
+  &.pending {
+    background: hsl(38, 92%, 50%);
+    color: #fff;
+  }
+
+  &.conflict {
+    background: hsl(0, 84%, 60%);
+    color: #fff;
+  }
+}
+
+.pill-progress {
+  font-size: 0.75rem;
+  color: var(--status-color);
+  font-weight: 700;
+}
+
+.pill-time {
+  font-size: 0.72rem;
+  color: var(--ion-color-medium);
+  font-weight: 500;
+}
+
+.pill-chevron {
+  color: var(--ion-color-medium);
+  font-size: 14px;
+  margin-inline-start: auto;
+  flex-shrink: 0;
+}
+
+// ── Expanded Panel ──────────────────────────────
+.sync-panel {
+  margin-top: 6px;
+  padding: 14px 16px;
+  border: 1px solid var(--status-border);
+  border-radius: 14px;
+  background: rgba(var(--ion-background-color-rgb, 255, 255, 255), 0.05);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  animation: slideDown 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ── Progress Bar ────────────────────────────────
+.panel-progress {
+  margin-bottom: 14px;
+}
+
+.progress-track {
+  height: 4px;
+  background: rgba(var(--ion-color-medium-rgb, 128, 128, 128), 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--status-color);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.progress-label {
+  margin: 6px 0 0;
+  font-size: 0.75rem;
+  color: var(--ion-color-medium);
+  text-align: center;
+}
+
+// ── Stats Grid ──────────────────────────────────
+.panel-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 90px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(var(--ion-color-medium-rgb, 128, 128, 128), 0.06);
+  border: 1px solid rgba(var(--ion-color-medium-rgb, 128, 128, 128), 0.12);
+}
+
+.stat-icon {
+  font-size: 18px;
+
+  &.synced {
+    color: hsl(142, 70%, 45%);
+  }
+  &.pending {
+    color: hsl(38, 92%, 50%);
+  }
+  &.conflict,
+  &.error {
+    color: hsl(0, 84%, 60%);
+  }
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-val {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ion-text-color);
+  line-height: 1.2;
+}
+
+.stat-key {
+  font-size: 0.68rem;
+  color: var(--ion-color-medium);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+// ── Connection Row ──────────────────────────────
+.conn-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 0.78rem;
+  color: var(--ion-color-medium);
+}
+
+.conn-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+
+  &.online {
+    background: hsl(142, 70%, 45%);
+    box-shadow: 0 0 6px hsla(142, 70%, 45%, 0.6);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  &.offline {
+    background: hsl(220, 13%, 55%);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 4px hsla(142, 70%, 45%, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 10px hsla(142, 70%, 45%, 0.9);
+  }
+}
+
+.conn-label {
+  flex: 1;
+}
+
+// ── Action Buttons ──────────────────────────────
+.panel-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--status-border);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: var(--status-bg);
+  color: var(--status-color);
+
+  ion-icon {
+    font-size: 15px;
+  }
+
+  &:hover {
+    background: var(--status-color);
+    color: #fff;
+    border-color: var(--status-color);
+    box-shadow: 0 4px 14px var(--status-glow);
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+// ── Errors ──────────────────────────────────────
+.panel-errors {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.error-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: hsla(0, 84%, 60%, 0.1);
+  border: 1px solid hsla(0, 84%, 60%, 0.22);
+  color: hsl(0, 84%, 60%);
+  font-size: 0.75rem;
+
+  ion-icon {
+    flex-shrink: 0;
+  }
+}

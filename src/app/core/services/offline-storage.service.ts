@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { SyncEntity, SyncStatus, OfflineData, SyncOperation, SyncQueue } from 'src/app/shared/models/sync.model';
 import { Observable, BehaviorSubject, from, of } from 'rxjs';
-import { map, catchError, tap } from 'rxjs/operators';
+import { map, catchError, tap, take } from 'rxjs/operators';
 import { DatabaseService } from './database.service';
 
 @Injectable({
@@ -149,6 +149,10 @@ export class OfflineStorageService {
     return false;
   }
 
+  removeEntityHard(entityType: string, id: string): void {
+    this.db.getTable(entityType).delete(id).catch(console.error);
+  }
+
   // ==================== SYNC QUEUE MANAGEMENT ====================
 
   private generateId(): string {
@@ -186,6 +190,7 @@ export class OfflineStorageService {
 
   getPendingOperations(): Observable<SyncOperation[]> {
     return this.syncQueue$.pipe(
+      take(1),
       map(queue => queue.operations.filter(op => op.status === SyncStatus.PENDING))
     );
   }

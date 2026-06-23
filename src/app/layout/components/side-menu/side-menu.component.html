@@ -72,6 +72,14 @@
         </ion-list>
         <!-- Common Bottom Menu Items -->
         <ion-list lines="none" class="bottom-menu" role="menu">
+
+          <!-- Sync Status Widget (only when logged in) -->
+          @if (vm.profile.isLoggedIn) {
+            <div class="sync-status-wrapper">
+              <app-sync-status></app-sync-status>
+            </div>
+          }
+
           <!-- Logout Button (conditional) -->
           @if (vm.profile.isLoggedIn) {
             <ion-item

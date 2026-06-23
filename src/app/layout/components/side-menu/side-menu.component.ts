@@ -1,4 +1,10 @@
-import { Component, ChangeDetectionStrategy, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  OnInit,
+  ViewChild,
+  AfterViewInit,
+} from '@angular/core';
 import { NavigationEnd, RouterLink } from '@angular/router';
 import { Observable, combineLatest } from 'rxjs';
 import { filter, map, startWith } from 'rxjs/operators';
@@ -8,14 +14,22 @@ import { MenuItem } from 'src/app/shared/models';
 import { ThemeToggleComponent } from '../../../shared/components/theme-toggle/theme-toggle.component';
 import { AsyncPipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
+import { SyncStatusComponent } from '../../../shared/components/sync-status/sync-status.component';
 
 @Component({
-    selector: 'app-side-menu',
-    templateUrl: './side-menu.component.html',
-    styleUrls: ['./side-menu.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-    imports: [IonicModule, RouterLink, ThemeToggleComponent, AsyncPipe, TranslateModule]
+  selector: 'app-side-menu',
+  templateUrl: './side-menu.component.html',
+  styleUrls: ['./side-menu.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    IonicModule,
+    RouterLink,
+    ThemeToggleComponent,
+    AsyncPipe,
+    TranslateModule,
+    SyncStatusComponent,
+  ],
 })
 export class SideMenuComponent
   extends BaseComponent
