@@ -1,10 +1,19 @@
-import { enableProdMode, ErrorHandler, importProvidersFrom } from '@angular/core';
+import {
+  enableProdMode,
+  ErrorHandler,
+  importProvidersFrom,
+  provideZoneChangeDetection,
+} from '@angular/core';
 import { initWebVitalsTracking } from './app/web-vitals';
 import { registerLocaleData } from '@angular/common';
 import localeAr from '@angular/common/locales/ar';
 
 import { environment } from './environments/environment';
-import { provideHttpClient, withInterceptors, HttpClient } from '@angular/common/http';
+import {
+  provideHttpClient,
+  withInterceptors,
+  HttpClient,
+} from '@angular/common/http';
 import { GlobalErrorHandler } from './app/core/services/global-error-handler.service';
 
 // Functional interceptors
@@ -14,7 +23,7 @@ import { authInterceptor } from './app/modules/auth/helper/authInterceptor';
 import { cacheInterceptor } from './app/core/interceptors/cache.interceptor';
 import { errorInterceptor } from './app/core/interceptors/error.interceptor';
 
-import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
+import { bootstrapApplication } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app/app-routing.module';
 import { IonicModule } from '@ionic/angular';
@@ -41,8 +50,8 @@ if (!(window as any).__appBootstrapped) {
 
   bootstrapApplication(AppComponent, {
     providers: [
+      provideZoneChangeDetection({ eventCoalescing: true }),
       importProvidersFrom(
-        BrowserModule,
         AppRoutingModule,
         IonicModule.forRoot(),
         TranslateModule.forRoot({
@@ -70,6 +79,6 @@ if (!(window as any).__appBootstrapped) {
         useClass: GlobalErrorHandler,
       },
       provideAnimations(),
-    ]
-  }).catch((err) => console.error('Bootstrap error:', err));
+    ],
+  }).catch((err: any) => console.error('Bootstrap error:', err));
 }

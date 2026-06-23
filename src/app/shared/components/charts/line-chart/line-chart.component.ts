@@ -1,4 +1,5 @@
-import { Component, ChangeDetectionStrategy, Input,
+import {
+  Component, ChangeDetectionStrategy, Input,
   OnInit,
   inject,
   OnChanges,
@@ -7,8 +8,10 @@ import { Component, ChangeDetectionStrategy, Input,
   EventEmitter,
   ElementRef,
   ViewChild,
-  OnDestroy, } from '@angular/core';
-import { CommonModule, DOCUMENT } from '@angular/common';
+  OnDestroy,
+  DOCUMENT
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { BaseComponent } from 'src/app/shared/base/base.component';
 import {
