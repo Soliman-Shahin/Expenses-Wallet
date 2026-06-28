@@ -3,6 +3,7 @@
     <ion-icon
       class="icon"
       [class.selected]="selectedIcon === icon"
+      [style.--active-color]="themeColor || 'var(--ion-color-primary)'"
       [name]="icon"
       size="large"
       [title]="icon"

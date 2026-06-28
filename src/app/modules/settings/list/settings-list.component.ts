@@ -6,32 +6,6 @@ import { ModalController, IonicModule } from '@ionic/angular';
 import { AuthService } from 'src/app/modules/auth/services/auth.service';
 import { User } from 'src/app/modules/auth/models';
 import { TranslateModule } from '@ngx-translate/core';
-import { BackupRestoreComponent } from '../../../shared/components/backup-restore/backup-restore.component';
-
-@Component({
-    selector: 'app-backup-modal',
-    template: `
-    <ion-header class="ion-no-border">
-      <ion-toolbar>
-        <ion-buttons slot="start">
-          <ion-button (click)="close()">
-            <ion-icon name="close"></ion-icon>
-          </ion-button>
-        </ion-buttons>
-        <ion-title>{{ 'SETTINGS.BACKUP_RESTORE' | translate }}</ion-title>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content class="ion-padding">
-      <app-backup-restore></app-backup-restore>
-    </ion-content>
-  `,
-    standalone: true,
-    imports: [IonicModule, BackupRestoreComponent, TranslateModule]
-})
-export class BackupModalComponent {
-  private modalCtrl = inject(ModalController);
-  close() { this.modalCtrl.dismiss(); }
-}
 
 @Component({
     selector: 'app-settings-list',
@@ -184,11 +158,8 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
     this.cdr.markForCheck();
   }
 
-  async navigateToBackup() {
-    const modal = await this.modalCtrl.create({
-      component: BackupModalComponent,
-    });
-    await modal.present();
+  navigateToBackup() {
+    this.router.navigate(['/settings/backup']);
   }
 
   navigateToSync() {

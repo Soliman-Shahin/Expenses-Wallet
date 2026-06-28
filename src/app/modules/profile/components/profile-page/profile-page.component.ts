@@ -15,7 +15,6 @@ import { BehaviorSubject, combineLatest, takeUntil } from 'rxjs';
 import { catchError, finalize, tap } from 'rxjs/operators';
 import { ItemReorderEventDetail, IonicModule } from '@ionic/angular';
 import { UiInputComponent } from '../../../../shared/ui/ui-input/ui-input.component';
-import { BackupRestoreComponent } from '../../../../shared/components/backup-restore/backup-restore.component';
 import { AsyncPipe, DecimalPipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 
@@ -30,7 +29,6 @@ import { TranslateModule } from '@ngx-translate/core';
         FormsModule,
         ReactiveFormsModule,
         UiInputComponent,
-        BackupRestoreComponent,
         AsyncPipe,
         DecimalPipe,
         TranslateModule,

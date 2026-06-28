@@ -14,6 +14,7 @@ import { ICONS } from '../../models';
 export class IconSelectorComponent implements OnInit {
   @Output() icon = new EventEmitter<string>();
   @Input() selectedIcon?: string;
+  @Input() themeColor?: string;
   
   icons: string[] = ICONS;
 

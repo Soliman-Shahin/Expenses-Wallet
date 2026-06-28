@@ -14,21 +14,24 @@ import { SyncConfig } from 'src/app/shared/models/sync.model';
 import { BaseComponent } from 'src/app/shared/base';
 import { AsyncPipe, DecimalPipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-sync-settings',
   template: `
-    <ion-header mode="ios">
+    <ion-header mode="ios" class="settings-header" translucent="true">
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-back-button defaultHref="/settings/list"></ion-back-button>
+          <ion-button routerLink="/settings/list" class="modern-back-btn">
+            <ion-icon name="chevron-back"></ion-icon>
+          </ion-button>
         </ion-buttons>
         <ion-title>{{ 'SYNC.SETTINGS_TITLE' | translate }}</ion-title>
       </ion-toolbar>
     </ion-header>
 
     <ion-content class="settings-content" [fullscreen]="true">
-      <ion-header collapse="condense">
+      <ion-header collapse="condense" class="settings-header">
         <ion-toolbar>
           <ion-title size="large">{{
             'SYNC.SETTINGS_TITLE' | translate
@@ -43,7 +46,7 @@ import { TranslateModule } from '@ngx-translate/core';
       >
         <div class="section-label">{{ 'SYNC.AUTO_SYNC' | translate }}</div>
         <ion-list inset="true" class="premium-list">
-          <ion-item>
+      <ion-item lines="none">
             <div slot="start" class="icon-wrapper color-cyan">
               <ion-icon name="sync"></ion-icon>
             </div>
@@ -59,7 +62,10 @@ import { TranslateModule } from '@ngx-translate/core';
           </ion-item>
 
           @if (syncForm.get('autoSync')?.value) {
-          <ion-item>
+      <ion-item lines="none">
+            <div slot="start" class="icon-wrapper color-blue">
+              <ion-icon name="time"></ion-icon>
+            </div>
             <ion-label>{{ 'SYNC.SYNC_INTERVAL' | translate }}</ion-label>
             <ion-select
               formControlName="syncInterval"
@@ -85,7 +91,10 @@ import { TranslateModule } from '@ngx-translate/core';
           {{ 'SYNC.CONFLICT_RESOLUTION' | translate }}
         </div>
         <ion-list inset="true" class="premium-list">
-          <ion-item>
+      <ion-item lines="none">
+            <div slot="start" class="icon-wrapper color-red">
+              <ion-icon name="git-compare"></ion-icon>
+            </div>
             <ion-label>{{ 'SYNC.CONFLICT_STRATEGY' | translate }}</ion-label>
             <ion-select
               formControlName="conflictResolution"
@@ -105,7 +114,7 @@ import { TranslateModule } from '@ngx-translate/core';
             </ion-select>
           </ion-item>
 
-          <ion-item>
+      <ion-item lines="none">
             <div slot="start" class="icon-wrapper color-purple">
               <ion-icon name="cloud-offline"></ion-icon>
             </div>
@@ -123,7 +132,10 @@ import { TranslateModule } from '@ngx-translate/core';
 
         <div class="section-label">{{ 'SYNC.ADVANCED' | translate }}</div>
         <ion-list inset="true" class="premium-list">
-          <ion-item>
+      <ion-item lines="none">
+            <div slot="start" class="icon-wrapper color-orange">
+              <ion-icon name="refresh-circle"></ion-icon>
+            </div>
             <ion-label>{{ 'SYNC.MAX_RETRIES' | translate }}</ion-label>
             <ion-input
               type="number"
@@ -135,7 +147,10 @@ import { TranslateModule } from '@ngx-translate/core';
             ></ion-input>
           </ion-item>
 
-          <ion-item>
+          <ion-item lines="none">
+            <div slot="start" class="icon-wrapper color-green">
+              <ion-icon name="layers"></ion-icon>
+            </div>
             <ion-label>{{ 'SYNC.BATCH_SIZE' | translate }}</ion-label>
             <ion-input
               type="number"
@@ -150,7 +165,7 @@ import { TranslateModule } from '@ngx-translate/core';
 
         <div class="section-label">{{ 'SYNC.STORAGE_INFO' | translate }}</div>
         <ion-list inset="true" class="premium-list">
-          <ion-item>
+      <ion-item lines="none">
             <div slot="start" class="icon-wrapper color-dark">
               <ion-icon name="folder"></ion-icon>
             </div>
@@ -160,7 +175,7 @@ import { TranslateModule } from '@ngx-translate/core';
             </ion-label>
           </ion-item>
 
-          <ion-item>
+      <ion-item lines="none">
             <div slot="start" class="icon-wrapper color-orange">
               <ion-icon name="cloud-upload"></ion-icon>
             </div>
@@ -171,17 +186,16 @@ import { TranslateModule } from '@ngx-translate/core';
           </ion-item>
         </ion-list>
 
-        <div class="ion-padding">
-          <ion-button expand="block" type="submit" class="ion-margin-bottom">
+        <div class="ion-padding action-buttons-container">
+          <ion-button expand="block" type="submit" class="action-button btn-primary">
             <ion-icon name="save-outline" slot="start"></ion-icon>
             {{ 'COMMON.SAVE' | translate }}
           </ion-button>
 
           <ion-button
             expand="block"
-            fill="outline"
+            class="action-button btn-outline btn-outline-primary"
             (click)="forceSync()"
-            class="ion-margin-bottom"
           >
             <ion-icon name="sync-outline" slot="start"></ion-icon>
             {{ 'SYNC.SYNC_NOW' | translate }}
@@ -189,10 +203,8 @@ import { TranslateModule } from '@ngx-translate/core';
 
           <ion-button
             expand="block"
-            fill="outline"
-            color="warning"
+            class="action-button btn-outline btn-outline-warning"
             (click)="createBackup()"
-            class="ion-margin-bottom"
           >
             <ion-icon name="download-outline" slot="start"></ion-icon>
             {{ 'SYNC.CREATE_BACKUP' | translate }}
@@ -200,8 +212,7 @@ import { TranslateModule } from '@ngx-translate/core';
 
           <ion-button
             expand="block"
-            fill="outline"
-            color="danger"
+            class="action-button btn-outline btn-outline-danger"
             (click)="clearOfflineData()"
           >
             <ion-icon name="trash-outline" slot="start"></ion-icon>
@@ -213,11 +224,33 @@ import { TranslateModule } from '@ngx-translate/core';
   `,
   styles: [
     `
+      .settings-header {
+        background: transparent !important;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+      }
+      .settings-header ion-toolbar {
+        --background: rgba(var(--ion-background-color-rgb), 0.8) !important;
+        --border-width: 0px;
+      }
+      .modern-back-btn {
+        --padding-start: 0;
+        --padding-end: 0;
+        --border-radius: 50%;
+        --background: rgba(var(--ion-text-color-rgb), 0.05);
+        width: 40px;
+        height: 40px;
+        margin: 8px 12px;
+        color: var(--ion-text-color);
+      }
+      .modern-back-btn ion-icon {
+        font-size: 24px;
+      }
       .settings-content {
-        --background: var(--ion-color-step-50, #f2f2f6);
+        --background: var(--ion-background-color);
       }
       .settings-container {
-        padding: 0 0 100px 0;
+        padding: 0 0 150px 0;
       }
       .section-label {
         margin: 20px 20px 8px;
@@ -229,18 +262,29 @@ import { TranslateModule } from '@ngx-translate/core';
         letter-spacing: 0.5px;
       }
       .premium-list {
-        margin-bottom: 24px;
-        border-radius: 12px;
-        background: var(--ion-item-background, #ffffff);
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+        margin: 0 16px 24px 16px;
+        padding: 0 !important;
+        border-radius: 24px;
+        overflow: hidden;
+        background: var(--glass-background, rgba(255, 255, 255, 0.7));
+        backdrop-filter: blur(16px) saturate(180%);
+        -webkit-backdrop-filter: blur(16px) saturate(180%);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.18);
       }
       .premium-list ion-item {
+        --background: transparent;
         --padding-start: 16px;
         --inner-padding-end: 16px;
-        --min-height: 60px;
+        --min-height: 64px;
+        border-bottom: 1px solid rgba(var(--ion-text-color-rgb), 0.05);
+        margin-bottom: 0 !important;
+      }
+      .premium-list ion-item:last-child {
+        border-bottom: none;
       }
       .premium-list ion-item h3 {
-        font-weight: 500;
+        font-weight: 600;
         font-size: 16px;
         letter-spacing: -0.2px;
       }
@@ -262,15 +306,13 @@ import { TranslateModule } from '@ngx-translate/core';
         font-size: 20px;
         color: #ffffff;
       }
-      .color-cyan {
-        background: #32ade6;
-      }
-      .color-purple {
-        background: #5856d6;
-      }
-      .color-dark {
-        background: #8e8e93;
-      }
+      .color-cyan { background: #32ade6; }
+      .color-purple { background: #5856d6; }
+      .color-dark { background: #8e8e93; }
+      .color-orange { background: #ff9500; }
+      .color-blue { background: #007aff; }
+      .color-red { background: #ff3b30; }
+      .color-green { background: #34c759; }
       .modern-select {
         width: 100%;
         max-width: 150px;
@@ -280,15 +322,61 @@ import { TranslateModule } from '@ngx-translate/core';
       .right-align-input {
         text-align: end;
       }
-      :host-context(body.dark) .settings-content {
-        --background: #000000;
+      .action-buttons-container {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding: 24px 16px;
       }
-      :host-context(body.dark) .section-label {
-        color: #98989d;
+      .action-button {
+        margin: 0;
+        --border-radius: 16px;
+        height: 56px;
+        font-weight: 600;
+        font-size: 16px;
+        letter-spacing: 0.3px;
       }
-      :host-context(body.dark) .premium-list {
-        background: #1c1c1e;
-        box-shadow: none;
+      .btn-primary {
+        --background: var(--brand-gradient, linear-gradient(135deg, #007aff, #5856d6));
+        --box-shadow: 0 8px 16px rgba(0, 122, 255, 0.25);
+        --color: white;
+      }
+      .btn-outline {
+        --border-width: 1.5px;
+        --border-style: solid;
+        --background: transparent;
+      }
+      .btn-outline-primary {
+        --border-color: rgba(var(--ion-color-primary-rgb), 0.3);
+        --color: var(--ion-color-primary);
+      }
+      .btn-outline-warning {
+        --border-color: rgba(var(--ion-color-warning-rgb), 0.4);
+        --color: var(--ion-color-warning);
+      }
+      .btn-outline-danger {
+        --border-color: rgba(var(--ion-color-danger-rgb), 0.3);
+        --color: var(--ion-color-danger);
+      }
+      /* Dark mode overrides */
+      :host-context(body.dark) {
+        .settings-content {
+          --background: var(--ion-background-color);
+        }
+        .section-label {
+          color: var(--ew-color-gray-500);
+        }
+        .premium-list {
+          background: rgba(22, 28, 42, 0.6);
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .premium-list ion-item {
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .premium-list ion-item:last-child {
+          border-bottom: none;
+        }
       }
     `,
   ],
@@ -300,6 +388,7 @@ import { TranslateModule } from '@ngx-translate/core';
     AsyncPipe,
     DecimalPipe,
     TranslateModule,
+    RouterModule,
   ],
 })
 export class SyncSettingsPage extends BaseComponent implements OnInit {

@@ -46,40 +46,22 @@
   width: 52px;
   height: 52px;
   cursor: pointer;
-  border: 1px solid rgba(var(--ion-text-color-rgb), 0.08);
-  border-radius: 12px; // Matching squircle theme
+  border: none; // remove hard border for a cleaner look
+  border-radius: 16px; // Modern smooth squircle
   transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(var(--ion-text-color-rgb), 0.03);
-  color: var(--ew-text-color-secondary);
+  background: rgba(var(--ion-text-color-rgb), 0.02);
+  color: var(--ew-text-color-muted);
   position: relative;
-  overflow: hidden;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
+  overflow: visible; // allow glow to extend
+  font-size: 26px;
 
   &:hover {
-    background: rgba(var(--ion-color-primary-rgb), 0.08);
-    color: var(--ion-color-primary);
-    border-color: rgba(var(--ion-color-primary-rgb), 0.25);
+    background: rgba(var(--ion-text-color-rgb), 0.06);
+    color: var(--ion-text-color);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.12);
-
-    &::before {
-      opacity: 0.3;
-    }
   }
 
   &:active {
@@ -87,15 +69,22 @@
   }
 
   &.selected {
-    background: var(--brand-gradient) !important;
+    background: var(--active-color) !important;
     color: #ffffff !important;
-    border-color: transparent !important;
-    transform: scale(1.06);
-    box-shadow: 0 4px 14px rgba(var(--ion-color-primary-rgb), 0.3);
-    animation: iconBounce 0.6s ease-out;
+    transform: scale(1.08);
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--active-color) 40%, transparent);
+    animation: iconBounce 0.4s ease-out;
+    z-index: 1; // ensure shadow sits above others
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
 
-    &::before {
-      opacity: 0.2;
+    // Subtle inner light for a premium 3D feel
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.3);
+      pointer-events: none;
     }
   }
 }

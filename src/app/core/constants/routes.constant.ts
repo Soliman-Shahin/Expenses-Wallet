@@ -27,6 +27,7 @@ export const APP_ROUTES = {
     LIST: 'list',
     SYNC: 'sync',
     CONFLICTS: 'conflicts',
+    BACKUP: 'backup',
   },
   PROFILE: {
     INDEX: 'profile',

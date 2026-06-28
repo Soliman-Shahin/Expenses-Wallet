@@ -18,5 +18,9 @@ export const routes: Routes = [
   {
     path: APP_ROUTES.SETTINGS.CONFLICTS,
     loadComponent: () => import('./sync/pages/conflict-resolution/conflict-resolution.page').then(m => m.ConflictResolutionPage)
+  },
+  {
+    path: APP_ROUTES.SETTINGS.BACKUP,
+    loadComponent: () => import('./backup/backup.page').then(m => m.BackupSettingsPage)
   }
 ];

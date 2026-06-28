@@ -97,6 +97,9 @@
     height: 48px !important;
     text-transform: none !important;
     transition: all 0.3s ease !important;
+    span {
+      justify-content: center;
+    }
   }
 
   /* Confirm Button */
@@ -117,11 +120,12 @@
 
   /* Cancel Button */
   .alert-button-cancel {
-    background: var(--ion-color-light) !important;
-    color: var(--ion-color-dark) !important;
+    background: transparent !important;
+    border: 1px solid rgba(var(--ion-text-color-rgb), 0.15) !important;
+    color: var(--ion-text-color) !important;
 
     &:hover {
-      background: var(--ion-color-light-shade) !important;
+      background: rgba(var(--ion-text-color-rgb), 0.05) !important;
     }
   }
 }
@@ -234,22 +238,24 @@
 .alert-confirm {
   .alert-head {
     h2 {
+      display: flex;
+      align-items: center;
       color: var(--ion-color-primary) !important;
 
       &::before {
         content: "?";
-        display: inline-block;
-        margin-inline-end: 8px;
-        font-size: 24px;
-        vertical-align: middle;
-        width: 32px;
-        height: 32px;
-        line-height: 32px;
-        text-align: center;
-        background: var(--ion-color-primary);
-        color: var(--ion-color-primary-contrast);
-        border-radius: 50%;
-        font-weight: bold;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-inline-end: 12px;
+        font-size: 20px;
+        width: 36px;
+        height: 36px;
+        background: rgba(var(--ion-color-primary-rgb), 0.15);
+        color: var(--ion-color-primary);
+        border-radius: 12px;
+        font-weight: 800;
+        box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.1);
       }
     }
   }
@@ -299,16 +305,17 @@
     --min-width: calc(100vw - 40px);
 
     .alert-button-group {
-      flex-direction: column !important;
-      gap: 8px !important;
+      flex-direction: row-reverse !important;
+      gap: 12px !important;
 
       .alert-button {
-        width: 100% !important;
+        width: auto !important;
+        flex: 1 !important;
       }
     }
   }
 
   [dir="rtl"] .custom-alert .alert-button-group {
-    flex-direction: column !important;
+    flex-direction: row !important;
   }
 }

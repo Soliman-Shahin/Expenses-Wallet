@@ -61,7 +61,7 @@
               id="cat-popover-trigger"
               class="cat-select-trigger"
               (click)="openCategoryPopover($event)"
-              [class.has-selection]="selectedCategories.length > 0"
+              [class.has-selection]="selectedCategories().length > 0"
               >
               <!-- Icon squircle (shows selected category color, or default) -->
               <span
@@ -92,7 +92,7 @@
             <button
               class="cat-select-trigger"
               (click)="openDatePicker()"
-              [class.has-selection]="startDate || endDate"
+              [class.has-selection]="startDate() || endDate()"
               >
               <!-- Icon squircle -->
               <span
@@ -119,7 +119,7 @@
   <ion-popover
     trigger="cat-popover-trigger"
     triggerAction="click"
-    [isOpen]="showCategoryPopover"
+    [isOpen]="showCategoryPopover()"
     (didDismiss)="closeCategoryPopover()"
     [dismissOnSelect]="false"
     side="bottom"
@@ -131,7 +131,7 @@
         <!-- Header -->
         <div class="cat-popover-header">
           <span class="cat-popover-title">{{ "TRANSACTIONS.FILTER_BY_CATEGORY" | translate }}</span>
-          @if (selectedCategories.length > 0) {
+          @if (selectedCategories().length > 0) {
             <button
               class="cat-clear-btn"
               (click)="toggleCategory('')"
@@ -330,7 +330,7 @@
 
   <!-- Date Range Picker Modal -->
   <ion-modal
-    [isOpen]="showDatePicker"
+    [isOpen]="showDatePicker()"
     (willDismiss)="closeDatePicker()"
     cssClass="date-picker-modal"
     >
