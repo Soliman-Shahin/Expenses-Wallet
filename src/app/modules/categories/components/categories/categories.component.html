@@ -27,7 +27,7 @@
         <ion-segment
           value="all"
           (ionChange)="filterByType($event)"
-          class="modern-segment"
+          class="custom-segment"
           >
           <ion-segment-button value="all" layout="icon-start">
             <ion-icon name="options-outline"></ion-icon>
@@ -108,10 +108,12 @@
           </ion-reorder-group>
         </ion-list>
       } @else {
-        <div class="empty-state">
-          <ion-icon name="albums-outline"></ion-icon>
-          <h2>{{ "CATEGORIES.EMPTY_TITLE" | translate }}</h2>
-          <p>{{ "CATEGORIES.EMPTY_MESSAGE" | translate }}</p>
+        <div class="empty-state-wrapper">
+          <div class="empty-icon-glow">
+            <ion-icon name="albums-outline"></ion-icon>
+          </div>
+          <h3 class="empty-title">{{ "CATEGORIES.EMPTY_TITLE" | translate }}</h3>
+          <p class="empty-subtitle">{{ "CATEGORIES.EMPTY_MESSAGE" | translate }}</p>
         </div>
       }
       <ion-infinite-scroll

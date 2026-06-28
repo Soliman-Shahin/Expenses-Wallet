@@ -8,6 +8,10 @@ const config: CapacitorConfig = {
     androidScheme: 'https',
   },
   plugins: {
+    StatusBar: {
+      overlaysWebView: true,
+      style: 'DARK',
+    },
     LiveUpdates: {
       appId: '1e7b36fa',
       channel: 'Production',

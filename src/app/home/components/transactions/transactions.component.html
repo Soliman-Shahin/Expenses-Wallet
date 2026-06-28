@@ -106,36 +106,38 @@
         }
       </ion-list>
     } @else {
-      <div class="empty-state ion-text-center ion-padding">
-        <div class="empty-state-icon-wrapper">
+      <div class="empty-state-wrapper">
+        <div class="empty-icon-glow">
           <img
             src="assets/icon/icon.png"
             alt="App Logo"
             class="empty-state-icon"
+            style="width: 48px; height: 48px; filter: drop-shadow(0 4px 8px rgba(var(--ion-color-primary-rgb), 0.3));"
             />
         </div>
-        <h3 class="empty-state-title">
+        <h3 class="empty-title">
           {{ "TRANSACTIONS.NO_RECENT" | translate }}
         </h3>
-        <p class="empty-state-subtitle">
+        <p class="empty-subtitle">
           {{ "TRANSACTIONS.ADD_NEW" | translate }}
         </p>
       </div>
     }
     <!-- Empty State -->
     <ng-template #empty>
-      <div class="empty-state ion-text-center ion-padding">
-        <div class="empty-state-icon-wrapper">
+      <div class="empty-state-wrapper">
+        <div class="empty-icon-glow">
           <img
             src="assets/icon/icon.png"
             alt="App Logo"
             class="empty-state-icon"
+            style="width: 48px; height: 48px; filter: drop-shadow(0 4px 8px rgba(var(--ion-color-primary-rgb), 0.3));"
             />
         </div>
-        <h3 class="empty-state-title">
+        <h3 class="empty-title">
           {{ "TRANSACTIONS.NO_RECENT" | translate }}
         </h3>
-        <p class="empty-state-subtitle">
+        <p class="empty-subtitle">
           {{ "TRANSACTIONS.ADD_NEW" | translate }}
         </p>
       </div>

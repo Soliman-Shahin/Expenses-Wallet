@@ -3,40 +3,22 @@
 // ===================================================================
 
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(var(--ion-text-color-rgb), 0.15);
-  border-radius: 10px;
-
-  &:hover {
-    background: rgba(var(--ion-text-color-rgb), 0.25);
-  }
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 // Target Ionic content scroll container shadow part
 ion-content::part(scroll) {
   &::-webkit-scrollbar {
-    width: 5px;
-    height: 5px;
+    display: none;
+    width: 0;
+    height: 0;
   }
+}
 
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: rgba(var(--ion-text-color-rgb), 0.12);
-    border-radius: 10px;
-    
-    &:hover {
-      background: rgba(var(--ion-text-color-rgb), 0.2);
-    }
-  }
+// Hide scrollbar for standard Firefox/IE
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }

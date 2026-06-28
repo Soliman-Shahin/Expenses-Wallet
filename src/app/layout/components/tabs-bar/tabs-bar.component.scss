@@ -9,7 +9,7 @@ ion-tab-bar {
   
   /* Make it floating */
   position: absolute;
-  bottom: var(--ew-space-5);
+  bottom: calc(env(safe-area-inset-bottom, 20px) + var(--ew-space-5));
   left: var(--ew-space-5);
   right: var(--ew-space-5);
   width: auto;
@@ -17,12 +17,13 @@ ion-tab-bar {
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 0 var(--ew-space-2);
-  height: 64px;
+  height: 72px; /* Increased height for labels */
   display: flex;
   justify-content: space-around;
   align-items: center;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 100;
+  overflow: visible; /* Ensure indicator doesn't clip */
 
   &::before {
     display: none;
@@ -31,7 +32,7 @@ ion-tab-bar {
 
 ion-tab-button {
   /* Use Ionic's own custom properties — these penetrate the shadow DOM */
-  --color: rgba(var(--ion-color-primary-rgb), 0.45);
+  --color: var(--ew-color-gray-500);
   --color-selected: var(--ion-color-primary);
   --padding-top: var(--ew-space-1);
   --padding-bottom: var(--ew-space-1);
@@ -41,8 +42,9 @@ ion-tab-button {
 
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  max-width: 80px;
+  max-width: 100px;
   border-radius: 999px;
+  opacity: 0.6; // Inactive tabs are more faded
 
   ion-icon {
     font-size: 24px;
@@ -54,30 +56,46 @@ ion-tab-button {
     font-size: 11px;
     font-weight: 500;
     transition: all 0.3s ease;
+    overflow: visible;
+    margin-top: 4px; /* Space between icon and label */
+    padding-bottom: 2px; /* Prevent baseline cutoff */
   }
 
   &:hover:not(.tab-selected) {
-    --color: rgba(var(--ion-color-primary-rgb), 0.75);
+    --color: var(--ion-color-primary);
+    opacity: 0.8;
     transform: translateY(-2px);
   }
 
   &.tab-selected {
-    /* Ionic uses --color-selected for the text/icon in selected state.
-       We also add a pill background using a pseudo-element since
-       Ionic's background CSS var doesn't always work reliably. */
     --color-selected: var(--ion-color-primary);
-    transform: translateY(-2px);
+    transform: translateY(-4px);
+    opacity: 1;
 
-    /* Pill background via actual background property */
-    background: rgba(var(--ion-color-primary-rgb), 0.15) !important;
+    background: transparent !important;
 
     ion-icon {
-      transform: scale(1.2);
-      filter: drop-shadow(0 0 6px rgba(var(--ion-color-primary-rgb), 0.5));
+      transform: scale(1.1);
+      filter: drop-shadow(0 2px 6px rgba(var(--ion-color-primary-rgb), 0.3));
     }
 
     ion-label {
-      font-weight: 700;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+      color: var(--ion-color-primary);
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: -12px; /* Hangs exactly above the button inside the visible 72px area */
+      left: 50%;
+      transform: translateX(-50%);
+      width: 36px;
+      height: 4px;
+      border-radius: 4px;
+      background: var(--brand-gradient);
+      box-shadow: 0 4px 8px rgba(var(--ion-color-primary-rgb), 0.5);
     }
   }
 }
@@ -91,11 +109,11 @@ ion-tab-button {
   }
 
   ion-tab-button {
-    --color: rgba(255, 255, 255, 0.35);
+    --color: var(--ew-color-gray-500);
     --color-selected: var(--ion-color-primary);
 
     &.tab-selected {
-      background: rgba(var(--ion-color-primary-rgb), 0.18) !important;
+      background: transparent !important;
     }
   }
 }
@@ -111,8 +129,8 @@ ion-tab-button {
 /* Responsive Adjustments */
 @media (max-width: 768px) {
   ion-tab-bar {
-    height: 60px;
-    bottom: var(--ew-space-4);
+    height: 68px;
+    bottom: calc(env(safe-area-inset-bottom, 20px) + var(--ew-space-4));
     left: var(--ew-space-4);
     right: var(--ew-space-4);
   }
@@ -120,8 +138,8 @@ ion-tab-button {
 
 @media (max-width: 480px) {
   ion-tab-bar {
-    height: 56px;
-    bottom: var(--ew-space-3);
+    height: 64px;
+    bottom: calc(env(safe-area-inset-bottom, 20px) + var(--ew-space-3));
     left: var(--ew-space-3);
     right: var(--ew-space-3);
   }

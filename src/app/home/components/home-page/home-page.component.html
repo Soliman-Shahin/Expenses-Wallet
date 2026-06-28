@@ -140,11 +140,7 @@
             <ion-segment
               [value]="activeTab"
               (ionChange)="setActiveTab($event.detail.value)"
-              class="dash-tabs"
-              [ngClass]="{
-                'summary-active': activeTab === 'summary',
-                'charts-active': activeTab === 'charts'
-              }"
+              class="custom-segment"
               role="tablist"
               [attr.aria-label]="'HOME.SECTIONS' | translate"
               >
@@ -156,7 +152,6 @@
                 <ion-icon name="pie-chart-outline"></ion-icon>
                 <ion-label>{{ "HOME.TABS.CHARTS" | translate }}</ion-label>
               </ion-segment-button>
-              <div class="sliding-indicator"></div>
             </ion-segment>
           </div>
           <!-- Skeleton template -->

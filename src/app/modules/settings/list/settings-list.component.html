@@ -1,27 +1,34 @@
 <ion-header mode="ios" class="settings-header">
   <ion-toolbar>
-    <ion-title>{{ "SIDEBAR.SETTINGS" | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="settings-content" [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">{{ "SIDEBAR.SETTINGS" | translate }}</ion-title>
-    </ion-toolbar>
-  </ion-header>
-
   <div class="settings-container">
-
     <!-- Profile Banner -->
     <ion-list inset="true" class="premium-list">
-      <ion-item button detail="true" (click)="navigateToProfile()" class="profile-item" lines="none">
+      <ion-item
+        button
+        detail="true"
+        (click)="navigateToProfile()"
+        class="profile-item"
+        lines="none"
+      >
         <ion-avatar slot="start" class="profile-avatar">
-          <img [src]="currentUser?.image || 'https://ionicframework.com/docs/img/demos/avatar.svg'" />
+          <img
+            [src]="
+              currentUser?.image ||
+              'https://ionicframework.com/docs/img/demos/avatar.svg'
+            "
+          />
         </ion-avatar>
         <ion-label>
-          <h2 class="profile-name">{{ currentUser?.username || currentUser?.email || 'Expenses User' }}</h2>
-          <p class="profile-desc">{{ "SETTINGS.MANAGE_PROFILE" | translate }}</p>
+          <h2 class="profile-name">
+            {{ currentUser?.username || currentUser?.email || "Expenses User" }}
+          </h2>
+          <p class="profile-desc">
+            {{ "SETTINGS.MANAGE_PROFILE" | translate }}
+          </p>
         </ion-label>
       </ion-item>
     </ion-list>
@@ -30,7 +37,7 @@
     <div class="section-label">{{ "SETTINGS.GENERAL" | translate }}</div>
     <ion-list inset="true" class="premium-list">
       <!-- Language Setting -->
-      <ion-item>
+      <ion-item lines="none">
         <div slot="start" class="icon-wrapper color-blue">
           <ion-icon name="language"></ion-icon>
         </div>
@@ -43,19 +50,17 @@
           (ionChange)="onLanguageChange($event)"
           interface="popover"
           class="modern-select"
-          >
+        >
           @for (lang of languages; track lang) {
-            <ion-select-option
-              [value]="lang.code"
-              >
-              {{ lang.flag }} {{ lang.name }}
-            </ion-select-option>
+          <ion-select-option [value]="lang.code">
+            {{ lang.flag }} {{ lang.name }}
+          </ion-select-option>
           }
         </ion-select>
       </ion-item>
 
       <!-- Theme Setting -->
-      <ion-item>
+      <ion-item lines="none">
         <div slot="start" class="icon-wrapper color-purple">
           <ion-icon name="color-palette"></ion-icon>
         </div>
@@ -68,23 +73,24 @@
           (ionChange)="onThemeChange($event)"
           interface="popover"
           class="modern-select"
-          >
+        >
           @for (theme of themes; track theme) {
-            <ion-select-option
-              [value]="theme.value"
-              >
-              {{ theme.label | translate }}
-            </ion-select-option>
+          <ion-select-option [value]="theme.value">
+            {{ theme.label | translate }}
+          </ion-select-option>
           }
         </ion-select>
       </ion-item>
     </ion-list>
 
     <!-- Notifications & Security Section -->
-    <div class="section-label">{{ "SETTINGS.SECURITY" | translate }} & {{ "SETTINGS.NOTIFICATIONS" | translate }}</div>
+    <div class="section-label">
+      {{ "SETTINGS.SECURITY" | translate }} &
+      {{ "SETTINGS.NOTIFICATIONS" | translate }}
+    </div>
     <ion-list inset="true" class="premium-list">
       <!-- Notifications Setting -->
-      <ion-item>
+      <ion-item lines="none">
         <div slot="start" class="icon-wrapper color-red">
           <ion-icon name="notifications"></ion-icon>
         </div>
@@ -102,21 +108,21 @@
 
       <!-- Biometric Settings -->
       @if (biometricAvailable) {
-        <ion-item lines="none">
-          <div slot="start" class="icon-wrapper color-green">
-            <ion-icon name="finger-print"></ion-icon>
-          </div>
-          <ion-label>
-            <h3>{{ "SETTINGS.BIOMETRIC" | translate }}</h3>
-            <p>{{ "SETTINGS.BIOMETRIC_DESC" | translate }}</p>
-          </ion-label>
-          <ion-toggle
-            slot="end"
-            [checked]="biometricEnabled"
-            (ionChange)="toggleBiometric($event)"
-            color="success"
-          ></ion-toggle>
-        </ion-item>
+      <ion-item lines="none">
+        <div slot="start" class="icon-wrapper color-green">
+          <ion-icon name="finger-print"></ion-icon>
+        </div>
+        <ion-label>
+          <h3>{{ "SETTINGS.BIOMETRIC" | translate }}</h3>
+          <p>{{ "SETTINGS.BIOMETRIC_DESC" | translate }}</p>
+        </ion-label>
+        <ion-toggle
+          slot="end"
+          [checked]="biometricEnabled"
+          (ionChange)="toggleBiometric($event)"
+          color="success"
+        ></ion-toggle>
+      </ion-item>
       }
     </ion-list>
 
@@ -134,7 +140,7 @@
       </ion-item>
 
       <!-- Auto Backup Setting -->
-      <ion-item>
+      <ion-item lines="none">
         <div slot="start" class="icon-wrapper color-orange">
           <ion-icon name="cloud-done"></ion-icon>
         </div>

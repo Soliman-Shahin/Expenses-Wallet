@@ -1,5 +1,7 @@
 import { Component, ChangeDetectionStrategy, NgZone, OnInit, inject } from '@angular/core';
 import { App } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
+import { StatusBar, Style } from '@capacitor/status-bar';
 import { BaseComponent } from './shared/base/base.component';
 import { DirectionService } from './core/services/direction.service';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
@@ -39,6 +41,11 @@ export class AppComponent extends BaseComponent implements OnInit {
   override ngOnInit(): void {
     super.ngOnInit();
     this.themeService.initTheme();
+
+    if (Capacitor.isNativePlatform()) {
+      StatusBar.setOverlaysWebView({ overlay: true }).catch(console.warn);
+      StatusBar.setStyle({ style: Style.Dark }).catch(console.warn);
+    }
 
     // Initialize GoogleAuth for web/development
     this.initializeGoogleAuth();

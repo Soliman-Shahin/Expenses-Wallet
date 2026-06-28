@@ -18,8 +18,9 @@
   // === CORE & SEMANTIC COLOR SYSTEM
   // ===================================================================
 
-  // --- Base Font ---
+  // --- Base Font & Safe Area ---
   --ion-font-family: "Ubuntu", sans-serif;
+  --ion-safe-area-top: max(env(safe-area-inset-top), 48px);
 
   // --- Brand Colors (Light Theme) ---
   --ion-color-primary: #3867d6;

@@ -1,5 +1,91 @@
 /* Redesigned Transactions List Stylesheet - Premium Visual Excellence */
 
+:host {
+  ion-header {
+    &::after {
+      display: none;
+    }
+    background: transparent !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(var(--ion-text-color-rgb), 0.05);
+
+    .title-toolbar {
+      --background: rgba(var(--ion-background-color-rgb), 0.8) !important;
+      --padding-start: var(--ew-space-4);
+      --padding-end: var(--ew-space-4);
+      --padding-top: 0 !important;
+      --padding-bottom: 0 !important;
+    }
+
+    ion-toolbar {
+      --background: rgba(var(--ion-background-color-rgb), 0.8) !important;
+      --padding-start: var(--ew-space-4);
+      --padding-end: var(--ew-space-4);
+      --padding-top: 0;
+      --padding-bottom: 0;
+    }
+
+    ion-title {
+      font-family: var(--ew-font-family-heading);
+      padding-top: calc(var(--ion-safe-area-top, 48px) + var(--ew-space-4)) !important;
+      padding-bottom: var(--ew-space-4) !important;
+      padding-inline-start: var(--ew-space-4) !important;
+      padding-inline-end: var(--ew-space-4) !important;
+      text-align: start;
+    }
+  }
+
+  .header-title-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    line-height: 1.15;
+    padding: 0;
+
+    .main-title {
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--ew-text-color-primary);
+      letter-spacing: -0.8px;
+    }
+
+    .sub-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ew-text-color-muted);
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+
+  ion-searchbar {
+    --background: transparent;
+    --border-radius: var(--ew-radius-pill) !important;
+    --box-shadow: none;
+    --color: var(--ew-text-color-primary);
+    --placeholder-color: var(--ew-text-color-muted);
+    --icon-color: var(--ew-text-color-muted);
+    --clear-button-color: var(--ew-text-color-muted);
+    padding: 0 !important;
+    margin: var(--ew-space-2) 0;
+
+    &::part(container) {
+      border: 1px solid rgba(var(--ion-text-color-rgb), 0.08);
+      border-radius: var(--ew-radius-pill);
+      background: rgba(var(--ion-text-color-rgb), 0.03) !important;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    &.searchbar-has-focus::part(container) {
+      border-color: var(--ion-color-primary);
+      background: var(--ion-item-background) !important;
+      box-shadow: 0 0 0 3px rgba(var(--ion-color-primary-rgb), 0.15);
+    }
+  }
+}
+
 // ===================================================================
 //  Segment (Filter) Overhaul - Full Width Sliding Line (matches Categories page)
 // ===================================================================
@@ -9,53 +95,7 @@
   padding: 0 !important;
 }
 
-ion-segment {
-  width: 100% !important;
-  background: var(--ion-background-color) !important;
-  border-radius: 0 !important;
-  border: none;
-  margin: 0;
-  padding: 0;
 
-  // Premium bottom sliding indicator line
-  &::part(indicator) {
-    background: var(--brand-gradient) !important;
-    border-radius: 99px !important;
-    height: 3px !important;
-    box-shadow: none;
-  }
-
-  ion-segment-button {
-    --color: var(--ew-text-color-muted);
-    --color-checked: var(--ion-color-primary) !important;
-    --border-radius: 0 !important;
-    --indicator-color: transparent !important;
-    --background: transparent !important;
-    --background-checked: transparent !important;
-    --background-focused: transparent !important;
-    --background-hover: transparent !important;
-    min-height: 48px;
-    margin: 0;
-    font-weight: var(--ew-font-weight-semibold);
-    transition: all 0.3s ease;
-
-    &.segment-button-checked {
-      font-weight: var(--ew-font-weight-bold);
-    }
-
-    ion-label {
-      font-family: var(--ew-font-family-base);
-      font-weight: var(--ew-font-weight-bold);
-      font-size: var(--ew-font-size-sm) !important;
-      margin: 0 var(--ew-space-1);
-    }
-
-    ion-icon {
-      font-size: 18px;
-      margin: 0 var(--ew-space-1);
-    }
-  }
-}
 
 /* Spacing and margins for the main transactions container */
 .transactions-list {
@@ -145,36 +185,7 @@ ion-segment {
   }
 }
 
-/* Empty state styling */
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: calc(100vh - 300px);
-  text-align: center;
-  padding: var(--ew-space-6);
-  opacity: 0.7;
 
-  ion-icon {
-    font-size: var(--ew-size-20);
-    color: var(--ew-text-color-muted);
-    margin-bottom: var(--ew-space-4);
-  }
-  h2 {
-    font-family: var(--ew-font-family-heading);
-    font-weight: var(--ew-font-weight-bold);
-    font-size: var(--ew-font-size-xl);
-    color: var(--ew-text-color-primary);
-    margin-bottom: var(--ew-space-2);
-  }
-  p {
-    font-family: var(--ew-font-family-base);
-    color: var(--ew-text-color-secondary);
-    max-width: 320px;
-    margin-bottom: var(--ew-space-6);
-  }
-}
 
 .transaction-content {
   flex: 1;
@@ -519,60 +530,7 @@ ion-searchbar {
   --background: rgba(var(--ion-background-color-rgb), 0.8) !important;
 }
 
-.modern-segment {
-  background: rgba(var(--ion-text-color-rgb), 0.04) !important;
-  border-radius: 20px !important;
-  padding: 4px;
-  border: 1px solid rgba(var(--ion-text-color-rgb), 0.03);
-  width: 100% !important;
-  margin: 0;
 
-  // Disable default iOS indicator
-  &::part(indicator) {
-    background: transparent !important;
-  }
-
-  ion-segment-button {
-    --indicator-color: transparent !important; // Hide standard indicator line
-    --border-radius: 16px !important;
-    --color: var(--ew-text-color-muted);
-    min-height: 40px;
-    margin: 0;
-    font-weight: var(--ew-font-weight-semibold);
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    background: transparent !important;
-    border-right: none !important; // Remove separators!
-    --border-style: none !important;
-
-    &::part(native) {
-      border: none !important;
-    }
-
-    &::part(indicator-background) {
-      background: transparent !important;
-    }
-
-    ion-label {
-      font-family: var(--ew-font-family-base);
-      font-weight: 700;
-      font-size: var(--ew-font-size-sm) !important;
-      margin: 0 var(--ew-space-1);
-    }
-
-    ion-icon {
-      font-size: 18px;
-      margin: 0 var(--ew-space-1);
-    }
-
-    &.segment-button-checked {
-      --background: var(--brand-gradient) !important;
-      --color: #ffffff !important;
-      --color-checked: #ffffff !important;
-      box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.25);
-      font-weight: var(--ew-font-weight-bold);
-    }
-  }
-}
 
 @media (prefers-color-scheme: dark) {
   ion-searchbar,

@@ -34,7 +34,7 @@
       <ion-segment
         [(ngModel)]="selectedType"
         (ionChange)="onFilterChange()"
-        class="modern-segment"
+        class="custom-segment"
         >
         <ion-segment-button value="" layout="icon-start">
           <ion-icon name="options-outline"></ion-icon>
@@ -304,20 +304,22 @@
         </ion-list>
       }
       @if (transactions().length === 0) {
-        <div class="empty-state">
-          <div class="empty-icon-wrap">
+        <div class="empty-state-wrapper">
+          <div class="empty-icon-glow">
             <ion-icon name="receipt-outline"></ion-icon>
           </div>
-          <h2>{{ "TRANSACTIONS.EMPTY_TITLE" | translate }}</h2>
-          <p>{{ "TRANSACTIONS.EMPTY_MESSAGE" | translate }}</p>
+          <h3 class="empty-title">{{ "TRANSACTIONS.EMPTY_TITLE" | translate }}</h3>
+          <p class="empty-subtitle">{{ "TRANSACTIONS.EMPTY_MESSAGE" | translate }}</p>
         </div>
       }
       <!-- Empty State -->
       <ng-template #empty>
-        <div class="empty-state">
-          <ion-icon name="receipt-outline"></ion-icon>
-          <h2>{{ "TRANSACTIONS.EMPTY_TITLE" | translate }}</h2>
-          <p>{{ "TRANSACTIONS.EMPTY_MESSAGE" | translate }}</p>
+        <div class="empty-state-wrapper">
+          <div class="empty-icon-glow">
+            <ion-icon name="receipt-outline"></ion-icon>
+          </div>
+          <h3 class="empty-title">{{ "TRANSACTIONS.EMPTY_TITLE" | translate }}</h3>
+          <p class="empty-subtitle">{{ "TRANSACTIONS.EMPTY_MESSAGE" | translate }}</p>
         </div>
       </ng-template>
     }

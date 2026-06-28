@@ -2,12 +2,61 @@
   display: block;
   height: 100%;
 
+  /* Unified Glassmorphic Header */
+  .settings-header {
+    &::after {
+      display: none;
+    }
+    background: transparent !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    // border-bottom: 1px solid rgba(var(--ion-text-color-rgb), 0.05);
+
+    ion-toolbar {
+      --background: rgba(var(--ion-background-color-rgb), 0.8) !important;
+      --padding-start: var(--ew-space-4);
+      --padding-end: var(--ew-space-4);
+      --padding-top: 0;
+      --padding-bottom: 0;
+
+      --border-width: 0px;
+    }
+
+    ion-title {
+      position: relative !important;
+      height: auto !important;
+      font-family: var(--ew-font-family-heading);
+      padding-top: calc(
+        var(--ion-safe-area-top, 48px) + var(--ew-space-6)
+      ) !important;
+      padding-bottom: var(--ew-space-6) !important;
+      padding-inline-start: var(--ew-space-4) !important;
+      padding-inline-end: var(--ew-space-4) !important;
+      text-align: start;
+    }
+
+    .header-title-container {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      line-height: 1.15;
+      padding: 0;
+
+      .main-title {
+        font-size: 28px;
+        font-weight: 900;
+        color: var(--ew-text-color-primary);
+        letter-spacing: -0.8px;
+      }
+    }
+  }
+
   .settings-content {
-    --background: var(--ion-color-step-50, #f2f2f6);
+    --background: var(--ion-background-color);
   }
 
   .settings-container {
-    padding: 0 0 100px 0; /* Clear bottom tabs */
+    padding: 0 0 150px 0; /* Clear bottom tabs */
   }
 
   .section-label {
@@ -20,20 +69,32 @@
     letter-spacing: 0.5px;
   }
 
-  /* Premium List Overrides */
+  /* Premium List Overrides (Glassmorphism) */
   .premium-list {
-    margin-bottom: 24px;
-    border-radius: 12px;
-    background: var(--ion-item-background, #ffffff);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
-    
+    margin: 0 16px 24px 16px;
+    padding: 0 !important;
+    border-radius: 24px;
+    overflow: hidden; /* Prevent bottom padding leak */
+    background: var(--glass-background, rgba(255, 255, 255, 0.7));
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+
     ion-item {
+      --background: transparent;
       --padding-start: 16px;
       --inner-padding-end: 16px;
-      --min-height: 60px;
+      --min-height: 64px;
+      border-bottom: 1px solid rgba(var(--ion-text-color-rgb), 0.05);
+      margin-bottom: 0 !important;
+
+      &:last-child {
+        border-bottom: none;
+      }
 
       h3 {
-        font-weight: 500;
+        font-weight: 600;
         font-size: 16px;
         letter-spacing: -0.2px;
       }
@@ -61,20 +122,36 @@
       color: #ffffff;
     }
 
-    &.color-blue { background: #007aff; }
-    &.color-purple { background: #5856d6; }
-    &.color-red { background: #ff3b30; }
-    &.color-green { background: #34c759; }
-    &.color-orange { background: #ff9500; }
-    &.color-cyan { background: #32ade6; }
-    &.color-indigo { background: #5e5ce6; }
-    &.color-dark { background: #8e8e93; }
+    &.color-blue {
+      background: #007aff;
+    }
+    &.color-purple {
+      background: #5856d6;
+    }
+    &.color-red {
+      background: #ff3b30;
+    }
+    &.color-green {
+      background: #34c759;
+    }
+    &.color-orange {
+      background: #ff9500;
+    }
+    &.color-cyan {
+      background: #32ade6;
+    }
+    &.color-indigo {
+      background: #5e5ce6;
+    }
+    &.color-dark {
+      background: #8e8e93;
+    }
   }
 
   /* Profile Avatar */
   .profile-item {
     --min-height: 80px;
-    
+
     .profile-avatar {
       width: 60px;
       height: 60px;
@@ -142,20 +219,28 @@
   /* Dark mode overrides */
   :host-context(body.dark) {
     .settings-content {
-      --background: #000000;
+      --background: var(--ion-background-color);
     }
-    
+
     .section-label {
-      color: #98989d;
+      color: var(--ew-color-gray-500);
     }
 
     .premium-list {
-      background: #1c1c1e;
-      box-shadow: none;
+      background: rgba(22, 28, 42, 0.6);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+
+      ion-item {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        &:last-child {
+          border-bottom: none;
+        }
+      }
     }
 
     .app-info-footer .app-name {
-      color: #ffffff;
+      color: var(--ew-text-color-primary);
     }
   }
 }

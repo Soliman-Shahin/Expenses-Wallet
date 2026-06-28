@@ -1,5 +1,6 @@
 import { Injectable, Renderer2, RendererFactory2, signal, effect } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
+import { StatusBar, Style } from '@capacitor/status-bar';
 
 @Injectable({
   providedIn: 'root',
@@ -33,12 +34,23 @@ export class ThemeService {
     localStorage.setItem('theme', newTheme);
   }
 
-  private enableDark() {
+  private async enableDark() {
     this.renderer.addClass(document.body, 'dark');
+    try {
+      await StatusBar.setStyle({ style: Style.Dark });
+    } catch (e) {
+      // Ignored on web
+    }
   }
 
-  private enableLight() {
+  private async enableLight() {
     this.renderer.removeClass(document.body, 'dark');
+    try {
+      // Light style actually means dark text (for light backgrounds)
+      await StatusBar.setStyle({ style: Style.Light });
+    } catch (e) {
+      // Ignored on web
+    }
   }
 
   getCurrentTheme() {

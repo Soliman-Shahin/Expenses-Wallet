@@ -121,46 +121,50 @@
   }
 
   &.income {
-    background: rgba(var(--ion-color-success-rgb), 0.04);
+    background: var(--ion-item-background);
     border-color: rgba(var(--ion-color-success-rgb), 0.15);
     ion-icon {
       color: var(--ion-color-success);
+      filter: drop-shadow(0 2px 4px rgba(var(--ion-color-success-rgb), 0.4));
       &:hover { transform: translateY(-2px); }
     }
   }
 
   &.expenses {
-    background: rgba(var(--ion-color-danger-rgb), 0.04);
+    background: var(--ion-item-background);
     border-color: rgba(var(--ion-color-danger-rgb), 0.15);
     ion-icon {
       color: var(--ion-color-danger);
+      filter: drop-shadow(0 2px 4px rgba(var(--ion-color-danger-rgb), 0.4));
       &:hover { transform: translateY(2px); }
     }
   }
 
   &.savings {
-    background: linear-gradient(135deg, rgba(var(--ion-color-success-rgb), 0.06), transparent);
+    background: var(--ion-item-background);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(var(--ion-color-success-rgb), 0.12);
+    border: 1px solid rgba(var(--ion-text-color-rgb), 0.05);
     padding: 16px;
 
     &.positive {
-      background: linear-gradient(135deg, rgba(var(--ion-color-success-rgb), 0.06), transparent);
-      border-color: rgba(var(--ion-color-success-rgb), 0.15);
+      border-color: rgba(var(--ion-color-success-rgb), 0.3);
+      box-shadow: 0 4px 12px rgba(var(--ion-color-success-rgb), 0.05);
     }
 
     &.negative {
-      background: linear-gradient(135deg, rgba(var(--ion-color-warning-rgb), 0.06), transparent);
-      border-color: rgba(var(--ion-color-warning-rgb), 0.15);
+      border-color: rgba(var(--ion-color-warning-rgb), 0.3);
+      box-shadow: 0 4px 12px rgba(var(--ion-color-warning-rgb), 0.05);
     }
 
     ion-icon {
       font-size: 32px;
       color: var(--ion-color-success);
+      filter: drop-shadow(0 2px 6px rgba(var(--ion-color-success-rgb), 0.4));
     }
     
     &.negative ion-icon {
       color: var(--ion-color-warning);
+      filter: drop-shadow(0 2px 6px rgba(var(--ion-color-warning-rgb), 0.4));
     }
 
     .badge {
@@ -168,11 +172,11 @@
       font-weight: 700;
       padding: 4px 8px;
       border-radius: 12px;
-      background: rgba(var(--ion-color-success-rgb), 0.15);
+      background: rgba(var(--ion-color-success-rgb), 0.1);
       color: var(--ion-color-success);
       
       &.badge-warning {
-        background: rgba(var(--ion-color-warning-rgb), 0.15);
+        background: rgba(var(--ion-color-warning-rgb), 0.1);
         color: var(--ion-color-warning);
       }
     }
@@ -267,17 +271,5 @@ body.dark {
   .toggle-visibility {
     background: var(--glass-background-dark);
     border-color: var(--ew-color-gray-300);
-  }
-
-  .balance-item.savings {
-    background: var(--ew-color-gray-200);
-
-    &.positive {
-      background: var(--success-alpha-20);
-    }
-
-    &.negative {
-      background: var(--warning-alpha-20);
-    }
   }
 }
