@@ -7,17 +7,16 @@ ion-fab {
 }
 
 .fab-add {
-  // Use CSS variables for easy theming and consistency.
-  --background: var(--ion-color-primary);
-  --color: var(--ion-color-primary-contrast);
-  --box-shadow: var(--ew-shadow-xl);
-  --transition: var(--ew-transition-base);
-  --border-radius: var(--ew-radius-full); // Perfectly circular
-  border-radius: var(--ew-radius-full); // Ensure animation is circular
+  --background: var(--gradient-primary-secondary);
+  --background-hover: var(--gradient-primary-secondary);
+  --color: #ffffff;
+  --box-shadow: 0 8px 24px rgba(var(--ion-color-primary-rgb), 0.4);
+  --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  --border-radius: var(--ew-radius-full); 
+  border-radius: var(--ew-radius-full); 
 
-  // Custom properties for size
-  width: var(--ew-size-14);
-  height: var(--ew-size-14);
+  width: 60px;
+  height: 60px;
 
   // Pulse animation for attracting attention
   animation: pulse 2s infinite;

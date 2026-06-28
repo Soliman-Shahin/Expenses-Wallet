@@ -53,49 +53,43 @@
     <span id="balance-desc" class="visually-hidden">{{
       "HOME.BALANCE_DESCRIPTION" | translate
     }}</span>
-    <!-- Income & Expenses Grid -->
-    <ion-grid class="ion-no-padding">
-      <ion-row>
-        <!-- Income -->
-        <ion-col size="6" class="ion-no-padding">
-          <div class="balance-item income slide-in-left">
-            <ion-icon
-              name="arrow-up-circle"
-              color="success"
-              [attr.aria-label]="'COMMON.INCOME' | translate"
-              class="pulse"
-            ></ion-icon>
-            <div class="item-details">
-              <span class="label">{{ "COMMON.INCOME" | translate }}</span>
-              <span class="amount text-success-color font-semibold">{{
-                formattedIncome()
-              }}</span>
-            </div>
-          </div>
-        </ion-col>
-        <!-- Expenses -->
-        <ion-col size="6" class="ion-no-padding">
-          <div class="balance-item expenses slide-in-right">
-            <ion-icon
-              name="arrow-down-circle"
-              color="danger"
-              [attr.aria-label]="'COMMON.OUTCOME' | translate"
-              class="pulse"
-            ></ion-icon>
-            <div class="item-details">
-              <span class="label">{{ "COMMON.OUTCOME" | translate }}</span>
-              <span class="amount text-danger-color font-semibold">{{
-                formattedExpenses()
-              }}</span>
-            </div>
-          </div>
-        </ion-col>
-      </ion-row>
+    <!-- Income & Expenses Row -->
+    <div class="income-expense-row mt-4">
+      <!-- Income -->
+      <div class="balance-item income slide-in-left flex-1">
+        <ion-icon
+          name="arrow-up-circle"
+          color="success"
+          [attr.aria-label]="'COMMON.INCOME' | translate"
+          class="pulse"
+        ></ion-icon>
+        <div class="item-details">
+          <span class="label">{{ "COMMON.INCOME" | translate }}</span>
+          <span class="amount text-success-color font-semibold">{{
+            formattedIncome()
+          }}</span>
+        </div>
+      </div>
+      <!-- Expenses -->
+      <div class="balance-item expenses slide-in-right flex-1">
+        <ion-icon
+          name="arrow-down-circle"
+          color="danger"
+          [attr.aria-label]="'COMMON.OUTCOME' | translate"
+          class="pulse"
+        ></ion-icon>
+        <div class="item-details">
+          <span class="label">{{ "COMMON.OUTCOME" | translate }}</span>
+          <span class="amount text-danger-color font-semibold">{{
+            formattedExpenses()
+          }}</span>
+        </div>
+      </div>
+    </div>
       <!-- Savings Row (New Feature) -->
-      <ion-row class="mt-3">
-        <ion-col size="12" class="ion-no-padding">
-          <div class="divider divider-gradient my-2"></div>
-          <div
+      <div class="mt-3">
+        <div class="divider divider-gradient my-2"></div>
+        <div
             class="balance-item savings fade-in-up"
             [class.positive]="isPositiveSavings()"
             [class.negative]="!isPositiveSavings()"
@@ -122,11 +116,9 @@
                 >
                 {{ formatAmount(savings(), showBalance()) }}
               </span>
-            </div>
           </div>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
+        </div>
+      </div>
   } @else {
     <div class="total-balance">
       <div

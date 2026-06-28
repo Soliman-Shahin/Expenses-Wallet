@@ -4,14 +4,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-inline-end: 0;
+  margin-inline-end: var(--ew-space-3);
 }
 
 /* Larger category icon with glow */
 .category-icon {
-  height: 52px !important;
-  width: 52px !important;
-  min-width: 52px !important;
+  height: 46px !important;
+  width: 46px !important;
+  min-width: 46px !important;
   border-radius: 14px;
   display: flex;
   justify-content: center;
@@ -19,7 +19,7 @@
   color: white;
   flex-shrink: 0;
   position: relative;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
   // Dynamic glow effect
   &::after {
@@ -31,14 +31,14 @@
     bottom: 0;
     background: inherit;
     border-radius: inherit;
-    filter: blur(8px);
-    opacity: 0.4;
+    filter: blur(6px);
+    opacity: 0.2;
     z-index: -1;
-    transform: translateY(3px) scale(0.9);
+    transform: translateY(2px) scale(0.9);
   }
 
   ion-icon {
-    font-size: 26px;
+    font-size: 22px;
     font-weight: 500;
   }
 }
@@ -62,24 +62,28 @@
 
 .transaction-item {
   --background: var(--ion-item-background);
-  border-radius: 16px;
+  border-radius: 20px;
   margin: 0 !important;
-  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
-  --min-height: 70px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  --min-height: 78px;
   --padding-start: 14px;
   --padding-end: 14px;
   --inner-padding-end: 0;
 
-  transition: all 0.25s ease;
-  --ripple-color: rgba(var(--ion-color-primary-rgb), 0.08);
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  --ripple-color: rgba(var(--ion-color-primary-rgb), 0.1);
 
   &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    border-color: rgba(var(--ion-color-primary-rgb), 0.25);
+    transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1),
+      box-shadow 0.3s ease, border-color 0.3s ease;
   }
 
   &:active {
-    transform: scale(0.98);
+    transform: scale(0.985);
+    transition: transform 0.1s ease;
   }
 }
 

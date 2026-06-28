@@ -18,9 +18,6 @@ ion-tab-bar {
   border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 0 var(--ew-space-2);
   height: 72px; /* Increased height for labels */
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 100;
   overflow: visible; /* Ensure indicator doesn't clip */
@@ -37,12 +34,11 @@ ion-tab-button {
   --padding-top: var(--ew-space-1);
   --padding-bottom: var(--ew-space-1);
   --background: transparent;
-  --background-focused: transparent;
-  --background-hover: transparent;
-
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  max-width: 100px;
+  min-width: 0;
+  max-width: none;
+  flex: 1;
   border-radius: 999px;
   opacity: 0.6; // Inactive tabs are more faded
 
