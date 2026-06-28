@@ -60,7 +60,7 @@ ion-segment {
 /* Spacing and margins for the main transactions container */
 .transactions-list {
   background: transparent;
-  padding: var(--ew-space-2) 0 90px !important; // 90px bottom padding to prevent FAB/tabs overlay
+  padding: var(--ew-space-2) 0 130px !important; // 130px bottom padding to prevent FAB/tabs overlay
 }
 
 /* Spacing and margins for the sliding wrapper */
@@ -427,7 +427,7 @@ ion-fab-button {
     ion-title {
       font-family: var(--ew-font-family-heading);
       padding-top: calc(
-        env(safe-area-inset-top, 20px) + var(--ew-space-4)
+        var(--ion-safe-area-top, 48px) + var(--ew-space-4)
       ) !important;
       padding-bottom: var(--ew-space-4) !important;
       padding-inline-start: var(

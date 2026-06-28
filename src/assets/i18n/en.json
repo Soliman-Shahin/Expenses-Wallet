@@ -22,7 +22,7 @@
   "TOTAL_EXPENSES": "Total expenses",
   "TOTAL_BALANCE": "Total balance",
   "INCOME": "Income",
-  "OUTCOME": "Outcome",
+  "OUTCOME": "Expense",
   "REMAINING": "Remaining",
   "THEME": "Theme",
   "HOME": {
@@ -181,7 +181,7 @@
     "SAVE": "Save",
     "REMOVE": "Remove",
     "INCOME": "Income",
-    "OUTCOME": "Outcome",
+    "OUTCOME": "Expense",
     "DELETE": "Delete",
     "SAVINGS": "Savings",
     "NOT_SUPPORTED": "This feature is not currently supported",
@@ -307,6 +307,8 @@
     "MONTHLY_EXPENSE_TREND": "Monthly expense trend"
   },
   "CATEGORIES": {
+    "EMPTY_TITLE": "No categories yet",
+    "EMPTY_MESSAGE": "Add categories to organize your expenses.",
     "INCOME": "Income",
     "EXPENSES": "Expenses",
     "MISCELLANEOUS": "Miscellaneous",

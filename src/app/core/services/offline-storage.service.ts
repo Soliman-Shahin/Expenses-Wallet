@@ -42,6 +42,7 @@ export class OfflineStorageService {
     let updatedEntity: T;
     if (existing) {
       updatedEntity = {
+        ...existing,
         ...entity,
         _lastModified: new Date(),
         _version: (existing._version || 0) + 1
@@ -102,7 +103,11 @@ export class OfflineStorageService {
     const localEntities = await table.toArray();
     
     for (const serverEntity of serverEntities) {
-      const localEntity = localEntities.find((e: any) => e._id === serverEntity._id);
+      // Find local entity by _id OR by _clientId
+      const localEntity = localEntities.find((e: any) => 
+        e._id === serverEntity._id || 
+        (serverEntity._clientId && e._id === serverEntity._clientId)
+      );
 
       if (serverEntity._isDeleted) {
         if (localEntity) {
@@ -112,10 +117,17 @@ export class OfflineStorageService {
       }
 
       if (localEntity) {
+        // If we found it by _clientId (i.e. the local item is an offline item), 
+        // we MUST delete the old offline ID record because its primary key will change.
+        if (localEntity._id !== serverEntity._id) {
+          await table.delete(localEntity._id);
+        }
+
         const serverTime = new Date(serverEntity._lastModified).getTime();
         const localTime = new Date(localEntity._lastModified).getTime();
 
-        if (serverTime >= localTime) {
+        // Overwrite if server is newer, OR if the ID changed (we always want the real ID)
+        if (serverTime >= localTime || localEntity._id !== serverEntity._id) {
           await table.put({ ...serverEntity, _syncStatus: SyncStatus.SYNCED });
         }
       } else {

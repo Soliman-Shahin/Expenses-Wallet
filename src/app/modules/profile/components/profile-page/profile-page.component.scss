@@ -27,7 +27,7 @@
 // ── Hero Header ───────────────────────────────────────────────────
 .profile-hero {
   position: relative;
-  padding: calc(env(safe-area-inset-top, 20px) + 30px) 24px 100px;
+  padding: calc(var(--ion-safe-area-top, 48px) + 30px) 24px 100px;
   background: linear-gradient(135deg, #111a2e 0%, #0d1525 100%);
   overflow: hidden;
   border-radius: 0 0 40px 40px;

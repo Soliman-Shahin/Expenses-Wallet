@@ -402,11 +402,16 @@ export class HomePageComponent
     this.setupRouteDataSubscription();
   }
 
+  private hasEntered = false;
+
   /**
    * Refresh data when returning to the page
    */
   ionViewWillEnter(): void {
-    this.refreshData();
+    if (this.hasEntered) {
+      this.refreshData();
+    }
+    this.hasEntered = true;
   }
 
   /**

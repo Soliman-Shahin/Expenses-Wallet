@@ -147,7 +147,7 @@
             <h3>{{ 'EXPENSE.CATEGORY' | translate }}</h3>
           </div>
           <div class="popover-options">
-            @for (category of filteredCategories$ | async; track category) {
+            @for (category of filteredCategories; track category) {
               <div
                 class="popover-item"
                 (click)="selectCategory(category._id!)"
@@ -163,7 +163,7 @@
               </div>
             }
 
-            @if ((filteredCategories$ | async)?.length === 0) {
+            @if (filteredCategories?.length === 0) {
               <div class="popover-empty">
                 <ion-icon name="layers-outline"></ion-icon>
                 <p>No categories found.</p>

@@ -404,17 +404,23 @@ export class SyncService {
           ...op.data,
         }));
 
+        // CRITICAL: Sort entities so that categories come first.
+        // This ensures the backend resolves offline category IDs and puts them in idMap
+        // BEFORE it processes expenses that depend on those categories.
+        entities.sort((a, b) => {
+          if (a._entityType === 'category' && b._entityType !== 'category') return -1;
+          if (a._entityType !== 'category' && b._entityType === 'category') return 1;
+          return 0;
+        });
+
         return this.apiService.post<any>('/sync/push', { entities }).pipe(
           tap((result) => {
             console.log('✅ Push result:', result);
 
-            // Remove successful operations from queue and delete local offline duplicate
+            // Remove successful operations from queue
             if (result?.success) {
               operations.forEach((op) => {
                 this.offlineStorage.removeFromSyncQueue(op.id);
-                if (op.entityId.startsWith('offline_')) {
-                  this.offlineStorage.removeEntityHard(op.entityType, op.entityId);
-                }
               });
             }
 

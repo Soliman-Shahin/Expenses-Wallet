@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable, BehaviorSubject, fromEvent, merge, of } from 'rxjs';
-import { map, debounceTime } from 'rxjs/operators';
+import { map, debounceTime, timeout } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 
@@ -32,6 +32,7 @@ export class ConnectionService {
   private connectionStatus$ = this.connectionStatusSubject.asObservable();
 
   private healthCheckInterval: any;
+  private recoveryInterval: any;
   private readonly HEALTH_CHECK_INTERVAL = 60000; // 1 minute
 
   private http = inject(HttpClient);
@@ -70,6 +71,19 @@ export class ConnectionService {
   }
 
   /**
+   * Set backend reachable status directly
+   */
+  setBackendReachable(reachable: boolean): void {
+    const current = this.connectionStatusSubject.value;
+    if (current.backendReachable !== reachable) {
+      this.updateConnectionStatus({ 
+        backendReachable: reachable,
+        ...(reachable ? { online: true } : {})
+      });
+    }
+  }
+
+  /**
    * Initialize connection monitoring
    */
   private async initializeConnectionMonitoring(): Promise<void> {
@@ -83,7 +97,6 @@ export class ConnectionService {
       console.warn('Network getStatus failed, falling back to navigator', e);
     }
 
-    // Native listener
     Network.addListener('networkStatusChange', status => {
       this.updateConnectionStatus({ online: status.connected });
       if (status.connected) {
@@ -130,7 +143,7 @@ export class ConnectionService {
    */
   async checkBackendHealth(): Promise<boolean> {
     try {
-      const healthUrl = `${environment.apiUrl.replace('/v1', '')}/health`;
+      const healthUrl = `${environment.apiUrl.replace('/v1', '')}/health/detailed?t=${new Date().getTime()}`;
 
       const response = await this.http
         .get<any>(healthUrl, {
@@ -138,10 +151,12 @@ export class ConnectionService {
           // Don't retry health checks
           headers: { 'X-Skip-Retry': 'true', 'X-Silent-Error': 'true' },
         })
+        .pipe(timeout(3000))
         .toPromise();
 
       const isHealthy =
-        response?.status === 200 && response?.body?.status === 'ok';
+        response?.status === 200 && 
+        (response?.body?.status === 'healthy' || response?.body?.status === 'degraded');
 
       this.updateConnectionStatus({
         backendReachable: isHealthy,
@@ -164,11 +179,38 @@ export class ConnectionService {
    */
   private updateConnectionStatus(updates: Partial<ConnectionStatus>): void {
     const current = this.connectionStatusSubject.value;
-    this.connectionStatusSubject.next({
+    const next = {
       ...current,
       ...updates,
       lastChecked: new Date(),
-    });
+    };
+
+    this.connectionStatusSubject.next(next);
+
+    // Manage recovery polling
+    if (next.online && !next.backendReachable) {
+      this.startRecoveryPolling();
+    } else {
+      this.stopRecoveryPolling();
+    }
+  }
+
+  private startRecoveryPolling(): void {
+    if (this.recoveryInterval) return;
+    this.recoveryInterval = setInterval(async () => {
+      console.log('🔄 [ConnectionService] Recovery polling...');
+      const isHealthy = await this.checkBackendHealth();
+      if (isHealthy) {
+        this.stopRecoveryPolling();
+      }
+    }, 5000); // Poll every 5 seconds until recovered
+  }
+
+  private stopRecoveryPolling(): void {
+    if (this.recoveryInterval) {
+      clearInterval(this.recoveryInterval);
+      this.recoveryInterval = null;
+    }
   }
 
   /**
@@ -178,5 +220,6 @@ export class ConnectionService {
     if (this.healthCheckInterval) {
       clearInterval(this.healthCheckInterval);
     }
+    this.stopRecoveryPolling();
   }
 }

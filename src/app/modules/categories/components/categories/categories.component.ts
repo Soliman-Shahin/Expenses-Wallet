@@ -84,13 +84,22 @@ export class CategoriesComponent
     super();
   }
 
-  override ngOnInit() {}
-
-  ionViewWillEnter() {
-    this.loadCategories();
+  override ngOnInit() {
+    this.setupSubscription();
   }
 
-  private loadCategories() {
+  private hasEntered = false;
+
+  ionViewWillEnter() {
+    if (this.hasEntered) {
+      // Force a refresh by re-emitting the current params
+      const currentParams = this.#paramsSub.getValue();
+      this.#paramsSub.next({ ...currentParams });
+    }
+    this.hasEntered = true;
+  }
+
+  private setupSubscription() {
     this.#paramsSub
       .pipe(
         takeUntil(this.destroy$),

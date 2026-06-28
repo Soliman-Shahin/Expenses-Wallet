@@ -1,10 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map, tap, catchError } from 'rxjs/operators';
-import { Category } from 'src/app/shared/models';
+import { map, tap, catchError, switchMap } from 'rxjs/operators';
+import { Category, SyncStatus } from 'src/app/shared/models';
 import { CategoryParams } from '../models';
-import { ApiService } from 'src/app/core/services';
+import { ApiService, ConnectionService } from 'src/app/core/services';
 import { OfflineStorageService } from 'src/app/core/services/offline-storage.service';
 
 @Injectable({
@@ -13,6 +13,7 @@ import { OfflineStorageService } from 'src/app/core/services/offline-storage.ser
 export class CategoryService {
   private apiService = inject(ApiService);
   private offlineStorage = inject(OfflineStorageService);
+  private connectionService = inject(ConnectionService);
 
   getCategories(params: CategoryParams, forceRefresh = false): Observable<{ data: Category[]; total: number }> {
     let httpParams = new HttpParams()
@@ -36,11 +37,51 @@ export class CategoryService {
       '/categories/list',
       httpParams
     ).pipe(
-      tap(response => {
-        if (response?.data && response.data.length > 0) {
-          this.offlineStorage.replaceEntities('category', response.data as any[]).subscribe();
+      switchMap(response => {
+        return this.offlineStorage.getEntities<any>('category').pipe(
+          map(localCategories => {
+            const pendingLocal = localCategories.filter((c: any) => c._syncStatus === SyncStatus.PENDING);
+            const pendingActive = pendingLocal.filter((c: any) => !c._isDeleted);
+            const pendingDeletes = new Set(pendingLocal.filter((c: any) => c._isDeleted).map((c: any) => c._id));
+
+            const apiCategories = response.data || [];
+            const apiIds = new Set(apiCategories.map((c: any) => c._id));
+            const apiClientIds = new Set(apiCategories.map((c: any) => c._clientId).filter(Boolean));
+            
+            let uniquePending = pendingActive.filter((c: any) => !apiIds.has(c._id) && !apiClientIds.has(c._id));
+
+            if (params.type) {
+              uniquePending = uniquePending.filter((c: any) => c.type === params.type);
+            }
+            if (params.q) {
+              const q = params.q.toLowerCase();
+              uniquePending = uniquePending.filter((c: any) => c.title?.toLowerCase().includes(q));
+            }
+
+            const pendingMap = new Map(pendingActive.map((c: any) => [c._id, c]));
+            const filteredApi = apiCategories
+              .filter((c: any) => !pendingDeletes.has(c._id) && !pendingDeletes.has(c._clientId))
+              .map((c: any) => {
+                if (pendingMap.has(c._id)) return pendingMap.get(c._id);
+                if (c._clientId && pendingMap.has(c._clientId)) {
+                  // Keep pending data but use the real ID
+                  return { ...pendingMap.get(c._clientId), _id: c._id };
+                }
+                return c;
+              });
+              
+            const merged = [...uniquePending, ...filteredApi] as Category[];
+
+            return { data: merged, total: merged.length, originalApiData: apiCategories };
+          })
+        );
+      }),
+      tap(({ originalApiData }) => {
+        if (originalApiData && originalApiData.length > 0) {
+          this.offlineStorage.mergeEntities('category', originalApiData as any[]).subscribe();
         }
       }),
+      map((result: any) => ({ data: result.data, total: result.total })),
       catchError(() => {
         console.warn('⚠️ [CategoryService] API failed, loading from offline storage');
         return this.offlineStorage.getEntities<any>('category').pipe(
@@ -51,7 +92,7 @@ export class CategoryService {
             }
             if (params.q) {
               const q = params.q.toLowerCase();
-              filtered = filtered.filter(c => c.name?.en?.toLowerCase().includes(q) || c.name?.ar?.includes(q));
+              filtered = filtered.filter((c: any) => c.title?.toLowerCase().includes(q));
             }
             return { data: filtered, total: filtered.length };
           })
@@ -61,15 +102,19 @@ export class CategoryService {
   }
 
   getCategory(id: string): Observable<Category> {
-    return this.apiService.get<Category>(`/categories/${id}`).pipe(
-      catchError(() => {
-        return this.offlineStorage.getEntity<any>('category', id).pipe(
-          map(category => {
-            if (!category) throw new Error('Category not found offline');
-            return category;
-          })
-        );
+    const offlineFetch$ = this.offlineStorage.getEntity<any>('category', id).pipe(
+      map(category => {
+        if (!category) throw new Error('Category not found offline');
+        return category as Category;
       })
+    );
+
+    if (id.startsWith('offline_')) {
+      return offlineFetch$;
+    }
+
+    return this.apiService.get<Category>(`/categories/${id}`).pipe(
+      catchError(() => offlineFetch$)
     );
   }
 
@@ -86,6 +131,13 @@ export class CategoryService {
   }
 
   updateCategory(id: string, categoryData: Partial<Category>): Observable<Category> {
+    const isOnline = this.connectionService?.isOnline?.() ?? true;
+
+    if (!isOnline || id.startsWith('offline_')) {
+      console.warn('⚠️ [CategoryService] Offline or offline ID, updating offline');
+      return this._saveOffline('UPDATE', { ...categoryData, _id: id } as Partial<Category>);
+    }
+
     return this.apiService.put<Category>(`/categories/update/${id}`, categoryData).pipe(
       tap(category => {
         this.offlineStorage.saveEntity('category', category as any).subscribe();
@@ -98,6 +150,15 @@ export class CategoryService {
   }
 
   deleteCategory(id: string): Observable<void> {
+    const isOnline = this.connectionService?.isOnline?.() ?? true;
+
+    if (!isOnline || id.startsWith('offline_')) {
+      console.warn('⚠️ [CategoryService] Offline or offline ID, deleting offline');
+      return this.offlineStorage.deleteEntity('category', id).pipe(
+        map(() => void 0)
+      );
+    }
+
     return this.apiService.delete<void>(`/categories/delete/${id}`).pipe(
       catchError(() => {
         console.warn('⚠️ [CategoryService] API failed, marking as deleted offline');

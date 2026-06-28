@@ -108,9 +108,10 @@
           </ion-reorder-group>
         </ion-list>
       } @else {
-        <div class="no_data">
-          <ion-icon size="large" name="sad"></ion-icon>
-          <p>{{ "NO_DATA" | translate }}</p>
+        <div class="empty-state">
+          <ion-icon name="albums-outline"></ion-icon>
+          <h2>{{ "CATEGORIES.EMPTY_TITLE" | translate }}</h2>
+          <p>{{ "CATEGORIES.EMPTY_MESSAGE" | translate }}</p>
         </div>
       }
       <ion-infinite-scroll

@@ -53,7 +53,7 @@ export class ExpenseFormComponent
   userCurrency = 'USD';
 
   allCategories: Category[] = [];
-  filteredCategories$!: Observable<Category[]>;
+  filteredCategories: Category[] = [];
   showCategoryPopover = false;
   private typeSubject$ = new BehaviorSubject<'income' | 'outcome'>('outcome');
   private categoriesLoaded = false;
@@ -127,21 +127,20 @@ export class ExpenseFormComponent
     // Initialize typeSubject with the initial type
     this.typeSubject$.next(type);
     
-    // Use BehaviorSubject instead of valueChanges for better control
-    this.filteredCategories$ = this.typeSubject$.pipe(
-      map((t) => {
-        const filtered = this.allCategories.filter((c) => c.type === t);
-        // Reset category if current selection doesn't match new type
-        const currentCategoryId = this.expenseForm.get('category')?.value;
-        if (currentCategoryId) {
-          const currentCategory = this.allCategories.find(c => c._id === currentCategoryId);
-          if (currentCategory && currentCategory.type !== t) {
-            this.expenseForm.get('category')?.setValue('');
-          }
+    // Subscribe to type changes to update filtered categories
+    this.typeSubject$.pipe(takeUntil(this.destroy$)).subscribe((t) => {
+      this.filteredCategories = this.allCategories.filter((c) => c.type === t || (!c.type && t === 'outcome'));
+      
+      // Reset category if current selection doesn't match new type
+      const currentCategoryId = this.expenseForm.get('category')?.value;
+      if (currentCategoryId) {
+        const currentCategory = this.allCategories.find(c => c._id === currentCategoryId);
+        if (currentCategory && currentCategory.type !== t) {
+          this.expenseForm.get('category')?.setValue('');
         }
-        return filtered;
-      })
-    );
+      }
+      this.cdr.markForCheck();
+    });
   }
 
   private loadCategories(): void {
@@ -158,6 +157,7 @@ export class ExpenseFormComponent
       )
       .subscribe((categories) => {
         this.allCategories = categories;
+        this.typeSubject$.next(this.typeSubject$.value); // Trigger filtering again now that we have data
         this.cdr.markForCheck();
       });
   }

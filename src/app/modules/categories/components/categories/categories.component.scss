@@ -32,7 +32,7 @@
     ion-title {
       font-family: var(--ew-font-family-heading);
       padding-top: calc(
-        env(safe-area-inset-top, 20px) + var(--ew-space-4)
+        var(--ion-safe-area-top, 48px) + var(--ew-space-4)
       ) !important;
       padding-bottom: var(--ew-space-4) !important;
       padding-inline-start: var(
@@ -168,7 +168,7 @@
   // ===================================================================
   .categories-list {
     background: transparent;
-    padding: var(--ew-space-2) 0 90px !important;
+    padding: var(--ew-space-2) 0 130px !important;
 
     // Fix Ionic's reorder-group background bleed issue
     // ion-reorder-group creates a new stacking context; ensuring it has
@@ -331,7 +331,7 @@
   // ===================================================================
   //  Empty State Styling
   // ===================================================================
-  .no_data {
+  .empty-state {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -339,13 +339,20 @@
     height: calc(100vh - 300px);
     text-align: center;
     padding: var(--ew-space-6);
+    opacity: 0.7;
 
     ion-icon {
       font-size: var(--ew-size-20);
       color: var(--ew-text-color-muted);
       margin-bottom: var(--ew-space-4);
     }
-
+    h2 {
+      font-family: var(--ew-font-family-heading);
+      font-weight: var(--ew-font-weight-bold);
+      font-size: var(--ew-font-size-xl);
+      color: var(--ew-text-color-primary);
+      margin-bottom: var(--ew-space-2);
+    }
     p {
       font-family: var(--ew-font-family-base);
       color: var(--ew-text-color-secondary);

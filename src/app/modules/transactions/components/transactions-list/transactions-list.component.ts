@@ -56,7 +56,12 @@ interface TransactionItem {
 })
 export class TransactionsListComponent extends BaseComponent implements OnInit {
   // Signals for state management
-  transactions = signal<TransactionItem[]>([]);
+  rawTransactions = signal<Expense[]>([]);
+  transactions = computed(() => {
+    const raw = this.rawTransactions();
+    const items = raw.map((e) => this.mapToViewModel(e));
+    return items.sort((a, b) => b.date.getTime() - a.date.getTime());
+  });
   categories = signal<Category[]>([]);
   userCurrency = signal<string>('USD');
 
@@ -108,6 +113,15 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
 
     this.loadCategories();
     this.loadTransactions();
+  }
+
+  private hasEntered = false;
+
+  ionViewWillEnter() {
+    if (this.hasEntered) {
+      this.loadTransactions();
+    }
+    this.hasEntered = true;
   }
 
   async openAddTransactionModal() {
@@ -196,8 +210,7 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
                 ? response
                 : (response as any)?.data?.data || (response as any)?.data || [];
             }
-            const items = rawExpenses.map((e) => this.mapToViewModel(e));
-            this.transactions.set(items.sort((a, b) => b.date.getTime() - a.date.getTime()));
+            this.rawTransactions.set(rawExpenses);
           } catch (err) {
             console.error('Error processing transactions:', err);
             this.setError('Failed to process data');
@@ -215,7 +228,19 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
     let dateObj = new Date(dateVal);
     if (isNaN(dateObj.getTime())) dateObj = new Date();
 
-    const cat = e.category;
+    let cat = e.category;
+    
+    // Extract ID if it's an object (can happen during offline sync or API variations)
+    const catId = typeof cat === 'object' && cat ? ((cat as any)._id || (cat as any).id) : cat;
+    
+    // Try to find it in our loaded categories list using the ID
+    if (typeof catId === 'string') {
+      const foundCat = this.categories().find(c => c._id === catId);
+      if (foundCat) {
+        cat = foundCat;
+      }
+    }
+
     const isPopulated = cat && typeof cat !== 'string';
     const categoryName = isPopulated ? (cat as Category).title : '—';
     const categoryColor = isPopulated ? (cat as Category).color || '#ccc' : '#ccc';

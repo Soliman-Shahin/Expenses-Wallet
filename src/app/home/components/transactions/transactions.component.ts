@@ -25,6 +25,7 @@ import { ExpenseFormComponent } from '../expense-form/expense-form.component';
 import { SkeletonBlockComponent } from 'src/app/shared/ui/skeleton-block/skeleton-block.component';
 import { ComponentStateService } from 'src/app/shared/services/component-state.service';
 import { ExpenseService } from 'src/app/core/services/expense.service';
+import { CategoryService } from 'src/app/modules/categories/services/categories.service';
 import { AlertService } from 'src/app/shared/services/alert.service';
 import { ToastService } from 'src/app/shared/services/toast.service';
 import { TranslateService } from '@ngx-translate/core';
@@ -48,6 +49,7 @@ export class TransactionsComponent implements OnChanges, OnDestroy {
   txLoading = false;
   loadError: string | null = null;
   transactions: Expense[] = [];
+  categories: any[] = [];
 
   // ─── Private ─────────────────────────────────────────
   private isOpeningModal = false;
@@ -67,10 +69,14 @@ export class TransactionsComponent implements OnChanges, OnDestroy {
   private readonly toastService = inject(ToastService);
   private readonly translateService = inject(TranslateService);
   private readonly profileService = inject(ProfileService);
+  private readonly categoryService = inject(CategoryService);
 
   constructor() {
     // Load user currency
     this.loadUserCurrency();
+    
+    // Load categories
+    this.loadCategories();
     
     // Single subscription: params change → debounce → HTTP call (only ONE call per change)
     this.params$
@@ -127,6 +133,22 @@ export class TransactionsComponent implements OnChanges, OnDestroy {
     this.userCurrency = this.profileService.getProfile()?.currency || 'USD';
   }
 
+  loadCategories() {
+    this.categoryService
+      .getCategories({ skip: 0, limit: 100, sort: 'createdAt' })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response: any) => {
+          const arr = Array.isArray(response)
+            ? response
+            : (response as any)?.data?.data || (response as any)?.data || [];
+          this.categories = arr;
+          this.cdr.markForCheck();
+        },
+        error: (err: any) => console.error('Error loading categories:', err),
+      });
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['month'] || changes['year'] || changes['limit']) {
       this.params$.next({ month: this.month, year: this.year, limit: this.limit });
@@ -150,21 +172,30 @@ export class TransactionsComponent implements OnChanges, OnDestroy {
     return (t as any)?.description || (t as any)?.title || (t as any)?.name || '—';
   }
 
+  private resolveCategory(t: Expense): any {
+    let cat = (t as any)?.category;
+    if (typeof cat === 'string') {
+      const found = this.categories.find(c => c._id === cat);
+      if (found) return found;
+    }
+    return cat;
+  }
+
   getCategoryName(t: Expense): string {
-    const cat = (t as any)?.category;
+    const cat = this.resolveCategory(t);
     if (!cat || typeof cat === 'string') return '—';
     return (cat as any)?.title || (cat as any)?.name || '—';
   }
 
   getCategoryIcon(t: Expense): string {
-    const cat = (t as any)?.category;
+    const cat = this.resolveCategory(t);
     if (!cat || typeof cat === 'string') return 'pricetag-outline';
     if (cat.icon) return cat.icon;
     return cat.type === 'income' ? 'arrow-down-circle-outline' : 'arrow-up-circle-outline';
   }
 
   getCategoryColor(t: Expense): string {
-    const cat = (t as any)?.category;
+    const cat = this.resolveCategory(t);
     if (!cat || typeof cat === 'string') return '#ccc';
     return typeof cat.color === 'string' && cat.color ? cat.color : '#ccc';
   }
@@ -179,7 +210,7 @@ export class TransactionsComponent implements OnChanges, OnDestroy {
   }
 
   getCategoryType(t: Expense): 'income' | 'outcome' {
-    const cat = (t as any)?.category;
+    const cat = this.resolveCategory(t);
     const catType = (cat as any)?.type;
     const expType = (t as any)?.type;
     return catType === 'income' || expType === 'income' ? 'income' : 'outcome';

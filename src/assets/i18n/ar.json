@@ -279,6 +279,8 @@
     "MONTHLY_EXPENSE_TREND": "اتجاه المصروفات الشهري"
   },
   "CATEGORIES": {
+    "EMPTY_TITLE": "لا توجد فئات بعد",
+    "EMPTY_MESSAGE": "أضف بعض الفئات لتنظيم مصروفاتك.",
     "INCOME": "الدخل",
     "EXPENSES": "المصروفات",
     "MISCELLANEOUS": "متفردة",
