@@ -1,5 +1,5 @@
 @use "src/theme/variables";
-@use "src/theme/utilities";
+@use "src/theme/utilities" as *;
 
 :host {
   --side-menu-background: var(--ew-background-color-secondary);
