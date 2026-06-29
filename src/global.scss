@@ -7,6 +7,18 @@
 //
 // ===================================================================
 
+// App Design Tokens & Partials
+@use "theme/variables";
+@use "theme/base";
+@use "theme/rtl";
+@use "theme/scrollbar";
+@use "theme/components";
+@use "theme/animations";
+@use "theme/utilities";
+@use "theme/forms";
+@use "theme/input-styles";
+@use "theme/components/alert";
+
 // 1. Google Fonts
 // -------------------------------------------------------------------
 @import url("https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&family=Ubuntu:wght@300;400;500;700&display=swap");
@@ -33,22 +45,6 @@
 }
 @import "@ionic/angular/css/flex-utils.css";
 @import "@ionic/angular/css/display.css";
-
-// 4. App Design Tokens (Single Source of Truth)
-// -------------------------------------------------------------------
-@import "theme/variables";
-
-// 5. Custom SCSS Partials
-// -------------------------------------------------------------------
-@import "theme/base"; // Base styles, resets, typography
-@import "theme/rtl"; // RTL-specific adjustments
-@import "theme/scrollbar"; // Custom scrollbar styling
-@import "theme/components"; // Custom component styles (cards, buttons)
-@import "theme/animations"; // Animation keyframes and classes
-@import "theme/_utilities"; // Utility classes (spacing, etc.)
-@import "theme/forms"; // General form styles
-@import "theme/input-styles"; // Modern input-specific styles
-@import "theme/components/alert"; // Unified alert styles
 
 // ===================================================================
 // Dark Mode - Popovers Global Styles

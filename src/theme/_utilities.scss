@@ -3,6 +3,8 @@
 //  - Spacing, Text, Layout, etc.
 // ===================================================================
 
+@use "sass:list";
+
 // Text utilities
 .text-center {
   text-align: center;
@@ -42,10 +44,10 @@ $spacing-map: (
 {
   @each $i, $val in $spacing-map {
     .m#{$dir-key}-#{$i} {
-      #{nth($dir-props, 1)}: $val;
+      #{list.nth($dir-props, 1)}: $val;
     }
     .p#{$dir-key}-#{$i} {
-      #{nth($dir-props, 2)}: $val;
+      #{list.nth($dir-props, 2)}: $val;
     }
   }
 }

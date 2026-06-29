@@ -1,5 +1,5 @@
-@import "src/theme/variables";
-@import "src/theme/_utilities.scss";
+@use "src/theme/variables";
+@use "src/theme/utilities";
 
 ion-app {
   display: flex;

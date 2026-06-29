@@ -1,4 +1,4 @@
-@import "src/theme/variables";
+@use "src/theme/variables";
 
 ion-tab-bar {
   --background: var(--glass-background, rgba(255, 255, 255, 0.8));
