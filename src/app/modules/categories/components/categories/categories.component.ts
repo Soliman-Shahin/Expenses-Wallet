@@ -21,6 +21,8 @@ import { Category, CategoryParams } from '../../models';
 import { SkeletonBlockComponent } from '../../../../shared/ui/skeleton-block/skeleton-block.component';
 import { NgClass, AsyncPipe, LowerCasePipe } from '@angular/common';
 import { AddFabButtonComponent } from '../../../../shared/ui/add-fab-button/add-fab-button.component';
+import { PlanService } from '../../../../core/services/plan.service';
+import { PlanLimitBannerComponent } from '../../../../shared/components/plan-limit-banner/plan-limit-banner.component';
 
 @Component({
     selector: 'app-categories',
@@ -36,6 +38,7 @@ import { AddFabButtonComponent } from '../../../../shared/ui/add-fab-button/add-
         AsyncPipe,
         LowerCasePipe,
         TranslateModule,
+        PlanLimitBannerComponent,
     ],
 })
 export class CategoriesComponent
@@ -44,6 +47,7 @@ export class CategoriesComponent
 {
   private alertController = inject(AlertController);
   private translate = inject(TranslateService);
+  private planService = inject(PlanService);
 
   private readonly loading = new BehaviorSubject<boolean>(false);
   private readonly errorMessage = new BehaviorSubject<string>('');
@@ -79,6 +83,10 @@ export class CategoriesComponent
 
   isActionSheetOpen = false;
   selectedCategory: Category | null = null;
+  
+  // Plan Limits State
+  canAddCategory = true;
+  categoriesLimitInfo = { used: 0, limit: 0 as number | null, percentage: 0 };
 
   constructor() {
     super();
@@ -86,17 +94,29 @@ export class CategoriesComponent
 
   override ngOnInit() {
     this.setupSubscription();
+    this.checkPlanLimits();
   }
 
   private hasEntered = false;
 
   ionViewWillEnter() {
+    this.checkPlanLimits();
     if (this.hasEntered) {
       // Force a refresh by re-emitting the current params
       const currentParams = this.#paramsSub.getValue();
       this.#paramsSub.next({ ...currentParams });
     }
     this.hasEntered = true;
+  }
+  
+  private checkPlanLimits() {
+    this.planService.currentPlan$.pipe(takeUntil(this.destroy$)).subscribe(planData => {
+      if (planData) {
+        this.canAddCategory = this.planService.canAddCategory();
+        this.categoriesLimitInfo = planData.usage.categories;
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   private setupSubscription() {
@@ -160,6 +180,12 @@ export class CategoriesComponent
   }
 
   navigateToAdd() {
+    if (!this.canAddCategory) {
+      this.router.navigate(['/subscription'], {
+        queryParams: { reason: 'limit_reached', limitType: 'SUBSCRIPTION.CATEGORIES_LIMIT' }
+      });
+      return;
+    }
     this.router.navigate(['/categories/create']);
   }
 

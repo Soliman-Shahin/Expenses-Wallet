@@ -7,6 +7,10 @@ import {
 import { BaseComponent } from '../../base/base.component';
 import { DatePipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
+import { PlanService } from 'src/app/core/services/plan.service';
+import { Permission, PlanSlug } from 'src/app/shared/models/plan.model';
+import { UpgradePromptComponent } from '../upgrade-prompt/upgrade-prompt.component';
+import { takeUntil } from 'rxjs';
 
 @Component({
     selector: 'app-backup-restore',
@@ -14,7 +18,7 @@ import { TranslateModule } from '@ngx-translate/core';
     styleUrls: ['./backup-restore.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [IonicModule, DatePipe, TranslateModule]
+    imports: [IonicModule, DatePipe, TranslateModule, UpgradePromptComponent]
 })
 export class BackupRestoreComponent extends BaseComponent implements OnInit {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
@@ -32,15 +36,28 @@ export class BackupRestoreComponent extends BaseComponent implements OnInit {
   googleDriveBackups: any[] = [];
   isLoadingDriveBackups = false;
 
+  // Plan Permissions
+  hasDrivePermission = true;
+  PlanSlug = PlanSlug;
+
   constructor(
     private backupService: BackupService,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private planService: PlanService
   ) {
     super();
   }
 
   override ngOnInit() {
     super.ngOnInit();
+    
+    this.planService.currentPlan$.pipe(takeUntil(this.destroy$)).subscribe(planData => {
+      if (planData) {
+        this.hasDrivePermission = this.planService.hasPermission(Permission.BACKUP_GDRIVE);
+        this.cdr.markForCheck();
+      }
+    });
+
     this.loadHistory();
     this.loadAutoBackupSettings();
     this.loadGoogleDriveSettings();

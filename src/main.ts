@@ -23,6 +23,7 @@ import { encryptionAdvancedInterceptor } from './app/core/interceptors/encryptio
 import { authInterceptor } from './app/modules/auth/helper/authInterceptor';
 import { cacheInterceptor } from './app/core/interceptors/cache.interceptor';
 import { errorInterceptor } from './app/core/interceptors/error.interceptor';
+import { planLimitInterceptor } from './app/core/interceptors/plan-limit.interceptor';
 
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
@@ -83,6 +84,7 @@ if (!(window as any).__appBootstrapped) {
           retryInterceptor,
           encryptionAdvancedInterceptor,
           authInterceptor,
+          planLimitInterceptor,
           cacheInterceptor,
           errorInterceptor,
         ])

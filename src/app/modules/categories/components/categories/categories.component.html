@@ -58,6 +58,15 @@
           }
         </div>
       }
+      
+      @if (!vm.isLoading && categoriesLimitInfo.percentage >= 75) {
+        <app-plan-limit-banner
+          limitType="SUBSCRIPTION.CATEGORIES_LIMIT"
+          [used]="categoriesLimitInfo.used"
+          [limit]="categoriesLimitInfo.limit"
+          [percentage]="categoriesLimitInfo.percentage"
+        ></app-plan-limit-banner>
+      }
       @if (!vm.isLoading && vm.response && vm.response.total > 0) {
         <ion-list
           class="categories-list"

@@ -1,0 +1,208 @@
+<div class="usage-stats-container">
+  <!-- Current Plan Info -->
+  <ion-card class="plan-info-card">
+    <ion-card-header>
+      <ion-card-title>{{ planData.plan.name }}</ion-card-title>
+      <ion-card-subtitle>{{
+        "SUBSCRIPTION.CURRENT_PLAN" | translate
+      }}</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-list lines="none">
+        <ion-item *ngIf="planData.context.planStartedAt">
+          <ion-icon
+            name="calendar-outline"
+            slot="start"
+            color="primary"
+          ></ion-icon>
+          <ion-label>
+            <p>{{ "SUBSCRIPTION.PLAN_STARTED_ON" | translate }}</p>
+            <h3>{{ formatDate(planData.context.planStartedAt) }}</h3>
+          </ion-label>
+        </ion-item>
+        <ion-item *ngIf="planData.context.planExpiresAt">
+          <ion-icon
+            name="time-outline"
+            slot="start"
+            [color]="planData.context.isExpired ? 'danger' : 'warning'"
+          ></ion-icon>
+          <ion-label>
+            <p>{{ "SUBSCRIPTION.PLAN_EXPIRES_ON" | translate }}</p>
+            <h3 [class.text-danger]="planData.context.isExpired">
+              {{ formatDate(planData.context.planExpiresAt) }}
+            </h3>
+          </ion-label>
+        </ion-item>
+        <ion-item *ngIf="planData.context.isExpired">
+          <ion-icon name="alert-circle" slot="start" color="danger"></ion-icon>
+          <ion-label color="danger">
+            <h3>{{ "SUBSCRIPTION.PLAN_EXPIRED" | translate }}</h3>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Usage Statistics -->
+  <ion-card class="usage-card">
+    <ion-card-header>
+      <ion-card-title>{{ "SUBSCRIPTION.USAGE" | translate }}</ion-card-title>
+      <ion-card-subtitle>{{
+        "SUBSCRIPTION.LIMITS" | translate
+      }}</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <!-- Categories Usage -->
+      <div class="usage-item">
+        <div class="usage-header">
+          <div class="usage-title">
+            <ion-icon name="folder-outline" color="primary"></ion-icon>
+            <span>{{ "SUBSCRIPTION.CATEGORIES_LIMIT" | translate }}</span>
+          </div>
+          <div class="usage-count">
+            <span class="used">{{ planData.usage.categories.used }}</span>
+            <span class="separator">/</span>
+            <span class="limit">{{
+              formatLimit(planData.usage.categories.limit)
+            }}</span>
+          </div>
+        </div>
+        <ion-progress-bar
+          [value]="planData.usage.categories.percentage / 100"
+          [color]="getProgressColor(planData.usage.categories.percentage)"
+        ></ion-progress-bar>
+        <div class="usage-footer">
+          <span class="percentage"
+            >{{ planData.usage.categories.percentage }}%</span
+          >
+          <span
+            class="remaining"
+            *ngIf="planData.usage.categories.limit !== null"
+          >
+            {{
+              planData.usage.categories.limit - planData.usage.categories.used
+            }}
+            {{ "SUBSCRIPTION.REMAINING" | translate }}
+          </span>
+          <span
+            class="remaining"
+            *ngIf="planData.usage.categories.limit === null"
+          >
+            {{ "SUBSCRIPTION.UNLIMITED" | translate }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Transactions Usage -->
+      <div class="usage-item">
+        <div class="usage-header">
+          <div class="usage-title">
+            <ion-icon name="receipt-outline" color="primary"></ion-icon>
+            <span>{{ "SUBSCRIPTION.TRANSACTIONS_LIMIT" | translate }}</span>
+          </div>
+          <div class="usage-count">
+            <span class="used">{{
+              planData.usage.transactionsThisMonth.used
+            }}</span>
+            <span class="separator">/</span>
+            <span class="limit">{{
+              formatLimit(planData.usage.transactionsThisMonth.limit)
+            }}</span>
+          </div>
+        </div>
+        <ion-progress-bar
+          [value]="planData.usage.transactionsThisMonth.percentage / 100"
+          [color]="
+            getProgressColor(planData.usage.transactionsThisMonth.percentage)
+          "
+        ></ion-progress-bar>
+        <div class="usage-footer">
+          <span class="percentage"
+            >{{ planData.usage.transactionsThisMonth.percentage }}%</span
+          >
+          <span
+            class="remaining"
+            *ngIf="planData.usage.transactionsThisMonth.limit !== null"
+          >
+            {{
+              planData.usage.transactionsThisMonth.limit -
+                planData.usage.transactionsThisMonth.used
+            }}
+            {{ "SUBSCRIPTION.REMAINING" | translate }}
+          </span>
+          <span
+            class="remaining"
+            *ngIf="planData.usage.transactionsThisMonth.limit === null"
+          >
+            {{ "SUBSCRIPTION.UNLIMITED" | translate }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Other Limits Info -->
+      <div class="limits-info">
+        <h4>{{ "SUBSCRIPTION.LIMITS" | translate }}</h4>
+        <ion-list lines="none">
+          <ion-item>
+            <ion-icon name="cloud-upload-outline" slot="start"></ion-icon>
+            <ion-label>
+              <p>{{ "SUBSCRIPTION.BACKUP_FILES_LIMIT" | translate }}</p>
+              <h3>{{ formatLimit(planData.context.limits.maxBackupFiles) }}</h3>
+            </ion-label>
+          </ion-item>
+          <ion-item>
+            <ion-icon name="phone-portrait-outline" slot="start"></ion-icon>
+            <ion-label>
+              <p>{{ "SUBSCRIPTION.DEVICES_LIMIT" | translate }}</p>
+              <h3>{{ formatLimit(planData.context.limits.maxDevices) }}</h3>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Subscription History -->
+  <ion-card
+    class="history-card"
+    *ngIf="
+      planData.subscriptionHistory && planData.subscriptionHistory.length > 0
+    "
+  >
+    <ion-card-header>
+      <ion-card-title>{{
+        "SUBSCRIPTION.SUBSCRIPTION_HISTORY" | translate
+      }}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-list>
+        <ion-item *ngFor="let subscription of planData.subscriptionHistory">
+          <ion-icon
+            [name]="
+              subscription.status === 'active'
+                ? 'checkmark-circle'
+                : 'time-outline'
+            "
+            slot="start"
+            [color]="subscription.status === 'active' ? 'success' : 'medium'"
+          ></ion-icon>
+          <ion-label>
+            <h3>{{ subscription.plan }}</h3>
+            <p>
+              {{ formatDate(subscription.startDate) }} -
+              {{ formatDate(subscription.endDate) }}
+            </p>
+          </ion-label>
+          <ion-badge
+            slot="end"
+            [color]="subscription.status === 'active' ? 'success' : 'medium'"
+          >
+            {{
+              "SUBSCRIPTION." + subscription.status.toUpperCase() | translate
+            }}
+          </ion-badge>
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+</div>

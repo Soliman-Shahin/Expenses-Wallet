@@ -209,6 +209,15 @@
       </div>
     }
 
+    @if (!isLoading && transactionsLimitInfo.percentage >= 75) {
+      <app-plan-limit-banner
+        limitType="SUBSCRIPTION.TRANSACTIONS_LIMIT"
+        [used]="transactionsLimitInfo.used"
+        [limit]="transactionsLimitInfo.limit"
+        [percentage]="transactionsLimitInfo.percentage"
+      ></app-plan-limit-banner>
+    }
+
     <!-- Error State -->
     @if (state.error() && !isLoading) {
       <div class="ion-text-center ion-padding">

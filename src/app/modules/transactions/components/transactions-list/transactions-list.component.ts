@@ -1,4 +1,12 @@
-import { Component, ChangeDetectionStrategy, OnInit, signal, computed, effect } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  OnInit,
+  signal,
+  computed,
+  effect,
+  inject,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   Subject,
@@ -17,9 +25,16 @@ import { ExpenseFormComponent } from 'src/app/home/components/expense-form/expen
 import { ComponentStateService } from 'src/app/shared/services/component-state.service';
 import { FormsModule } from '@angular/forms';
 import { SkeletonBlockComponent } from '../../../../shared/ui/skeleton-block/skeleton-block.component';
-import { NgClass, LowerCasePipe, CurrencyPipe, DatePipe } from '@angular/common';
+import {
+  NgClass,
+  LowerCasePipe,
+  CurrencyPipe,
+  DatePipe,
+} from '@angular/common';
 import { AddFabButtonComponent } from '../../../../shared/ui/add-fab-button/add-fab-button.component';
 import { TranslateModule } from '@ngx-translate/core';
+import { PlanService } from '../../../../core/services/plan.service';
+import { PlanLimitBannerComponent } from '../../../../shared/components/plan-limit-banner/plan-limit-banner.component';
 
 interface TransactionItem {
   _id: string;
@@ -52,6 +67,7 @@ interface TransactionItem {
     CurrencyPipe,
     DatePipe,
     TranslateModule,
+    PlanLimitBannerComponent,
   ],
 })
 export class TransactionsListComponent extends BaseComponent implements OnInit {
@@ -96,11 +112,7 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
   ) {
     super();
     this.searchSubject
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        takeUntilDestroyed()
-      )
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed())
       .subscribe((term) => {
         this.searchTerm.set(term);
         this.loadTransactions();
@@ -113,18 +125,46 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
 
     this.loadCategories();
     this.loadTransactions();
+    this.checkPlanLimits();
   }
 
   private hasEntered = false;
 
   ionViewWillEnter() {
+    this.checkPlanLimits();
     if (this.hasEntered) {
       this.loadTransactions();
     }
     this.hasEntered = true;
   }
 
+  // Plan Limits State
+  canAddTransaction = true;
+  transactionsLimitInfo = { used: 0, limit: 0 as number | null, percentage: 0 };
+  private planService = inject(PlanService);
+
+  private checkPlanLimits() {
+    this.planService.currentPlan$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((planData) => {
+        if (planData) {
+          this.canAddTransaction = this.planService.canAddTransaction();
+          this.transactionsLimitInfo = planData.usage.transactionsThisMonth;
+          this.cdr.markForCheck();
+        }
+      });
+  }
+
   async openAddTransactionModal() {
+    if (!this.canAddTransaction) {
+      this.router.navigate(['/subscription'], {
+        queryParams: {
+          reason: 'limit_reached',
+          limitType: 'SUBSCRIPTION.TRANSACTIONS_LIMIT',
+        },
+      });
+      return;
+    }
     if (this.isOpeningModal) return;
     this.isOpeningModal = true;
     try {
@@ -168,7 +208,7 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
 
     const params: any = {};
     if (this.searchTerm()) params.search = this.searchTerm();
-    
+
     const selectedCats = this.selectedCategories();
     if (selectedCats.length === 1) {
       params.category = selectedCats[0];
@@ -177,17 +217,29 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
     }
 
     if (this.selectedType()) params.type = this.selectedType();
-    
+
     if (this.startDate()) params.startDate = this.startDate();
     else {
       const now = new Date();
-      params.startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      params.startDate = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        1
+      ).toISOString();
     }
-    
+
     if (this.endDate()) params.endDate = this.endDate();
     else {
       const now = new Date();
-      params.endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999).toISOString();
+      params.endDate = new Date(
+        now.getFullYear(),
+        now.getMonth() + 1,
+        0,
+        23,
+        59,
+        59,
+        999
+      ).toISOString();
     }
 
     this.expenseService
@@ -208,7 +260,9 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
             } else {
               rawExpenses = Array.isArray(response)
                 ? response
-                : (response as any)?.data?.data || (response as any)?.data || [];
+                : (response as any)?.data?.data ||
+                  (response as any)?.data ||
+                  [];
             }
             this.rawTransactions.set(rawExpenses);
           } catch (err) {
@@ -229,13 +283,16 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
     if (isNaN(dateObj.getTime())) dateObj = new Date();
 
     let cat = e.category;
-    
+
     // Extract ID if it's an object (can happen during offline sync or API variations)
-    const catId = typeof cat === 'object' && cat ? ((cat as any)._id || (cat as any).id) : cat;
-    
+    const catId =
+      typeof cat === 'object' && cat
+        ? (cat as any)._id || (cat as any).id
+        : cat;
+
     // Try to find it in our loaded categories list using the ID
     if (typeof catId === 'string') {
-      const foundCat = this.categories().find(c => c._id === catId);
+      const foundCat = this.categories().find((c) => c._id === catId);
       if (foundCat) {
         cat = foundCat;
       }
@@ -243,7 +300,9 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
 
     const isPopulated = cat && typeof cat !== 'string';
     const categoryName = isPopulated ? (cat as Category).title : '—';
-    const categoryColor = isPopulated ? (cat as Category).color || '#ccc' : '#ccc';
+    const categoryColor = isPopulated
+      ? (cat as Category).color || '#ccc'
+      : '#ccc';
 
     let categoryIcon = 'pricetag-outline';
     let type: 'income' | 'outcome' = 'outcome';
@@ -259,7 +318,8 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
     }
 
     const amount = Number(e.amount) || 0;
-    const title = e.description || (isPopulated ? (cat as Category).title : 'Transaction');
+    const title =
+      e.description || (isPopulated ? (cat as Category).title : 'Transaction');
 
     return {
       _id: e._id,
@@ -306,7 +366,7 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
       if (idx === -1) {
         this.selectedCategories.set([...current, catId]);
       } else {
-        this.selectedCategories.set(current.filter(id => id !== catId));
+        this.selectedCategories.set(current.filter((id) => id !== catId));
       }
     }
     this.loadTransactions();
@@ -320,18 +380,23 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
 
   getSelectedCategoryText(): string {
     const current = this.selectedCategories();
-    if (current.length === 0) return this.translateService.instant('TRANSACTIONS.ALL_CATEGORIES');
+    if (current.length === 0)
+      return this.translateService.instant('TRANSACTIONS.ALL_CATEGORIES');
     if (current.length === 1) {
-      const cat = this.categories().find(c => c._id === current[0]);
-      return cat?.title || this.translateService.instant('TRANSACTIONS.CATEGORY');
+      const cat = this.categories().find((c) => c._id === current[0]);
+      return (
+        cat?.title || this.translateService.instant('TRANSACTIONS.CATEGORY')
+      );
     }
-    return `${current.length} ${this.translateService.instant('COMMON.SELECTED')}`;
+    return `${current.length} ${this.translateService.instant(
+      'COMMON.SELECTED'
+    )}`;
   }
 
   getSelectedCategoryIcon(): string {
     const current = this.selectedCategories();
     if (current.length === 1) {
-      const cat = this.categories().find(c => c._id === current[0]);
+      const cat = this.categories().find((c) => c._id === current[0]);
       return cat?.icon || 'pricetag-outline';
     }
     return 'pricetag-outline';
@@ -340,7 +405,7 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
   getSelectedCategoryColor(): string | null {
     const current = this.selectedCategories();
     if (current.length === 1) {
-      const cat = this.categories().find(c => c._id === current[0]);
+      const cat = this.categories().find((c) => c._id === current[0]);
       return cat?.color || null;
     }
     return null;
@@ -363,10 +428,10 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
     const month = baseDate.getMonth();
     const firstDayOfMonth = new Date(year, month, 1);
     const lastDayOfMonth = new Date(year, month + 1, 0);
-    
+
     const startDate = new Date(firstDayOfMonth);
     startDate.setDate(startDate.getDate() - startDate.getDay());
-    
+
     const endDate = new Date(lastDayOfMonth);
     if (endDate.getDay() !== 6) {
       endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
@@ -388,12 +453,20 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
   }
 
   prevMonth() {
-    this.currentCalendarDate = new Date(this.currentCalendarDate.getFullYear(), this.currentCalendarDate.getMonth() - 1, 1);
+    this.currentCalendarDate = new Date(
+      this.currentCalendarDate.getFullYear(),
+      this.currentCalendarDate.getMonth() - 1,
+      1
+    );
     this.generateCalendar(this.currentCalendarDate);
   }
 
   nextMonth() {
-    this.currentCalendarDate = new Date(this.currentCalendarDate.getFullYear(), this.currentCalendarDate.getMonth() + 1, 1);
+    this.currentCalendarDate = new Date(
+      this.currentCalendarDate.getFullYear(),
+      this.currentCalendarDate.getMonth() + 1,
+      1
+    );
     this.generateCalendar(this.currentCalendarDate);
   }
 
@@ -420,27 +493,39 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
   isDateSelectedStart(date: Date): boolean {
     if (!this.tempStartDate) return false;
     const start = new Date(this.tempStartDate);
-    return date.getFullYear() === start.getFullYear() && date.getMonth() === start.getMonth() && date.getDate() === start.getDate();
+    return (
+      date.getFullYear() === start.getFullYear() &&
+      date.getMonth() === start.getMonth() &&
+      date.getDate() === start.getDate()
+    );
   }
 
   isDateSelectedEnd(date: Date): boolean {
     if (!this.tempEndDate) return false;
     const end = new Date(this.tempEndDate);
-    return date.getFullYear() === end.getFullYear() && date.getMonth() === end.getMonth() && date.getDate() === end.getDate();
+    return (
+      date.getFullYear() === end.getFullYear() &&
+      date.getMonth() === end.getMonth() &&
+      date.getDate() === end.getDate()
+    );
   }
 
   isDateInRange(date: Date): boolean {
     if (!this.tempStartDate || !this.tempEndDate) return false;
     const start = new Date(this.tempStartDate);
-    start.setHours(0,0,0,0);
+    start.setHours(0, 0, 0, 0);
     const end = new Date(this.tempEndDate);
-    end.setHours(23,59,59,999);
+    end.setHours(23, 59, 59, 999);
     return date > start && date < end;
   }
-  
+
   isToday(date: Date): boolean {
     const today = new Date();
-    return date.getFullYear() === today.getFullYear() && date.getMonth() === today.getMonth() && date.getDate() === today.getDate();
+    return (
+      date.getFullYear() === today.getFullYear() &&
+      date.getMonth() === today.getMonth() &&
+      date.getDate() === today.getDate()
+    );
   }
 
   isCurrentMonthDay(date: Date): boolean {
@@ -450,7 +535,7 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
   openDatePicker() {
     this.tempStartDate = this.startDate();
     this.tempEndDate = this.endDate();
-    
+
     if (this.tempStartDate) {
       this.currentCalendarDate = new Date(this.tempStartDate);
     } else {
@@ -484,11 +569,19 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
     const sDate = this.startDate();
     const eDate = this.endDate();
     if (sDate && eDate) {
-      return `${new Date(sDate).toLocaleDateString()} ${this.translateService.instant('TRANSACTIONS.TO')} ${new Date(eDate).toLocaleDateString()}`;
+      return `${new Date(
+        sDate
+      ).toLocaleDateString()} ${this.translateService.instant(
+        'TRANSACTIONS.TO'
+      )} ${new Date(eDate).toLocaleDateString()}`;
     } else if (sDate) {
-      return `${this.translateService.instant('TRANSACTIONS.FROM')} ${new Date(sDate).toLocaleDateString()}`;
+      return `${this.translateService.instant('TRANSACTIONS.FROM')} ${new Date(
+        sDate
+      ).toLocaleDateString()}`;
     } else if (eDate) {
-      return `${this.translateService.instant('TRANSACTIONS.UNTIL')} ${new Date(eDate).toLocaleDateString()}`;
+      return `${this.translateService.instant('TRANSACTIONS.UNTIL')} ${new Date(
+        eDate
+      ).toLocaleDateString()}`;
     }
     return this.translateService.instant('TRANSACTIONS.CURRENT_MONTH');
   }
@@ -534,27 +627,24 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
     this.isProcessingAction = true;
     try {
       const transactionName = item.description || 'Transaction';
-      await this.alertService.showDeleteConfirm(
-        transactionName,
-        async () => {
-          this.expenseService.deleteExpense(item._id).subscribe({
-            next: async () => {
-              await this.toastService.presentSuccessToast(
-                'bottom',
-                this.translateService.instant('EXPENSE.DELETE_SUCCESS_TOAST')
-              );
-              this.loadTransactions();
-            },
-            error: async (err) => {
-              await this.toastService.presentErrorToast(
-                'bottom',
-                this.translateService.instant('EXPENSE.DELETE_ERROR_TOAST')
-              );
-              console.error(err);
-            },
-          });
-        }
-      );
+      await this.alertService.showDeleteConfirm(transactionName, async () => {
+        this.expenseService.deleteExpense(item._id).subscribe({
+          next: async () => {
+            await this.toastService.presentSuccessToast(
+              'bottom',
+              this.translateService.instant('EXPENSE.DELETE_SUCCESS_TOAST')
+            );
+            this.loadTransactions();
+          },
+          error: async (err) => {
+            await this.toastService.presentErrorToast(
+              'bottom',
+              this.translateService.instant('EXPENSE.DELETE_ERROR_TOAST')
+            );
+            console.error(err);
+          },
+        });
+      });
     } finally {
       this.isProcessingAction = false;
     }

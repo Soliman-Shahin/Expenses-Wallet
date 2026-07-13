@@ -6,24 +6,33 @@
 
   <!-- Google Drive Section -->
   <div class="google-drive-section">
-    <div class="section-header">
-      <div class="header-content">
-        <ion-icon name="logo-google"></ion-icon>
-        <div>
-          <h3>{{ "BACKUP.GOOGLE_DRIVE" | translate }}</h3>
-          <p>{{ "BACKUP.GOOGLE_DRIVE_DESC" | translate }}</p>
-          @if (googleDriveEmail) {
-            <span class="email-badge">{{
-              googleDriveEmail
-            }}</span>
-          }
+    @if (!hasDrivePermission) {
+      <app-upgrade-prompt
+        title="SUBSCRIPTION.FEATURE_LOCKED"
+        message="BACKUP.GDRIVE_LOCKED_MSG"
+        icon="logo-google"
+        [requiredPlan]="PlanSlug.Pro"
+      ></app-upgrade-prompt>
+    } @else {
+      <div class="section-header">
+        <div class="header-content">
+          <ion-icon name="logo-google"></ion-icon>
+          <div>
+            <h3>{{ "BACKUP.GOOGLE_DRIVE" | translate }}</h3>
+            <p>{{ "BACKUP.GOOGLE_DRIVE_DESC" | translate }}</p>
+            @if (googleDriveEmail) {
+              <span class="email-badge">{{
+                googleDriveEmail
+              }}</span>
+            }
+          </div>
         </div>
+        <ion-toggle
+          [checked]="googleDriveEnabled"
+          (ionChange)="toggleGoogleDrive($event)"
+        ></ion-toggle>
       </div>
-      <ion-toggle
-        [checked]="googleDriveEnabled"
-        (ionChange)="toggleGoogleDrive($event)"
-      ></ion-toggle>
-    </div>
+    }
   </div>
 
   <!-- Auto Backup Section -->

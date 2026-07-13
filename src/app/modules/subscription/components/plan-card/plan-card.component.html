@@ -1,0 +1,137 @@
+<ion-card
+  [class.current-plan]="isCurrentPlan"
+  [class.popular-plan]="plan.isPopular"
+>
+  <!-- Popular Badge -->
+  <div class="popular-badge" *ngIf="plan.isPopular">
+    <ion-badge color="warning">
+      <ion-icon name="star"></ion-icon>
+      {{ "SUBSCRIPTION.POPULAR" | translate }}
+    </ion-badge>
+  </div>
+
+  <!-- Current Plan Badge -->
+  <div class="current-badge" *ngIf="isCurrentPlan">
+    <ion-badge [color]="getPlanColor()">
+      <ion-icon name="checkmark-circle"></ion-icon>
+      {{ "SUBSCRIPTION.CURRENT_PLAN" | translate }}
+    </ion-badge>
+  </div>
+
+  <ion-card-header>
+    <ion-card-title [color]="getPlanColor()">
+      {{ plan.name }}
+    </ion-card-title>
+    <ion-card-subtitle>
+      {{ plan.description }}
+    </ion-card-subtitle>
+  </ion-card-header>
+
+  <ion-card-content>
+    <!-- Price -->
+    <div class="price-section">
+      <div class="price">
+        <span class="currency">{{ plan.currency }}</span>
+        <span class="amount">{{ plan.price }}</span>
+        <span class="period" *ngIf="plan.billingCycle !== 'lifetime'">
+          {{
+            "SUBSCRIPTION." +
+              (plan.billingCycle === "monthly" ? "PER_MONTH" : "PER_YEAR")
+              | translate
+          }}
+        </span>
+        <span class="period" *ngIf="plan.billingCycle === 'lifetime'">
+          {{ "SUBSCRIPTION.LIFETIME" | translate }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Limits -->
+    <div class="limits-section">
+      <h4>{{ "SUBSCRIPTION.LIMITS" | translate }}</h4>
+      <ion-list lines="none">
+        <ion-item>
+          <ion-icon name="folder-outline" slot="start"></ion-icon>
+          <ion-label>
+            <p>{{ "SUBSCRIPTION.CATEGORIES_LIMIT" | translate }}</p>
+            <h3>{{ formatLimit(plan.limits.maxCategories) }}</h3>
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-icon name="receipt-outline" slot="start"></ion-icon>
+          <ion-label>
+            <p>{{ "SUBSCRIPTION.TRANSACTIONS_LIMIT" | translate }}</p>
+            <h3>{{ formatLimit(plan.limits.maxTransactionsPerMonth) }}</h3>
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-icon name="cloud-upload-outline" slot="start"></ion-icon>
+          <ion-label>
+            <p>{{ "SUBSCRIPTION.BACKUP_FILES_LIMIT" | translate }}</p>
+            <h3>{{ formatLimit(plan.limits.maxBackupFiles) }}</h3>
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-icon name="phone-portrait-outline" slot="start"></ion-icon>
+          <ion-label>
+            <p>{{ "SUBSCRIPTION.DEVICES_LIMIT" | translate }}</p>
+            <h3>{{ formatLimit(plan.limits.maxDevices) }}</h3>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </div>
+
+    <!-- Features -->
+    <div class="features-section">
+      <h4>{{ "SUBSCRIPTION.INCLUDED_FEATURES" | translate }}</h4>
+      <ion-list lines="none">
+        <ion-item *ngFor="let feature of plan.features.slice(0, 6)">
+          <ion-icon
+            name="checkmark-circle"
+            slot="start"
+            [color]="getPlanColor()"
+          ></ion-icon>
+          <ion-label>
+            {{ getFeatureTranslationKey(feature) | translate }}
+          </ion-label>
+        </ion-item>
+        <ion-item *ngIf="plan.features.length > 6">
+          <ion-icon
+            name="ellipsis-horizontal"
+            slot="start"
+            color="medium"
+          ></ion-icon>
+          <ion-label color="medium">
+            +{{ plan.features.length - 6 }} {{ "MORE" | translate }}
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </div>
+
+    <!-- Action Button -->
+    <ion-button
+      expand="block"
+      [color]="getPlanColor()"
+      [disabled]="isCurrentPlan"
+      (click)="onUpgrade()"
+      class="upgrade-button"
+    >
+      <ion-icon
+        name="arrow-up-circle"
+        slot="start"
+        *ngIf="!isCurrentPlan"
+      ></ion-icon>
+      <ion-icon
+        name="checkmark-circle"
+        slot="start"
+        *ngIf="isCurrentPlan"
+      ></ion-icon>
+      {{
+        (isCurrentPlan
+          ? "SUBSCRIPTION.CURRENT_PLAN"
+          : "SUBSCRIPTION.UPGRADE_NOW"
+        ) | translate
+      }}
+    </ion-button>
+  </ion-card-content>
+</ion-card>

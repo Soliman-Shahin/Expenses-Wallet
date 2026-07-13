@@ -5,3 +5,4 @@ export * from './offline-storage.service';
 export * from './sync.service';
 export * from './biometric.service';
 export * from './connection.service';
+export * from './plan.service';
