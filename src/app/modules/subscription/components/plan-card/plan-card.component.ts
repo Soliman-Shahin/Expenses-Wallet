@@ -34,9 +34,10 @@ export class PlanCardComponent {
 
   getPlanColor(): string {
     const colors: Record<PlanSlug, string> = {
-      [PlanSlug.Free]: 'medium',
-      [PlanSlug.Pro]: 'primary',
-      [PlanSlug.Premium]: 'tertiary',
+      [PlanSlug.FREE]: 'medium',
+      [PlanSlug.BASIC]: 'primary',
+      [PlanSlug.PRO]: 'secondary',
+      [PlanSlug.ENTERPRISE]: 'tertiary',
     };
     return colors[this.plan.slug] || 'medium';
   }

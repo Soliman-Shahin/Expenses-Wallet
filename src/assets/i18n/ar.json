@@ -712,6 +712,40 @@
     "PROFILE_AVATAR": "صورة شخصية مخصصة",
     "SUPPORT_PRIORITY": "دعم ذو أولوية",
     "SECURITY_ADVANCED_ENCRYPTION": "تشفير متقدم",
-    "SECURITY_BIOMETRIC": "المصادقة البيومترية"
+    "SECURITY_BIOMETRIC": "المصادقة البيومترية",
+    "ADMIN_DASHBOARD": "لوحة الإدارة",
+    "ADMIN_USERS": "إدارة المستخدمين",
+    "ADMIN_CATEGORIES": "إدارة جميع الأقسام",
+    "ADMIN_EXPENSES": "إدارة جميع المصروفات",
+    "ADMIN_SYNC": "إدارة المزامنة",
+    "ADMIN_HEALTH": "صحة النظام",
+    "ADMIN_PLANS": "إدارة الخطط"
+  },
+  "PERMISSION_GROUPS": {
+    "CATEGORIES": "الفئات",
+    "EXPENSES": "المصروفات",
+    "REPORTS": "التقارير",
+    "BACKUP": "النسخ الاحتياطي والمزامنة",
+    "PROFILE": "الملف الشخصي",
+    "SUPPORT": "الدعم",
+    "SECURITY": "الأمان",
+    "ADMIN": "الإدارة"
+  },
+  "PERMISSION_ERRORS": {
+    "ACCESS_DENIED": "الوصول مرفوض",
+    "PERMISSION_REQUIRED": "صلاحية مطلوبة",
+    "PLAN_REQUIRED": "ترقية مطلوبة",
+    "PLAN_EXPIRED": "انتهت صلاحية الاشتراك",
+    "UPGRADE_TO_UNLOCK": "قم بالترقية لفتح هذه الميزة",
+    "CONTACT_SUPPORT": "تواصل مع الدعم للحصول على الوصول",
+    "RENEW_SUBSCRIPTION": "يرجى تجديد اشتراكك",
+    "FEATURE_LOCKED": "هذه الميزة مقفلة",
+    "INSUFFICIENT_PERMISSIONS": "ليس لديك صلاحية لتنفيذ هذا الإجراء"
+  },
+  "ROLES": {
+    "USER": "مستخدم",
+    "MODERATOR": "مشرف",
+    "ADMIN": "مسؤول",
+    "SUPERADMIN": "مسؤول أعلى"
   }
 }

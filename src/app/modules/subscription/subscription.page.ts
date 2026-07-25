@@ -117,7 +117,7 @@ export class SubscriptionPage implements OnInit {
 
   async onUpgrade(plan: Plan) {
     // Don't allow downgrade to free
-    if (plan.slug === PlanSlug.Free) {
+    if (plan.slug === PlanSlug.FREE) {
       await this.toastService.show({
         message: 'Please contact support to downgrade your plan',
         color: 'warning',

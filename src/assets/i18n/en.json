@@ -726,6 +726,40 @@
     "PROFILE_AVATAR": "Custom avatar",
     "SUPPORT_PRIORITY": "Priority support",
     "SECURITY_ADVANCED_ENCRYPTION": "Advanced encryption",
-    "SECURITY_BIOMETRIC": "Biometric authentication"
+    "SECURITY_BIOMETRIC": "Biometric authentication",
+    "ADMIN_DASHBOARD": "Admin Dashboard",
+    "ADMIN_USERS": "Manage Users",
+    "ADMIN_CATEGORIES": "Manage All Categories",
+    "ADMIN_EXPENSES": "Manage All Expenses",
+    "ADMIN_SYNC": "Manage Sync",
+    "ADMIN_HEALTH": "System Health",
+    "ADMIN_PLANS": "Manage Plans"
+  },
+  "PERMISSION_GROUPS": {
+    "CATEGORIES": "Categories",
+    "EXPENSES": "Expenses",
+    "REPORTS": "Reports",
+    "BACKUP": "Backup & Sync",
+    "PROFILE": "Profile",
+    "SUPPORT": "Support",
+    "SECURITY": "Security",
+    "ADMIN": "Administration"
+  },
+  "PERMISSION_ERRORS": {
+    "ACCESS_DENIED": "Access Denied",
+    "PERMISSION_REQUIRED": "Permission Required",
+    "PLAN_REQUIRED": "Upgrade Required",
+    "PLAN_EXPIRED": "Subscription Expired",
+    "UPGRADE_TO_UNLOCK": "Upgrade to unlock this feature",
+    "CONTACT_SUPPORT": "Contact support for access",
+    "RENEW_SUBSCRIPTION": "Please renew your subscription",
+    "FEATURE_LOCKED": "This feature is locked",
+    "INSUFFICIENT_PERMISSIONS": "You don't have permission to perform this action"
+  },
+  "ROLES": {
+    "USER": "User",
+    "MODERATOR": "Moderator",
+    "ADMIN": "Admin",
+    "SUPERADMIN": "Super Admin"
   }
 }

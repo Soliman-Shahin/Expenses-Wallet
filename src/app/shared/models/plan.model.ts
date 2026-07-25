@@ -7,9 +7,10 @@
 // ==================== Enums ====================
 
 export enum PlanSlug {
-  Free = 'free',
-  Pro = 'pro',
-  Premium = 'premium',
+  FREE = 'free',
+  BASIC = 'basic',
+  PRO = 'pro',
+  ENTERPRISE = 'enterprise',
 }
 
 export enum Permission {
@@ -133,9 +134,10 @@ export interface UpgradePlanRequest {
 // ==================== Plan Weights (for comparison) ====================
 
 export const PLAN_WEIGHTS: Record<PlanSlug, number> = {
-  [PlanSlug.Free]: 0,
-  [PlanSlug.Pro]: 1,
-  [PlanSlug.Premium]: 2,
+  [PlanSlug.FREE]: 0,
+  [PlanSlug.BASIC]: 1,
+  [PlanSlug.PRO]: 2,
+  [PlanSlug.ENTERPRISE]: 3,
 };
 
 // ==================== Helper Functions ====================
@@ -155,9 +157,10 @@ export function isPlanSufficient(
  */
 export function getPlanDisplayName(slug: PlanSlug): string {
   const names: Record<PlanSlug, string> = {
-    [PlanSlug.Free]: 'Free',
-    [PlanSlug.Pro]: 'Pro',
-    [PlanSlug.Premium]: 'Premium',
+    [PlanSlug.FREE]: 'Free',
+    [PlanSlug.BASIC]: 'Basic',
+    [PlanSlug.PRO]: 'Pro',
+    [PlanSlug.ENTERPRISE]: 'Enterprise',
   };
   return names[slug] || slug;
 }
@@ -167,9 +170,23 @@ export function getPlanDisplayName(slug: PlanSlug): string {
  */
 export function getPlanColor(slug: PlanSlug): string {
   const colors: Record<PlanSlug, string> = {
-    [PlanSlug.Free]: 'medium',
-    [PlanSlug.Pro]: 'primary',
-    [PlanSlug.Premium]: 'tertiary',
+    [PlanSlug.FREE]: 'medium',
+    [PlanSlug.BASIC]: 'primary',
+    [PlanSlug.PRO]: 'secondary',
+    [PlanSlug.ENTERPRISE]: 'tertiary',
   };
   return colors[slug] || 'medium';
+}
+
+/**
+ * Returns the plan icon for UI display
+ */
+export function getPlanIcon(slug: PlanSlug): string {
+  const icons: Record<PlanSlug, string> = {
+    [PlanSlug.FREE]: 'gift-outline',
+    [PlanSlug.BASIC]: 'star-outline',
+    [PlanSlug.PRO]: 'rocket-outline',
+    [PlanSlug.ENTERPRISE]: 'business-outline',
+  };
+  return icons[slug] || 'pricetag-outline';
 }

@@ -4,6 +4,7 @@ import {
   importProvidersFrom,
   provideZoneChangeDetection,
   isDevMode,
+  APP_INITIALIZER,
 } from '@angular/core';
 import { initWebVitalsTracking } from './app/web-vitals';
 import { registerLocaleData } from '@angular/common';
@@ -24,6 +25,10 @@ import { authInterceptor } from './app/modules/auth/helper/authInterceptor';
 import { cacheInterceptor } from './app/core/interceptors/cache.interceptor';
 import { errorInterceptor } from './app/core/interceptors/error.interceptor';
 import { planLimitInterceptor } from './app/core/interceptors/plan-limit.interceptor';
+import { permissionErrorInterceptor } from './app/core/interceptors/permission-error.interceptor';
+
+// Services
+import { PermissionService } from './app/core/services/permission.service';
 
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
@@ -85,6 +90,7 @@ if (!(window as any).__appBootstrapped) {
           encryptionAdvancedInterceptor,
           authInterceptor,
           planLimitInterceptor,
+          permissionErrorInterceptor,
           cacheInterceptor,
           errorInterceptor,
         ])
@@ -92,6 +98,22 @@ if (!(window as any).__appBootstrapped) {
       {
         provide: ErrorHandler,
         useClass: GlobalErrorHandler,
+      },
+      {
+        provide: APP_INITIALIZER,
+        useFactory: (permissionService: PermissionService) => {
+          return () => {
+            // Load permissions on app initialization
+            // This ensures permissions are available before any route is activated
+            return permissionService.loadUserPermissions().catch((error) => {
+              console.warn('Failed to load permissions on init:', error);
+              // Don't block app initialization if permissions fail to load
+              return [];
+            });
+          };
+        },
+        deps: [PermissionService],
+        multi: true,
       },
       provideAnimations(),
       provideServiceWorker('ngsw-worker.js', {

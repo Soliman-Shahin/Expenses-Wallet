@@ -201,14 +201,16 @@ export class PlanService {
    * Checks if the user is on the Free plan
    */
   isFreePlan(): boolean {
-    return this.isOnPlan(PlanSlug.Free);
+    return this.isOnPlan(PlanSlug.FREE);
   }
 
   /**
-   * Checks if the user is on a paid plan (Pro or Premium)
+   * Checks if the user is on a paid plan (Basic, Pro or Enterprise)
    */
   isPaidPlan(): boolean {
-    return this.isOnPlan(PlanSlug.Pro) || this.isOnPlan(PlanSlug.Premium);
+    return this.isOnPlan(PlanSlug.BASIC) ||
+           this.isOnPlan(PlanSlug.PRO) ||
+           this.isOnPlan(PlanSlug.ENTERPRISE);
   }
 
   /**
