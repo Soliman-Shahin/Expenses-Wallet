@@ -45,8 +45,22 @@ export class AuthService {
 
   // Getter for current user state
   get isLoggedIn(): boolean {
-    // Token is stored securely via TokenService
-    return !!this.tokenService.getAccessToken();
+    // Check both token and user data to ensure complete authentication state
+    const hasToken = !!this.tokenService.getAccessToken();
+    const hasUser = !!this.user();
+    
+    // If we have a token but no user, try to restore user from storage
+    if (hasToken && !hasUser) {
+      const storedUser = this.tokenService.getUser();
+      if (storedUser) {
+        this.tokenService.setUser(storedUser);
+        return true;
+      }
+      // Token exists but no user data - invalid state
+      return false;
+    }
+    
+    return hasToken && hasUser;
   }
 
   // Alias for current user

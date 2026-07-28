@@ -21,8 +21,75 @@ export class TokenService {
     private storage: StorageService,
     private secure: SecureStorageService
   ) {
-    const user = this.getUser();
-    if (user) this.user.set(user);
+    // Migrate old tokens if they exist
+    this.migrateOldTokens();
+    // Initialize user signal from storage on app start
+    this.initializeUserFromStorage();
+  }
+
+  /**
+   * Migrate tokens from old storage format to new format
+   * Old format: 'ewallet_ewallet_secure_access-token'
+   * New format: 'ewallet_secure_access-token'
+   */
+  private migrateOldTokens(): void {
+    try {
+      const oldAccessTokenKey = 'ewallet_ewallet_secure_access-token';
+      const oldRefreshTokenKey = 'ewallet_ewallet_secure_refresh-token';
+      
+      const oldAccessToken = localStorage.getItem(oldAccessTokenKey);
+      const oldRefreshToken = localStorage.getItem(oldRefreshTokenKey);
+      
+      if (oldAccessToken) {
+        console.log('🔄 [TokenService] Migrating old access token...');
+        this.setAccessToken(JSON.parse(oldAccessToken));
+        localStorage.removeItem(oldAccessTokenKey);
+      }
+      
+      if (oldRefreshToken) {
+        console.log('🔄 [TokenService] Migrating old refresh token...');
+        this.setRefreshToken(JSON.parse(oldRefreshToken));
+        localStorage.removeItem(oldRefreshTokenKey);
+      }
+    } catch (error) {
+      console.warn('⚠️ [TokenService] Token migration failed:', error);
+    }
+  }
+
+  /**
+   * Initialize user signal from storage
+   * This ensures authentication state persists across page reloads
+   */
+  private initializeUserFromStorage(): void {
+    try {
+      const storedUser = this.getUser();
+      const accessToken = this.getAccessToken();
+      
+      console.log('🔍 [TokenService] Checking stored auth state:', {
+        hasUser: !!storedUser,
+        hasToken: !!accessToken,
+        tokenLength: accessToken?.length || 0
+      });
+      
+      // Only restore user if we have both user data and a valid token
+      if (storedUser && accessToken) {
+        // Check if token is expired
+        if (!this.isTokenExpired(accessToken)) {
+          this.user.set(storedUser);
+          console.log('✅ [TokenService] User state restored from storage');
+        } else {
+          // Token expired, clear invalid session
+          console.warn('⚠️ [TokenService] Token expired, clearing session');
+          this.removeSession();
+        }
+      } else {
+        console.warn('⚠️ [TokenService] No valid session found in storage');
+      }
+    } catch (error) {
+      console.error('❌ [TokenService] Failed to initialize user from storage:', error);
+      // Clear potentially corrupted data
+      this.removeSession();
+    }
   }
 
   // Use StorageService for all storage operations
@@ -116,11 +183,20 @@ export class TokenService {
   isTokenExpired(token: string | null): boolean {
     if (!token) return true;
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
+      const parts = token.split('.');
+      if (parts.length !== 3) return true; // Invalid JWT format
+      
+      const payload = JSON.parse(atob(parts[1]));
       const exp = payload.exp;
+      
+      // If no expiration, consider token valid (some tokens don't expire)
       if (!exp) return false;
-      return Date.now() / 1000 > exp;
+      
+      // Add 30 second buffer to account for clock skew
+      const currentTime = Math.floor(Date.now() / 1000);
+      return currentTime > (exp - 30);
     } catch (e) {
+      console.error('Error checking token expiration:', e);
       return true;
     }
   }

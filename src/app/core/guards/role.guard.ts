@@ -6,7 +6,7 @@
  */
 
 import { inject } from '@angular/core';
-import { CanActivateFn, Router, ActivatedRouteSnapshot } from '@angular/router';
+import { CanActivateFn, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { UserRole, hasRoleLevel, getRoleDisplayName } from '../models/role.model';
 import { ToastService } from '../../shared/services/toast.service';
 
@@ -24,7 +24,8 @@ interface AuthService {
  *   data: { requiredRole: UserRole.ADMIN }
  */
 export const roleGuard: CanActivateFn = async (
-  route: ActivatedRouteSnapshot
+  route: ActivatedRouteSnapshot,
+  state: RouterStateSnapshot
 ) => {
   const router = inject(Router);
   const toastService = inject(ToastService);
@@ -53,7 +54,9 @@ export const roleGuard: CanActivateFn = async (
       position: 'bottom',
     });
     
-    router.navigate(['/']);
+    router.navigate(['/'], {
+      queryParams: { returnUrl: state.url }
+    });
     return false;
     
     /* 
@@ -99,24 +102,24 @@ export const roleGuard: CanActivateFn = async (
  * Makes route configuration cleaner
  */
 export function createRoleGuard(role: UserRole): CanActivateFn {
-  return (route) => {
+  return (route, state) => {
     route.data = { ...route.data, requiredRole: role };
-    return roleGuard(route, {} as any);
+    return roleGuard(route, state);
   };
 }
 
 /**
  * Admin Guard - Shortcut for admin-only routes
  */
-export const adminGuard: CanActivateFn = (route) => {
+export const adminGuard: CanActivateFn = (route, state) => {
   route.data = { ...route.data, requiredRole: UserRole.ADMIN };
-  return roleGuard(route, {} as any);
+  return roleGuard(route, state);
 };
 
 /**
  * Super Admin Guard - Shortcut for super admin-only routes
  */
-export const superAdminGuard: CanActivateFn = (route) => {
+export const superAdminGuard: CanActivateFn = (route, state) => {
   route.data = { ...route.data, requiredRole: UserRole.SUPERADMIN };
-  return roleGuard(route, {} as any);
+  return roleGuard(route, state);
 };

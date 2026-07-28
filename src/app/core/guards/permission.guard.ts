@@ -1,9 +1,8 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, Router, ActivatedRouteSnapshot } from '@angular/router';
+import { CanActivateFn, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { PermissionService } from '../services/permission.service';
 import { Permission } from '../../shared/models/plan.model';
 import { ToastService } from '../../shared/services/toast.service';
-import { getPermissionErrorMessage } from '../constants/error-messages.constants';
 
 /**
  * Permission Guard (Functional Guard - Angular 15+)
@@ -21,7 +20,8 @@ import { getPermissionErrorMessage } from '../constants/error-messages.constants
  *   }
  */
 export const permissionGuard: CanActivateFn = async (
-  route: ActivatedRouteSnapshot
+  route: ActivatedRouteSnapshot,
+  state: RouterStateSnapshot
 ) => {
   const permissionService = inject(PermissionService);
   const router = inject(Router);
@@ -61,26 +61,17 @@ export const permissionGuard: CanActivateFn = async (
     }
 
     // Permission denied - show appropriate message
-    const permission = requiredPermission || requiredPermissions?.[0];
-    if (permission) {
-      const errorMsg = getPermissionErrorMessage(permission, 'en');
-      await toastService.show({
-        message: errorMsg.message,
-        color: 'warning',
-        duration: 3000,
-        position: 'bottom',
-      });
-    } else {
-      await toastService.show({
-        message: 'You do not have permission to access this feature.',
-        color: 'warning',
-        duration: 3000,
-        position: 'bottom',
-      });
-    }
+    await toastService.show({
+      message: 'You do not have permission to access this feature.',
+      color: 'warning',
+      duration: 3000,
+      position: 'bottom',
+    });
 
-    // Navigate to subscription/upgrade page
-    router.navigate(['/subscription']);
+    // Navigate to subscription/upgrade page with returnUrl
+    router.navigate(['/subscription'], {
+      queryParams: { returnUrl: state.url }
+    });
     return false;
   } catch (error) {
     console.error('Error in permissionGuard:', error);
@@ -99,8 +90,8 @@ export const permissionGuard: CanActivateFn = async (
  * Makes route configuration cleaner
  */
 export function createPermissionGuard(permission: Permission): CanActivateFn {
-  return (route) => {
+  return (route, state) => {
     route.data = { ...route.data, requiredPermission: permission };
-    return permissionGuard(route, {} as any);
+    return permissionGuard(route, state);
   };
 }

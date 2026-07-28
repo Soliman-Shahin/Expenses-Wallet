@@ -29,6 +29,7 @@ import { permissionErrorInterceptor } from './app/core/interceptors/permission-e
 
 // Services
 import { PermissionService } from './app/core/services/permission.service';
+import { TokenService } from './app/modules/auth/services/token.service';
 
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
@@ -101,8 +102,15 @@ if (!(window as any).__appBootstrapped) {
       },
       {
         provide: APP_INITIALIZER,
-        useFactory: (permissionService: PermissionService) => {
+        useFactory: (permissionService: PermissionService, tokenService: any) => {
           return () => {
+            // Only load permissions if user is authenticated
+            const hasToken = tokenService.getAccessToken();
+            if (!hasToken) {
+              console.log('⚠️ [APP_INITIALIZER] No token found, skipping permission load');
+              return Promise.resolve([]);
+            }
+            
             // Load permissions on app initialization
             // This ensures permissions are available before any route is activated
             return permissionService.loadUserPermissions().catch((error) => {
@@ -112,7 +120,7 @@ if (!(window as any).__appBootstrapped) {
             });
           };
         },
-        deps: [PermissionService],
+        deps: [PermissionService, TokenService],
         multi: true,
       },
       provideAnimations(),

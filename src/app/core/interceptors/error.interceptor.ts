@@ -10,13 +10,30 @@ import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { TokenService } from 'src/app/modules/auth/services/token.service';
+import { AuthService } from 'src/app/modules/auth/services/auth.service';
 
-async function handleUnauthorized(router: Router): Promise<void> {
-  localStorage.removeItem('accessToken');
-  localStorage.removeItem('refreshToken');
-  await router.navigate(['/login'], {
-    queryParams: { returnUrl: router.url },
-  });
+async function handleUnauthorized(
+  router: Router,
+  tokenService: TokenService,
+  authService: AuthService,
+  currentUrl?: string
+): Promise<void> {
+  // Clear session using TokenService to ensure proper cleanup
+  tokenService.removeSession();
+  
+  // Store the attempted URL for redirecting after login
+  const returnUrl = currentUrl || router.url;
+  if (returnUrl &&
+      returnUrl !== '/' &&
+      returnUrl !== '/home' &&
+      !returnUrl.includes('/auth/login') &&
+      !returnUrl.includes('/auth/signup')) {
+    authService.redirectUrl = returnUrl;
+  }
+  
+  // Navigate to login
+  await router.navigate(['/auth/login']);
 }
 
 function handleAccountLocked(error: HttpErrorResponse): string {
@@ -64,7 +81,9 @@ async function handleError(
   error: HttpErrorResponse,
   request: HttpRequest<unknown>,
   toastController: ToastController,
-  router: Router
+  router: Router,
+  tokenService: TokenService,
+  authService: AuthService
 ): Promise<void> {
   let errorMessage = 'An unexpected error occurred';
   let shouldShowToast = true;
@@ -78,7 +97,8 @@ async function handleError(
       break;
     case 401:
       errorMessage = 'Session expired. Please login again.';
-      await handleUnauthorized(router);
+      // Get current URL from router, not from request
+      await handleUnauthorized(router, tokenService, authService, router.url);
       break;
     case 403:
       errorMessage = error.error?.message || "You don't have permission to access this resource.";
@@ -133,10 +153,12 @@ export const errorInterceptor: HttpInterceptorFn = (
 ): Observable<HttpEvent<unknown>> => {
   const toastController = inject(ToastController);
   const router = inject(Router);
+  const tokenService = inject(TokenService);
+  const authService = inject(AuthService);
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      handleError(error, req, toastController, router);
+      handleError(error, req, toastController, router, tokenService, authService);
       return throwError(() => error);
     })
   );

@@ -6,66 +6,15 @@ import {
   HttpEvent,
   HttpErrorResponse,
 } from '@angular/common/http';
-import { Observable, throwError, BehaviorSubject } from 'rxjs';
-import { catchError, filter, switchMap, take } from 'rxjs/operators';
-import { AuthService } from '../services/auth.service';
-
-let refreshInProgress = false;
-const refreshTokenSubject = new BehaviorSubject<string | null>(null);
-
-function handle401Error(
-  request: HttpRequest<any>,
-  next: HttpHandlerFn,
-  authService: AuthService
-): Observable<HttpEvent<any>> {
-  if (!refreshInProgress) {
-    refreshInProgress = true;
-    refreshTokenSubject.next(null);
-    return authService.refreshAccessToken().pipe(
-      switchMap((tokens: any) => {
-        refreshInProgress = false;
-        if (tokens && tokens.accessToken && tokens.refreshToken) {
-          refreshTokenSubject.next(tokens.accessToken);
-          authService['storageService'].set('access-token', tokens.accessToken);
-          authService['storageService'].set('refresh-token', tokens.refreshToken);
-          
-          const headers: Record<string, string> = {};
-          if (tokens.accessToken) headers['Authorization'] = `Bearer ${tokens.accessToken}`;
-          if (tokens.refreshToken) headers['refresh-token'] = tokens.refreshToken;
-          
-          const retryReq = request.clone({ setHeaders: headers });
-          return next(retryReq);
-        } else {
-          authService.logout();
-          return throwError(() => new Error('Invalid token refresh response'));
-        }
-      }),
-      catchError((err) => {
-        refreshInProgress = false;
-        return throwError(() => err);
-      })
-    );
-  } else {
-    return refreshTokenSubject.pipe(
-      filter((token) => token != null),
-      take(1),
-      switchMap((token) => {
-        const headers: Record<string, string> = {};
-        if (token) headers['Authorization'] = `Bearer ${token}`;
-        const refreshToken = authService.getRefreshToken();
-        if (refreshToken) headers['refresh-token'] = refreshToken;
-        const retryReq = request.clone({ setHeaders: headers });
-        return next(retryReq);
-      })
-    );
-  }
-}
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { TokenService } from '../services/token.service';
 
 export const authInterceptor: HttpInterceptorFn = (
   request: HttpRequest<any>,
   next: HttpHandlerFn
 ): Observable<HttpEvent<any>> => {
-  const authService = inject(AuthService);
+  const tokenService = inject(TokenService);
 
   const url = request.url || '';
   const isAsset =
@@ -80,13 +29,21 @@ export const authInterceptor: HttpInterceptorFn = (
     url.includes('/login') ||
     url.includes('/signup') ||
     url.includes('/refresh-token') ||
+    url.includes('/google') ||
+    url.includes('/health') ||
     isAsset
   ) {
     return next(request);
   }
 
-  const accessToken = authService['storageService'].get('access-token');
-  const refreshToken = authService.getRefreshToken();
+  const accessToken = tokenService.getAccessToken();
+  const refreshToken = tokenService.getRefreshToken();
+  
+  // Only add headers if we have tokens
+  if (!accessToken) {
+    return next(request);
+  }
+  
   const headers: Record<string, string> = {};
   if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
   if (refreshToken) headers['refresh-token'] = refreshToken;
@@ -95,7 +52,8 @@ export const authInterceptor: HttpInterceptorFn = (
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
-      const hasRefresh = !!authService.getRefreshToken();
+      // Don't try to handle 401 here - let errorInterceptor handle it
+      // This prevents circular dependency issues
       if (
         error.status === 401 &&
         hasRefresh &&

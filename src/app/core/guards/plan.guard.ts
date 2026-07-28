@@ -1,5 +1,5 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, Router, ActivatedRouteSnapshot } from '@angular/router';
+import { CanActivateFn, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { PlanService } from '../services/plan.service';
 import { PlanSlug, PLAN_WEIGHTS, isPlanSufficient, getPlanDisplayName } from '../../shared/models/plan.model';
 import { ToastService } from '../../shared/services/toast.service';
@@ -15,7 +15,8 @@ import { ToastService } from '../../shared/services/toast.service';
  *   data: { requiredPlan: PlanSlug.PRO }
  */
 export const planGuard: CanActivateFn = async (
-  route: ActivatedRouteSnapshot
+  route: ActivatedRouteSnapshot,
+  state: RouterStateSnapshot
 ) => {
   const planService = inject(PlanService);
   const router = inject(Router);
@@ -44,7 +45,11 @@ export const planGuard: CanActivateFn = async (
           position: 'bottom',
         });
         router.navigate(['/subscription'], {
-          queryParams: { reason: 'expired', plan: userPlanSlug }
+          queryParams: {
+            reason: 'expired',
+            plan: userPlanSlug,
+            returnUrl: state.url
+          }
         });
         return false;
       }
@@ -63,7 +68,11 @@ export const planGuard: CanActivateFn = async (
     });
     
     router.navigate(['/subscription'], {
-      queryParams: { required: requiredPlan, current: userPlanSlug }
+      queryParams: {
+        required: requiredPlan,
+        current: userPlanSlug,
+        returnUrl: state.url
+      }
     });
     return false;
   } catch (error) {
@@ -83,8 +92,8 @@ export const planGuard: CanActivateFn = async (
  * Makes route configuration cleaner
  */
 export function createPlanGuard(plan: PlanSlug): CanActivateFn {
-  return (route) => {
+  return (route, state) => {
     route.data = { ...route.data, requiredPlan: plan };
-    return planGuard(route, {} as any);
+    return planGuard(route, state);
   };
 }
