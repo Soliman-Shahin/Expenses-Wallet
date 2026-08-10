@@ -108,7 +108,7 @@ export interface UsageStats {
 export interface Subscription {
   _id: string;
   user: string;
-  plan: Plan | string;
+  plan: Plan;
   status: 'active' | 'expired' | 'cancelled' | 'trial';
   startDate: Date;
   endDate: Date | null;

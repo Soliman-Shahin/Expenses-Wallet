@@ -186,9 +186,9 @@
               ></ion-icon>
               Google Drive Backups
             </h3>
-            @if (isLoadingDriveBackups) {
-              <ion-spinner name="crescent"></ion-spinner>
-            }
+            <ion-button fill="clear" (click)="loadGoogleDriveBackups()" [disabled]="isLoadingDriveBackups">
+              <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
+            </ion-button>
             @if (!isLoadingDriveBackups && googleDriveBackups.length > 0) {
               <span
                 class="badge"

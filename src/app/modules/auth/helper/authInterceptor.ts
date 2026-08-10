@@ -51,17 +51,9 @@ export const authInterceptor: HttpInterceptorFn = (
   const authReq = request.clone({ setHeaders: headers });
 
   return next(authReq).pipe(
-    catchError((error: HttpErrorResponse) => {
-      // Don't try to handle 401 here - let errorInterceptor handle it
-      // This prevents circular dependency issues
-      if (
-        error.status === 401 &&
-        hasRefresh &&
-        !authReq.url.endsWith('/refresh-token')
-      ) {
-        return handle401Error(authReq, next, authService);
-      }
-      return throwError(() => error);
-    })
-  );
+  catchError((error: HttpErrorResponse) => {
+    // Let the error interceptor handle authentication errors
+    return throwError(() => error);
+  })
+);
 };

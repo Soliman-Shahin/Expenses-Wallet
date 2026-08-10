@@ -292,7 +292,8 @@
     "CACHE_CLEARED": "Cache cleared successfully",
     "VERSION": "Version",
     "BACKUP": "Backup & Restore",
-    "MANAGE_PROFILE": "Profile Management"
+    "MANAGE_PROFILE": "Profile Management",
+    "SUBSCRIPTION": "Subscription"
   },
   "BUDGET": {
     "TITLE": "Budget"
@@ -705,7 +706,9 @@
     "UPGRADE_BENEFITS": "Upgrade Benefits",
     "COMPARE_PLANS": "Compare Plans",
     "FAQ": "Frequently Asked Questions",
-    "CONTACT_SUPPORT": "Contact Support"
+    "CONTACT_SUPPORT": "Contact Support",
+    "UNKNOWN_PLAN": "Unknown Plan",
+    "ONGOING": "Ongoing"
   },
   "PLAN_FEATURES": {
     "CATEGORY_CREATE": "Create categories",

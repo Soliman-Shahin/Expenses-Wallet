@@ -386,9 +386,9 @@ export class HomePageComponent
    */
   override ngOnInit(): void {
     super.ngOnInit();
-    // Subscribe to vm$ for latest values (for injectors)
     this.vm$.pipe(takeUntil(this.destroy$)).subscribe((vm) => {
       this.latestVm = vm;
+      this.setLoading(vm.loading);
       this.createInjectors(vm);
       this.cdr.markForCheck();
     });

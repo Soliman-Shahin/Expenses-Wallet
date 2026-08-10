@@ -173,17 +173,20 @@ export class BackupRestoreComponent extends BaseComponent implements OnInit {
   loadGoogleDriveBackups() {
     if (!this.isSignedInToGoogleDrive) return;
     this.isLoadingDriveBackups = true;
+    this.setLoading(true);
     this.cdr.markForCheck();
     
     this.backupService.listGoogleDriveBackups().subscribe({
       next: (backups) => {
         this.googleDriveBackups = backups;
         this.isLoadingDriveBackups = false;
+        this.setLoading(false);
         this.cdr.markForCheck();
       },
       error: (error) => {
         console.error('Failed to load Google Drive backups:', error);
         this.isLoadingDriveBackups = false;
+        this.setLoading(false);
         this.cdr.markForCheck();
       }
     });

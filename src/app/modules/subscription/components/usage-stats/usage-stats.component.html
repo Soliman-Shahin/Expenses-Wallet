@@ -187,10 +187,19 @@
             [color]="subscription.status === 'active' ? 'success' : 'medium'"
           ></ion-icon>
           <ion-label>
-            <h3>{{ subscription.plan }}</h3>
+            <h3>
+              {{
+                subscription.plan.name ||
+                  ("SUBSCRIPTION.UNKNOWN_PLAN" | translate)
+              }}
+            </h3>
             <p>
               {{ formatDate(subscription.startDate) }} -
-              {{ formatDate(subscription.endDate) }}
+              {{
+                subscription.endDate
+                  ? formatDate(subscription.endDate)
+                  : ("SUBSCRIPTION.ONGOING" | translate)
+              }}
             </p>
           </ion-label>
           <ion-badge

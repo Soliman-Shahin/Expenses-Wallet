@@ -87,14 +87,8 @@
             expand="block"
             [disabled]="loginForm.invalid || vm.isLoading"
             class="auth-submit-button"
-            [class.loading]="vm.isLoading"
             >
-            @if (vm.isLoading) {
-              <ion-spinner name="crescent" class="ion-margin-end"></ion-spinner>
-            }
-            @if (!vm.isLoading) {
-              <span>{{ "AUTH.SIGN_IN" | translate }}</span>
-            }
+            <span>{{ "AUTH.SIGN_IN" | translate }}</span>
           </ion-button>
         </form>
         <div class="signup-link-container ion-text-center">

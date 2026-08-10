@@ -152,12 +152,7 @@
             [disabled]="signupForm.invalid || vm.isLoading"
             class="auth-submit-button"
             >
-            @if (!vm.isLoading) {
-              <span>{{ "AUTH.SIGN_UP" | translate }}</span>
-            }
-            @if (vm.isLoading) {
-              <ion-spinner name="crescent"></ion-spinner>
-            }
+            <span>{{ "AUTH.SIGN_UP" | translate }}</span>
           </ion-button>
           <!-- Login Link -->
           <div class="login-link-container ion-text-center">

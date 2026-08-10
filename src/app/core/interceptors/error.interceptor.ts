@@ -102,6 +102,7 @@ async function handleError(
       break;
     case 403:
       errorMessage = error.error?.message || "You don't have permission to access this resource.";
+      await handleUnauthorized(router, tokenService, authService, router.url);
       break;
     case 404:
       errorMessage = error.error?.message || 'The requested resource was not found.';

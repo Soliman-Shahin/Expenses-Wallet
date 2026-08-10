@@ -1,9 +1,10 @@
 ion-card {
   position: relative;
-  margin: 16px;
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
+  margin: 20px 16px 16px;
+  overflow: visible;
 
   &:hover {
     transform: translateY(-4px);
@@ -186,4 +187,14 @@ ion-card-content {
   ion-card {
     margin: 24px;
   }
+}
+
+ion-card-subtitle {
+  color: var(--ion-color-medium);
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+.limits-info h4 {
+  opacity: 1;
 }

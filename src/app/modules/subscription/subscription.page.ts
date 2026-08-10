@@ -40,6 +40,7 @@ export class SubscriptionPage implements OnInit {
   currentPlan: MyPlanResponse | null = null;
   selectedSegment: 'plans' | 'usage' = 'plans';
   isLoading = false;
+  from?: string;
 
   // Query params (for redirects from guards/interceptors)
   reason?: string;
@@ -52,6 +53,7 @@ export class SubscriptionPage implements OnInit {
       this.reason = params['reason'];
       this.limitType = params['limitType'];
       this.permission = params['permission'];
+      this.from = params['from'];
     });
 
     await this.loadData();
@@ -178,6 +180,10 @@ export class SubscriptionPage implements OnInit {
   }
 
   goBack() {
-    this.router.navigate(['/home']);
+    if (this.from === 'settings') {
+      this.router.navigate(['/settings']);
+    } else {
+      this.router.navigate(['/home']);
+    }
   }
 }

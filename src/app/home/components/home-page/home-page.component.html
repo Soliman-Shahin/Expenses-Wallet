@@ -6,20 +6,7 @@
   [fullscreen]="true"
   >
   @if (vm$ | async; as vm) {
-    <!-- ══ Loading Skeleton ══ -->
-    @if (vm.loading) {
-      <div class="skeleton-page">
-        <div class="sk-header"></div>
-        <div class="sk-card"></div>
-        <div class="sk-stats">
-          <div class="sk-stat"></div>
-          <div class="sk-stat"></div>
-          <div class="sk-stat"></div>
-        </div>
-        <div class="sk-block"></div>
-        <div class="sk-block sk-block--short"></div>
-      </div>
-    } @else {
+    @if (!vm.loading) {
       <!-- Error State -->
       @if (state.error()) {
         <div class="error-state ion-text-center">
@@ -228,12 +215,6 @@
                         </div>
                       </div>
                     }
-                  </div>
-                } @else {
-                  <div class="chart-skeleton">
-                    <app-skeleton-block variant="chart"></app-skeleton-block>
-                    <app-skeleton-block variant="chart"></app-skeleton-block>
-                    <app-skeleton-block variant="chart"></app-skeleton-block>
                   </div>
                 }
               </section>

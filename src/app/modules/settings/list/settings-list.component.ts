@@ -8,11 +8,11 @@ import { User } from 'src/app/modules/auth/models';
 import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
-    selector: 'app-settings-list',
-    templateUrl: './settings-list.component.html',
-    styleUrls: ['./settings-list.component.scss'],
-    standalone: true,
-    imports: [IonicModule, TranslateModule],
+  selector: 'app-settings-list',
+  templateUrl: './settings-list.component.html',
+  styleUrls: ['./settings-list.component.scss'],
+  standalone: true,
+  imports: [IonicModule, TranslateModule],
 })
 export class SettingsListComponent extends BaseComponent implements OnInit {
   biometricAvailable = false;
@@ -168,6 +168,12 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
 
   navigateToProfile() {
     this.router.navigate(['/profile']);
+  }
+
+  navigateToSubscription() {
+    const params: any = {};
+    params.from = 'settings';
+    this.router.navigate(['/subscription'], { queryParams: params });
   }
 
   async clearCache() {

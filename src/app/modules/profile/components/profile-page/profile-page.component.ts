@@ -97,10 +97,14 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
 
     // Fetch latest profile from backend
     this.isLoadingProfile$.next(true);
+    this.setLoading(true);
     this.profileService
       .fetchProfile()
       .pipe(
-        finalize(() => this.isLoadingProfile$.next(false)),
+        finalize(() => {
+          this.isLoadingProfile$.next(false);
+          this.setLoading(false);
+        }),
         takeUntil(this.destroy$),
         catchError((err) => {
           this.errorMessage$.next(err);
@@ -312,11 +316,15 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
       return;
     }
     this.isLoadingPersonal$.next(true);
+    this.setLoading(true);
     this.errorMessage$.next(null);
     this.profileService
       .updateProfile({ ...(this.personalForm.value as Partial<UserProfile>) })
       .pipe(
-        finalize(() => this.isLoadingPersonal$.next(false)),
+        finalize(() => {
+          this.isLoadingPersonal$.next(false);
+          this.setLoading(false);
+        }),
         takeUntil(this.destroy$),
         tap((updated) => {
           if (updated) {
@@ -351,6 +359,7 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
       return;
     }
     this.isLoadingSalary$.next(true);
+    this.setLoading(true);
     this.errorMessage$.next(null);
     const detailsRaw = this.details.getRawValue() || [];
     const salaryPayload = detailsRaw.map((d: any) => ({
@@ -368,7 +377,10 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
     this.profileService
       .updateProfile(payload)
       .pipe(
-        finalize(() => this.isLoadingSalary$.next(false)),
+        finalize(() => {
+          this.isLoadingSalary$.next(false);
+          this.setLoading(false);
+        }),
         takeUntil(this.destroy$),
         tap((updated) => {
           if (updated) {
@@ -421,11 +433,15 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
     }
 
     this.isLoadingAvatar$.next(true);
+    this.setLoading(true);
     this.errorMessage$.next(null);
     this.profileService
       .uploadAvatar(file)
       .pipe(
-        finalize(() => this.isLoadingAvatar$.next(false)),
+        finalize(() => {
+          this.isLoadingAvatar$.next(false);
+          this.setLoading(false);
+        }),
         takeUntil(this.destroy$),
         tap(async (res) => {
           if (res) {

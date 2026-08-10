@@ -180,6 +180,20 @@
       </ion-item>
     </ion-list>
 
+    <!-- Subscription Section -->
+    <div class="section-label">{{ "SETTINGS.SUBSCRIPTION" | translate }}</div>
+    <ion-list inset="true" class="premium-list">
+      <!-- Subscription Button -->
+      <ion-item button detail="true" (click)="navigateToSubscription()" lines="none">
+        <div slot="start" class="icon-wrapper color-purple">
+          <ion-icon name="card"></ion-icon>
+        </div>
+        <ion-label>
+          <h3>{{ "SETTINGS.SUBSCRIPTION" | translate }}</h3>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+
     <!-- App Info Section -->
     <div class="app-info-footer">
       <div class="app-logo">

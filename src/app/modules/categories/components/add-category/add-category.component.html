@@ -150,15 +150,13 @@
                 (editMode ? 'COMMON.UPDATE' : 'COMMON.CREATE') | translate
               "
             >
-              @if (vm.isLoading) {
-              <ion-spinner name="crescent"></ion-spinner>
-              } @if (formSubmitted && !vm.isLoading) {
+              @if (formSubmitted && !vm.isLoading) {
               <ion-icon
                 name="checkmark-done-outline"
                 class="success-icon animated-icon"
               >
               </ion-icon>
-              } @if (!vm.isLoading && !(formSubmitted && !vm.isLoading)) {
+              } @if (!(formSubmitted && !vm.isLoading)) {
               <span class="button-text">
                 {{ (editMode ? "COMMON.UPDATE" : "COMMON.CREATE") | translate }}
               </span>

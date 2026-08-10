@@ -21,9 +21,6 @@
           <div class="avatar-image"
             [style.background-image]="vm.profile?.avatarUrl ? 'url(' + vm.profile?.avatarUrl + ')' : ''"
             [attr.aria-label]="'PROFILE.AVATAR' | translate">
-            @if (vm.isLoadingAvatar) {
-              <ion-spinner color="light"></ion-spinner>
-            }
             @if (!vm.profile?.avatarUrl && !vm.isLoadingAvatar) {
               <ion-icon name="person"></ion-icon>
             }
@@ -122,12 +119,7 @@
               ></app-ui-input>
               <div class="form-actions">
                 <ion-button type="submit" expand="block" class="btn-gradient" [disabled]="personalForm.invalid || vm.isLoadingPersonal">
-                  @if (vm.isLoadingPersonal) {
-                    <ion-spinner name="crescent"></ion-spinner>
-                  }
-                  @if (!vm.isLoadingPersonal) {
-                    <span>{{ "PROFILE.PERSONAL_INFO.SAVE" | translate }}</span>
-                  }
+                  <span>{{ "PROFILE.PERSONAL_INFO.SAVE" | translate }}</span>
                 </ion-button>
               </div>
             </form>
@@ -215,12 +207,7 @@
               </div>
               <div class="form-actions">
                 <ion-button type="submit" expand="block" class="btn-gradient" [disabled]="salaryForm.invalid || vm.isLoadingSalary">
-                  @if (vm.isLoadingSalary) {
-                    <ion-spinner name="crescent"></ion-spinner>
-                  }
-                  @if (!vm.isLoadingSalary) {
-                    <span>{{ "PROFILE.SALARY.SAVE" | translate }}</span>
-                  }
+                  <span>{{ "PROFILE.SALARY.SAVE" | translate }}</span>
                 </ion-button>
               </div>
             </form>

@@ -120,14 +120,9 @@
           class="submit-btn"
           expand="block"
           >
-          @if ((vm$ | async)?.isLoading) {
-            <ion-spinner name="crescent"></ion-spinner>
-          }
-          @if (!(vm$ | async)?.isLoading) {
-            <span>
-              {{ (isEditMode ? 'COMMON.SAVE' : 'COMMON.CREATE') | translate }}
-            </span>
-          }
+          <span>
+            {{ (isEditMode ? 'COMMON.SAVE' : 'COMMON.CREATE') | translate }}
+          </span>
         </ion-button>
       </div>
     </div>
