@@ -1,5 +1,5 @@
-@import "src/theme/variables";
-@import "src/theme/_utilities.scss";
+@use "src/theme/variables";
+@use "src/theme/utilities" as *;
 
 ion-app {
   display: flex;
@@ -146,63 +146,119 @@ ion-router-outlet {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.24);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  z-index: 2000;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 9999;
   pointer-events: auto;
-  animation: loaderOverlayFadeIn 220ms ease-out;
+  animation: loaderOverlayFadeIn 300ms ease-out;
 }
 
 .custom-loader {
-  min-width: 180px;
-  max-width: 260px;
-  padding: 16px 20px;
-  border-radius: 18px;
-  background: rgba(15, 23, 42, 0.9);
-  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.45);
-  border: 1px solid rgba(148, 163, 184, 0.45);
+  min-width: 200px;
+  padding: 32px 24px;
+  border-radius: 24px;
+  background: rgba(30, 41, 59, 0.85);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  color: #e5e7eb;
+  gap: 20px;
+  color: #f8fafc;
   text-align: center;
-  animation: loaderScaleIn 220ms cubic-bezier(0.4, 0, 0.2, 1);
+  animation: loaderScaleIn 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
 
-  ion-spinner {
-    --color: var(--ion-color-primary);
-    transform-origin: center;
+.logo-spinner-container {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loader-logo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  z-index: 2;
+  animation: logoPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.5));
+}
+
+.spinner-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: var(--ion-color-primary, #22d3ee);
+  border-right-color: var(--ion-color-tertiary, #818cf8);
+  animation: spinnerRotate 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  z-index: 1;
+
+  &::before, &::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    border: 3px solid transparent;
   }
+  
+  &::before {
+    inset: -9px;
+    border-top-color: var(--ion-color-secondary, #38bdf8);
+    border-left-color: rgba(56, 189, 248, 0.3);
+    animation: spinnerRotate 2s cubic-bezier(0.5, 0, 0.5, 1) infinite reverse;
+  }
+  
+  &::after {
+    inset: 3px;
+    border-bottom-color: var(--ion-color-success, #34d399);
+    animation: spinnerRotate 1.5s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  }
+}
+
+.loader-message {
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  color: #e2e8f0;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  animation: textPulse 2s ease-in-out infinite;
+}
+
+@keyframes spinnerRotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes logoPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.9); opacity: 0.8; }
+}
+
+@keyframes textPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
 }
 
 @keyframes loaderOverlayFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; backdrop-filter: blur(0px); }
+  to { opacity: 1; backdrop-filter: blur(8px); }
 }
 
 @keyframes loaderScaleIn {
-  from {
-    opacity: 0;
-    transform: translateY(16px) scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity: 0; transform: translateY(20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .custom-loader-overlay {
+  .custom-loader-overlay, .custom-loader, .spinner-ring, .loader-logo, .loader-message {
     animation: none !important;
   }
-
-  .custom-loader {
-    animation: none !important;
+  
+  .spinner-ring {
+    border-color: var(--ion-color-primary, #22d3ee);
   }
 }

@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, fromEvent, merge, of } from 'rxjs';
-import { map, debounceTime } from 'rxjs/operators';
+import { Injectable, inject } from '@angular/core';
+import { Observable, BehaviorSubject, fromEvent, merge, of } from 'rxjs';
+import { map, debounceTime, timeout } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 
@@ -23,16 +23,21 @@ export interface ConnectionStatus {
   providedIn: 'root',
 })
 export class ConnectionService {
-  private connectionStatus$ = new BehaviorSubject<ConnectionStatus>({
+  private connectionStatusSubject = new BehaviorSubject<ConnectionStatus>({
     online: navigator.onLine,
     backendReachable: false,
     lastChecked: new Date(),
   });
 
+  private connectionStatus$ = this.connectionStatusSubject.asObservable();
+
   private healthCheckInterval: any;
+  private recoveryInterval: any;
   private readonly HEALTH_CHECK_INTERVAL = 60000; // 1 minute
 
-  constructor(private http: HttpClient) {
+  private http = inject(HttpClient);
+
+  constructor() {
     this.initializeConnectionMonitoring();
     this.startHealthCheck();
   }
@@ -41,35 +46,67 @@ export class ConnectionService {
    * Get connection status as observable
    */
   getConnectionStatus(): Observable<ConnectionStatus> {
-    return this.connectionStatus$.asObservable();
+    return this.connectionStatus$;
   }
 
   /**
    * Get current connection status
    */
   getCurrentStatus(): ConnectionStatus {
-    return this.connectionStatus$.value;
+    return this.connectionStatusSubject.value;
   }
 
   /**
    * Check if online
    */
   isOnline(): boolean {
-    return this.connectionStatus$.value.online;
+    return this.connectionStatusSubject.value.online;
   }
 
   /**
    * Check if backend is reachable
    */
   isBackendReachable(): boolean {
-    return this.connectionStatus$.value.backendReachable;
+    return this.connectionStatusSubject.value.backendReachable;
+  }
+
+  /**
+   * Set backend reachable status directly
+   */
+  setBackendReachable(reachable: boolean): void {
+    const current = this.connectionStatusSubject.value;
+    if (current.backendReachable !== reachable) {
+      this.updateConnectionStatus({ 
+        backendReachable: reachable,
+        ...(reachable ? { online: true } : {})
+      });
+    }
   }
 
   /**
    * Initialize connection monitoring
    */
-  private initializeConnectionMonitoring(): void {
-    // Monitor browser online/offline events
+  private async initializeConnectionMonitoring(): Promise<void> {
+    const { Network } = await import('@capacitor/network');
+    
+    // Initial status
+    try {
+      const status = await Network.getStatus();
+      this.updateConnectionStatus({ online: status.connected });
+    } catch (e) {
+      console.warn('Network getStatus failed, falling back to navigator', e);
+    }
+
+    Network.addListener('networkStatusChange', status => {
+      this.updateConnectionStatus({ online: status.connected });
+      if (status.connected) {
+        this.checkBackendHealth();
+      } else {
+        this.updateConnectionStatus({ backendReachable: false });
+      }
+    });
+
+    // Monitor browser online/offline events (Fallback for web)
     merge(
       of(navigator.onLine),
       fromEvent(window, 'online').pipe(map(() => true)),
@@ -95,11 +132,9 @@ export class ConnectionService {
     // Initial check
     this.checkBackendHealth();
 
-    // Periodic checks
+    // Periodic checks: Try regardless of isOnline() to recover from stuck offline states
     this.healthCheckInterval = setInterval(() => {
-      if (this.isOnline()) {
-        this.checkBackendHealth();
-      }
+      this.checkBackendHealth();
     }, this.HEALTH_CHECK_INTERVAL);
   }
 
@@ -108,21 +143,25 @@ export class ConnectionService {
    */
   async checkBackendHealth(): Promise<boolean> {
     try {
-      const healthUrl = `${environment.apiUrl.replace('/v1', '')}/health`;
+      const healthUrl = `${environment.apiUrl.replace('/v1', '')}/health/detailed?t=${new Date().getTime()}`;
 
       const response = await this.http
         .get<any>(healthUrl, {
           observe: 'response',
           // Don't retry health checks
-          headers: { 'X-Skip-Retry': 'true' },
+          headers: { 'X-Skip-Retry': 'true', 'X-Silent-Error': 'true' },
         })
+        .pipe(timeout(3000))
         .toPromise();
 
       const isHealthy =
-        response?.status === 200 && response?.body?.status === 'ok';
+        response?.status === 200 && 
+        (response?.body?.status === 'healthy' || response?.body?.status === 'degraded');
 
       this.updateConnectionStatus({
         backendReachable: isHealthy,
+        // If the backend is reachable, we must be online, overriding any buggy OS states
+        ...(isHealthy ? { online: true } : {})
       });
 
       return isHealthy;
@@ -139,11 +178,39 @@ export class ConnectionService {
    * Update connection status
    */
   private updateConnectionStatus(updates: Partial<ConnectionStatus>): void {
-    this.connectionStatus$.next({
-      ...this.connectionStatus$.value,
+    const current = this.connectionStatusSubject.value;
+    const next = {
+      ...current,
       ...updates,
       lastChecked: new Date(),
-    });
+    };
+
+    this.connectionStatusSubject.next(next);
+
+    // Manage recovery polling
+    if (next.online && !next.backendReachable) {
+      this.startRecoveryPolling();
+    } else {
+      this.stopRecoveryPolling();
+    }
+  }
+
+  private startRecoveryPolling(): void {
+    if (this.recoveryInterval) return;
+    this.recoveryInterval = setInterval(async () => {
+      console.log('🔄 [ConnectionService] Recovery polling...');
+      const isHealthy = await this.checkBackendHealth();
+      if (isHealthy) {
+        this.stopRecoveryPolling();
+      }
+    }, 5000); // Poll every 5 seconds until recovered
+  }
+
+  private stopRecoveryPolling(): void {
+    if (this.recoveryInterval) {
+      clearInterval(this.recoveryInterval);
+      this.recoveryInterval = null;
+    }
   }
 
   /**
@@ -153,5 +220,6 @@ export class ConnectionService {
     if (this.healthCheckInterval) {
       clearInterval(this.healthCheckInterval);
     }
+    this.stopRecoveryPolling();
   }
 }

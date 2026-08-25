@@ -1,66 +1,72 @@
-<div
-  *ngIf="currentUser()"
-  class="user-info-container flex items-center gap-3 cursor-pointer transition-all hover:scale-105"
-  (click)="onUserClick()"
-  role="button"
-  tabindex="0"
->
-  <!-- Avatar -->
+@if (currentUser()) {
   <div
-    class="avatar bounce-in"
-    [class]="avatarSizeClass()"
-    [class.avatar-bordered]="hasPhoto()"
-    (click)="onAvatarClick($event)"
-  >
-    <img
-      *ngIf="hasPhoto()"
-      [src]="currentUser()!.photoURL"
-      [alt]="currentUser()!.displayName"
-      class="object-cover"
-    />
-    <span *ngIf="!hasPhoto()" class="text-gradient">
-      {{ userInitials() }}
-    </span>
-  </div>
-
-  <!-- User Details -->
-  <div class="user-details flex-1 fade-in-left">
-    <div class="flex items-center gap-2">
-      <h3 class="user-name text-lg font-semibold">
-        {{ currentUser()!.displayName }}
-      </h3>
-
-      <!-- Verification Badge -->
-      <ion-icon
-        *ngIf="isVerified()"
-        name="checkmark-circle"
-        color="success"
-        class="text-sm glow-pulse"
-        [attr.aria-label]="'COMMON.VERIFIED' | translate"
-      ></ion-icon>
+    class="user-info-container flex items-center gap-3 cursor-pointer transition-all hover:scale-105"
+    (click)="onUserClick()"
+    role="button"
+    tabindex="0"
+    >
+    <!-- Avatar -->
+    <div
+      class="avatar bounce-in"
+      [class]="avatarSizeClass()"
+      [class.avatar-bordered]="hasPhoto()"
+      (click)="onAvatarClick($event)"
+      >
+      @if (hasPhoto()) {
+        <img
+          [src]="currentUser()!.photoURL"
+          [alt]="currentUser()!.displayName"
+          class="object-cover"
+          />
+      }
+      @if (!hasPhoto()) {
+        <span class="text-gradient">
+          {{ userInitials() }}
+        </span>
+      }
     </div>
-
-    <!-- Email -->
-    <p *ngIf="showEmail" class="user-email text-sm text-muted-color">
-      {{ currentUser()!.email }}
-    </p>
+    <!-- User Details -->
+    <div class="user-details flex-1 fade-in-left">
+      <div class="flex items-center gap-2">
+        <h3 class="user-name text-lg font-semibold">
+          {{ currentUser()!.displayName }}
+        </h3>
+        <!-- Verification Badge -->
+        @if (isVerified()) {
+          <ion-icon
+            name="checkmark-circle"
+            color="success"
+            class="text-sm glow-pulse"
+            [attr.aria-label]="'COMMON.VERIFIED' | translate"
+          ></ion-icon>
+        }
+      </div>
+      <!-- Email -->
+      @if (showEmail) {
+        <p class="user-email text-sm text-muted-color">
+          {{ currentUser()!.email }}
+        </p>
+      }
+    </div>
   </div>
-</div>
+}
 
 <!-- Empty State -->
-<div *ngIf="!currentUser()" class="user-info-skeleton flex items-center gap-3">
-  <div
-    class="skeleton skeleton-circle shimmer"
-    style="width: 48px; height: 48px"
-  ></div>
-  <div class="flex-1">
+@if (!currentUser()) {
+  <div class="user-info-skeleton flex items-center gap-3">
     <div
-      class="skeleton skeleton-text shimmer"
-      style="width: 60%; height: 18px"
+      class="skeleton skeleton-circle shimmer"
+      style="width: 48px; height: 48px"
     ></div>
-    <div
-      class="skeleton skeleton-text shimmer"
-      style="width: 80%; height: 14px; margin-top: 4px"
-    ></div>
+    <div class="flex-1">
+      <div
+        class="skeleton skeleton-text shimmer"
+        style="width: 60%; height: 18px"
+      ></div>
+      <div
+        class="skeleton skeleton-text shimmer"
+        style="width: 80%; height: 14px; margin-top: 4px"
+      ></div>
+    </div>
   </div>
-</div>
+}

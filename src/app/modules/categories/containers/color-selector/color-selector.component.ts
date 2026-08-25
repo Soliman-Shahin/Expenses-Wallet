@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, ChangeDetectionStrategy, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { TranslateModule } from '@ngx-translate/core';
@@ -6,7 +6,7 @@ import { COLORS } from '../../models';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, IonicModule, TranslateModule],
+  imports: [IonicModule, TranslateModule],
   selector: 'app-color-selector',
   templateUrl: './color-selector.component.html',
   styleUrls: ['./color-selector.component.scss'],

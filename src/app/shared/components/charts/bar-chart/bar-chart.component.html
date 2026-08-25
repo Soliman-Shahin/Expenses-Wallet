@@ -1,60 +1,67 @@
 <div class="chart-container" [attr.aria-label]="ariaLabel">
-  <h3 *ngIf="title" class="chart-title">{{ title | translate }}</h3>
+  @if (title) {
+    <h3 class="chart-title">{{ title | translate }}</h3>
+  }
 
-  <div
-    *ngIf="chartData && chartData.length > 0; else emptyState"
-    class="chart-wrapper"
-    role="img"
-    [attr.aria-label]="chartDescription"
-    (mouseleave)="onMouseLeave()"
-    (mousemove)="onMouseMove($event)"
-  >
-    <div class="y-axis">
-      <div *ngFor="let label of yAxisLabels" class="y-axis-label">
-        <span>{{ label | number : "1.0-0" }}</span>
+  @if (chartData && chartData.length > 0) {
+    <div
+      class="chart-wrapper"
+      role="img"
+      [attr.aria-label]="chartDescription"
+      (mouseleave)="onMouseLeave()"
+      (mousemove)="onMouseMove($event)"
+      >
+      <div class="y-axis">
+        @for (label of yAxisLabels; track label) {
+          <div class="y-axis-label">
+            <span>{{ label | number : "1.0-0" }}</span>
+          </div>
+        }
       </div>
-    </div>
-    <div class="chart-area-wrapper">
-      <div class="grid-lines">
-        <div *ngFor="let label of yAxisLabels" class="grid-line"></div>
-      </div>
-      <div class="chart-bars" [@barAnimation]="chartData.length">
-        <div
-          *ngFor="let item of chartData; let i = index"
-          class="bar-container"
-          (click)="onBarClick(item)"
-          role="button"
-          tabindex="0"
-          (keyup.enter)="onBarClick(item)"
-          (keyup.space)="onBarClick(item); $event.preventDefault()"
-          (mouseenter)="onMouseEnter($event, item, i)"
-          (focus)="onMouseEnter($event, item, i)"
-          (blur)="onMouseLeave()"
-        >
-          <div class="bar-area">
+      <div class="chart-area-wrapper">
+        <div class="grid-lines">
+          @for (label of yAxisLabels; track label) {
+            <div class="grid-line"></div>
+          }
+        </div>
+        <div class="chart-bars" [@barAnimation]="chartData.length">
+          @for (item of chartData; track item; let i = $index) {
             <div
-              class="bar"
-              [style.height]="getBarHeight(item.value)"
-              [style.background]="getBarColor(i)"
-              [attr.aria-label]="item.name + ': ' + item.value"
-              role="img"
-            ></div>
-          </div>
-          <div class="bar-meta">
-            <div class="bar-label">{{ item.name | translate }}</div>
-            <div class="bar-value">{{ item.value | number : "1.0-0" }}</div>
-          </div>
+              class="bar-container"
+              (click)="onBarClick(item)"
+              role="button"
+              tabindex="0"
+              (keyup.enter)="onBarClick(item)"
+              (keyup.space)="onBarClick(item); $event.preventDefault()"
+              (mouseenter)="onMouseEnter($event, item, i)"
+              (focus)="onMouseEnter($event, item, i)"
+              (blur)="onMouseLeave()"
+              >
+              <div class="bar-area">
+                <div
+                  class="bar"
+                  [style.height]="getBarHeight(item.value)"
+                  [style.background]="getBarColor(i)"
+                  [attr.aria-label]="item.name + ': ' + item.value"
+                  role="img"
+                ></div>
+              </div>
+              <div class="bar-meta">
+                <div class="bar-label">{{ item.name | translate }}</div>
+                <div class="bar-value">{{ item.value | number : "1.0-0" }}</div>
+              </div>
+            </div>
+          }
         </div>
       </div>
     </div>
-  </div>
-
-  <ng-template #emptyState>
+  } @else {
     <div class="empty-state">
       <div class="empty-icon">📊</div>
       <p>{{ "CHARTS.NO_DATA" | translate }}</p>
     </div>
-  </ng-template>
+  }
+
 </div>
 
 <app-chart-tooltip
@@ -62,5 +69,5 @@
   [visible]="tooltipVisible"
   [x]="tooltipX"
   [y]="tooltipY"
->
+  >
 </app-chart-tooltip>

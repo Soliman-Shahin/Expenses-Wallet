@@ -6,3 +6,6 @@ export * from './total-salary/total-salary.component';
 export * from './user-info/user-info.component';
 export * from './onboarding/onboarding.component';
 export * from './backup-restore/backup-restore.component';
+export * from './plan-badge/plan-badge.component';
+export * from './plan-limit-banner/plan-limit-banner.component';
+export * from './upgrade-prompt/upgrade-prompt.component';

@@ -1,12 +1,13 @@
 <div class="date-range-selector" role="group" aria-label="Select a date range">
-  <button
-    *ngFor="let range of ranges"
-    [class.selected]="range.value === selectedRange"
-    (click)="selectRange(range.value)"
-    type="button"
-    role="radio"
-    [attr.aria-checked]="range.value === selectedRange"
-  >
-    {{ range.label }}
-  </button>
+  @for (range of ranges; track range) {
+    <button
+      [class.selected]="range.value === selectedRange"
+      (click)="selectRange(range.value)"
+      type="button"
+      role="radio"
+      [attr.aria-checked]="range.value === selectedRange"
+      >
+      {{ range.label | translate }}
+    </button>
+  }
 </div>

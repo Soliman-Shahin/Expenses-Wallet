@@ -1,20 +1,21 @@
 import { Component, ChangeDetectionStrategy, OnInit } from '@angular/core';
-import {
-  AbstractControl,
-  FormGroup,
-  ValidationErrors,
-  ValidatorFn,
-  Validators,
-} from '@angular/forms';
+import { AbstractControl, FormGroup, ValidationErrors, ValidatorFn, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { finalize, takeUntil } from 'rxjs/operators';
 import { BaseComponent } from 'src/app/shared/base/base.component';
+import { IonicModule } from '@ionic/angular';
+import { UiInputComponent } from '../../../../shared/ui/ui-input/ui-input.component';
+import { RouterLink } from '@angular/router';
+import { AsyncPipe } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
-  selector: 'app-signup',
-  templateUrl: './signup.component.html',
-  styleUrls: ['./signup.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-signup',
+    templateUrl: './signup.component.html',
+    styleUrls: ['./signup.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [IonicModule, FormsModule, ReactiveFormsModule, UiInputComponent, RouterLink, AsyncPipe, TranslateModule]
 })
 export class SignupComponent extends BaseComponent implements OnInit {
   signupForm!: FormGroup;
@@ -121,7 +122,7 @@ export class SignupComponent extends BaseComponent implements OnInit {
         if (/[^A-Za-z0-9]/.test(password)) strength += 1;
 
         // Calculate strength percentage (0-100)
-        this.passwordStrength = Math.min(100, Math.round((strength / 7) * 100));
+        this.passwordStrength = Math.min(100, Math.round((strength / 6) * 100));
 
         // Set strength message
         if (password.length < 8) {

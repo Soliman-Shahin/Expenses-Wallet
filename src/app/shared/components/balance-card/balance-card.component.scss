@@ -1,37 +1,30 @@
-/* Balance Summary: styled like a single card row (matches .transaction-item) */
 .balance-summary {
   position: relative;
   transition: var(--ew-transition-base);
   animation: cardAppear var(--ew-duration-long) var(--ew-ease-in-out) both;
   box-shadow: none !important;
-  cursor: pointer;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--ew-shadow-md) !important;
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
 }
 
 .toggle-visibility {
   position: absolute;
-  inset-inline-end: var(--ew-space-4);
-  top: var(--ew-space-4);
+  inset-inline-end: 0;
+  top: 0;
   background: var(--glass-background);
   backdrop-filter: blur(10px);
-  border: var(--glass-border);
+  border: 1px solid rgba(var(--ion-text-color-rgb), 0.08);
   padding: var(--ew-space-2);
   border-radius: var(--ew-radius-full);
-  color: var(--ion-color-primary);
+  color: var(--ew-text-color-muted);
   z-index: 10;
   transition: var(--ew-transition-base);
+  cursor: pointer;
 
   &:hover {
-    background: var(--primary-alpha-10);
-    transform: scale(1.1) rotate(5deg);
+    background: rgba(var(--ion-text-color-rgb), 0.05);
+    color: var(--ion-text-color);
   }
 
   &:active {
@@ -46,20 +39,27 @@
 
 .total-balance {
   display: flex;
-  align-items: center;
-  gap: var(--ew-space-4);
-  margin-bottom: var(--ew-space-5);
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: var(--ew-space-2);
+  margin-bottom: var(--ew-space-6);
+  padding: 32px 0 var(--ew-space-2) 0;
 
   .amount {
-    font-size: var(--ew-font-size-3xl);
-    font-weight: var(--ew-font-weight-bold);
-    letter-spacing: var(--tracking-tight);
-    background: var(--brand-gradient);
+    font-size: clamp(2.2rem, 7vw, 2.8rem);
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    color: var(--ion-text-color);
+    line-height: 1.1;
+    animation: fadeIn var(--ew-duration-base) var(--ew-ease-in-out);
+    background: var(--gradient-primary-secondary);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: fadeIn var(--ew-duration-base) var(--ew-ease-in-out);
+    text-shadow: 0 4px 20px rgba(var(--ion-color-primary-rgb), 0.15);
+
+    /* Target the currency code if it can be matched via small tag in html, 
+       but since it's just a string, we just reduced the overall font size above to fit better */
   }
 
   ion-badge {
@@ -77,36 +77,45 @@
   }
 }
 
+.income-expense-row {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
 .balance-item {
   display: flex;
   align-items: center;
-  gap: var(--ew-space-3);
-  padding: var(--ew-space-3);
-  border-radius: var(--ew-radius-lg);
-  transition: var(--ew-transition-base);
+  justify-content: center;
+  gap: 12px;
+  background: rgba(var(--ion-text-color-rgb), 0.03);
+  border: 1px solid rgba(var(--ion-text-color-rgb), 0.06);
+  padding: 16px;
+  border-radius: 20px;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   position: relative;
   overflow: hidden;
 
   &::before {
     content: "";
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: var(--shimmer-gradient);
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.08), transparent);
     opacity: 0;
-    transition: opacity var(--ew-duration-base);
+    transition: opacity 0.3s ease;
+    pointer-events: none;
   }
 
-  &:hover,
-  &:focus-within {
-    background: var(--primary-alpha-10);
+  &:hover {
     transform: translateY(-2px);
-
+    box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+    
     &::before {
-      opacity: 0.1;
-      animation: shimmer 2s infinite;
+      opacity: 1;
     }
   }
 
@@ -115,83 +124,110 @@
   }
 
   ion-icon {
-    font-size: var(--ew-size-10);
+    font-size: 24px;
     flex-shrink: 0;
     transition: transform var(--ew-duration-base) var(--ew-ease-in-out);
   }
 
   &.income {
+    background: var(--success-alpha-10);
+    border-color: rgba(var(--ion-color-success-rgb), 0.1);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
     ion-icon {
-      color: var(--color-income);
-
-      &:hover {
-        transform: translateY(-2px);
-      }
+      color: var(--ion-color-success);
+      font-size: 28px;
+      margin-bottom: 4px;
     }
   }
 
   &.expenses {
+    background: var(--danger-alpha-10);
+    border-color: rgba(var(--ion-color-danger-rgb), 0.1);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
     ion-icon {
-      color: var(--color-expense);
-
-      &:hover {
-        transform: translateY(2px);
-      }
+      color: var(--ion-color-danger);
+      font-size: 28px;
+      margin-bottom: 4px;
     }
   }
 
   &.savings {
-    background: var(--glass-background);
-    backdrop-filter: blur(10px);
-    border: var(--glass-border);
-    padding: var(--ew-space-4);
+    background: var(--tertiary-alpha-10);
+    border-color: rgba(var(--ion-color-tertiary-rgb), 0.1);
+    padding: 20px 24px; // slightly larger padding for full width card
+    border-radius: 24px;
 
     &.positive {
       background: var(--success-alpha-10);
-      border-color: var(--ion-color-success);
+      border-color: rgba(var(--ion-color-success-rgb), 0.15);
+      ion-icon { color: var(--ion-color-success); }
     }
 
     &.negative {
       background: var(--warning-alpha-10);
-      border-color: var(--ion-color-warning);
+      border-color: rgba(var(--ion-color-warning-rgb), 0.15);
+      ion-icon { color: var(--ion-color-warning); }
     }
 
     ion-icon {
-      font-size: var(--ew-size-12);
+      font-size: 32px;
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 12px;
+      background: rgba(var(--ion-color-success-rgb), 0.15);
+      color: var(--ion-color-success);
+      
+      &.badge-warning {
+        background: rgba(var(--ion-color-warning-rgb), 0.15);
+        color: var(--ion-color-warning);
+      }
     }
   }
 
   .item-details {
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
     flex: 1;
-    gap: var(--ew-space-1);
+    min-width: 0; 
+    width: 100%;
+    gap: 4px;
 
     .label {
-      font-size: var(--ew-font-size-sm);
-      color: var(--ew-text-color-secondary);
-      font-weight: var(--ew-font-weight-medium);
-      text-transform: uppercase;
-      letter-spacing: var(--tracking-wide);
+      font-size: 13px;
+      color: var(--ew-text-color-muted);
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      width: 100%;
     }
 
     .amount {
-      font-size: var(--ew-font-size-lg);
-      font-weight: var(--ew-font-weight-semibold);
-      color: var(--ew-text-color-primary);
-      letter-spacing: var(--tracking-tight);
+      font-size: clamp(14px, 3.5vw, 16px);
+      font-weight: 800;
+      color: var(--ion-text-color);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+    }
+    
+    > div {
+      width: 100%;
     }
   }
 }
 
-/* Divider */
 .divider {
-  &.divider-gradient {
-    height: 2px;
-    background: var(--brand-gradient);
-    border-radius: var(--ew-radius-pill);
-    opacity: 0.3;
-  }
+  display: none; // Removing the divider line completely for a cleaner look
 }
 
 /* Animations */
@@ -207,48 +243,13 @@
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-/* Accessibility */
-@media (prefers-reduced-motion: reduce) {
-  .balance-summary,
-  .balance-item,
-  .total-balance .amount,
-  .toggle-visibility {
-    animation: none !important;
-    transition: none !important;
-  }
-}
-
-/* Dark mode adjustments */
 body.dark {
-  .total-balance .amount {
-    background: var(--gradient-primary-secondary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
   .toggle-visibility {
-    background: var(--glass-background-dark);
-    border-color: var(--ew-color-gray-300);
-  }
-
-  .balance-item.savings {
-    background: var(--ew-color-gray-200);
-
-    &.positive {
-      background: var(--success-alpha-20);
-    }
-
-    &.negative {
-      background: var(--warning-alpha-20);
-    }
+    background: rgba(255,255,255,0.05);
   }
 }
+

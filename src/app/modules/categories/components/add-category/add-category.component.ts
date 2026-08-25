@@ -1,13 +1,39 @@
 import { Component, ChangeDetectionStrategy, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import {
+  FormControl,
+  FormGroup,
+  Validators,
+  FormsModule,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { BehaviorSubject, combineLatest, finalize, takeUntil } from 'rxjs';
 import { BaseComponent } from 'src/app/shared/base';
+import { IonicModule } from '@ionic/angular';
+import { NgClass, AsyncPipe } from '@angular/common';
+import { UiInputComponent } from '../../../../shared/ui/ui-input/ui-input.component';
+import { ColorSelectorComponent } from '../../containers/color-selector/color-selector.component';
+import { IconSelectorComponent } from '../../containers/icon-selector/icon-selector.component';
+import { TranslateModule } from '@ngx-translate/core';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-add-category',
   templateUrl: './add-category.component.html',
   styleUrls: ['./add-category.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    IonicModule,
+    NgClass,
+    FormsModule,
+    ReactiveFormsModule,
+    UiInputComponent,
+    ColorSelectorComponent,
+    IconSelectorComponent,
+    AsyncPipe,
+    TranslateModule,
+    RouterModule,
+  ],
 })
 export class AddCategoryComponent extends BaseComponent implements OnInit {
   categoryForm!: FormGroup;
@@ -97,7 +123,13 @@ export class AddCategoryComponent extends BaseComponent implements OnInit {
         )
         .subscribe({
           next: (category) => {
-            this.initFormGroup(category);
+            this.categoryForm.patchValue({
+              title: category.title || '',
+              icon: category.icon || 'add',
+              color: category.color || '#28ba62',
+              type: category.type || 'outcome'
+            });
+            this.cdr.markForCheck(); // Trigger change detection for OnPush
           },
           error: (error) => {
             this.errorMessage.next(error.message);

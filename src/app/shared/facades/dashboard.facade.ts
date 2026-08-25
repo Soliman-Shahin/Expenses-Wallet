@@ -86,6 +86,80 @@ export class DashboardFacade {
     return this.totalsForRange(startDate, endDate);
   }
 
+  // Compute expense distribution by category for a custom date range
+  expenseByCategoryForRange(
+    startDate: Date,
+    endDate: Date
+  ): Observable<NamedValue[]> {
+    const startInclusive = startDate.getTime();
+    const endExclusive = endDate.getTime();
+    return forkJoin({
+      categoriesResp: this.categories.getCategories({
+        skip: 0,
+        limit: 1000,
+        sort: 'name',
+      }),
+      expenses: this.expenses.getExpenses(),
+    }).pipe(
+      map(({ categoriesResp, expenses }) => {
+        const categoriesWrapped = categoriesResp as
+          | { data?: Category[] | { data?: Category[] }; total?: number }
+          | Category[];
+        const categories: Category[] = Array.isArray(categoriesWrapped)
+          ? categoriesWrapped
+          : (categoriesWrapped?.data as any)?.data ??
+            (categoriesWrapped?.data as Category[]) ??
+            [];
+        const byId = new Map<string, { name: string; type?: string }>();
+        categories.forEach((c) =>
+          byId.set(c._id, {
+            name: (c as any).title || c.title,
+            type: (c as any).type,
+          })
+        );
+
+        const expArr: Expense[] = Array.isArray(expenses)
+          ? (expenses as Expense[])
+          : (expenses as any)?.data?.data || (expenses as any)?.data || [];
+        const sums = new Map<string, number>();
+
+        expArr
+          .filter((e) => {
+            const rawDate = e?.date || e?.createdAt;
+            if (!rawDate) return false;
+            const t = new Date(rawDate).getTime();
+            return t >= startInclusive && t < endExclusive;
+          })
+          .forEach((e) => {
+            // Only aggregate expense (non-income) categories
+            let name = 'Uncategorized';
+            let catType: string | undefined;
+            if (e.category && typeof e.category === 'object') {
+              name =
+                (e.category as any).title || (e.category as any).title || name;
+              catType = (e.category as any).type;
+            } else if (typeof e.category === 'string') {
+              const meta = byId.get(e.category);
+              if (meta) {
+                name = meta.name;
+                catType = meta.type;
+              }
+            }
+            const typeLower = (catType ?? '').toString().toLowerCase();
+            if (typeLower === 'income') return; // skip income lines
+
+            const amt = Number(e.amount);
+            if (!Number.isFinite(amt) || Number.isNaN(amt)) return;
+            sums.set(name, (sums.get(name) || 0) + amt);
+          });
+
+        return Array.from(sums.entries())
+          .map(([name, value]) => ({ name, value }))
+          .sort((a, b) => b.value - a.value);
+      })
+    );
+  }
+
   // Compute expense distribution by category for a given month from real data
   expenseByCategoryForMonth(
     month: number,
@@ -157,6 +231,54 @@ export class DashboardFacade {
           .map(([name, value]) => ({ name, value }))
           .sort((a, b) => b.value - a.value);
       })
+    );
+  }
+
+  // Compute daily expense totals for a custom date range
+  monthlyExpensesForRange(
+    startDate: Date,
+    endDate: Date
+  ): Observable<NamedValue[]> {
+    const startInclusive = startDate.getTime();
+    const endExclusive = endDate.getTime();
+    
+    // Calculate number of days in the range
+    const daysDiff = Math.ceil((endExclusive - startInclusive) / (1000 * 60 * 60 * 24));
+    
+    return this.expenses.getExpenses().pipe(
+      map((resp) => {
+        const expArr: Expense[] = Array.isArray(resp)
+          ? (resp as Expense[])
+          : (resp as any)?.data?.data || (resp as any)?.data || [];
+        const daily = new Array<number>(daysDiff).fill(0);
+        expArr
+          .filter((e) => {
+            const rawDate = e?.date || e?.createdAt;
+            if (!rawDate) return false;
+            const t = new Date(rawDate).getTime();
+            return t >= startInclusive && t < endExclusive;
+          })
+          .forEach((e) => {
+            // exclude income from daily expenses
+            const cat = e.category;
+            let type: string | undefined = undefined;
+            if (cat && typeof cat === 'object') type = (cat as any).type;
+            const typeLower = (type ?? '').toString().toLowerCase();
+            if (typeLower === 'income') return;
+            const amt = Number(e.amount);
+            if (!Number.isFinite(amt) || Number.isNaN(amt)) return;
+            const expenseDate = new Date((e as any)?.date || (e as any)?.createdAt);
+            const dayIndex = Math.floor((expenseDate.getTime() - startInclusive) / (1000 * 60 * 60 * 24));
+            if (dayIndex >= 0 && dayIndex < daysDiff) daily[dayIndex] += amt;
+          });
+        return daily.map((v, i) => {
+          const date = new Date(startInclusive + i * 24 * 60 * 60 * 1000);
+          return { name: `${date.getDate()}/${date.getMonth() + 1}`, value: v };
+        });
+      }),
+      switchMap((arr) =>
+        arr && arr.length > 0 ? of(arr) : this.charts.getMonthlyExpenses()
+      )
     );
   }
 

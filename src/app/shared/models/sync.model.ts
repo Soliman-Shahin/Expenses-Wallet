@@ -1,9 +1,10 @@
 export interface SyncEntity {
   _id: string;
   _syncStatus: SyncStatus;
-  _lastModified: Date;
-  _version: number;
+  _lastModified: Date | string;
+  _version?: number;
   _isDeleted?: boolean;
+  _clientId?: string;
   _conflictData?: any;
 }
 

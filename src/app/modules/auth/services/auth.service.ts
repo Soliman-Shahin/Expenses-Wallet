@@ -7,8 +7,9 @@ import { Injectable, inject, NgZone } from '@angular/core';
 import { Capacitor } from '@capacitor/core';
 import { Router } from '@angular/router';
 import { NavController } from '@ionic/angular';
-import { Observable, throwError, BehaviorSubject, from, of, EMPTY } from 'rxjs';
+import { Observable, throwError, from, of, EMPTY } from 'rxjs';
 import { catchError, tap, map } from 'rxjs/operators';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { environment } from 'src/environments/environment';
 import { AuthResponse, User } from '../models';
 import { ApiService } from 'src/app/core/services';
@@ -32,8 +33,8 @@ export class AuthService {
   // Raw backend to create HttpClient that bypasses interceptors when needed
   private httpBackend = inject(HttpBackend);
 
-  private userSubject = new BehaviorSubject<User | null>(null);
-  public user$ = this.userSubject.asObservable();
+  public user = this.tokenService.user;
+  public user$ = toObservable(this.user);
 
   public isLoggedIn$: Observable<boolean> = this.user$.pipe(
     map((user) => !!user)
@@ -44,18 +45,32 @@ export class AuthService {
 
   // Getter for current user state
   get isLoggedIn(): boolean {
-    // Token is stored securely via TokenService
-    return !!this.tokenService.getAccessToken();
+    // Check both token and user data to ensure complete authentication state
+    const hasToken = !!this.tokenService.getAccessToken();
+    const hasUser = !!this.user();
+    
+    // If we have a token but no user, try to restore user from storage
+    if (hasToken && !hasUser) {
+      const storedUser = this.tokenService.getUser();
+      if (storedUser) {
+        this.tokenService.setUser(storedUser);
+        return true;
+      }
+      // Token exists but no user data - invalid state
+      return false;
+    }
+    
+    return hasToken && hasUser;
   }
 
   // Alias for current user
   get currentUser(): User | null {
-    return this.userSubject.value;
+    return this.user();
   }
 
   // Observable of user changes
   get userChanges(): Observable<User | null> {
-    return this.userSubject.asObservable();
+    return this.user$;
   }
 
   constructor() {
@@ -67,7 +82,7 @@ export class AuthService {
    * @returns The current user's ID or null if not authenticated
    */
   getCurrentUserId(): string | null {
-    return this.userSubject.value?._id || null;
+    return this.user()?._id || null;
   }
 
   private initializeUser(): void {
@@ -75,7 +90,7 @@ export class AuthService {
       (this.storageService.get('user') as User | null) ??
       this.tokenService.getUser();
     if (user) {
-      this.userSubject.next(user);
+      this.tokenService.setUser(user);
     }
   }
 
@@ -227,7 +242,7 @@ export class AuthService {
               this.tokenService.setRefreshToken(tokens.refreshToken);
             if (user && user._id) this.tokenService.setUserId(user._id);
             this.storageService.set('user', user);
-            this.userSubject.next(user);
+            this.tokenService.setUser(user);
 
             const redirectUrl = this.redirectUrl || '/home';
             this.redirectUrl = null;
@@ -293,7 +308,7 @@ export class AuthService {
           this.tokenService.setUserId(user._id);
         }
         this.storageService.set('user', user);
-        this.userSubject.next(user);
+        this.tokenService.setUser(user);
 
         // Navigate to redirect URL or home
         const redirectUrl = this.redirectUrl || '/home';
@@ -316,7 +331,6 @@ export class AuthService {
     // Also clear cached profile stored outside StorageService prefixing
     this.profileService.clearProfile();
     // Update state
-    this.userSubject.next(null);
     this.redirectUrl = null;
     // Avoid Angular/Ionic navigation to prevent StackController transition errors
     // Perform a single hard redirect which resets history and view stack
@@ -427,7 +441,7 @@ export class AuthService {
         this.tokenService.setUserId((user as any)._id);
       }
       this.storageService.set('user', user);
-      this.userSubject.next(user);
+      this.tokenService.setUser(user);
       return of(undefined);
     } catch (e) {
       return throwError(() => e);

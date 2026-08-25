@@ -1,17 +1,19 @@
 <div class="icon-selector-container">
-  <ion-icon
-    class="icon"
-    *ngFor="let icon of icons; trackBy: trackByIcon"
-    [class.selected]="selectedIcon === icon"
-    [name]="icon"
-    size="large"
-    [title]="icon"
-    [attr.aria-label]="icon"
-    [attr.aria-pressed]="selectedIcon === icon"
-    role="radio"
-    tabindex="0"
-    (click)="selectIcon(icon)"
-    (keydown.enter)="selectIcon(icon)"
-    (keydown.space)="selectIcon(icon)"
-  ></ion-icon>
+  @for (icon of icons; track trackByIcon($index, icon)) {
+    <ion-icon
+      class="icon"
+      [class.selected]="selectedIcon === icon"
+      [style.--active-color]="themeColor || 'var(--ion-color-primary)'"
+      [name]="icon"
+      size="large"
+      [title]="icon"
+      [attr.aria-label]="icon"
+      [attr.aria-pressed]="selectedIcon === icon"
+      role="radio"
+      tabindex="0"
+      (click)="selectIcon(icon)"
+      (keydown.enter)="selectIcon(icon)"
+      (keydown.space)="selectIcon(icon)"
+    ></ion-icon>
+  }
 </div>

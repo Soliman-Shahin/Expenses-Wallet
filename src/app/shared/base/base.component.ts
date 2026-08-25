@@ -124,12 +124,6 @@ export abstract class BaseComponent<T = any> implements OnInit, OnDestroy {
         }));
       })
     );
-
-    this.translateService.onLangChange
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((event: { lang: string }) => {
-        this.language$.next(event.lang);
-      });
   }
 
   //#region Getters & Setters
@@ -260,6 +254,7 @@ export abstract class BaseComponent<T = any> implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe((event: { lang: string }) => {
         this.language = event.lang;
+        this.language$.next(event.lang);
         // Keep html attributes updated
         document.documentElement.dir = event.lang === 'ar' ? 'rtl' : 'ltr';
         document.documentElement.lang = event.lang;

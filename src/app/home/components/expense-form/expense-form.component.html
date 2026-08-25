@@ -1,113 +1,173 @@
-<ion-header class="ion-no-border">
-  <ion-toolbar>
-    <ion-title>
-      {{ (isEditMode ? "EXPENSE.UPDATE_TITLE" : "EXPENSE.CREATE_TITLE") | translate }}
-    </ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="close()" shape="round">
-        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
+<ion-content class="expense-modal-content" [fullscreen]="true">
+  <form [formGroup]="expenseForm" (ngSubmit)="onSubmit($event)" class="form-container">
 
-<ion-content class="ion-padding">
-  <form [formGroup]="expenseForm" (ngSubmit)="onSubmit()" class="form-container">
-    <!-- Transaction Type Segment -->
-    <ion-segment formControlName="type" value="outcome" class="type-segment">
-      <ion-segment-button value="outcome">
-        <ion-icon name="arrow-up-circle-outline"></ion-icon>
-        <ion-label>{{ 'COMMON.OUTCOME' | translate }}</ion-label>
-      </ion-segment-button>
-      <ion-segment-button value="income">
-        <ion-icon name="arrow-down-circle-outline"></ion-icon>
-        <ion-label>{{ 'COMMON.INCOME' | translate }}</ion-label>
-      </ion-segment-button>
-    </ion-segment>
+    <!-- Top Hero Section (Dynamic Background based on type) -->
+    <div class="top-hero" [ngClass]="expenseForm.get('type')?.value || 'outcome'">
 
-    <!-- Amount Input -->
-    <div class="amount-container">
-      <ion-input
-        type="number"
-        formControlName="amount"
-        class="amount-input"
-        [placeholder]="'0.00'"
-      ></ion-input>
-      <span class="currency-display">{{ userCurrency }}</span>
-    </div>
+      <!-- Integrated Header inside Hero for seamless look -->
+      <ion-header class="ion-no-border transparent-header">
+        <ion-toolbar>
+          <ion-buttons slot="start">
+            <ion-button (click)="close()" class="close-btn">
+              <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+          <ion-title>
+            {{ (isEditMode ? "EXPENSE.UPDATE_TITLE" : "EXPENSE.CREATE_TITLE") | translate }}
+          </ion-title>
+        </ion-toolbar>
+      </ion-header>
 
-    <ion-list class="form-fields-list">
-      <!-- Category -->
-      <ion-item class="form-input-item" lines="none">
-        <ion-icon name="pricetags-outline" slot="start"></ion-icon>
-        <ion-select
-          formControlName="category"
-          [placeholder]="'EXPENSE.CATEGORY' | translate"
-          interface="action-sheet"
-          class="modern-input"
-        >
-          <ion-select-option
-            *ngFor="let category of filteredCategories$ | async"
-            [value]="category._id"
-          >
-            <div class="category-option">
-              <ion-icon [name]="category.icon" [style.color]="category.color"></ion-icon>
-              <span>{{ category.title }}</span>
+      <div class="hero-body">
+        <!-- Custom Premium Segment -->
+        <div class="custom-segment-container">
+          <div class="custom-segment">
+            <div
+              class="segment-btn"
+              [class.active]="expenseForm.get('type')?.value === 'outcome'"
+              (click)="changeType('outcome')"
+              >
+              {{ 'COMMON.OUTCOME' | translate }}
             </div>
-          </ion-select-option>
-        </ion-select>
-      </ion-item>
+            <div
+              class="segment-btn"
+              [class.active]="expenseForm.get('type')?.value === 'income'"
+              (click)="changeType('income')"
+              >
+              {{ 'COMMON.INCOME' | translate }}
+            </div>
+          </div>
+        </div>
 
-      <!-- Description -->
-      <ion-item class="form-input-item" lines="none">
-        <ion-icon name="reader-outline" slot="start"></ion-icon>
-        <ion-input
-          formControlName="description"
-          [placeholder]="'EXPENSE.DESCRIPTION' | translate"
-          class="modern-input"
-        ></ion-input>
-      </ion-item>
-
-      <!-- Date -->
-      <ion-item class="form-input-item" lines="none" [button]="true" id="date-picker-trigger">
-        <ion-icon name="calendar-outline" slot="start"></ion-icon>
-        <ion-label>
-          {{ (expenseForm.get('date')?.value | date:'longDate') || ('EXPENSE.DATE' | translate) }}
-        </ion-label>
-      </ion-item>
-      <ion-popover trigger="date-picker-trigger" [keepContentsMounted]="true">
-        <ng-template>
-          <ion-datetime
-            formControlName="date"
-            presentation="date"
-            [max]="maxDate"
-            (ionChange)="expenseForm.get('date')?.setValue($event.detail.value)"
-          ></ion-datetime>
-        </ng-template>
-      </ion-popover>
-    </ion-list>
-
-    <!-- Action Buttons -->
-    <div class="form-actions">
-      <ion-button
-        *ngIf="isEditMode"
-        fill="outline"
-        color="danger"
-        (click)="onDelete()"
-      >
-        <ion-icon slot="start" name="trash-outline"></ion-icon>
-        {{ 'COMMON.DELETE' | translate }}
-      </ion-button>
-      <ion-button
-        type="submit"
-        [disabled]="expenseForm.invalid || (vm$ | async)?.isLoading"
-        class="save-button"
-      >
-        <ion-spinner *ngIf="(vm$ | async)?.isLoading"></ion-spinner>
-        <span *ngIf="!(vm$ | async)?.isLoading">
-          {{ (isEditMode ? 'COMMON.SAVE' : 'COMMON.CREATE') | translate }}
-        </span>
-      </ion-button>
+        <!-- Huge Amount Input -->
+        <div class="amount-wrapper">
+          <span class="currency-symbol">{{ userCurrency }}</span>
+          <ion-input
+            type="number"
+            formControlName="amount"
+            class="huge-amount-input"
+            [placeholder]="'0.00'"
+          ></ion-input>
+        </div>
+      </div>
     </div>
+
+    <!-- Bottom Form Section -->
+    <div class="bottom-sheet">
+      <div class="sheet-indicator"></div>
+
+      <ion-list class="grouped-fields-list">
+        <!-- Category -->
+        <ion-item class="form-field" lines="full" [button]="true" [detail]="false" id="cat-select-trigger" (click)="openCategoryPopover($event)">
+          <div class="icon-box category-icon-box" slot="start" [style.background]="getSelectedCategoryColor() || 'linear-gradient(135deg, #f59e0b, #d97706)'">
+            <ion-icon [name]="getSelectedCategoryIcon()"></ion-icon>
+          </div>
+          <ion-label class="premium-label">
+            {{ getSelectedCategoryText() }}
+          </ion-label>
+        </ion-item>
+
+        <!-- Description -->
+        <ion-item class="form-field" lines="full">
+          <div class="icon-box desc-icon-box" slot="start">
+            <ion-icon name="text-outline"></ion-icon>
+          </div>
+          <ion-input
+            formControlName="description"
+            [placeholder]="'EXPENSE.DESCRIPTION' | translate"
+            class="premium-input"
+          ></ion-input>
+        </ion-item>
+
+        <!-- Date -->
+        <ion-item class="form-field" lines="none" [button]="true" [detail]="false" id="date-picker-trigger">
+          <div class="icon-box date-icon-box" slot="start">
+            <ion-icon name="calendar-outline"></ion-icon>
+          </div>
+          <ion-label class="premium-label">
+            {{ (expenseForm.get('date')?.value | date:'longDate') || ('EXPENSE.DATE' | translate) }}
+          </ion-label>
+        </ion-item>
+
+        <ion-popover trigger="date-picker-trigger" cssClass="date-popover">
+          <ng-template>
+            <ion-datetime
+              [value]="expenseForm.get('date')?.value"
+              (ionChange)="onDateChange($event)"
+              presentation="date"
+              [max]="maxDate"
+            ></ion-datetime>
+          </ng-template>
+        </ion-popover>
+      </ion-list>
+
+      <!-- Action Buttons -->
+      <div class="form-actions-row">
+        @if (isEditMode) {
+          <ion-button
+            fill="clear"
+            color="danger"
+            class="delete-btn"
+            (click)="onDelete()"
+            >
+            <ion-icon slot="icon-only" name="trash"></ion-icon>
+          </ion-button>
+        }
+
+        <ion-button
+          type="submit"
+          [disabled]="expenseForm.invalid || (vm$ | async)?.isLoading"
+          class="submit-btn"
+          expand="block"
+          >
+          <span>
+            {{ (isEditMode ? 'COMMON.SAVE' : 'COMMON.CREATE') | translate }}
+          </span>
+        </ion-button>
+      </div>
+    </div>
+
+    <!-- Category Popover -->
+    <ion-popover
+      trigger="cat-select-trigger"
+      [isOpen]="showCategoryPopover"
+      (didDismiss)="closeCategoryPopover()"
+      cssClass="custom-cat-popover"
+      alignment="start"
+      side="bottom"
+      >
+      <ng-template>
+        <div class="popover-content">
+          <div class="popover-header">
+            <h3>{{ 'EXPENSE.CATEGORY' | translate }}</h3>
+          </div>
+          <div class="popover-options">
+            @for (category of filteredCategories; track category) {
+              <div
+                class="popover-item"
+                (click)="selectCategory(category._id!)"
+                [class.selected]="expenseForm.get('category')?.value === category._id"
+                >
+                <div class="popover-item-icon" [style.background]="category.color">
+                  <ion-icon [name]="category.icon"></ion-icon>
+                </div>
+                <span class="popover-item-text">{{ category.title }}</span>
+                @if (expenseForm.get('category')?.value === category._id) {
+                  <ion-icon name="checkmark-circle" class="check-icon"></ion-icon>
+                }
+              </div>
+            }
+
+            @if (filteredCategories.length === 0) {
+              <div class="popover-empty">
+                <ion-icon name="layers-outline"></ion-icon>
+                <p>No categories found.</p>
+              </div>
+            }
+          </div>
+        </div>
+      </ng-template>
+    </ion-popover>
+
   </form>
 </ion-content>

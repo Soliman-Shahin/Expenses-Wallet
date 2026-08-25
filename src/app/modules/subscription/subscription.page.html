@@ -1,0 +1,89 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">
+        <ion-icon name="arrow-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ 'SUBSCRIPTION.TITLE' | translate }}</ion-title>
+  </ion-toolbar>
+
+  <!-- Segment -->
+  <ion-toolbar>
+    <ion-segment [value]="selectedSegment" (ionChange)="segmentChanged($event)">
+      <ion-segment-button value="plans">
+        <ion-label>{{ 'SUBSCRIPTION.TITLE' | translate }}</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="usage">
+        <ion-label>{{ 'SUBSCRIPTION.USAGE' | translate }}</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+
+  <!-- Plans Tab -->
+  <div
+    class="plans-container"
+    *ngIf="selectedSegment === 'plans' && !isLoading"
+  >
+    <!-- Header -->
+    <div class="header-section">
+      <h1>{{ 'SUBSCRIPTION.TITLE' | translate }}</h1>
+      <p>{{ 'SUBSCRIPTION.SUBTITLE' | translate }}</p>
+    </div>
+
+    <!-- Alert for expired plan -->
+    <ion-card
+      class="alert-card"
+      *ngIf="currentPlan?.context?.isExpired"
+      color="danger"
+    >
+      <ion-card-content>
+        <div class="alert-content">
+          <ion-icon name="alert-circle"></ion-icon>
+          <div>
+            <h3>{{ 'SUBSCRIPTION.PLAN_EXPIRED' | translate }}</h3>
+            <p>{{ 'SUBSCRIPTION.LIMIT_REACHED_MSG' | translate }}</p>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Plans Grid -->
+    <div class="plans-grid">
+      <app-plan-card
+        *ngFor="let plan of availablePlans"
+        [plan]="plan"
+        [isCurrentPlan]="isCurrentPlan(plan)"
+        (upgrade)="onUpgrade(plan)"
+      ></app-plan-card>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="availablePlans.length === 0">
+      <ion-icon name="pricetags-outline"></ion-icon>
+      <h3>{{ 'NO_DATA' | translate }}</h3>
+      <p>No subscription plans available at the moment.</p>
+    </div>
+  </div>
+
+  <!-- Usage Tab -->
+  <div
+    class="usage-container"
+    *ngIf="selectedSegment === 'usage' && !isLoading"
+  >
+    <app-usage-stats
+      *ngIf="currentPlan"
+      [planData]="currentPlan"
+    ></app-usage-stats>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!currentPlan">
+      <ion-icon name="stats-chart-outline"></ion-icon>
+      <h3>{{ 'NO_DATA' | translate }}</h3>
+      <p>Unable to load usage statistics.</p>
+    </div>
+  </div>
+</ion-content>

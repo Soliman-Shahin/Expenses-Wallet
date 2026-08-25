@@ -8,12 +8,15 @@ import { Component, ChangeDetectionStrategy, EventEmitter,
   OnChanges,
   SimpleChanges, } from '@angular/core';
 import { MonthYear } from 'src/app/home/models';
+import { DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'app-months-scroll-header',
-  templateUrl: './months-scroll-header.component.html',
-  styleUrls: ['./months-scroll-header.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-months-scroll-header',
+    templateUrl: './months-scroll-header.component.html',
+    styleUrls: ['./months-scroll-header.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [DatePipe]
 })
 export class MonthsScrollHeaderComponent
   implements OnInit, AfterViewInit, OnChanges

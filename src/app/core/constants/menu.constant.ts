@@ -20,4 +20,10 @@ export const MENU_ITEMS: MenuItem[] = [
     link: APP_ROUTES.BASE + APP_ROUTES.TRANSACTIONS.INDEX,
     requiresAuth: true,
   },
+  {
+    title: 'Settings',
+    icon: 'settings-outline',
+    link: APP_ROUTES.BASE + APP_ROUTES.SETTINGS.INDEX,
+    requiresAuth: true,
+  }
 ];

@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, ChangeDetectionStrategy, Input } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { SkeletonBlockComponent } from '../skeleton-block/skeleton-block.component';
@@ -8,7 +8,7 @@ import { SkeletonBlockComponent } from '../skeleton-block/skeleton-block.compone
   templateUrl: './chart-wrapper.component.html',
   styleUrls: ['./chart-wrapper.component.scss'],
   standalone: true,
-  imports: [CommonModule, IonicModule, SkeletonBlockComponent],
+  imports: [IonicModule, SkeletonBlockComponent],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChartWrapperComponent {

@@ -135,8 +135,6 @@
     min-width: 0;
     --padding-start: 0;
     --padding-end: 0;
-    --padding-top: var(--ew-space-4);
-    --padding-bottom: var(--ew-space-4);
     --background: transparent;
     --border-width: 0;
     --border-color: transparent;
@@ -171,9 +169,6 @@
       caret-color: var(--ion-color-primary, #4361ee) !important;
       color: var(--ion-text-color) !important;
       -webkit-text-fill-color: var(--ion-text-color) !important; // iOS/Safari caret visibility
-      line-height: 1.2 !important;
-      height: auto !important;
-      min-height: 0 !important;
       appearance: textfield !important;
       -webkit-appearance: none !important;
       -moz-appearance: textfield !important;

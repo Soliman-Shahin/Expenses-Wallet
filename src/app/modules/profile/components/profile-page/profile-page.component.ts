@@ -6,27 +6,33 @@ import {
   ElementRef,
   inject,
 } from '@angular/core';
-import {
-  AbstractControl,
-  FormArray,
-  FormBuilder,
-  FormGroup,
-  ValidationErrors,
-  Validators,
-} from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, ValidationErrors, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ToastService } from 'src/app/shared/services/toast.service';
 import { BaseComponent } from 'src/app/shared/base/base.component';
 import { ProfileService } from '../../services/profile.service';
 import { UserProfile } from '../../models/profile.model';
 import { BehaviorSubject, combineLatest, takeUntil } from 'rxjs';
 import { catchError, finalize, tap } from 'rxjs/operators';
-import { ItemReorderEventDetail } from '@ionic/angular';
+import { ItemReorderEventDetail, IonicModule } from '@ionic/angular';
+import { UiInputComponent } from '../../../../shared/ui/ui-input/ui-input.component';
+import { AsyncPipe, DecimalPipe } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
-  selector: 'app-profile-page',
-  templateUrl: './profile-page.component.html',
-  styleUrls: ['./profile-page.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-profile-page',
+    templateUrl: './profile-page.component.html',
+    styleUrls: ['./profile-page.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [
+        IonicModule,
+        FormsModule,
+        ReactiveFormsModule,
+        UiInputComponent,
+        AsyncPipe,
+        DecimalPipe,
+        TranslateModule,
+    ],
 })
 export class ProfilePageComponent extends BaseComponent implements OnInit {
   personalForm!: FormGroup;
@@ -91,10 +97,14 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
 
     // Fetch latest profile from backend
     this.isLoadingProfile$.next(true);
+    this.setLoading(true);
     this.profileService
       .fetchProfile()
       .pipe(
-        finalize(() => this.isLoadingProfile$.next(false)),
+        finalize(() => {
+          this.isLoadingProfile$.next(false);
+          this.setLoading(false);
+        }),
         takeUntil(this.destroy$),
         catchError((err) => {
           this.errorMessage$.next(err);
@@ -306,11 +316,15 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
       return;
     }
     this.isLoadingPersonal$.next(true);
+    this.setLoading(true);
     this.errorMessage$.next(null);
     this.profileService
       .updateProfile({ ...(this.personalForm.value as Partial<UserProfile>) })
       .pipe(
-        finalize(() => this.isLoadingPersonal$.next(false)),
+        finalize(() => {
+          this.isLoadingPersonal$.next(false);
+          this.setLoading(false);
+        }),
         takeUntil(this.destroy$),
         tap((updated) => {
           if (updated) {
@@ -345,6 +359,7 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
       return;
     }
     this.isLoadingSalary$.next(true);
+    this.setLoading(true);
     this.errorMessage$.next(null);
     const detailsRaw = this.details.getRawValue() || [];
     const salaryPayload = detailsRaw.map((d: any) => ({
@@ -362,7 +377,10 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
     this.profileService
       .updateProfile(payload)
       .pipe(
-        finalize(() => this.isLoadingSalary$.next(false)),
+        finalize(() => {
+          this.isLoadingSalary$.next(false);
+          this.setLoading(false);
+        }),
         takeUntil(this.destroy$),
         tap((updated) => {
           if (updated) {
@@ -415,11 +433,15 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
     }
 
     this.isLoadingAvatar$.next(true);
+    this.setLoading(true);
     this.errorMessage$.next(null);
     this.profileService
       .uploadAvatar(file)
       .pipe(
-        finalize(() => this.isLoadingAvatar$.next(false)),
+        finalize(() => {
+          this.isLoadingAvatar$.next(false);
+          this.setLoading(false);
+        }),
         takeUntil(this.destroy$),
         tap(async (res) => {
           if (res) {

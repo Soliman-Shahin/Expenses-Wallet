@@ -7,6 +7,18 @@
 //
 // ===================================================================
 
+// App Design Tokens & Partials
+@use "theme/variables";
+@use "theme/base";
+@use "theme/rtl";
+@use "theme/scrollbar";
+@use "theme/components";
+@use "theme/animations";
+@use "theme/utilities";
+@use "theme/forms";
+@use "theme/input-styles";
+@use "theme/components/alert";
+
 // 1. Google Fonts
 // -------------------------------------------------------------------
 @import url("https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&family=Ubuntu:wght@300;400;500;700&display=swap");
@@ -34,18 +46,55 @@
 @import "@ionic/angular/css/flex-utils.css";
 @import "@ionic/angular/css/display.css";
 
-// 4. App Design Tokens (Single Source of Truth)
-// -------------------------------------------------------------------
-@import "theme/variables";
-
-// 5. Custom SCSS Partials
-// -------------------------------------------------------------------
-@import "theme/base"; // Base styles, resets, typography
-@import "theme/rtl"; // RTL-specific adjustments
-@import "theme/scrollbar"; // Custom scrollbar styling
-@import "theme/components"; // Custom component styles (cards, buttons)
-@import "theme/animations"; // Animation keyframes and classes
-@import "theme/_utilities"; // Utility classes (spacing, etc.)
-@import "theme/forms"; // General form styles
-@import "theme/input-styles"; // Modern input-specific styles
-@import "theme/components/alert"; // Unified alert styles
+// ===================================================================
+// Dark Mode - Popovers Global Styles
+// ===================================================================
+.dark {
+  ion-popover {
+    --background: #161b22 !important;
+    
+    &::part(content) {
+      background: #161b22 !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    &::part(backdrop) {
+      background: rgba(0, 0, 0, 0.6) !important;
+    }
+  }
+  
+  .popover-content {
+    background: #161b22 !important;
+  }
+  
+  .popover-header {
+    background: #161b22 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    
+    h3 {
+      color: rgba(255, 255, 255, 0.7) !important;
+    }
+  }
+  
+  .category-list,
+  .popover-options {
+    background: #161b22 !important;
+  }
+  
+  .category-option,
+  .popover-item {
+    ion-label,
+    span {
+      color: #ffffff !important;
+    }
+  }
+  
+  ion-popover ion-item {
+    --background: transparent !important;
+    --color: #ffffff !important;
+    
+    ion-label {
+      color: #ffffff !important;
+    }
+  }
+}

@@ -1,0 +1,146 @@
+<div class="sync-wrapper" [class]="getStatusClass()">
+  <!-- ── Compact Pill Badge ── -->
+  <button
+    class="sync-pill"
+    (click)="toggleDetails()"
+    [attr.aria-expanded]="showDetails"
+  >
+    <!-- Animated icon -->
+    <span class="pill-icon" [class.spin]="isSyncing">
+      <ion-icon [name]="getStatusIcon()"></ion-icon>
+    </span>
+
+    <!-- Status label -->
+    <span class="pill-label">{{ getStatusKey() | translate }}</span>
+
+    <!-- Pending count badge -->
+    @if (hasPending && !isSyncing) {
+    <span class="pill-badge pending">{{ metadata?.pendingCount }}</span>
+    }
+
+    <!-- Conflict count badge -->
+    @if (hasConflicts) {
+    <span class="pill-badge conflict">{{ metadata?.conflictCount }}</span>
+    }
+
+    <!-- Syncing progress text -->
+    @if (isSyncing) {
+    <span class="pill-progress">{{ progress?.percentage || 0 }}%</span>
+    }
+
+    <!-- Last sync time (when synced) -->
+    @if (!isSyncing && !isOffline && !hasPending && !hasConflicts) {
+    <span class="pill-time">{{ getLastSyncTime() }}</span>
+    }
+
+    <!-- Chevron -->
+    <ion-icon
+      class="pill-chevron"
+      [name]="showDetails ? 'chevron-up-outline' : 'chevron-down-outline'"
+    >
+    </ion-icon>
+  </button>
+
+  <!-- ── Expanded Details Panel ── -->
+  @if (showDetails) {
+  <div class="sync-panel" role="region" aria-label="Sync details">
+    <!-- Progress bar while syncing -->
+    @if (isSyncing) {
+    <div class="panel-progress">
+      <div class="progress-track">
+        <div
+          class="progress-fill"
+          [style.width.%]="progress?.percentage || 0"
+        ></div>
+      </div>
+      <p class="progress-label">{{ progress?.currentOperation }}</p>
+    </div>
+    }
+
+    <!-- Stats grid -->
+    <div class="panel-stats">
+      <div class="stat">
+        <ion-icon
+          name="checkmark-circle-outline"
+          class="stat-icon synced"
+        ></ion-icon>
+        <div class="stat-info">
+          <span class="stat-val">{{ metadata?.totalEntities || 0 }}</span>
+          <span class="stat-key">{{ "SYNC.SYNCED" | translate }}</span>
+        </div>
+      </div>
+
+      @if (hasPending) {
+      <div class="stat">
+        <ion-icon name="time-outline" class="stat-icon pending"></ion-icon>
+        <div class="stat-info">
+          <span class="stat-val">{{ metadata?.pendingCount }}</span>
+          <span class="stat-key">{{ "SYNC.PENDING" | translate }}</span>
+        </div>
+      </div>
+      } @if (hasConflicts) {
+      <div class="stat">
+        <ion-icon name="warning-outline" class="stat-icon conflict"></ion-icon>
+        <div class="stat-info">
+          <span class="stat-val">{{ metadata?.conflictCount }}</span>
+          <span class="stat-key">{{ "SYNC.CONFLICTS" | translate }}</span>
+        </div>
+      </div>
+      } @if ((metadata?.errorCount ?? 0) > 0) {
+      <div class="stat">
+        <ion-icon
+          name="alert-circle-outline"
+          class="stat-icon error"
+        ></ion-icon>
+        <div class="stat-info">
+          <span class="stat-val">{{ metadata?.errorCount }}</span>
+          <span class="stat-key">{{ "SYNC.ERRORS" | translate }}</span>
+        </div>
+      </div>
+      }
+    </div>
+
+    <!-- Connection status indicator -->
+    @if (connectionStatus$ | async; as conn) {
+    <div class="conn-row">
+      <span
+        class="conn-dot"
+        [class.online]="conn.online"
+        [class.offline]="!conn.online"
+      ></span>
+      <span class="conn-label">
+        @if (conn.online && conn.backendReachable) {
+        {{ "SYNC.BACKEND_CONNECTED" | translate }}
+        } @else if (conn.online && !conn.backendReachable) {
+        {{ "SYNC.BACKEND_UNREACHABLE" | translate }}
+        } @else {
+        {{ "SYNC.NO_INTERNET" | translate }}
+        }
+      </span>
+    </div>
+    }
+
+    <!-- Action buttons -->
+    <div class="panel-actions">
+      @if (!isSyncing && !isOffline) {
+      <button class="action-btn primary" (click)="forceSync()">
+        <ion-icon name="refresh-outline"></ion-icon>
+        {{ "SYNC.SYNC_NOW" | translate }}
+      </button>
+      }
+    </div>
+
+    <!-- Sync errors list -->
+    @if ((progress?.errors?.length ?? 0) > 0) {
+    <div class="panel-errors">
+      @for (err of progress?.errors; track err) {
+      <div class="error-row">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        <span>{{ err }}</span>
+      </div>
+      }
+    </div>
+    }
+  </div>
+  }
+</div>

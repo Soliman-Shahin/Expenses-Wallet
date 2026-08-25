@@ -4,11 +4,15 @@ import { SyncService } from 'src/app/core/services/sync.service';
 import { OfflineStorageService } from 'src/app/core/services/offline-storage.service';
 import { ConflictResolution } from 'src/app/shared/models/sync.model';
 import { BaseComponent } from 'src/app/shared/base';
+import { IonicModule } from '@ionic/angular';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
-  selector: 'app-conflict-resolution',
-  templateUrl: './conflict-resolution.page.html',
-  styleUrls: ['./conflict-resolution.page.scss'],
+    selector: 'app-conflict-resolution',
+    templateUrl: './conflict-resolution.page.html',
+    styleUrls: ['./conflict-resolution.page.scss'],
+    standalone: true,
+    imports: [IonicModule, TranslateModule],
 })
 export class ConflictResolutionPage extends BaseComponent implements OnInit {
   private syncService = inject(SyncService);

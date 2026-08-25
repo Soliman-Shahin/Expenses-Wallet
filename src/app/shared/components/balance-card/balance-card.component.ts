@@ -8,6 +8,9 @@ import {
   computed,
   signal,
 } from '@angular/core';
+import { IonicModule } from '@ionic/angular';
+import { DecimalPipe } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
 
 export interface BalanceCardData {
   balance: number | null;
@@ -17,11 +20,17 @@ export interface BalanceCardData {
 }
 
 @Component({
-  selector: 'app-balance-card',
-  templateUrl: './balance-card.component.html',
-  styleUrls: ['./balance-card.component.scss'],
-  encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-balance-card',
+    templateUrl: './balance-card.component.html',
+    styleUrls: ['./balance-card.component.scss'],
+    encapsulation: ViewEncapsulation.None,
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [
+        IonicModule,
+        DecimalPipe,
+        TranslateModule,
+    ],
 })
 export class BalanceCardComponent {
   // Inputs

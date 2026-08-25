@@ -21,8 +21,9 @@ export class ProfileService {
 
   // Use app-wide storage (prefix ewallet_) so the key becomes 'ewallet_user'
   private storage = inject(StorageService);
+  private api = inject(ApiService);
 
-  constructor(private api: ApiService) {
+  constructor() {
     // Initialize stream with current value from storage
     // Cleanup legacy key if exists (do not rely on it anymore)
     try {

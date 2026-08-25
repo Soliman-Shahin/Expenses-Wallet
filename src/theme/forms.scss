@@ -4,7 +4,7 @@ ion-item {
   display: flex;
   align-items: center;
   // Let the global style handle margin, but override for forms if needed
-  margin-bottom: var(--ew-space-5, 20px);
+  // margin-bottom: var(--ew-space-5, 20px);
   // Remove the bottom border line for form items specifically
   --highlight-height: 0;
   // Use transparent background to adopt the host's styled background

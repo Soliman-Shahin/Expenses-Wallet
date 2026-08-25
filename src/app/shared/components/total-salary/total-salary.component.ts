@@ -8,12 +8,21 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { SalaryDetail } from 'src/app/home/models';
+import { IonicModule } from '@ionic/angular';
+import { CurrencyPipe } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
-  selector: 'app-total-salary',
-  templateUrl: './total-salary.component.html',
-  styleUrls: ['./total-salary.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-total-salary',
+    templateUrl: './total-salary.component.html',
+    styleUrls: ['./total-salary.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [
+        IonicModule,
+        CurrencyPipe,
+        TranslateModule,
+    ],
 })
 export class TotalSalaryComponent {
   // Inputs

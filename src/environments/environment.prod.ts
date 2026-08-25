@@ -8,6 +8,10 @@ export const environment = {
     webClientId:
       '358709669585-0td9nf2p58ncgtoreopgqkq7vosco473.apps.googleusercontent.com',
   },
+
+  // Google Drive for Backup
+  // يمكنك استخدام نفس webClientId أو إنشاء Client ID منفصل
+  googleDriveClientId: '358709669585-0td9nf2p58ncgtoreopgqkq7vosco473.apps.googleusercontent.com',
   
   // Encryption is handled by backend
   enableEncryption: true,

@@ -3,6 +3,8 @@ import { Component, ChangeDetectionStrategy, Input,
   EventEmitter,
   signal,
   computed, } from '@angular/core';
+import { IonicModule } from '@ionic/angular';
+import { TranslateModule } from '@ngx-translate/core';
 
 export interface UserInfo {
   displayName: string;
@@ -12,10 +14,12 @@ export interface UserInfo {
 }
 
 @Component({
-  selector: 'app-user-info',
-  templateUrl: './user-info.component.html',
-  styleUrls: ['./user-info.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-user-info',
+    templateUrl: './user-info.component.html',
+    styleUrls: ['./user-info.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [IonicModule, TranslateModule]
 })
 export class UserInfoComponent {
   // Inputs

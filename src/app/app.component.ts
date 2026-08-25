@@ -1,27 +1,38 @@
 import { Component, ChangeDetectionStrategy, NgZone, OnInit, inject } from '@angular/core';
 import { App } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
+import { StatusBar, Style } from '@capacitor/status-bar';
 import { BaseComponent } from './shared/base/base.component';
 import { DirectionService } from './core/services/direction.service';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { OnboardingService } from './core/services/onboarding.service';
 import { BiometricService } from './core/services/biometric.service';
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
+import { BackupService } from './core/services/backup.service';
+import { environment } from '../environments/environment';
+import { LayoutComponent } from './layout/pages/layout-component/layout.component';
+import { OnboardingComponent } from './shared/components/onboarding/onboarding.component';
+import { IonicModule } from '@ionic/angular';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: 'app.component.html',
-  styleUrls: ['app.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-root',
+    templateUrl: 'app.component.html',
+    styleUrls: ['app.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [LayoutComponent, OnboardingComponent, IonicModule, TranslateModule]
 })
 export class AppComponent extends BaseComponent implements OnInit {
   isLocked = false;
+  private isAuthenticating = false;
 
   constructor(
     private zone: NgZone,
     private translate: TranslateService,
     private directionService: DirectionService,
     public onboardingService: OnboardingService,
-    private biometricService: BiometricService
+    private biometricService: BiometricService,
+    private backupService: BackupService
   ) {
     super();
     this.translate.setDefaultLang('en');
@@ -31,8 +42,16 @@ export class AppComponent extends BaseComponent implements OnInit {
     super.ngOnInit();
     this.themeService.initTheme();
 
+    if (Capacitor.isNativePlatform()) {
+      StatusBar.setOverlaysWebView({ overlay: true }).catch(console.warn);
+      StatusBar.setStyle({ style: Style.Dark }).catch(console.warn);
+    }
+
     // Initialize GoogleAuth for web/development
     this.initializeGoogleAuth();
+
+    // Initialize Google Drive for Backup
+    this.initializeGoogleDrive();
 
     // Check biometric on startup
     this.checkBiometric();
@@ -42,6 +61,11 @@ export class AppComponent extends BaseComponent implements OnInit {
 
     // Check on resume
     App.addListener('resume', () => {
+      // Ignore resume if it happened within 2 seconds of a biometric prompt finishing.
+      // This prevents the infinite loop caused by the biometric dialog itself triggering a pause/resume cycle.
+      if (Date.now() - this.biometricService.lastBiometricTime < 2000) {
+        return;
+      }
       this.checkBiometric();
     });
 
@@ -114,17 +138,42 @@ export class AppComponent extends BaseComponent implements OnInit {
     }
   }
 
+  private async initializeGoogleDrive() {
+    try {
+      if (environment.googleDriveClientId && environment.googleDriveClientId !== 'YOUR_CLIENT_ID_HERE.apps.googleusercontent.com') {
+        await this.backupService.initializeGoogleDrive(environment.googleDriveClientId);
+        console.log('✅ Google Drive initialized successfully');
+      } else {
+        console.warn('⚠️ Google Drive Client ID not configured. Please add it to environment files.');
+      }
+    } catch (error) {
+      console.error('❌ Failed to initialize Google Drive:', error);
+    }
+  }
+
   async checkBiometric() {
+    if (this.isAuthenticating) return;
+
     if (
       this.biometricService.isEnabled &&
       (await this.biometricService.isAvailable())
     ) {
       this.isLocked = true;
+      this.isAuthenticating = true;
+      this.cdr.markForCheck();
+      
       // Small delay to ensure UI updates
       setTimeout(async () => {
-        const authenticated = await this.biometricService.verifyIdentity();
-        if (authenticated) {
-          this.isLocked = false;
+        try {
+          const authenticated = await this.biometricService.verifyIdentity();
+          if (authenticated) {
+            this.isLocked = false;
+          }
+        } catch (e) {
+          console.error('Biometric check failed', e);
+        } finally {
+          this.isAuthenticating = false;
+          this.cdr.markForCheck();
         }
       }, 100);
     }

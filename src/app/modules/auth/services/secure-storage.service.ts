@@ -18,7 +18,7 @@ import { Platform } from '@ionic/angular';
  */
 @Injectable({ providedIn: 'root' })
 export class SecureStorageService {
-  private readonly prefix = 'ewallet_secure_';
+  private readonly prefix = 'secure_';
   private isNative = false;
 
   constructor(
@@ -37,7 +37,8 @@ export class SecureStorageService {
     //   return;
     // }
     
-    // Web fallback: localStorage
+    // Web fallback: localStorage with StorageService prefix
+    // StorageService already adds 'ewallet_' prefix, so we just add 'secure_'
     this.storage.set<string>(this.prefix + key, value);
   }
 
@@ -68,17 +69,16 @@ export class SecureStorageService {
   clear(): void {
     // Clear only secure-prefixed keys
     try {
-      // Access underlying storage via the same mechanism StorageService uses
-      // We don't have direct access to the raw Storage instance, so iterate keys from window.localStorage
+      // StorageService uses 'ewallet_' prefix, and we add 'secure_' on top
+      // So keys look like: 'ewallet_secure_access-token'
       const store = window.localStorage;
       const keys: string[] = [];
+      const fullPrefix = 'ewallet_' + this.prefix; // 'ewallet_secure_'
+      
       for (let i = 0; i < store.length; i++) {
         const k = store.key(i);
         if (!k) continue;
-        if (
-          k.startsWith('ewallet_' + this.prefix) ||
-          k.startsWith(this.prefix)
-        ) {
+        if (k.startsWith(fullPrefix)) {
           keys.push(k);
         }
       }

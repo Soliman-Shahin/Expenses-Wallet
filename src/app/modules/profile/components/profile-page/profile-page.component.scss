@@ -1,1486 +1,874 @@
+@use "src/theme/variables";
+
 :host {
   display: block;
+  height: 100%;
 }
 
-/* Contain widths to viewport to prevent horizontal overflow */
-:host *,
-:host *::before,
-:host *::after {
-  box-sizing: border-box;
+.profile-content {
+  --background: var(--ion-background-color);
+  
+  &::part(background) {
+    background: var(--ion-background-color);
+  }
 }
 
-ion-content {
-  --background: linear-gradient(
-    135deg,
-    var(--ion-background-color) 0%,
-    color-mix(
-        in srgb,
-        var(--ion-background-color) 95%,
-        var(--ion-color-primary)
-      )
-      100%
-  );
-  contain: layout paint;
+// ── Shared Utilities ──────────────────────────────────────────────
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes orbDrift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%       { transform: translate(30px, -20px) scale(1.1); }
+}
+
+// ── Hero Header ───────────────────────────────────────────────────
+.profile-hero {
   position: relative;
-}
-
-ion-content::before {
-  content: "";
-  position: fixed;
-  top: -50%;
-  right: -15%;
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(
-    circle,
-    color-mix(in srgb, var(--ion-color-primary) 15%, transparent) 0%,
-    transparent 70%
-  );
-  border-radius: 50%;
-  pointer-events: none;
-  animation: float 20s ease-in-out infinite;
-}
-
-ion-content::after {
-  content: "";
-  position: fixed;
-  bottom: -30%;
-  left: -10%;
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(
-    circle,
-    color-mix(in srgb, var(--ion-color-tertiary) 12%, transparent) 0%,
-    transparent 70%
-  );
-  border-radius: 50%;
-  pointer-events: none;
-  animation: float 25s ease-in-out infinite reverse;
-}
-
-.profile-page {
-  max-width: 1080px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  z-index: 1;
-}
-
-.profile-header {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: var(--ew-space-4);
-  padding: var(--ew-space-7) var(--ew-space-8);
-  border-radius: var(--ew-radius-xl);
-  background: linear-gradient(
-    135deg,
-    color-mix(
-      in srgb,
-      var(--ion-background-color) 85%,
-      var(--ion-color-primary)
-    ),
-    color-mix(
-      in srgb,
-      var(--ion-background-color) 90%,
-      var(--ion-color-tertiary)
-    )
-  );
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  box-shadow: 0 8px 32px
-      color-mix(in srgb, var(--ion-color-primary) 8%, transparent),
-    0 0 0 1px color-mix(in srgb, var(--ion-text-color) 10%, transparent) inset;
-  border: var(--ew-border-width-sm) solid
-    color-mix(in srgb, var(--ion-text-color) 12%, transparent);
-  position: relative;
+  padding: calc(var(--ion-safe-area-top, 48px) + 30px) 24px 100px;
+  background: linear-gradient(135deg, rgba(var(--ion-color-primary-rgb), 0.12) 0%, rgba(var(--ion-color-secondary-rgb), 0.05) 100%);
   overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 0 0 40px 40px;
+  
+  .dark & {
+    background: linear-gradient(135deg, rgba(var(--ion-color-primary-rgb), 0.15) 0%, rgba(var(--ion-color-secondary-rgb), 0.08) 100%);
+  }
 }
 
-.profile-header::before {
-  content: "";
+.hero-bg {
   position: absolute;
-  top: -50%;
-  right: -20%;
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(
-    circle,
-    color-mix(in srgb, var(--ion-color-primary) 20%, transparent),
-    transparent
-  );
-  border-radius: 50%;
+  inset: 0;
   pointer-events: none;
+  
+  .hero-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.6;
+    
+    &--left {
+      width: 250px;
+      height: 250px;
+      background: var(--ion-color-primary);
+      top: -50px;
+      left: -50px;
+      animation: orbDrift 15s ease-in-out infinite;
+    }
+    
+    &--right {
+      width: 200px;
+      height: 200px;
+      background: var(--ion-color-secondary);
+      bottom: -20px;
+      right: -20px;
+      animation: orbDrift 12s ease-in-out infinite reverse;
+    }
+  }
+  
+  .hero-noise {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 24px 24px;
+    opacity: 0.3;
+  }
 }
 
-.profile-header:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 40px
-      color-mix(in srgb, var(--ion-color-primary) 12%, transparent),
-    0 0 0 1px color-mix(in srgb, var(--ion-text-color) 15%, transparent) inset;
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  animation: fadeUp 0.6s ease both;
+  
+  .hero-title {
+    font-size: clamp(2rem, 6vw, 2.5rem);
+    font-weight: 800;
+    color: var(--ew-text-color-primary);
+    margin: 0 0 20px;
+    letter-spacing: -0.5px;
+    font-family: var(--ew-font-family-heading);
+  }
 }
 
-.profile-header .header-text h1 {
-  margin: 0 0 var(--ew-space-2);
-  font-size: var(--ew-font-size-2xl);
-  font-weight: var(--ew-font-weight-semibold);
-}
-
-.profile-header .header-text .subtitle {
-  margin: 0;
-  color: var(--ion-color-medium);
-  font-size: var(--ew-font-size-md);
-}
-
-.header-chips {
+.hero-badges {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--ew-space-3);
-  align-items: center;
-  position: relative;
-  z-index: 1;
-}
-
-.header-chips ion-chip {
-  --border-radius: 999px;
-  --background: linear-gradient(
-    135deg,
-    color-mix(
-      in srgb,
-      var(--ion-background-color) 75%,
-      var(--ion-color-step-100)
-    ),
-    color-mix(
-      in srgb,
-      var(--ion-background-color) 85%,
-      var(--ion-color-step-100)
-    )
-  );
-  --color: var(--ion-text-color);
-  font-weight: var(--ew-font-weight-semibold);
-  padding-inline: 1.25rem;
-  box-shadow: 0 4px 16px
-      color-mix(in srgb, var(--ion-color-primary) 6%, transparent),
-    0 0 0 1px color-mix(in srgb, var(--ion-text-color) 10%, transparent) inset;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.header-chips ion-chip:hover {
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 6px 20px
-      color-mix(in srgb, var(--ion-color-primary) 10%, transparent),
-    0 0 0 1px color-mix(in srgb, var(--ion-text-color) 15%, transparent) inset;
-}
-
-.header-chips ion-icon {
-  margin-inline-end: 6px;
-  font-size: 1.1em;
-}
-
-@media (min-width: 768px) {
-  .profile-header {
-    flex-direction: row;
+  justify-content: center;
+  gap: 10px;
+  
+  .glass-badge {
+    display: flex;
     align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 99px;
+    background: rgba(var(--ion-text-color-rgb), 0.05);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(var(--ion-text-color-rgb), 0.1);
+    color: var(--ew-text-color-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    
+    ion-icon { font-size: 16px; }
+    
+    &.badge-primary {
+      background: rgba(var(--ion-color-primary-rgb), 0.1);
+      border-color: rgba(var(--ion-color-primary-rgb), 0.2);
+      color: var(--ion-color-primary);
+    }
   }
 }
 
-.security-card {
-  .security-content {
-    display: flex;
-    flex-direction: column;
-    gap: var(--ew-space-5);
-  }
-
-  .security-list {
-    margin: 0;
-    padding-left: 1.25rem;
-    color: var(--ion-color-medium);
-    font-size: var(--ew-font-size-sm);
-    display: flex;
-    flex-direction: column;
-    gap: var(--ew-space-2);
-  }
-
-  .security-list li::marker {
-    color: var(--ion-color-primary);
-  }
-}
-
-/* Stats Section */
-.stats-section {
-  margin: var(--ew-space-6) 0;
+// ── Main Container ────────────────────────────────────────────────
+.profile-main {
+  position: relative;
+  z-index: 10;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px 60px;
   display: flex;
   flex-direction: column;
-  gap: var(--ew-space-5);
+  gap: 24px;
 }
 
-.completion-card {
-  background: linear-gradient(
-    135deg,
-    color-mix(
-      in srgb,
-      var(--ion-background-color) 92%,
-      var(--ion-color-success)
-    ),
-    color-mix(
-      in srgb,
-      var(--ion-background-color) 95%,
-      var(--ion-color-success-tint)
-    )
-  );
-  backdrop-filter: saturate(200%) blur(24px);
-  -webkit-backdrop-filter: saturate(200%) blur(24px);
-  border-radius: var(--ew-radius-xl);
-  padding: var(--ew-space-8);
-  border: 1px solid
-    color-mix(in srgb, var(--ion-color-success) 25%, transparent);
-  box-shadow: 0 10px 40px
-      color-mix(in srgb, var(--ion-color-success) 12%, transparent),
-    0 0 0 1px color-mix(in srgb, var(--ion-text-color) 10%, transparent) inset,
-    0 1px 0 0 rgba(255, 255, 255, 0.1) inset;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: -60%;
-    right: -35%;
-    width: 300px;
-    height: 300px;
-    background: radial-gradient(
-      circle,
-      color-mix(in srgb, var(--ion-color-success) 20%, transparent),
-      transparent 70%
-    );
-    border-radius: 50%;
-    pointer-events: none;
-    animation: float 8s ease-in-out infinite;
-  }
-
-  &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 16px 48px
-        color-mix(in srgb, var(--ion-color-success) 18%, transparent),
-      0 0 0 1px color-mix(in srgb, var(--ion-text-color) 15%, transparent) inset,
-      0 1px 0 0 rgba(255, 255, 255, 0.15) inset;
-    border-color: color-mix(in srgb, var(--ion-color-success) 35%, transparent);
-  }
-}
-
-.completion-header {
+// ── Avatar Section ────────────────────────────────────────────────
+.avatar-section {
   display: flex;
-  gap: var(--ew-space-5);
+  flex-direction: column;
   align-items: center;
-  margin-bottom: var(--ew-space-6);
-  position: relative;
-  z-index: 1;
+  margin-top: -80px;
+  animation: fadeUp 0.6s 0.1s ease both;
+}
 
-  .icon-wrapper {
-    width: 64px;
-    height: 64px;
-    border-radius: var(--ew-radius-full);
-    background: linear-gradient(
-      135deg,
-      var(--ion-color-success),
-      color-mix(
-        in srgb,
-        var(--ion-color-success) 85%,
-        var(--ion-color-success-shade)
-      )
-    );
+.avatar-wrapper {
+  position: relative;
+  width: 130px;
+  height: 130px;
+  margin-bottom: 16px;
+  
+  .avatar-rings {
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, transparent, var(--ion-color-primary) 50%, transparent);
+    animation: spinRing 4s linear infinite;
+    z-index: 1;
+    opacity: 0.8;
+  }
+  
+  .avatar-image {
+    position: absolute;
+    inset: 4px;
+    z-index: 2;
+    background-color: var(--ion-color-step-100);
+    background-size: cover;
+    background-position: center;
+    border-radius: 50%;
+    border: 4px solid var(--ion-background-color);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.2);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 8px 24px
-        color-mix(in srgb, var(--ion-color-success) 40%, transparent),
-      0 0 0 3px color-mix(in srgb, var(--ion-background-color) 80%, transparent),
-      0 0 0 4px color-mix(in srgb, var(--ion-color-success) 35%, transparent);
-    position: relative;
-    transition: all 0.3s ease;
-
-    &::before {
-      content: "";
-      position: absolute;
-      inset: -2px;
-      border-radius: var(--ew-radius-full);
-      background: conic-gradient(
-        from 0deg,
-        transparent,
-        color-mix(in srgb, var(--ion-color-success) 50%, transparent),
-        transparent
-      );
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      animation: rotate 3s linear infinite;
-    }
-
-    &:hover::before {
-      opacity: 0.6;
-    }
-
+    overflow: hidden;
+    
     ion-icon {
-      font-size: 2.25rem;
-      color: white;
-      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+      font-size: 64px;
+      color: var(--ion-color-step-300);
     }
   }
-
-  h3 {
-    margin: 0;
-    font-size: var(--ew-font-size-xl);
-    font-weight: var(--ew-font-weight-bold);
-    background: linear-gradient(
-      135deg,
-      var(--ion-text-color),
-      color-mix(in srgb, var(--ion-text-color) 80%, var(--ion-color-success))
-    );
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  
+  .edit-avatar-btn {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    z-index: 3;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-secondary));
+    color: #fff;
+    border: 3px solid var(--ion-background-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.4);
+    transition: transform 0.2s ease;
+    
+    &:hover { transform: scale(1.1); }
+    ion-icon { font-size: 18px; }
   }
-
-  .subtitle {
-    margin: var(--ew-space-1) 0 0;
-    color: var(--ion-color-medium);
-    font-size: var(--ew-font-size-sm);
-    line-height: 1.5;
+  
+  &.loading .avatar-image {
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+    }
   }
 }
 
-.progress-wrapper {
+@keyframes spinRing {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.user-name {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--ion-text-color);
+  font-family: var(--ew-font-family-heading);
+}
+
+// ── Profile Completion ────────────────────────────────────────────
+.completion-strip {
   display: flex;
-  align-items: center;
-  gap: var(--ew-space-5);
-  position: relative;
-  z-index: 1;
-}
-
-.progress-bar {
-  flex: 1;
-  height: 16px;
-  background: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--ion-background-color) 50%, transparent),
-    color-mix(in srgb, var(--ion-background-color) 60%, transparent)
-  );
-  border-radius: var(--ew-radius-lg);
-  overflow: visible;
-  position: relative;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12) inset,
-    0 0 0 1px color-mix(in srgb, var(--ion-text-color) 8%, transparent) inset;
-  border: 1px solid color-mix(in srgb, var(--ion-text-color) 6%, transparent);
-}
-
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    var(--ion-color-success),
-    color-mix(
-      in srgb,
-      var(--ion-color-success) 90%,
-      var(--ion-color-success-tint)
-    ),
-    var(--ion-color-success)
-  );
-  border-radius: var(--ew-radius-lg);
-  transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 0 20px
-      color-mix(in srgb, var(--ion-color-success) 40%, transparent),
-    0 2px 8px color-mix(in srgb, var(--ion-color-success) 30%, transparent);
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.4),
-      transparent
-    );
-    animation: shimmer 2.5s ease-in-out infinite;
+  flex-direction: column;
+  gap: 16px;
+  background: var(--glass-background, rgba(255,255,255,0.7));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(var(--ion-color-success-rgb), 0.2);
+  border-radius: 20px;
+  padding: 20px 24px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.05);
+  animation: fadeUp 0.6s 0.2s ease both;
+  
+  .dark & {
+    background: rgba(22, 28, 42, 0.7);
   }
-
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: var(--ew-radius-lg);
-    background: linear-gradient(
-      to bottom,
-      rgba(255, 255, 255, 0.3) 0%,
-      transparent 50%,
-      rgba(0, 0, 0, 0.1) 100%
-    );
-    pointer-events: none;
+  
+  @media (min-width: 768px) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .strip-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    
+    .strip-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: rgba(var(--ion-color-success-rgb), 0.15);
+      color: var(--ion-color-success);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+    
+    .strip-text {
+      display: flex;
+      flex-direction: column;
+      
+      strong { font-size: 16px; color: var(--ion-text-color); }
+      span { font-size: 13px; color: var(--ew-color-gray-500); }
+    }
+  }
+  
+  .strip-progress {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: 1;
+    max-width: 400px;
+    
+    .progress-pct {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--ion-color-success);
+      min-width: 50px;
+    }
+    
+    .progress-track {
+      flex: 1;
+      height: 8px;
+      background: rgba(var(--ion-color-success-rgb), 0.1);
+      border-radius: 99px;
+      position: relative;
+      overflow: hidden;
+      
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--ion-color-success), var(--ion-color-success-tint));
+        border-radius: 99px;
+        position: relative;
+        transition: width 1s ease-out;
+        
+        .progress-glow {
+          position: absolute;
+          top: 0; right: 0; bottom: 0; left: 0;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+          animation: shimmer 2s infinite;
+        }
+      }
+    }
   }
 }
 
-.progress-text {
-  font-size: var(--ew-font-size-xl);
-  font-weight: var(--ew-font-weight-extrabold);
-  background: linear-gradient(
-    135deg,
-    var(--ion-color-success),
-    color-mix(
-      in srgb,
-      var(--ion-color-success) 80%,
-      var(--ion-color-success-tint)
-    )
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  min-width: 60px;
-  text-align: right;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-  letter-spacing: -0.5px;
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
-/* Stats Grid */
+// ── Quick Stats Grid ──────────────────────────────────────────────
 .stats-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--ew-space-4);
-
+  gap: 16px;
+  animation: fadeUp 0.6s 0.3s ease both;
+  
   @media (min-width: 640px) {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
-.stat-card {
-  background: linear-gradient(
-    135deg,
-    color-mix(
-      in srgb,
-      var(--ion-background-color) 85%,
-      var(--ion-color-step-100)
-    ),
-    color-mix(
-      in srgb,
-      var(--ion-background-color) 90%,
-      var(--ion-color-step-100)
-    )
-  );
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border-radius: var(--ew-radius-lg);
-  padding: var(--ew-space-6);
-  border: var(--ew-border-width-sm) solid
-    color-mix(in srgb, var(--ion-text-color) 10%, transparent);
-  box-shadow: 0 4px 16px
-      color-mix(in srgb, var(--ion-color-primary) 4%, transparent),
-    0 0 0 1px color-mix(in srgb, var(--ion-text-color) 6%, transparent) inset;
+.stat-box {
+  background: var(--glass-background, rgba(255,255,255,0.7));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 20px;
   display: flex;
-  gap: var(--ew-space-4);
   align-items: center;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  animation-delay: var(--delay, 0s);
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 120px;
-    height: 120px;
-    background: radial-gradient(
-      circle,
-      color-mix(in srgb, var(--ion-color-primary) 5%, transparent),
-      transparent
-    );
-    border-radius: 50%;
-    pointer-events: none;
-    transition: all 0.6s ease;
+  gap: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+  transition: transform 0.3s ease;
+  
+  .dark & {
+    border-color: rgba(255, 255, 255, 0.05);
   }
-
+  
   &:hover {
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 8px 24px
-        color-mix(in srgb, var(--ion-color-primary) 8%, transparent),
-      0 0 0 1px color-mix(in srgb, var(--ion-text-color) 12%, transparent) inset;
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.08);
   }
-
-  &:hover::before {
-    top: -30%;
-    right: -30%;
+  
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+    
+    &.icon-blue { background: rgba(var(--ion-color-primary-rgb), 0.15); color: var(--ion-color-primary); }
+    &.icon-teal { background: rgba(var(--ion-color-secondary-rgb), 0.15); color: var(--ion-color-secondary); }
+    &.icon-purple { background: rgba(var(--ion-color-tertiary-rgb), 0.15); color: var(--ion-color-tertiary); }
+  }
+  
+  .stat-data {
+    display: flex;
+    flex-direction: column;
+    
+    .stat-lbl {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--ew-color-gray-500);
+      letter-spacing: 0.5px;
+    }
+    
+    .stat-val {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--ion-text-color);
+    }
   }
 }
 
-.stat-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--ew-radius-lg);
+// ── Forms Layout ──────────────────────────────────────────────────
+.forms-layout, .system-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  animation: fadeUp 0.6s 0.4s ease both;
+  
+  @media (min-width: 900px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+// ── Premium Card ──────────────────────────────────────────────────
+.premium-card {
+  background: var(--glass-background, rgba(255,255,255,0.7));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.04);
+  height: 100%;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-
-  &.primary {
-    background: linear-gradient(
-      135deg,
-      var(--ion-color-primary),
-      color-mix(
-        in srgb,
-        var(--ion-color-primary) 80%,
-        var(--ion-color-primary-shade)
-      )
-    );
+  flex-direction: column;
+  
+  .dark & {
+    border-color: rgba(255, 255, 255, 0.05);
   }
-
-  &.success {
-    background: linear-gradient(
-      135deg,
-      var(--ion-color-success),
-      color-mix(
-        in srgb,
-        var(--ion-color-success) 80%,
-        var(--ion-color-success-shade)
-      )
-    );
+  
+  &.danger-card {
+    border-color: rgba(var(--ion-color-danger-rgb), 0.3);
+    .header-icon {
+      background: rgba(var(--ion-color-danger-rgb), 0.15);
+      color: var(--ion-color-danger);
+    }
   }
-
-  &.tertiary {
-    background: linear-gradient(
-      135deg,
-      var(--ion-color-tertiary),
-      color-mix(
-        in srgb,
-        var(--ion-color-tertiary) 80%,
-        var(--ion-color-tertiary-shade)
-      )
-    );
-  }
-
-  ion-icon {
-    font-size: 1.5rem;
-    color: white;
+  
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+    
+    .header-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(var(--ion-color-primary-rgb), 0.1);
+      color: var(--ion-color-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+    
+    .header-titles {
+      h2 {
+        margin: 0 0 4px;
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--ion-text-color);
+      }
+      p {
+        margin: 0;
+        font-size: 13px;
+        color: var(--ew-color-gray-500);
+      }
+    }
   }
 }
 
-.stat-card:hover .stat-icon {
-  transform: scale(1.1) rotate(5deg);
-}
-
-.stat-content {
+// ── Forms & Inputs ────────────────────────────────────────────────
+.form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   flex: 1;
-  min-width: 0;
 }
 
-.stat-label {
-  margin: 0 0 var(--ew-space-1);
-  color: var(--ion-color-medium);
-  font-size: var(--ew-font-size-xs);
-  font-weight: var(--ew-font-weight-medium);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+.form-actions {
+  margin-top: auto;
 }
 
-.stat-value {
-  margin: 0;
-  font-size: var(--ew-font-size-xl);
-  font-weight: var(--ew-font-weight-bold);
-  color: var(--ion-text-color);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.btn-gradient {
+  --border-radius: 16px;
+  --background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-secondary));
+  --box-shadow: 0 8px 24px rgba(var(--ion-color-primary-rgb), 0.3);
+  font-weight: 700;
+  height: 52px;
 }
 
-.card {
-  width: 100%;
-  max-width: 100%;
-  background: linear-gradient(
-    135deg,
-    color-mix(
-      in srgb,
-      var(--ion-background-color) 85%,
-      var(--ion-color-step-100)
-    ),
-    color-mix(
-      in srgb,
-      var(--ion-background-color) 90%,
-      var(--ion-color-step-100)
-    )
-  );
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border-radius: var(--ew-radius-xl);
-  padding: var(--ew-space-8);
-  border: var(--ew-border-width-sm) solid
-    color-mix(in srgb, var(--ion-text-color) 12%, transparent);
-  box-shadow: 0 8px 32px
-      color-mix(in srgb, var(--ion-color-primary) 5%, transparent),
-    0 0 0 1px color-mix(in srgb, var(--ion-text-color) 8%, transparent) inset;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  animation: fadeIn 0.5s ease-out;
-  position: relative;
-  overflow: hidden;
-}
-
-.card::before {
-  content: "";
-  position: absolute;
-  top: -50%;
-  right: -50%;
-  width: 200px;
-  height: 200px;
-  background: radial-gradient(
-    circle,
-    color-mix(in srgb, var(--ion-color-primary) 8%, transparent),
-    transparent
-  );
-  border-radius: 50%;
-  pointer-events: none;
-  transition: all 0.6s ease;
-}
-
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 40px
-      color-mix(in srgb, var(--ion-color-primary) 8%, transparent),
-    0 0 0 1px color-mix(in srgb, var(--ion-text-color) 15%, transparent) inset;
-}
-
-.card:hover::before {
-  top: -30%;
-  right: -30%;
-}
-.card-header {
-  margin-bottom: var(--ew-space-6);
-  padding-bottom: var(--ew-space-4);
-  border-bottom: var(--ew-border-width-sm) solid
-    var(--ion-color-step-150, rgba(0, 0, 0, 0.07));
-}
-.card-header h2 {
-  font-size: var(--ew-font-size-xl);
-  font-weight: var(--ew-font-weight-semibold);
-  margin: 0 0 var(--ew-space-2);
-  color: var(--ion-text-color);
-}
-.card-header .subtitle {
-  color: var(--ion-color-medium);
-  margin: 0;
-  font-size: var(--ew-font-size-md);
-}
-
-ion-list.ios.list-ios.list-lines-none.list-ios-lines-none.hydrated {
-  background: transparent;
-}
-
-/* Avatar section */
-.avatar-card {
-  padding: var(--ew-space-7);
-  text-align: center;
-}
-
-.avatar-row {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  max-width: 100%;
-}
-
-.avatar {
-  width: var(--ew-size-28);
-  height: var(--ew-size-28);
-  border-radius: var(--ew-radius-full);
-  background-size: cover;
-  background-position: center;
-  background-color: var(--ion-color-step-100, rgba(0, 0, 0, 0.06));
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 12px 40px
-      color-mix(in srgb, var(--ion-color-primary) 15%, transparent),
-    0 0 0 4px color-mix(in srgb, var(--ion-background-color) 80%, transparent),
-    0 0 0 5px color-mix(in srgb, var(--ion-color-primary) 30%, transparent);
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 3px solid var(--ion-color-primary);
-  position: relative;
-}
-
-.avatar::before {
-  content: "";
-  position: absolute;
-  inset: -8px;
-  border-radius: var(--ew-radius-full);
-  background: conic-gradient(
-    from 0deg,
-    transparent,
-    color-mix(in srgb, var(--ion-color-primary) 40%, transparent),
-    transparent
-  );
-  opacity: 0;
-  transition: opacity 0.5s ease;
-  animation: rotate 3s linear infinite;
-}
-
-.avatar:hover::before {
-  opacity: 1;
-}
-
-.avatar:hover {
-  transform: scale(1.08) rotate(3deg);
-  box-shadow: 0 16px 48px
-      color-mix(in srgb, var(--ion-color-primary) 20%, transparent),
-    0 0 0 4px color-mix(in srgb, var(--ion-background-color) 80%, transparent),
-    0 0 0 6px color-mix(in srgb, var(--ion-color-primary) 40%, transparent);
-}
-.avatar ion-icon {
-  font-size: var(--ew-font-size-8xl);
-  color: var(--ion-color-medium);
-}
-
-.avatar-actions {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.avatar-actions h2 {
-  margin: 0 0 var(--ew-space-3);
-  font-size: var(--ew-font-size-2xl);
-  font-weight: var(--ew-font-weight-semibold);
-}
-.avatar-actions .subtitle {
-  margin: 0 0 var(--ew-space-6);
-  color: var(--ion-color-medium);
-  font-size: var(--ew-font-size-base);
-}
-.avatar-actions .actions {
-  display: flex;
-  gap: var(--ew-space-4);
-}
-.avatar-actions .actions ion-button {
-  --border-radius: var(--ew-radius-lg);
-  --box-shadow: var(--ew-shadow-md);
-  --padding-top: var(--ew-space-4);
-  --padding-bottom: var(--ew-space-4);
-  --padding-start: var(--ew-space-7);
-  --padding-end: var(--ew-space-7);
-  font-weight: var(--ew-font-weight-medium);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.avatar-actions .actions ion-button:hover {
-  --box-shadow: var(--ew-shadow-lg);
-  transform: translateY(-2px);
-}
-
-.avatar-actions .actions ion-button:active {
-  animation: button-press 0.2s ease-out forwards;
-}
-
-// Salary Form
+// ── Salary Items ──────────────────────────────────────────────────
 .salary-form {
   display: flex;
   flex-direction: column;
-  gap: var(--ew-space-6);
+  flex: 1;
 }
 
 .salary-details-group {
   display: flex;
   flex-direction: column;
-  gap: var(--ew-space-5);
-}
-
-.array-error {
-  padding: var(--ew-space-4) var(--ew-space-5);
-  border-radius: var(--ew-radius-lg);
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--ion-color-danger) 15%, transparent),
-    color-mix(in srgb, var(--ion-color-danger) 20%, transparent)
-  );
-  border: 1px solid color-mix(in srgb, var(--ion-color-danger) 30%, transparent);
-  display: flex;
-  align-items: center;
-  gap: var(--ew-space-3);
-  animation: shake 0.4s ease;
-
-  ion-icon {
-    font-size: 1.25rem;
-    color: var(--ion-color-danger);
-  }
-
-  ion-text {
-    font-size: var(--ew-font-size-sm);
-    font-weight: var(--ew-font-weight-medium);
-  }
-}
-
-@keyframes shake {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  25% {
-    transform: translateX(-5px);
-  }
-  75% {
-    transform: translateX(5px);
-  }
-}
-
-// Salary Items List
-.salary-items-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ew-space-4);
+  gap: 12px;
 }
 
 .salary-item {
-  background: linear-gradient(
-    135deg,
-    color-mix(
-      in srgb,
-      var(--ion-background-color) 90%,
-      var(--ion-color-step-100)
-    ),
-    color-mix(
-      in srgb,
-      var(--ion-background-color) 95%,
-      var(--ion-color-step-100)
-    )
-  );
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: var(--ew-radius-lg);
-  border: 1px solid color-mix(in srgb, var(--ion-text-color) 8%, transparent);
-  padding: var(--ew-space-5);
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: var(--ew-space-4);
-  align-items: start;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px
-      color-mix(in srgb, var(--ion-color-primary) 3%, transparent),
-    0 0 0 1px color-mix(in srgb, var(--ion-text-color) 5%, transparent) inset;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--glass-background, rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(var(--ion-text-color-rgb), 0.06);
+  border-radius: 16px;
+  padding: 12px;
+  margin-bottom: 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.02);
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px
-        color-mix(in srgb, var(--ion-color-primary) 6%, transparent),
-      0 0 0 1px color-mix(in srgb, var(--ion-text-color) 10%, transparent) inset;
-    border-color: color-mix(in srgb, var(--ion-color-primary) 30%, transparent);
+    border-color: rgba(var(--ion-color-primary-rgb), 0.3);
+    box-shadow: 0 4px 16px rgba(var(--ion-color-primary-rgb), 0.08);
   }
-}
-
-// Reorder Handle
-.reorder-handle {
-  display: flex;
-  align-items: flex-start;
-  padding-top: var(--ew-space-8);
-  cursor: grab;
-
-  ion-reorder {
-    width: 24px;
-    height: 24px;
-    color: var(--ion-color-medium);
-    transition: all 0.2s ease;
-
-    &:hover {
-      color: var(--ion-color-primary);
-      transform: scale(1.1);
-    }
-
-    ion-icon {
-      font-size: 1.25rem;
-    }
+  
+  .salary-item-main {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
   }
-}
 
-// Hide reorder on mobile
-@media (max-width: 640px) {
   .reorder-handle {
-    display: none;
+    color: rgba(var(--ion-text-color-rgb), 0.3);
+    font-size: 22px;
+    cursor: grab;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    &:hover { color: var(--ion-color-primary); }
   }
+  
+  .salary-fields-row {
+    flex: 1;
+    display: flex;
+    gap: 12px;
+    min-width: 0;
+    
+    .field-col.slim-input {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0; /* allow shrinking */
 
-  .salary-item {
-    grid-template-columns: 1fr auto;
+      .input-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(var(--ion-text-color-rgb), 0.04);
+        border: 1px solid transparent;
+        border-radius: 12px;
+        padding: 6px 10px;
+        height: 52px;
+        transition: all 0.2s ease;
+
+        &:focus-within {
+          background: rgba(var(--ion-text-color-rgb), 0.02);
+          border-color: var(--ion-color-primary);
+          box-shadow: 0 0 0 3px rgba(var(--ion-color-primary-rgb), 0.15);
+        }
+
+        ion-icon {
+          color: var(--ion-color-primary);
+          font-size: 18px;
+          opacity: 0.9;
+          flex-shrink: 0;
+          margin-top: 12px; /* Align icon visually with the input text */
+        }
+
+        .input-content {
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+          min-width: 0;
+          
+          .floating-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: rgba(var(--ion-text-color-rgb), 0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+          }
+
+          input {
+            flex: 1;
+            min-width: 0;
+            background: transparent;
+            border: none;
+            color: var(--ion-text-color);
+            font-size: 14px;
+            font-weight: 600;
+            outline: none;
+            width: 100%;
+            padding: 0;
+
+            &::placeholder {
+              color: rgba(var(--ion-text-color-rgb), 0.3);
+              font-weight: 500;
+            }
+          }
+        }
+      }
+    }
   }
-}
-
-// Salary Item Content
-.salary-item-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: var(--ew-space-4);
-  min-width: 0;
-}
-
-.salary-item-fields {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--ew-space-4);
-
-  @media (min-width: 640px) {
-    grid-template-columns: 1.2fr 0.8fr;
-  }
-}
-
-.salary-field {
-  min-width: 0;
-}
-
-.field-error {
-  display: flex;
-  align-items: center;
-  gap: var(--ew-space-2);
-  padding: var(--ew-space-3) var(--ew-space-4);
-  border-radius: var(--ew-radius-md);
-  background: color-mix(in srgb, var(--ion-color-danger) 10%, transparent);
-  border: 1px solid color-mix(in srgb, var(--ion-color-danger) 25%, transparent);
-  animation: fadeIn 0.3s ease;
-
-  ion-icon {
-    font-size: 1rem;
-    color: var(--ion-color-danger);
+  
+  .delete-item-btn {
+    background: transparent;
+    color: rgba(var(--ion-color-danger-rgb), 0.6);
+    border: 1px solid rgba(var(--ion-color-danger-rgb), 0.2);
+    border-radius: 12px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.2s;
     flex-shrink: 0;
+    
+    &:disabled { 
+      opacity: 0.3; 
+      border-color: transparent; 
+      cursor: not-allowed;
+    }
+    
+    &:not(:disabled):hover { 
+      background: var(--ion-color-danger); 
+      color: white; 
+      border-color: var(--ion-color-danger);
+      transform: scale(1.05);
+    }
   }
-
-  ion-text {
-    font-size: var(--ew-font-size-xs);
-    font-weight: var(--ew-font-weight-medium);
-    line-height: 1.4;
-  }
-}
-
-// Salary Item Actions
-.salary-item-actions {
-  display: flex;
-  align-items: flex-start;
-  padding-top: var(--ew-space-8);
-
-  .delete-btn {
-    --padding-start: var(--ew-space-3);
-    --padding-end: var(--ew-space-3);
-    --padding-top: var(--ew-space-3);
-    --padding-bottom: var(--ew-space-3);
-    width: 40px;
-    height: 40px;
-    border-radius: var(--ew-radius-md);
-    transition: all 0.3s ease;
-
-    &:not([disabled]):hover {
-      background: color-mix(in srgb, var(--ion-color-danger) 15%, transparent);
-      transform: scale(1.1) rotate(5deg);
-    }
-
-    &[disabled] {
-      opacity: 0.3;
-    }
-
-    ion-icon {
-      font-size: 1.25rem;
-    }
+  
+  .field-error {
+    margin-left: 36px; /* align with fields, past the handle */
+    font-size: 12px;
+    color: var(--ion-color-danger);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    
+    ion-icon { font-size: 14px; }
   }
 }
 
-// Add Detail Section
-.add-detail-section {
-  margin-top: var(--ew-space-2);
-
-  .add-detail-btn {
-    --border-radius: var(--ew-radius-lg);
-    --border-width: 2px;
-    --border-style: dashed;
-    --border-color: color-mix(
-      in srgb,
-      var(--ion-color-primary) 40%,
-      transparent
-    );
-    --background-hover: color-mix(
-      in srgb,
-      var(--ion-color-primary) 8%,
-      transparent
-    );
-    --color: var(--ion-color-primary);
-    --padding-top: var(--ew-space-5);
-    --padding-bottom: var(--ew-space-5);
-    font-weight: var(--ew-font-weight-semibold);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-    &:hover {
-      --border-style: solid;
-      --border-color: var(--ion-color-primary);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px
-        color-mix(in srgb, var(--ion-color-primary) 15%, transparent);
-    }
-
-    ion-icon {
-      font-size: 1.25rem;
-    }
-  }
-}
-
-// Currency Section
-.currency-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ew-space-3);
-  padding-top: var(--ew-space-4);
-  border-top: 1px solid
-    color-mix(in srgb, var(--ion-text-color) 8%, transparent);
-
-  .currency-label {
-    font-size: var(--ew-font-size-md);
-    font-weight: var(--ew-font-weight-semibold);
-    color: var(--ion-text-color);
-  }
-
-  .currency-select-item {
-    --background: linear-gradient(
-      135deg,
-      color-mix(
-        in srgb,
-        var(--ion-background-color) 85%,
-        var(--ion-color-step-100)
-      ),
-      color-mix(
-        in srgb,
-        var(--ion-background-color) 90%,
-        var(--ion-color-step-100)
-      )
-    );
-    --border-radius: var(--ew-radius-lg);
-    --padding-start: var(--ew-space-5);
-    --padding-end: var(--ew-space-5);
-    --inner-padding-end: 0;
-    --inner-border-width: 0;
-    border: 1px solid color-mix(in srgb, var(--ion-text-color) 12%, transparent);
-    box-shadow: 0 2px 8px
-        color-mix(in srgb, var(--ion-color-primary) 4%, transparent),
-      0 0 0 1px color-mix(in srgb, var(--ion-text-color) 5%, transparent) inset;
-    transition: all 0.3s ease;
-
-    &:hover {
-      box-shadow: 0 4px 12px
-          color-mix(in srgb, var(--ion-color-primary) 8%, transparent),
-        0 0 0 1px color-mix(in srgb, var(--ion-text-color) 10%, transparent)
-          inset;
-      border-color: color-mix(
-        in srgb,
-        var(--ion-color-primary) 30%,
-        transparent
-      );
-    }
-
-    ion-icon {
-      font-size: 1.25rem;
-      margin-inline-end: var(--ew-space-3);
-    }
-
-    ion-select {
-      --padding-start: 0;
-      font-weight: var(--ew-font-weight-medium);
-    }
-  }
-}
-
-// Salary Actions (Save Button)
-.salary-actions {
-  padding-top: var(--ew-space-4);
-  border-top: 1px solid
-    color-mix(in srgb, var(--ion-text-color) 8%, transparent);
-
-  .save-salary-btn {
-    --border-radius: var(--ew-radius-lg);
-    --padding-top: var(--ew-space-5);
-    --padding-bottom: var(--ew-space-5);
-    --box-shadow: 0 4px 16px
-      color-mix(in srgb, var(--ion-color-primary) 20%, transparent);
-    font-weight: var(--ew-font-weight-semibold);
-    font-size: var(--ew-font-size-md);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-    &:not([disabled]):hover {
-      --box-shadow: 0 6px 20px
-        color-mix(in srgb, var(--ion-color-primary) 30%, transparent);
-      transform: translateY(-2px);
-    }
-
-    ion-spinner {
-      margin-inline-end: var(--ew-space-3);
-    }
-  }
-}
-
-// Old styles cleanup - keep any that are still needed
-
-// New Responsive Grid Layout
-.profile-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  margin-top: 1rem;
-
-  // On tablets and larger screens, use a two-column layout
-  @media (min-width: 992px) {
-    grid-template-columns: minmax(300px, 1fr) 2fr;
-    align-items: flex-start; // Align items to the top of their grid cell
-  }
-}
-
-.column {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-}
-
-// Remove spacer style
-.spacer {
-  display: none;
-}
-
-.salary-detail-row .row-content .field app-ui-input,
-.salary-detail-row .row-content .field ion-input,
-.salary-detail-row .row-content .field ion-item {
-  width: 100%;
-  max-width: 100%;
-}
-.salary-detail-row .row-content .inline-actions ion-button {
-  flex: 0 1 auto;
-  max-width: 100%;
-  white-space: nowrap;
-}
-.salary-detail-row .row-content .inline-actions .remove-detail-icon ion-icon {
-  color: var(--ion-color-danger);
-  font-size: var(--ew-font-size-lg);
-}
-.salary-detail-row .row-content .inline-actions .remove-detail-icon[disabled] {
-  opacity: var(--ew-opacity-lg); // keep visible when disabled
-}
-
-/* Force caret visibility and text color inside salary inputs */
-.salary-detail-row .row-content .field ion-input::part(native),
-.salary-detail-row .row-content .field input {
-  caret-color: var(--ion-color-primary, #4361ee) !important;
-  color: var(--ion-text-color) !important;
-  -webkit-text-fill-color: var(--ion-text-color) !important;
-  text-shadow: none !important; /* avoid blend issues on glass backgrounds */
-}
-
-/* Cover number inputs explicitly (Chrome/Safari quirks) */
-.salary-detail-row .row-content .field input[type="number"],
-.salary-detail-row .row-content .field ion-input[type="number"]::part(native) {
-  appearance: textfield !important;
-  -webkit-appearance: none !important;
-  -moz-appearance: textfield !important;
-  caret-color: var(--ion-color-primary, #4361ee) !important;
-}
-
-/* Ensure vertical centering within item in salary row */
-.salary-detail-row .row-content .field ion-item::part(container) {
-  display: flex !important;
-  align-items: center !important;
-}
-
-/* Keep single-row layout across sizes */
-
-.inline-actions {
+.add-detail-btn {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 16px;
+  background: rgba(var(--ion-color-primary-rgb), 0.04);
+  border: 1px dashed rgba(var(--ion-color-primary-rgb), 0.4);
+  border-radius: 16px;
+  color: var(--ion-color-primary);
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 24px;
+  
+  &:hover {
+    background: rgba(var(--ion-color-primary-rgb), 0.08);
+    border-color: var(--ion-color-primary);
+  }
+  
+  ion-icon { font-size: 22px; }
+}
+
+.currency-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(var(--ion-text-color-rgb), 0.03);
+  border: 1px solid rgba(var(--ion-text-color-rgb), 0.06);
+  padding: 16px 20px;
+  border-radius: 16px;
+  margin-bottom: 24px;
+  
+  .currency-label {
+    font-weight: 600;
+    color: var(--ion-text-color);
+    font-size: 15px;
+  }
+  
+  .currency-picker-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(var(--ion-text-color-rgb), 0.05);
+    padding: 8px 12px;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    min-width: 100px; /* prevent text overlap with arrow */
+    
+    &:hover {
+      background: rgba(var(--ion-text-color-rgb), 0.08);
+    }
+    
+    .currency-icon { 
+      color: var(--ion-color-primary); 
+      font-size: 20px; 
+      flex-shrink: 0;
+    }
+    
+    ion-select {
+      flex: 1;
+      width: 100%;
+      background: transparent;
+      font-weight: 700;
+      color: var(--ion-text-color);
+      min-height: auto;
+      margin: 0;
+      border: none;
+      box-shadow: none;
+      --border-style: none;
+      --highlight-color-focused: transparent;
+      --highlight-color-valid: transparent;
+      --highlight-color-invalid: transparent;
+      --padding-start: 0;
+      --padding-end: 0;
+      --padding-top: 0;
+      --padding-bottom: 0;
+      --placeholder-color: rgba(var(--ion-text-color-rgb), 0.5);
+      
+      &::part(icon) {
+        display: none !important;
+      }
+    }
+
+    .dropdown-icon {
+      color: rgba(var(--ion-text-color-rgb), 0.5);
+      font-size: 16px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+  }
+}
+
+// ── Custom Premium Popover ─────────────────────────────────────────
+::ng-deep .premium-popover {
+  --background: rgba(30, 35, 45, 0.95);
+  --backdrop-filter: blur(20px);
+  --color: #fff;
+  
+  &::part(content) {
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  }
+
+  ion-item {
+    --background: transparent;
+    --color: rgba(255, 255, 255, 0.8);
+    --border-color: rgba(255, 255, 255, 0.05);
+    font-weight: 500;
+    font-size: 14px;
+    transition: background 0.2s;
+
+    &.item-has-focus, &:hover {
+      --background: rgba(255, 255, 255, 0.05);
+      --color: #fff;
+    }
+
+    ion-radio {
+      --color: var(--ion-color-primary);
+      --color-checked: var(--ion-color-primary);
+    }
+  }
+
+  /* Adjust for light mode automatically */
+  @media (prefers-color-scheme: light) {
+    body:not(.dark) & {
+      --background: rgba(255, 255, 255, 0.95);
+      --color: #333;
+      
+      &::part(content) {
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      }
+      
+      ion-item {
+        --color: rgba(0, 0, 0, 0.8);
+        --border-color: rgba(0, 0, 0, 0.05);
+
+        &.item-has-focus, &:hover {
+          --background: rgba(0, 0, 0, 0.03);
+          --color: #000;
+        }
+      }
+    }
+  }
+}
+
+// ── Security & Logout ─────────────────────────────────────────────
+.security-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+}
+
+.security-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    color: var(--ew-color-gray-500);
+    font-size: 14px;
+    line-height: 1.5;
+    
+    ion-icon {
+      color: var(--ion-color-success);
+      font-size: 18px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+  }
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px;
+  background: rgba(var(--ion-color-danger-rgb), 0.1);
+  border: 1px solid rgba(var(--ion-color-danger-rgb), 0.2);
+  border-radius: 16px;
+  color: var(--ion-color-danger);
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  ion-icon { font-size: 20px; }
+  
+  &:hover {
+    background: var(--ion-color-danger);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(var(--ion-color-danger-rgb), 0.3);
+  }
 }
 
 .field-error {
-  grid-column: 1 / -1;
-  font-size: var(--ew-font-size-sm);
-  padding: var(--ew-space-4) 0 0;
-  font-weight: var(--ew-font-weight-medium);
-}
-
-.add-detail {
   display: flex;
-  justify-content: flex-start;
-  margin: var(--ew-space-6) 0;
+  align-items: center;
+  gap: 4px;
+  color: var(--ion-color-danger);
+  font-size: 12px;
+  margin-top: 4px;
 }
-
-.total-row {
+.array-error {
   display: flex;
-  justify-content: flex-end;
-  margin-top: 24px;
-
-  ion-badge {
-    font-size: 1.2em;
-    font-weight: 600;
-    padding: 14px 20px;
-    border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.3);
-  }
-}
-
-.field label {
-  display: block;
-  margin-bottom: var(--ew-space-2);
-  color: var(--ion-color-medium);
-  font-weight: var(--ew-font-weight-medium);
-  font-size: var(--ew-font-size-md);
-}
-.select-item {
-  /* tighten paddings on the container item */
-  --inner-padding-end: var(--ew-space-3);
-  --padding-top: var(--ew-space-2);
-  --padding-bottom: var(--ew-space-2);
-  --padding-start: 0;
-  --padding-end: 0;
-  /* remove any built-in borders from ion-item itself */
-  --inner-border-width: 0;
-  --border-width: 0;
-  --border-color: transparent;
-  --highlight-height: 0;
-  border-radius: var(--ew-radius-lg);
-  transition: all 0.2s ease;
-  box-shadow: var(--ew-shadow-sm);
-  &.glass {
-    background: color-mix(
-      in srgb,
-      var(--ion-background-color) 78%,
-      var(--ion-color-step-100)
-    );
-    backdrop-filter: saturate(160%) blur(var(--ew-blur-lg));
-    -webkit-backdrop-filter: saturate(160%) blur(var(--ew-blur-lg));
-    /* remove outer border to avoid double outline */
-    border: 0;
-  }
-  &.pill {
-    border-radius: var(--ew-radius-lg);
-  }
-  &.variant-outline {
-    --inner-border-width: 0;
-  }
-  max-width: 100%;
-  overflow: hidden;
-}
-
-/* make the select itself minimal (no extra border/background), and control padding here */
-.select-item ion-select {
-  width: 100%;
-  --padding-start: var(--ew-space-5);
-  --padding-end: var(--ew-space-5);
-  --padding-top: var(--ew-space-2);
-  --padding-bottom: var(--ew-space-2);
-  --min-height: var(--ew-size-10);
-  --border-width: 0;
-  --background: transparent;
-  --box-shadow: none;
-  --highlight-height: 0;
-}
-
-/* Ensure no default hairline borders from ion-item parts (iOS/MD) */
-.select-item::part(native),
-.select-item::part(inner) {
-  border: 0 !important;
-}
-
-/* optional: refine popover style */
-.currency-popover {
-  --background: color-mix(
-    in srgb,
-    var(--ion-background-color) 92%,
-    var(--ion-color-step-150)
-  );
-  --backdrop-opacity: var(--ew-opacity-md);
-  --width: var(--ew-size-40);
-}
-
-.actions {
-  margin-top: calc(var(--ew-space-4) * -1);
-  padding-top: var(--ew-space-8);
-  border-top: var(--ew-border-width-sm) solid
-    var(--ion-color-step-150, rgba(0, 0, 0, 0.07));
-}
-
-.spacer {
-  height: var(--ew-space-10);
-}
-
-@media (min-width: 640px) {
-  .form-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .actions {
-    grid-column: 1 / -1;
-  }
-  .salary-detail-row .row-content {
-    /* On larger screens, give the amount more room and a larger min width */
-    grid-template-columns: minmax(0, 1.6fr) minmax(var(--ew-size-50), 0.9fr) var(
-        --ew-space-10
-      ); // fixed action column on larger screens
-    gap: var(--ew-space-4);
-    padding: var(--ew-space-4);
-  }
-  .avatar-row {
-    flex-direction: row;
-    text-align: start;
-    gap: var(--ew-space-8);
-  }
-  .avatar-actions {
-    align-items: flex-start;
-  }
-  .avatar-actions .actions {
-    justify-content: flex-start;
-  }
-}
-
-/* Hide reorder handle on mobile and reclaim start padding */
-@media (max-width: 640px) {
-  .salary-detail-row {
-    --padding-start: 0;
-  }
-  .salary-detail-row ion-reorder {
-    display: none !important;
-    width: 0 !important;
-    min-width: 0 !important;
-  }
-}
-
-/* Very small devices: stack actions and reduce paddings */
-@media (max-width: 360px) {
-  .salary-detail-row .row-content {
-    padding: var(--ew-space-6);
-  }
-  .salary-detail-row .row-content .inline-actions ion-button {
-    --padding-start: var(--ew-space-2);
-    --padding-end: var(--ew-space-2);
-    --padding-top: var(--ew-space-3);
-    --padding-bottom: var(--ew-space-3);
-    font-size: var(--ew-font-size-xs);
-  }
-}
-
-/* Micro-interactions */
-.salary-detail-row,
-.salary-detail-row .row-content {
-  transition: background-color var(--ew-transition-duration-medium) ease,
-    box-shadow var(--ew-transition-duration-medium) ease,
-    transform var(--ew-transition-duration-medium) ease;
-}
-.salary-detail-row:hover {
-  background: color-mix(
-    in srgb,
-    var(--ion-background-color) 92%,
-    var(--ion-color-step-150)
-  );
-  box-shadow: var(--ew-shadow-md);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .salary-detail-row {
-    transition: none !important;
-  }
-
-  .animate-in,
-  .pulse-on-change,
-  .slide-in-up {
-    animation: none !important;
-  }
-}
-
-/* Animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.03);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-@keyframes slideInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes button-press {
-  from {
-    transform: translateY(-2px) scale(1);
-  }
-  to {
-    transform: translateY(0) scale(0.98);
-    box-shadow: var(--ew-shadow-sm);
-  }
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0) translateX(0);
-  }
-  25% {
-    transform: translateY(-20px) translateX(10px);
-  }
-  50% {
-    transform: translateY(-10px) translateX(-10px);
-  }
-  75% {
-    transform: translateY(-30px) translateX(5px);
-  }
-}
-
-@keyframes rotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -1000px 0;
-  }
-  100% {
-    background-position: 1000px 0;
-  }
-}
-
-.animate-in {
-  animation: fadeIn 0.4s ease forwards;
-}
-
-.pulse-on-change {
-  animation: pulse 0.3s ease;
-}
-
-.slide-in-up {
-  animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  align-items: center;
+  gap: 6px;
+  padding: 12px;
+  background: rgba(var(--ion-color-danger-rgb), 0.1);
+  color: var(--ion-color-danger);
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
 }

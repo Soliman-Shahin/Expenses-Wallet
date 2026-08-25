@@ -1,17 +1,15 @@
 .icon-selector-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
-  gap: 8px;
-  padding: 0;
+  grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+  gap: 10px;
+  padding: var(--ew-space-2) 0;
   background: transparent;
   border: none;
-  border-radius: 12px;
-  margin: 8px 0;
-  max-height: 300px;
+  margin: var(--ew-space-2) 0;
+  max-height: 260px;
   overflow-y: auto;
   overflow-x: hidden;
   width: 100%;
-  min-width: 300px;
   animation: fadeInScale 0.5s ease-out;
 
   .icon {
@@ -19,102 +17,91 @@
     
     @for $i from 1 through 50 {
       &:nth-child(#{$i}) {
-        animation-delay: #{$i * 0.02}s;
+        animation-delay: #{$i * 0.015}s;
       }
     }
   }
 
+  // Thin custom scrollbar for the icon grid
   &::-webkit-scrollbar {
-    width: 6px;
+    width: 4px;
   }
 
   &::-webkit-scrollbar-track {
-    background: var(--ion-color-step-100);
-    border-radius: 3px;
+    background: transparent;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: var(--ion-color-primary);
-    border-radius: 3px;
+    background: rgba(var(--ion-text-color-rgb), 0.12);
+    border-radius: 10px;
     transition: background 0.3s ease;
 
     &:hover {
-      background: var(--ion-color-primary-shade);
+      background: rgba(var(--ion-text-color-rgb), 0.22);
     }
   }
 }
 
 .icon {
-  width: 50px;
-  height: 50px;
+  width: 52px;
+  height: 52px;
   cursor: pointer;
-  border: 2px solid transparent;
-  border-radius: 12px;
-  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  border: none; // remove hard border for a cleaner look
+  border-radius: 16px; // Modern smooth squircle
+  transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--ion-color-step-100);
-  color: var(--ion-color-medium);
-  box-shadow: 0 2px 4px var(--ion-color-step-200);
+  background: rgba(var(--ion-text-color-rgb), 0.02);
+  color: var(--ew-text-color-muted);
   position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    inset-inline-start: 0;
-    inset-inline-end: 0;
-    bottom: 0;
-    background: radial-gradient(circle at center, var(--ion-color-primary-tint) 0%, transparent 70%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
+  overflow: visible; // allow glow to extend
+  font-size: 26px;
 
   &:hover {
-    background: var(--ion-color-primary-tint);
-    color: var(--ion-color-primary-contrast);
-    border-color: var(--ion-color-primary);
-    transform: translateY(-3px) rotate(5deg);
-    box-shadow: 0 6px 20px var(--ion-color-primary-shade);
-
-    &::before {
-      opacity: 0.3;
-    }
+    background: rgba(var(--ion-text-color-rgb), 0.06);
+    color: var(--ion-text-color);
+    transform: translateY(-2px);
   }
 
   &:active {
-    transform: translateY(-1px) scale(0.95);
+    transform: translateY(0) scale(0.95);
   }
 
   &.selected {
-    background: var(--ion-color-primary);
-    color: var(--ion-color-primary-contrast);
-    border-color: var(--ion-color-primary-shade);
-    transform: scale(1.05);
-    box-shadow: 0 0 0 3px var(--ion-color-primary-tint);
-    animation: iconBounce 0.6s ease-out;
+    background: var(--active-color) !important;
+    color: #ffffff !important;
+    transform: scale(1.08);
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--active-color) 40%, transparent);
+    animation: iconBounce 0.4s ease-out;
+    z-index: 1; // ensure shadow sits above others
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
 
-    &::before {
-      opacity: 0.2;
+    // Subtle inner light for a premium 3D feel
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.3);
+      pointer-events: none;
     }
   }
 }
 
 @keyframes iconBounce {
   0% { transform: scale(1); }
-  50% { transform: scale(1.2) rotate(-5deg); }
-  100% { transform: scale(1.05); }
+  50% { transform: scale(1.15) rotate(-5deg); }
+  100% { transform: scale(1.06); }
 }
 
 @keyframes iconStagger {
   from {
     opacity: 0;
-    transform: translateY(30px) scale(0.7) rotate(-10deg);
+    transform: translateY(15px) scale(0.85);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1) rotate(0deg);
+    transform: translateY(0) scale(1);
   }
 }

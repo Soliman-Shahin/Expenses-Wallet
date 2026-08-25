@@ -1,24 +1,21 @@
-import { Injectable, Renderer2, RendererFactory2 } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Injectable, Renderer2, RendererFactory2, signal, effect } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { StatusBar, Style } from '@capacitor/status-bar';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ThemeService {
   private renderer: Renderer2;
-  private _theme = new BehaviorSubject<string>('light');
-  theme$ = this._theme.asObservable();
+  theme = signal<string>('light');
+  theme$ = toObservable(this.theme);
 
   constructor(rendererFactory: RendererFactory2) {
     this.renderer = rendererFactory.createRenderer(null, null);
-  }
 
-  initTheme() {
-    const storedTheme = localStorage.getItem('theme') || 'light';
-    this._theme.next(storedTheme);
-
-    this.theme$.subscribe((theme) => {
-      if (theme === 'dark') {
+    effect(() => {
+      const currentTheme = this.theme();
+      if (currentTheme === 'dark') {
         this.enableDark();
       } else {
         this.enableLight();
@@ -26,22 +23,38 @@ export class ThemeService {
     });
   }
 
+  initTheme() {
+    const storedTheme = localStorage.getItem('theme') || 'light';
+    this.theme.set(storedTheme);
+  }
+
   toggleTheme() {
-    const newTheme = this._theme.value === 'dark' ? 'light' : 'dark';
-    this._theme.next(newTheme);
+    const newTheme = this.theme() === 'dark' ? 'light' : 'dark';
+    this.theme.set(newTheme);
     localStorage.setItem('theme', newTheme);
   }
 
-  private enableDark() {
+  private async enableDark() {
     this.renderer.addClass(document.body, 'dark');
+    try {
+      await StatusBar.setStyle({ style: Style.Dark });
+    } catch (e) {
+      // Ignored on web
+    }
   }
 
-  private enableLight() {
+  private async enableLight() {
     this.renderer.removeClass(document.body, 'dark');
+    try {
+      // Light style actually means dark text (for light backgrounds)
+      await StatusBar.setStyle({ style: Style.Light });
+    } catch (e) {
+      // Ignored on web
+    }
   }
 
   getCurrentTheme() {
-    return this._theme.value;
+    return this.theme();
   }
 
   isDarkMode(): boolean {

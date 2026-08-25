@@ -1,17 +1,45 @@
-/* Match the category icon style used in Categories list */
+
+/* Transaction icon wrapper */
+.transaction-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-inline-end: var(--ew-space-3);
+}
+
+/* Larger category icon with glow */
 .category-icon {
-  height: 44px !important;
-  width: 44px !important;
-  min-width: 44px !important;
-  border-radius: var(--ew-radius-full);
+  height: 46px !important;
+  width: 46px !important;
+  min-width: 46px !important;
+  border-radius: 14px;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-inline-end: var(--ew-space-3);
   color: white;
   flex-shrink: 0;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  // Dynamic glow effect
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: inherit;
+    border-radius: inherit;
+    filter: blur(6px);
+    opacity: 0.2;
+    z-index: -1;
+    transform: translateY(2px) scale(0.9);
+  }
+
   ion-icon {
-    font-size: 24px;
+    font-size: 22px;
+    font-weight: 500;
   }
 }
 
@@ -19,157 +47,212 @@
 /* Match Categories list spacing */
 .transactions-list {
   background: transparent;
+  padding: var(--ew-space-2) 0;
+}
+
+.transaction-sliding {
+  margin: 0 0 12px 0 !important;
+  background: transparent !important;
+  border-radius: 18px;
+
+  animation: itemAppear var(--ew-animation-duration-slow, 400ms)
+    cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation-delay: calc(var(--animation-order, 0) * 45ms);
+}
+
+.transaction-item {
+  --background: var(--ion-item-background);
+  border-radius: 20px;
+  margin: 0 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  --min-height: 78px;
+  --padding-start: 14px;
+  --padding-end: 14px;
+  --inner-padding-end: 0;
+
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  --ripple-color: rgba(var(--ion-color-primary-rgb), 0.1);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    border-color: rgba(var(--ion-color-primary-rgb), 0.25);
+    transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1),
+      box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+
+  &:active {
+    transform: scale(0.985);
+    transition: transform 0.1s ease;
+  }
 }
 
 
+.transaction-content {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  padding: 4px 0 !important;
+}
+
+.transaction-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+}
+
 .transaction-title {
-  color: var(--ew-color-neutral-600);
-  font-weight: var(--ew-font-weight-semibold);
-  margin: 0 0 var(--ew-space-1) 0;
+  color: var(--ion-text-color) !important;
+  font-weight: 600 !important;
+  font-size: 16px !important;
+  margin: 0 !important;
+  line-height: 1.3 !important;
+  letter-spacing: -0.3px !important;
+  flex: 1 !important;
 }
 
 .transaction-meta {
-  display: flex;
-  align-items: center;
-  gap: var(--ew-space-2);
-  margin: 0;
-  font-size: var(--ew-font-size-xs);
-  color: var(--ion-color-medium);
-  .transaction-date {
-    display: flex;
-    align-items: center;
-  }
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin: 0 !important;
+  font-size: 13px !important;
+  color: var(--ion-color-medium) !important;
+  line-height: 1.4 !important;
+
+  .transaction-date,
   .transaction-category {
-    display: flex;
-    align-items: center;
-    gap: var(--ew-space-1);
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+
     ion-icon {
-      font-size: var(--ew-font-size-xs);
+      font-size: 14px !important;
+      opacity: 0.7 !important;
+    }
+  }
+
+  .transaction-category {
+    &::before {
+      content: '•';
+      display: inline-block;
+      margin: 0 4px;
+      opacity: 0.5;
     }
   }
 }
 
-ion-item-option {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--ew-radius-lg);
-  margin: var(--ew-space-1);
-  transition: background-color 0.3s ease, transform 0.3s ease;
-  height: 80%;
+/* Transaction amount styling */
+.transaction-amount {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+
+  .amount-value {
+    font-family: var(--ew-font-family-heading) !important;
+    font-weight: 700 !important;
+    font-size: 17px !important;
+    letter-spacing: -0.5px !important;
+    white-space: nowrap !important;
+  }
+
+  .amount-income {
+    color: var(--ion-color-success) !important;
+  }
+
+  .amount-expense {
+    color: var(--ion-color-danger) !important;
+  }
+}
+
+/* Custom sliding action buttons layout */
+.custom-item-options {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 6px;
+  height: 100%;
+}
+
+.option-btn {
+  --background: rgba(var(--ion-color-primary-rgb), 0.08);
+  --color: var(--ion-color-primary) !important;
+  --ripple-color: rgba(var(--ion-color-primary-rgb), 0.15);
+
+  border: 1px solid rgba(var(--ion-color-primary-rgb), 0.15);
+  border-radius: 16px !important;
+  margin: 0 6px;
+  height: calc(100% - 16px);
+  max-height: 62px;
+  min-width: 68px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  align-self: center;
+  padding: 0;
+
+  &::part(native) {
+    border-radius: 16px !important;
+    padding: 0;
+  }
+
+  .option-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    width: 100%;
+    height: 100%;
+
+    ion-icon {
+      font-size: 20px;
+      margin: 0;
+      color: inherit;
+    }
+
+    span {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+      text-transform: uppercase;
+      color: inherit;
+    }
+  }
+
   &:hover {
     transform: scale(1.05);
-    background-color: var(--ion-color-primary-tint);
+    --background: rgba(var(--ion-color-primary-rgb), 0.15);
+    border-color: rgba(var(--ion-color-primary-rgb), 0.3);
+    box-shadow: 0 6px 16px rgba(var(--ion-color-primary-rgb), 0.12);
+  }
+
+  &:active {
+    transform: scale(0.96);
   }
 }
 
-ion-item-option[color="danger"] {
+.option-delete {
+  --background: rgba(var(--ion-color-danger-rgb), 0.08) !important;
+  --color: var(--ion-color-danger) !important;
+  --ripple-color: rgba(var(--ion-color-danger-rgb), 0.15);
+  border: 1px solid rgba(var(--ion-color-danger-rgb), 0.15) !important;
+
   &:hover {
-    background-color: var(--ion-color-danger-tint);
+    --background: rgba(var(--ion-color-danger-rgb), 0.15) !important;
+    border-color: rgba(var(--ion-color-danger-rgb), 0.3) !important;
+    box-shadow: 0 6px 16px rgba(var(--ion-color-danger-rgb), 0.12);
   }
 }
 
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  padding: var(--ew-space-6);
-  ion-icon {
-    font-size: var(--ew-size-20);
-    color: var(--ew-text-color-muted);
-    margin-bottom: var(--ew-space-4);
-  }
-  h2 {
-    font-family: var(--ew-font-family-heading);
-    font-weight: var(--ew-font-weight-bold);
-    font-size: var(--ew-font-size-xl);
-    color: var(--ew-text-color-primary);
-    margin-bottom: var(--ew-space-2);
-  }
-  p {
-    font-family: var(--ew-font-family-base);
-    color: var(--ew-text-color-secondary);
-    max-width: 320px;
-    margin-bottom: var(--ew-space-6);
-  }
-}
-
-.transaction-amount {
-  font-weight: var(--ew-font-weight-bold);
-  font-size: var(--ew-font-size-base);
-  letter-spacing: var(--ew-letter-spacing-wide);
-
-  &.is-income {
-    color: var(--ion-color-success);
-  }
-
-  &.is-expense {
-    color: var(--ion-color-danger);
-  }
-}
-
-
-@keyframes cardAppear {
+@keyframes itemAppear {
   from {
     opacity: 0;
-    transform: translateY(var(--ew-space-3));
+    transform: translateY(20px) scale(0.95);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.list-fade-in .transaction-item {
-  animation: cardAppear var(--ew-transition-duration-medium) ease both;
-  animation-delay: calc(var(--animation-order, 0) * 50ms);
-}
-
-.empty-state {
-  padding-top: var(--ew-space-8) !important;
-  padding-bottom: var(--ew-space-8) !important;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.7;
-
-  .empty-state-icon-wrapper {
-    background: rgba(var(--ion-color-primary-rgb), 0.08);
-    border-radius: var(--ew-radius-full);
-    padding: var(--ew-space-6);
-    margin-bottom: var(--ew-space-5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .empty-state-icon {
-    width: 80px;
-    height: 80px;
-    border-radius: 20%;
-  }
-
-  .empty-state-title {
-    font-weight: var(--ew-font-weight-bold);
-    font-size: var(--ew-font-size-lg);
-    color: var(--ion-text-color);
-    margin: 0 0 var(--ew-space-2) 0;
-  }
-
-  .empty-state-subtitle {
-    font-size: var(--ew-font-size-base);
-    color: var(--ion-color-medium);
-    margin: 0 0 var(--ew-space-6) 0;
-    max-width: 300px;
-  }
-
-  .add-transaction-button {
-    --color: var(--ion-color-primary);
-    font-weight: var(--ew-font-weight-semibold);
-    --ripple-color: var(--ion-color-primary);
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -180,3 +263,4 @@ ion-item-option[color="danger"] {
     transition: none !important;
   }
 }
+

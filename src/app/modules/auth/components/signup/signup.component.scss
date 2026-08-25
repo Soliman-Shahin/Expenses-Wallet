@@ -1,288 +1,376 @@
-// =============================
-// Signup Page Styles
-// =============================
+// ===================================================================
+//  SIGNUP PAGE — Hero + Sheet Creative Layout (mirrors login)
+// ===================================================================
 
-// Utility Classes
-.no_account {
-  vertical-align: sub;
+// ── Page wrapper ──────────────────────────────────────────────────
+.auth-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
 }
 
-.text-success {
-  color: var(--ion-color-success);
-}
-
-// Visually Hidden (for accessibility)
-.visually-hidden {
-  position: absolute;
-  width: var(--ew-size-px);
-  height: var(--ew-size-px);
-  padding: 0;
-  margin: var(--ew-space-px-negative);
+// ── Hero / Brand Zone ─────────────────────────────────────────────
+.auth-hero {
+  position: relative;
   overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+  flex-shrink: 0;
+  padding: calc(env(safe-area-inset-top, 24px) + 40px) 24px 88px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  // Teal-to-dark (reversed compared to login for differentiation)
+  background: linear-gradient(145deg, #071a18 0%, #0f2d2a 40%, #081a28 100%);
+
+  .dark & {
+    background: linear-gradient(145deg, #050e0d 0%, #091e1b 40%, #07131f 100%);
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle, rgba(15, 185, 177, 0.18) 1px, transparent 1px);
+    background-size: 28px 28px;
+    opacity: 1;
+    pointer-events: none;
+  }
 }
 
-// Divider
+// Orbs — shifted palette for signup
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  pointer-events: none;
+
+  &--a {
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(15, 185, 177, 0.5), transparent 70%);
+    top: -50px;
+    left: -40px;
+    animation: orbDrift 9s ease-in-out infinite;
+  }
+
+  &--b {
+    width: 170px;
+    height: 170px;
+    background: radial-gradient(circle, rgba(56, 103, 214, 0.4), transparent 70%);
+    bottom: 10px;
+    right: -40px;
+    animation: orbDrift 11s ease-in-out infinite reverse;
+  }
+
+  &--c {
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, rgba(250, 130, 49, 0.25), transparent 70%);
+    top: 30%;
+    right: 25%;
+    animation: orbDrift 7s ease-in-out infinite 2s;
+  }
+}
+
+@keyframes orbDrift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(-15px, -18px) scale(1.05); }
+  66%       { transform: translate(10px, 12px) scale(0.96); }
+}
+
+// Hero content
+.hero-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+// ── Spinning gradient ring (teal/green variant) ───────────────────
+.logo-ring-wrap {
+  position: relative;
+  width: 104px;
+  height: 104px;
+  margin-bottom: 20px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -5px;
+    border-radius: 50%;
+    background: conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      rgba(15, 185, 177, 0.9) 90deg,
+      rgba(56, 103, 214, 0.8) 200deg,
+      rgba(250, 130, 49, 0.5) 280deg,
+      transparent 360deg
+    );
+    animation: spinRing 3.5s linear infinite;
+    filter: blur(1px);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border-radius: 50%;
+    background: #0f2d2a;
+
+    .dark & { background: #050e0d; }
+  }
+}
+
+.logo-ring {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-logo {
+  position: relative;
+  z-index: 2;
+  width: 84px;
+  height: 84px;
+  border-radius: 22px;
+  animation: logoAppear 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes spinRing {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes logoAppear {
+  from { transform: scale(0.6); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+.app-name {
+  margin: 0 0 8px;
+  font-size: clamp(1.6rem, 5vw, 2.2rem);
+  font-weight: 800;
+  font-family: var(--ew-font-family-heading);
+  color: #fff;
+  letter-spacing: -0.8px;
+  text-shadow: 0 0 40px rgba(15, 185, 177, 0.5);
+  animation: fadeUp 0.6s 0.2s both;
+}
+
+.app-tagline {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  animation: fadeUp 0.6s 0.3s both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+// ── Form Sheet ────────────────────────────────────────────────────
+.auth-sheet {
+  flex: 1;
+  position: relative;
+  z-index: 2;
+  margin-top: -36px;
+  border-radius: 32px 32px 0 0;
+  background: var(--ion-background-color);
+  padding: 16px 24px calc(env(safe-area-inset-bottom, 16px) + 24px);
+  box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.2);
+  animation: sheetSlideUp 0.5s 0.1s cubic-bezier(0.4, 0, 0.2, 1) both;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 2px;
+    border-radius: 0 0 2px 2px;
+    background: linear-gradient(to right, transparent, rgba(var(--ion-color-secondary-rgb), 0.6), transparent);
+  }
+}
+
+@keyframes sheetSlideUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.sheet-handle {
+  width: 40px;
+  height: 4px;
+  background: rgba(var(--ion-color-secondary-rgb), 0.2);
+  border-radius: 99px;
+  margin: 0 auto 20px;
+}
+
+.sheet-title {
+  font-size: var(--ew-font-size-xl);
+  font-weight: var(--ew-font-weight-bold);
+  font-family: var(--ew-font-family-heading);
+  color: var(--ion-text-color);
+  margin: 0 0 4px;
+  text-align: center;
+  animation: fadeUp 0.5s 0.2s both;
+}
+
+.sheet-subtitle {
+  font-size: var(--ew-font-size-sm);
+  color: var(--ew-color-gray-500);
+  text-align: center;
+  margin: 0 0 20px;
+  animation: fadeUp 0.5s 0.25s both;
+}
+
+// ── Google Button ─────────────────────────────────────────────────
+.social-signup-buttons {
+  animation: fadeUp 0.5s 0.3s both;
+
+  .google-btn {
+    --border-radius: var(--ew-radius-pill);
+    --border-style: solid;
+    --border-width: 1.5px;
+    --border-color: rgba(var(--ion-color-secondary-rgb), 0.25);
+    --background: transparent;
+    --background-hover: rgba(var(--ion-color-secondary-rgb), 0.05);
+    --color: var(--ion-text-color);
+    --box-shadow: none;
+    height: 52px;
+    font-weight: var(--ew-font-weight-semibold);
+    font-size: var(--ew-font-size-sm);
+    text-transform: none;
+    margin: 0;
+    transition: all 0.25s ease;
+
+    ion-icon {
+      font-size: 20px;
+      margin-inline-end: 12px;
+      color: #db4437;
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+      --box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+// ── Divider ──────────────────────────────────────────────────────
 .divider {
   display: flex;
   align-items: center;
-  text-align: center;
-  margin: var(--ew-space-6) 0;
-  color: var(--ion-color-medium-shade);
+  margin: 18px 0;
+  animation: fadeUp 0.5s 0.35s both;
 
   .divider-line {
     flex: 1;
     height: 1px;
-    background-color: var(--ion-color-step-200, #e0e0e0);
+    background: linear-gradient(to right, transparent, rgba(var(--ion-color-secondary-rgb), 0.2), transparent);
   }
 
   .divider-text {
-    margin: 0 var(--ew-space-3);
-    font-weight: var(--ew-font-weight-medium);
-    font-size: var(--ew-font-size-sm);
+    margin: 0 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ew-color-gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
   }
 }
 
-// Note Styling
-ion-note {
-  ul {
-    padding-inline-start: var(--ew-space-6);
-    margin: var(--ew-space-2) 0 0 0;
-  }
-
-  li {
-    margin: var(--ew-space-1) 0;
-    color: var(--text-tertiary);
-  }
+// ── Form ─────────────────────────────────────────────────────────
+.signup-form {
+  animation: fadeUp 0.5s 0.4s both;
 }
 
-// Form Container
-.signup-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100%;
-  padding: var(--ew-space-6);
-  background: var(--ion-background-color, var(--ion-color-light));
-}
-
-// Signup Card
-.signup-card {
-  width: 100%;
-  max-width: 420px;
-  margin: auto;
-  padding: var(--ew-space-6) var(--ew-space-5);
-  background: var(--ion-card-background);
-  border-radius: var(--ew-radius-xl);
-  display: flex;
-  flex-direction: column;
-  border: 1px solid transparent;
-
-  @media (prefers-color-scheme: light) {
-    border-color: var(--ion-color-step-200, #e0e0e0);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
-  }
-  box-shadow: var(--card-box-shadow, var(--ew-shadow-lg));
-  margin: var(--ew-space-6) 0;
-}
-
-// Logo Container
-.logo-container {
-  text-align: center;
-  margin-bottom: var(--ew-space-10);
-
-  .app-logo {
-    width: 96px;
-    height: 96px;
-    border-radius: 20%;
-    margin-bottom: var(--ew-space-4);
-    box-shadow: var(--ew-shadow-lg);
-  }
-
-  .app-name {
-    margin: 0;
-    font-size: var(--ew-font-size-3xl);
-    font-weight: var(--ew-font-weight-semibold);
-    color: var(--text-primary);
-  }
-}
-
-// Welcome Text
-.welcome-text {
-  font-size: var(--ew-font-size-2xl);
-  font-weight: var(--ew-font-weight-semibold);
-  color: var(--text-primary);
-  margin-bottom: var(--ew-space-2);
-  text-align: center;
-}
-
-// Subtitle Text
-.subtitle {
-  color: var(--text-tertiary);
-  text-align: center;
-  margin-bottom: var(--ew-space-6);
-  font-size: var(--ew-font-size-base);
-}
-
-// Social Buttons
-.social-signup-buttons {
-  display: grid;
-  row-gap: 1rem;
-
-  ion-button {
-    --border-radius: var(--ew-radius-xl);
-    --border-style: solid;
-    --border-width: var(--ew-border-width-sm);
-    --padding-top: var(--ew-space-4);
-    --padding-bottom: var(--ew-space-4);
-    font-weight: var(--ew-font-weight-medium);
-    text-transform: none;
-    height: var(--ew-size-12);
-    margin: 0;
-    transition: all var(--ew-transition-duration-medium) ease;
-
-    ion-icon {
-      font-size: var(--ew-font-size-xl);
-      margin-inline-end: var(--ew-space-3);
-    }
-
-    &:hover {
-      transform: translateY(var(--ew-space-px-negative));
-      --box-shadow: var(--ew-shadow-md);
-    }
-
-    &:active {
-      transform: translateY(var(--ew-space-px));
-      --box-shadow: none;
-    }
-
-    &.google-btn {
-      --border-color: #e0e0e0;
-      --color: #444;
-      --background: #fff;
-      --background-hover: #f5f5f5;
-
-      ion-icon {
-        color: #db4437; // Google brand red
-      }
-    }
-
-    &.facebook-btn {
-      --border-color: #1877f2;
-      --color: #1877f2;
-      --background: transparent;
-      --background-hover: rgba(24, 119, 242, 0.05);
-
-      ion-icon {
-        color: #1877f2;
-      }
-    }
-  }
+ion-list {
+  background: transparent !important;
+  padding: 0 !important;
 }
 
 .form-item {
-  // Lighter background (more transparent) per user's preference
-  --background: rgba(255, 255, 255, 0.03);
-  --border-radius: var(--ew-radius-xl);
-  --padding-start: var(
-    --ew-space-4
-  ); // tighter start padding so icon sticks to edge
-  --padding-end: var(--ew-space-4); // symmetric end padding
-  --min-height: var(--ew-size-15);
-  margin-bottom: var(--ew-space-4);
-  border: var(--ew-border-width-sm) solid transparent; // remove visible border to avoid double-box look
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-  overflow: hidden; // clip children to the same capsule
+  --background: rgba(var(--ion-color-secondary-rgb), 0.04);
+  --border-radius: var(--ew-radius-lg);
+  --padding-start: var(--ew-space-4);
+  --padding-end: var(--ew-space-4);
+  --min-height: 54px;
   --inner-border-width: 0;
   --inner-padding-top: 0;
   --inner-padding-bottom: 0;
-  --inner-padding-start: 0; // remove inner start padding so icon hugs the edge
-  --inner-padding-end: 0; // remove inner end padding so end icon hugs the edge
+  --inner-padding-start: 0;
+  --inner-padding-end: 0;
   --highlight-color-focused: transparent;
   --highlight-color-invalid: transparent;
   --highlight-color-valid: transparent;
   --box-shadow: none;
   --ripple-color: transparent;
-  --background: rgba(255, 255, 255, 0.02);
 
-  &.ion-invalid {
-    // keep border subtle; indicate invalid via soft glow instead of harsh red border
-    border-color: transparent;
-    box-shadow: 0 0 0 var(--ew-border-width-md)
-      color-mix(in srgb, var(--ion-color-danger) 14%, transparent);
-    --highlight-color-invalid: transparent;
+  margin-bottom: 12px;
+  border: 1.5px solid rgba(var(--ion-color-primary-rgb), 0.12);
+  border-radius: var(--ew-radius-lg);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
 
-    // Kill native invalid red outline inside the shadow DOM
-    ion-input::part(native) {
-      box-shadow: none !important;
-      outline: none !important;
-    }
-    ion-input::part(container) {
-      box-shadow: none !important;
-      border: 0 !important;
-    }
-  }
-
-  // Keep valid border neutral to avoid flashing green frames
-  &.ion-valid {
-    border-color: var(--ion-color-light-shade);
-  }
-
-  // Focus ring and subtle elevation when the input is focused
   &:focus-within {
-    border-color: transparent;
-    box-shadow: 0 0 0 var(--ew-border-width-md)
-      color-mix(in srgb, var(--ion-color-primary) 18%, transparent);
-    --background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(var(--ion-color-secondary-rgb), 0.5);
+    box-shadow: 0 0 0 4px rgba(var(--ion-color-secondary-rgb), 0.08);
+    --background: rgba(var(--ion-color-secondary-rgb), 0.06);
+  }
+
+  &.ion-invalid.ion-touched {
+    border-color: rgba(var(--ion-color-danger-rgb), 0.4);
+    box-shadow: 0 0 0 4px rgba(var(--ion-color-danger-rgb), 0.06);
   }
 
   ion-icon {
-    color: var(--ion-color-medium);
-    font-size: var(--ew-font-size-xl);
-    margin-inline-end: var(--ew-space-2); // reduce gap between icon and text
+    color: var(--ion-color-secondary);
+    font-size: 20px;
+    margin-inline-end: 8px;
+    opacity: 0.7;
     background: transparent !important;
-  }
-
-  // Icons are now inside ion-input via slots; style them too
-  ion-input ion-icon[slot="start"] {
-    color: var(--ion-color-medium);
-    margin-inline-end: var(--ew-space-2);
-    font-size: var(--ew-font-size-xl);
   }
 
   ion-input {
     --padding-top: var(--ew-space-3);
     --padding-bottom: var(--ew-space-3);
-    --padding-start: 0; // text starts right after icon
-    --padding-end: 0; // text ends right before end icon
-    --background: transparent; // kill any inner filled bg
+    --padding-start: 0;
+    --padding-end: 0;
+    --background: transparent;
     --border-width: 0;
     --border-color: transparent;
     --border-radius: 0;
     --box-shadow: none;
     --color: var(--ion-text-color);
-    --placeholder-color: var(--ion-color-medium);
-    --placeholder-opacity: 0.9;
-    font-size: var(--ew-font-size-base);
-    caret-color: var(--ion-color-primary);
-    flex: 1 1 auto; // fill remaining space inside ion-item
+    --placeholder-color: var(--ew-color-gray-500);
+    --placeholder-opacity: 0.7;
+    font-size: var(--ew-font-size-sm);
+    caret-color: var(--ion-color-secondary);
+    flex: 1 1 auto;
     width: 100%;
-    min-width: 0; // allow flexbox to shrink properly
+    min-width: 0;
   }
 
-  // Ensure the native input element itself has no default background/margins
   ion-input::part(native) {
     background: transparent !important;
     border: 0 !important;
     outline: none;
-    padding: var(--ew-space-3) 0 !important; // vertical only; horizontal handled by item paddings
     box-shadow: none !important;
     width: 100% !important;
   }
 
-  // Remove any inner container pill/background from ion-input
   ion-input::part(container) {
     background: transparent !important;
     border-radius: 0 !important;
@@ -292,7 +380,6 @@ ion-note {
     width: 100% !important;
   }
 
-  // Also ensure the ion-item surface itself is the capsule (no inner box)
   &::part(native) {
     background: var(--background);
     border-radius: var(--border-radius);
@@ -302,7 +389,6 @@ ion-note {
   }
 
   ion-button {
-    // Make the end-eye icon feel part of the input (no separate chip/button look)
     --padding-start: 0;
     --padding-end: 0;
     --background: transparent;
@@ -311,197 +397,232 @@ ion-note {
     height: var(--ew-size-8);
     min-height: var(--ew-size-8);
     min-width: var(--ew-size-8);
-    color: var(--ion-color-medium);
 
     ion-icon {
       margin-inline-end: 0;
       color: var(--ion-color-medium);
-      font-size: var(--ew-font-size-2xl);
+      font-size: var(--ew-font-size-xl);
+      opacity: 1;
     }
   }
 }
 
-// Form options
-.form-options {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: var(--ew-space-6) 0;
-  flex-wrap: nowrap;
-  gap: var(--ew-space-4);
-
-  .terms-label {
-    display: flex;
-  align-items: center;
-  gap: var(--ew-space-3);
-  font-size: var(--ew-font-size-sm);
-  white-space: nowrap;
-  color: var(--text-secondary);
-
-    ion-checkbox {
-      --size: 20px;
-      --background-checked: var(--ion-color-primary);
-      --border-color: var(--ion-color-medium);
-      --border-color-checked: var(--ion-color-primary);
-      margin: 0;
-    }
-
-    a {
-      color: var(--ion-color-primary);
-      text-decoration: none;
-      font-weight: 500;
-
-      &:hover {
-        text-decoration: underline;
-      }
-    }
-  }
-}
-
-// Error Message
-.error-message {
-  color: var(--ion-color-danger);
-  font-size: var(--ew-font-size-sm);
-  margin: var(--ew-space-2) 0;
-  display: flex;
-  align-items: center;
-
-  ion-icon {
-    margin-inline-end: var(--ew-space-2);
-  }
-}
-
-// Password Strength Meter
+// ── Password Strength Bars ────────────────────────────────────────
 .password-strength {
-  margin: var(--ew-space-4) 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: -6px 0 12px;
+  padding: 0 4px;
 
-  .strength-meter {
-    height: var(--ew-size-1-5);
-    background: var(--ion-color-light-shade);
-    border-radius: var(--ew-radius-sm);
-    overflow: hidden;
-    position: relative;
-
-    .strength-meter-fill {
-      height: 100%;
-      width: 0;
-      transition: width var(--ew-transition-duration-medium) ease,
-        background var(--ew-transition-duration-medium) ease;
-      border-radius: var(--ew-radius-sm);
-
-      &.weak {
-        background: var(--ion-color-danger);
-        width: 33%;
-      }
-
-      &.medium {
-        background: var(--ion-color-warning);
-        width: 66%;
-      }
-
-      &.strong {
-        background: var(--ion-color-success);
-        width: 100%;
-      }
-    }
+  .strength-bars {
+    display: flex;
+    gap: 4px;
+    flex: 1;
   }
 
-  .strength-text {
-    margin-top: var(--ew-space-2);
-    font-size: var(--ew-font-size-sm);
-    color: var(--text-secondary);
+  .bar {
+    flex: 1;
+    height: 4px;
+    border-radius: 99px;
+    background: rgba(var(--ion-color-primary-rgb), 0.1);
+    transition: background 0.3s ease, transform 0.3s ease;
+
+    &.active {
+      transform: scaleY(1.2);
+    }
+
+    &.active.weak   { background: #ff4757; }
+    &.active.medium { background: #ffa502; }
+    &.active.strong { background: #2ed573; }
+  }
+
+  .strength-label {
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 44px;
     text-align: end;
+    transition: color 0.3s;
 
-    &.weak {
-      color: var(--ion-color-danger);
-    }
-
-    &.medium {
-      color: var(--ion-color-warning);
-    }
-
-    &.strong {
-      color: var(--ion-color-success);
-    }
+    &.weak   { color: #ff4757; }
+    &.medium { color: #ffa502; }
+    &.strong { color: #2ed573; }
   }
 }
 
-// Password Requirements
+// ── Password Requirements ─────────────────────────────────────────
 .password-requirements {
-  font-size: 0.8rem;
-  color: var(--ion-color-medium);
-  margin: var(--ew-space-5) 0 var(--ew-space-6);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 12px;
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  background: rgba(var(--ion-color-primary-rgb), 0.03);
+  border: 1px solid rgba(var(--ion-color-primary-rgb), 0.1);
+  border-radius: var(--ew-radius-md);
 
-  ul {
-    padding-inline-start: 20px;
-    margin-top: 5px;
-  }
+  .req {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--ew-color-gray-500);
+    transition: color 0.25s ease;
 
-  li {
-    transition: color 0.3s ease;
+    .req-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--ew-color-gray-400);
+      flex-shrink: 0;
+      transition: background 0.25s ease, transform 0.25s ease;
+    }
+
     &.valid {
       color: var(--ion-color-success);
+
+      .req-dot {
+        background: var(--ion-color-success);
+        transform: scale(1.3);
+        box-shadow: 0 0 6px rgba(var(--ion-color-success-rgb), 0.5);
+      }
     }
   }
 }
 
-// Login Link
-.login-link-container {
-  margin-top: var(--ew-space-6);
-  font-size: var(--ew-font-size-sm);
-  color: var(--ion-color-medium);
+// ── Terms ─────────────────────────────────────────────────────────
+.form-options {
+  margin: 8px 0 16px;
+}
 
-  .login-link {
-    color: var(--ion-color-primary);
-    font-weight: var(--ew-font-weight-medium);
+.terms-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: var(--ew-font-size-xs);
+  color: var(--ew-color-gray-500);
+  cursor: pointer;
+
+  ion-checkbox {
+    --size: 18px;
+    --background-checked: var(--ion-color-secondary);
+    --border-color: rgba(var(--ion-color-secondary-rgb), 0.3);
+    --border-color-checked: var(--ion-color-secondary);
+    --border-radius: 5px;
+    margin: 2px 0 0;
+    flex-shrink: 0;
+  }
+
+  .terms-link {
+    color: var(--ion-color-secondary);
+    font-weight: var(--ew-font-weight-semibold);
     text-decoration: none;
-    margin-inline-start: var(--ew-space-1);
+    cursor: pointer;
 
-    &:hover {
-      text-decoration: underline;
-    }
+    &:hover { text-decoration: underline; }
   }
 }
 
-// Responsive Adjustments
-@media (max-width: 576px) {
-  .logo-container {
-    .app-logo {
-      font-size: var(--ew-font-size-6xl);
-    }
-
-    .app-name {
-      font-size: var(--ew-font-size-2xl);
-    }
-  }
-
-  .welcome-text {
-    font-size: var(--ew-font-size-2xl);
-  }
-
-  .form-options {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--ew-space-3);
-
-    .ion-margin-vertical {
-      align-self: flex-start;
-    }
-  }
-}
-
+// ── Submit Button ─────────────────────────────────────────────────
 .auth-submit-button {
-  --border-radius: var(--ew-radius-xl);
-  --box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.25);
-  height: var(--ew-size-12);
+  --border-radius: var(--ew-radius-pill);
+  --background: linear-gradient(135deg, var(--ion-color-secondary) 0%, var(--ion-color-primary) 100%);
+  --background-hover: linear-gradient(135deg, var(--ion-color-secondary) 0%, var(--ion-color-primary) 100%);
+  --box-shadow: 0 8px 24px rgba(var(--ion-color-secondary-rgb), 0.35);
+  --color: #fff;
+  height: 54px;
   font-weight: var(--ew-font-weight-bold);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  transition: all 0.3s ease-in-out;
-  margin-top: 1.5rem;
+  font-size: var(--ew-font-size-base);
+  text-transform: none;
+  letter-spacing: 0.3px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 0;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.2) 50%, transparent 60%);
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
+  }
+
+  &:hover::after { transform: translateX(100%); }
 
   &:hover {
-    --box-shadow: 0 8px 20px rgba(var(--ion-color-primary-rgb), 0.3);
+    --box-shadow: 0 12px 32px rgba(var(--ion-color-secondary-rgb), 0.45);
     transform: translateY(-2px);
+  }
+
+  &:active { transform: translateY(0); }
+  &[disabled] { opacity: 0.55; transform: none; }
+}
+
+// ── Field-level Error (password mismatch) ────────────────────────
+.field-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ion-color-danger);
+  font-size: 12px;
+  font-weight: 500;
+  background: rgba(var(--ion-color-danger-rgb), 0.07);
+  border: 1px solid rgba(var(--ion-color-danger-rgb), 0.2);
+  border-radius: var(--ew-radius-md);
+  padding: 8px 12px;
+  margin: -6px 0 12px;
+  animation: fadeUp 0.2s ease both;
+
+  ion-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+}
+
+// ── Error Message ────────────────────────────────────────────────
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ion-color-danger);
+  font-size: var(--ew-font-size-xs);
+  background: rgba(var(--ion-color-danger-rgb), 0.08);
+  border: 1px solid rgba(var(--ion-color-danger-rgb), 0.2);
+  border-radius: var(--ew-radius-md);
+  padding: 12px 16px;
+  margin-bottom: 12px;
+
+  ion-icon { font-size: 18px; flex-shrink: 0; }
+}
+
+// ── Login Link ───────────────────────────────────────────────────
+.login-link-container {
+  margin-top: 20px;
+  font-size: var(--ew-font-size-xs);
+  color: var(--ew-color-gray-500);
+  text-align: center;
+  animation: fadeUp 0.5s 0.5s both;
+
+  .login-link {
+    color: var(--ion-color-secondary);
+    font-weight: var(--ew-font-weight-bold);
+    text-decoration: none;
+    margin-inline-start: 4px;
+    position: relative;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 0;
+      height: 1.5px;
+      background: var(--ion-color-secondary);
+      transition: width 0.25s ease;
+    }
+
+    &:hover::after { width: 100%; }
   }
 }

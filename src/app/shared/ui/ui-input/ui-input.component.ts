@@ -3,7 +3,9 @@ import { Component, ChangeDetectionStrategy, Input,
   forwardRef,
   Injector,
   OnInit,
-  ViewChild, } from '@angular/core';
+  ViewChild,
+  ChangeDetectorRef
+} from '@angular/core';
 import {
   ControlValueAccessor,
   FormsModule,
@@ -65,7 +67,7 @@ export class UiInputComponent implements ControlValueAccessor, OnInit {
   @ViewChild(IonInput) inputRef?: IonInput;
 
   public ngControl?: NgControl;
-  constructor(private injector: Injector) {}
+  constructor(private injector: Injector, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     try {
@@ -82,6 +84,7 @@ export class UiInputComponent implements ControlValueAccessor, OnInit {
 
   writeValue(obj: any): void {
     this.value = obj ?? '';
+    this.cdr.markForCheck();
   }
   registerOnChange(fn: any): void {
     this.onChange = fn;

@@ -1,4 +1,4 @@
-import { Injectable, ErrorHandler, Injector } from '@angular/core';
+import { Injectable, ErrorHandler, Injector, inject } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ToastController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
@@ -9,7 +9,10 @@ import { TranslateService } from '@ngx-translate/core';
 export class ErrorHandlerService implements ErrorHandler {
   private toastCtrl!: ToastController;
 
-  constructor(private injector: Injector, private translate: TranslateService) {
+  private injector = inject(Injector);
+  private translate = inject(TranslateService);
+
+  constructor() {
     // Inject ToastController in constructor to avoid circular dependency
     setTimeout(() => {
       this.toastCtrl = this.injector.get(ToastController);

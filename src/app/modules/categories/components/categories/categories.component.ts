@@ -1,10 +1,10 @@
-import { Component, ChangeDetectionStrategy, inject, OnInit } from '@angular/core';
 import {
-  AlertController,
-  InfiniteScrollCustomEvent,
-  ItemReorderEventDetail,
-  RefresherCustomEvent,
-} from '@ionic/angular';
+  Component,
+  ChangeDetectionStrategy,
+  inject,
+  OnInit,
+} from '@angular/core';
+import { AlertController, InfiniteScrollCustomEvent, ItemReorderEventDetail, RefresherCustomEvent, IonicModule } from '@ionic/angular';
 import {
   BehaviorSubject,
   catchError,
@@ -15,15 +15,31 @@ import {
   takeUntil,
   tap,
 } from 'rxjs';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { BaseListComponent } from 'src/app/shared/base';
 import { Category, CategoryParams } from '../../models';
+import { SkeletonBlockComponent } from '../../../../shared/ui/skeleton-block/skeleton-block.component';
+import { NgClass, AsyncPipe, LowerCasePipe } from '@angular/common';
+import { AddFabButtonComponent } from '../../../../shared/ui/add-fab-button/add-fab-button.component';
+import { PlanService } from '../../../../core/services/plan.service';
+import { PlanLimitBannerComponent } from '../../../../shared/components/plan-limit-banner/plan-limit-banner.component';
 
 @Component({
-  selector: 'app-categories',
-  templateUrl: './categories.component.html',
-  styleUrls: ['./categories.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-categories',
+    templateUrl: './categories.component.html',
+    styleUrls: ['./categories.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [
+        IonicModule,
+        SkeletonBlockComponent,
+        NgClass,
+        AddFabButtonComponent,
+        AsyncPipe,
+        LowerCasePipe,
+        TranslateModule,
+        PlanLimitBannerComponent,
+    ],
 })
 export class CategoriesComponent
   extends BaseListComponent<Category>
@@ -31,6 +47,7 @@ export class CategoriesComponent
 {
   private alertController = inject(AlertController);
   private translate = inject(TranslateService);
+  private planService = inject(PlanService);
 
   private readonly loading = new BehaviorSubject<boolean>(false);
   private readonly errorMessage = new BehaviorSubject<string>('');
@@ -66,18 +83,43 @@ export class CategoriesComponent
 
   isActionSheetOpen = false;
   selectedCategory: Category | null = null;
+  
+  // Plan Limits State
+  canAddCategory = true;
+  categoriesLimitInfo = { used: 0, limit: 0 as number | null, percentage: 0 };
 
   constructor() {
     super();
   }
 
-  override ngOnInit() {}
-
-  ionViewWillEnter() {
-    this.loadCategories();
+  override ngOnInit() {
+    this.setupSubscription();
+    this.checkPlanLimits();
   }
 
-  private loadCategories() {
+  private hasEntered = false;
+
+  ionViewWillEnter() {
+    this.checkPlanLimits();
+    if (this.hasEntered) {
+      // Force a refresh by re-emitting the current params
+      const currentParams = this.#paramsSub.getValue();
+      this.#paramsSub.next({ ...currentParams });
+    }
+    this.hasEntered = true;
+  }
+  
+  private checkPlanLimits() {
+    this.planService.currentPlan$.pipe(takeUntil(this.destroy$)).subscribe(planData => {
+      if (planData) {
+        this.canAddCategory = this.planService.canAddCategory();
+        this.categoriesLimitInfo = planData.usage.categories;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  private setupSubscription() {
     this.#paramsSub
       .pipe(
         takeUntil(this.destroy$),
@@ -86,7 +128,7 @@ export class CategoriesComponent
           this.errorMessage.next('');
         }),
         switchMap((params) =>
-          this.categoryService.getCategories(params).pipe(
+          this.categoryService.getCategories(params, true).pipe( // forceRefresh = true
             finalize(() => this.loading.next(false)),
             catchError((err) => {
               this.errorMessage.next(err.message);
@@ -138,6 +180,12 @@ export class CategoriesComponent
   }
 
   navigateToAdd() {
+    if (!this.canAddCategory) {
+      this.router.navigate(['/subscription'], {
+        queryParams: { reason: 'limit_reached', limitType: 'SUBSCRIPTION.CATEGORIES_LIMIT' }
+      });
+      return;
+    }
     this.router.navigate(['/categories/create']);
   }
 
@@ -146,9 +194,12 @@ export class CategoriesComponent
     if (currentResponse) {
       const movedItem = currentResponse.data.splice(ev.detail.from, 1)[0];
       currentResponse.data.splice(ev.detail.to, 0, movedItem);
+      // Use 'categoryId' instead of 'id' to avoid the HTTP encryption interceptor
+      // from double-encrypting the MongoDB ObjectId (interceptor encrypts fields
+      // named 'id' and '_id', causing a key mismatch error on the backend)
       const reorderedCategories = currentResponse.data.map(
         (category, index) => ({
-          id: category._id as string,
+          categoryId: category._id as string,
           order: index,
         })
       );
@@ -224,7 +275,7 @@ export class CategoriesComponent
             });
             this.toastService.presentSuccessToast(
               'bottom',
-              'Category successfully deleted!'
+              this.translateService.instant('CATEGORY.SUCCESSFULLY_DELETED')
             );
           }
         }

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { NativeBiometric } from '@capgo/capacitor-native-biometric';
 import { Platform } from '@ionic/angular';
 import { StorageService } from '../../modules/auth/services/storage.service';
@@ -8,8 +8,10 @@ import { StorageService } from '../../modules/auth/services/storage.service';
 })
 export class BiometricService {
   private readonly BIOMETRIC_ENABLED_KEY = 'biometric_enabled';
+  public lastBiometricTime = 0;
 
-  constructor(private platform: Platform, private storage: StorageService) {}
+  private platform = inject(Platform);
+  private storage = inject(StorageService);
 
   get isEnabled(): boolean {
     return !!this.storage.get(this.BIOMETRIC_ENABLED_KEY);
@@ -21,7 +23,8 @@ export class BiometricService {
 
   async isAvailable(): Promise<boolean> {
     if (!this.platform.is('capacitor')) {
-      return false;
+      // Mock availability for web testing
+      return true;
     }
     try {
       const result = await NativeBiometric.isAvailable();
@@ -36,7 +39,13 @@ export class BiometricService {
     reason: string = 'Please authenticate to continue'
   ): Promise<boolean> {
     if (!this.platform.is('capacitor')) {
-      return true; // Skip on web
+      // Simulate biometric prompt on web
+      return new Promise((resolve) => {
+        const confirmed = window.confirm(
+          `[Web Simulation] Biometric Scan Required\n\n${reason}\n\nClick OK to simulate a successful fingerprint/face scan.`
+        );
+        resolve(confirmed);
+      });
     }
 
     try {
@@ -46,9 +55,11 @@ export class BiometricService {
         subtitle: 'Log in with your biometric',
         description: reason,
       });
+      this.lastBiometricTime = Date.now();
       return true;
     } catch (e) {
       console.error('Biometric verification failed', e);
+      this.lastBiometricTime = Date.now();
       return false;
     }
   }

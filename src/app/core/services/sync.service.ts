@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, BehaviorSubject, from, of, timer, interval } from 'rxjs';
+import { Observable, BehaviorSubject, from, of, interval } from 'rxjs';
 import {
   map,
   switchMap,
@@ -7,15 +7,14 @@ import {
   tap,
   filter,
   finalize,
+  distinctUntilChanged,
 } from 'rxjs/operators';
-import { Network } from '@capacitor/network';
 import { ApiService } from './api.service';
 import { OfflineStorageService } from './offline-storage.service';
+import { ConnectionService } from './connection.service';
 import {
-  SyncEntity,
   SyncStatus,
   SyncMetadata,
-  SyncOperation,
   SyncConfig,
   SyncProgress,
 } from 'src/app/shared/models/sync.model';
@@ -35,6 +34,7 @@ import {
 export class SyncService {
   private apiService = inject(ApiService);
   private offlineStorage = inject(OfflineStorageService);
+  private connectionService = inject(ConnectionService);
 
   // ==================== CONFIGURATION ====================
 
@@ -76,54 +76,88 @@ export class SyncService {
   private isOnline = false;
   private syncInProgress = false;
 
+  /** Key used to persist lastSyncTime in localStorage as fallback */
+  private readonly LAST_SYNC_KEY = 'sync_lastSyncTime';
+
   // ==================== INITIALIZATION ====================
 
   constructor() {
+    this.loadConfig();
+    this.loadLastSyncTime();
     this.initializeNetworkMonitoring();
     this.initializeAutoSync();
+    this.initializeQueueMonitoring();
+  }
+
+  private initializeQueueMonitoring(): void {
+    // Monitor offline queue and update metadata
+    this.offlineStorage.syncQueue$.subscribe((queue) => {
+      const pendingCount = queue.operations.filter(op => op.status === SyncStatus.PENDING).length;
+      const errorCount = queue.operations.filter(op => op.status === SyncStatus.ERROR).length;
+      
+      this.updateSyncMetadata({
+        pendingCount,
+        errorCount,
+      });
+      
+      // Also update total entities count occasionally
+      this.offlineStorage.getStorageSize().subscribe(totalEntities => {
+        this.updateSyncMetadata({ totalEntities });
+      });
+    });
+  }
+
+  private async loadConfig() {
+    try {
+      const stored = localStorage.getItem('sync_config');
+      if (stored) {
+        this.syncConfig = { ...this.syncConfig, ...JSON.parse(stored) };
+        if (this.syncConfig.syncInterval < 60000) {
+          this.syncConfig.syncInterval = 300000; // Reset to 5 mins if too low
+        }
+        console.log('⚙️ Loaded sync config:', this.syncConfig);
+      }
+    } catch (e) {
+      console.warn('Could not load sync config', e);
+    }
   }
 
   /**
-   * مراقبة حالة الاتصال بالإنترنت
+   * مراقبة حالة الاتصال - مربوط بـ ConnectionService للدقة الكاملة
+   * يستخدم backendReachable (health check) وليس navigator.onLine فقط
    */
   private initializeNetworkMonitoring(): void {
-    // Check initial network status
-    Network.getStatus()
-      .then((status: any) => {
-        this.isOnline = status.connected;
-        this.updateSyncMetadata({ isOnline: this.isOnline });
-        console.log('📡 Network status:', this.isOnline ? 'Online' : 'Offline');
-      })
-      .catch(() => {
-        // Fallback to browser online status
-        this.isOnline = navigator.onLine;
-        this.updateSyncMetadata({ isOnline: this.isOnline });
+    this.connectionService
+      .getConnectionStatus()
+      .pipe(
+        map((status) => status.online && status.backendReachable),
+        distinctUntilChanged()
+      )
+      .subscribe((isOnline) => {
+        const wasOnline = this.isOnline;
+        this.isOnline = isOnline;
+        this.updateSyncMetadata({ isOnline });
+
+        console.log(
+          '📡 Connection changed:',
+          wasOnline ? 'Online' : 'Offline',
+          '→',
+          isOnline ? 'Online (backend reachable)' : 'Offline'
+        );
+
+        // Auto-sync when coming back online (backend is reachable)
+        if (!wasOnline && isOnline && this.syncConfig.autoSync) {
+          console.log('🔄 Connection restored, starting auto-sync...');
+          // Small delay to let connection stabilize
+          setTimeout(() => {
+            this.syncAll().subscribe({
+              next: (success) =>
+                console.log('✅ Auto-sync completed:', success),
+              error: (err) => console.error('❌ Auto-sync failed:', err),
+            });
+          }, 1500);
+        }
       });
-
-    // Listen for network changes
-    Network.addListener('networkStatusChange', (status: any) => {
-      const wasOnline = this.isOnline;
-      this.isOnline = status.connected;
-      this.updateSyncMetadata({ isOnline: this.isOnline });
-
-      console.log(
-        '📡 Network changed:',
-        wasOnline ? 'Online' : 'Offline',
-        '→',
-        this.isOnline ? 'Online' : 'Offline'
-      );
-
-      // Auto-sync when coming back online
-      if (!wasOnline && this.isOnline && this.syncConfig.autoSync) {
-        console.log('🔄 Network restored, starting auto-sync...');
-        this.syncAll().subscribe({
-          next: (success) => console.log('✅ Auto-sync completed:', success),
-          error: (err) => console.error('❌ Auto-sync failed:', err),
-        });
-      }
-    }).catch(() => {
-      console.warn('⚠️ Network listener not available, using browser events');
-    });
   }
 
   /**
@@ -184,32 +218,40 @@ export class SyncService {
 
     console.log('🔄 Starting full sync...');
 
-    // Step 1: Pull data from server
-    return this.pullDataFromServer().pipe(
+    // Step 1: Push local pending changes to server
+    return this.pushLocalChanges().pipe(
       tap(() => {
         this.updateSyncProgress({
-          current: 50,
-          percentage: 50,
-          currentOperation: 'Pulling data from server...',
+          current: 33,
+          percentage: 33,
+          currentOperation: 'Pushing local changes...',
         });
       }),
-      switchMap((pullResult) => {
-        console.log(
-          `✅ Pulled ${pullResult.entities?.length || 0} entities from server`
-        );
-
-        // Step 2: Merge with local data
-        return this.mergeWithLocalData(pullResult.entities || []).pipe(
+      switchMap(() => {
+        // Step 2: Pull latest data from server
+        return this.pullDataFromServer().pipe(
           tap(() => {
             this.updateSyncProgress({
-              current: 75,
-              percentage: 75,
-              currentOperation: 'Merging data...',
+              current: 66,
+              percentage: 66,
+              currentOperation: 'Pulling data from server...',
             });
           }),
-          switchMap(() => {
-            // Step 3: Push local pending changes
-            return this.pushLocalChanges();
+          switchMap((pullResult) => {
+            console.log(
+              `✅ Pulled ${pullResult.entities?.length || 0} entities from server`
+            );
+
+            // Step 3: Merge with local data
+            return this.mergeWithLocalData(pullResult.entities || []).pipe(
+              tap(() => {
+                this.updateSyncProgress({
+                  current: 90,
+                  percentage: 90,
+                  currentOperation: 'Merging data...',
+                });
+              })
+            );
           })
         );
       }),
@@ -362,6 +404,15 @@ export class SyncService {
           ...op.data,
         }));
 
+        // CRITICAL: Sort entities so that categories come first.
+        // This ensures the backend resolves offline category IDs and puts them in idMap
+        // BEFORE it processes expenses that depend on those categories.
+        entities.sort((a, b) => {
+          if (a._entityType === 'category' && b._entityType !== 'category') return -1;
+          if (a._entityType !== 'category' && b._entityType === 'category') return 1;
+          return 0;
+        });
+
         return this.apiService.post<any>('/sync/push', { entities }).pipe(
           tap((result) => {
             console.log('✅ Push result:', result);
@@ -396,7 +447,7 @@ export class SyncService {
   // ==================== SYNC COMPLETION ====================
 
   /**
-   * ✅ إكمال المزامنة
+   * ✅ إكمال المزامنة وحفظ الوقت بشكل دائم
    */
   private completeSync(): void {
     const now = new Date();
@@ -411,7 +462,39 @@ export class SyncService {
       percentage: 100,
     });
 
+    // 💾 Persist lastSyncTime so it survives app restarts
+    this.persistLastSyncTime(now);
+
     console.log('✅ Sync completed at:', now);
+  }
+
+  /**
+   * 💾 حفظ آخر وقت مزامنة في localStorage
+   */
+  private persistLastSyncTime(time: Date): void {
+    try {
+      localStorage.setItem(this.LAST_SYNC_KEY, time.toISOString());
+    } catch (e) {
+      console.warn('Could not persist lastSyncTime', e);
+    }
+  }
+
+  /**
+   * 📂 تحميل آخر وقت مزامنة محفوظ عند بدء التشغيل
+   */
+  private loadLastSyncTime(): void {
+    try {
+      const stored = localStorage.getItem(this.LAST_SYNC_KEY);
+      if (stored) {
+        const lastSyncTime = new Date(stored);
+        if (!isNaN(lastSyncTime.getTime())) {
+          this.updateSyncMetadata({ lastSyncTime });
+          console.log('📂 Loaded lastSyncTime:', lastSyncTime);
+        }
+      }
+    } catch (e) {
+      console.warn('Could not load lastSyncTime', e);
+    }
   }
 
   // ==================== MANUAL SYNC TRIGGERS ====================
@@ -485,10 +568,13 @@ export class SyncService {
 
   updateConfig(config: Partial<SyncConfig>): void {
     this.syncConfig = { ...this.syncConfig, ...config };
+    localStorage.setItem('sync_config', JSON.stringify(this.syncConfig));
     console.log('⚙️ Sync config updated:', this.syncConfig);
   }
 
   getConfig(): SyncConfig {
+    // Try to load from storage if needed, but for now we just return the in-memory one
+    // Let's assume it's loaded during initialization.
     return { ...this.syncConfig };
   }
 
