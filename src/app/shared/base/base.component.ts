@@ -30,6 +30,7 @@ import { ExpenseService } from 'src/app/core/services/expense.service';
 import { MENU_ITEMS } from 'src/app/core/constants';
 import { MenuItem } from '../models';
 import { AlertService } from '../services/alert.service';
+import { SessionLifecycleService } from 'src/app/core/services/session-lifecycle.service';
 
 /**
  * Base component that provides common functionality and dependency injection.
@@ -99,6 +100,7 @@ export abstract class BaseComponent<T = any> implements OnInit, OnDestroy {
   protected readonly errorHandler = inject(ErrorHandlerService);
   protected readonly state = inject(ComponentStateService);
   protected readonly alertService = inject(AlertService);
+  protected readonly sessionLifecycleService = inject(SessionLifecycleService);
 
   /**
    * Initialize the component with common setup
@@ -317,7 +319,7 @@ export abstract class BaseComponent<T = any> implements OnInit, OnDestroy {
    */
   protected logOut(): void {
     this.state.setLoading(true);
-    this.authService.logout().subscribe({
+    this.sessionLifecycleService.logout().subscribe({
       next: () => {
         this.state.setLoading(false);
       },

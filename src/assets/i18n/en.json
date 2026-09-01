@@ -271,6 +271,7 @@
     "NOTIFICATIONS_DESC": "Enable push notifications",
     "NOTIFICATIONS_ENABLED": "Notifications enabled",
     "NOTIFICATIONS_DISABLED": "Notifications disabled",
+    "NOTIFICATIONS_PERMISSION_DENIED": "Notification permission is denied. Enable it in Android app settings to receive alerts.",
     "SECURITY": "Security",
     "BIOMETRIC": "Biometric Authentication",
     "BIOMETRIC_DESC": "Use fingerprint or face ID to unlock app",

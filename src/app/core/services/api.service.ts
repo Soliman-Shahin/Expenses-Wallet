@@ -1,9 +1,9 @@
-import { Injectable, Injector, inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map, timeout } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
-import { AuthService, TokenService } from 'src/app/modules/auth/services';
+import { TokenService } from 'src/app/modules/auth/services';
 import { ConnectionService } from './connection.service';
 
 @Injectable({
@@ -11,21 +11,12 @@ import { ConnectionService } from './connection.service';
 })
 export class ApiService {
   private readonly baseUrl = environment.apiUrl;
-  private authService: AuthService | null = null;
   private connectionService = inject(ConnectionService);
 
   constructor(
     private http: HttpClient,
-    private storageService: TokenService,
-    private injector: Injector
+    private storageService: TokenService
   ) {}
-
-  private getAuthService(): AuthService {
-    if (!this.authService) {
-      this.authService = this.injector.get(AuthService);
-    }
-    return this.authService;
-  }
 
   private getHeadersObject(): { [key: string]: string } {
     let token = '';

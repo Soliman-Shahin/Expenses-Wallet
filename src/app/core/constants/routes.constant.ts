@@ -32,6 +32,10 @@ export const APP_ROUTES = {
   PROFILE: {
     INDEX: 'profile',
   },
+  NOTIFICATIONS: {
+    INDEX: 'notifications',
+    DETAIL: ':id',
+  },
 
   __get: (key: string) => `${key}`.replace(':', ''),
 } as const;

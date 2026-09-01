@@ -33,11 +33,20 @@ export class ConnectionService {
 
   private healthCheckInterval: any;
   private recoveryInterval: any;
+  private initialized = false;
   private readonly HEALTH_CHECK_INTERVAL = 60000; // 1 minute
 
   private http = inject(HttpClient);
 
-  constructor() {
+  /**
+   * Start network listeners and backend health monitoring after application
+   * bootstrap. Keeping this explicit prevents HTTP interceptors from running
+   * while services that depend on ConnectionService are still being created.
+   */
+  initialize(): void {
+    if (this.initialized) return;
+    this.initialized = true;
+
     this.initializeConnectionMonitoring();
     this.startHealthCheck();
   }

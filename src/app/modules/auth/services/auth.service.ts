@@ -325,19 +325,15 @@ export class AuthService {
   }
 
   logout(): Observable<void> {
-    // Clear all auth-related data
+    // Authentication teardown remains synchronous so interceptor/internal
+    // callers cannot leave a stale session by forgetting to subscribe.
     this.tokenService.removeSession();
     this.storageService.clear();
-    // Also clear cached profile stored outside StorageService prefixing
     this.profileService.clearProfile();
-    // Update state
     this.redirectUrl = null;
-    // Avoid Angular/Ionic navigation to prevent StackController transition errors
-    // Perform a single hard redirect which resets history and view stack
     try {
       location.replace('/home');
     } catch {
-      // Fallback
       (window as any).location.href = '/home';
     }
     return of(undefined);

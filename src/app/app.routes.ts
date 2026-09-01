@@ -63,6 +63,15 @@ export const routes: Routes = [
     canLoad: [AuthGuardService],
   },
   {
+    path: 'notifications',
+    loadChildren: () =>
+      import('./modules/notifications/notifications.routes').then(
+        (m) => m.routes
+      ),
+    canActivate: [AuthGuard],
+    canLoad: [AuthGuardService],
+  },
+  {
     path: '**',
     redirectTo: '',
     pathMatch: 'full',

@@ -8,6 +8,9 @@ const config: CapacitorConfig = {
     androidScheme: 'https',
   },
   plugins: {
+    PushNotifications: {
+      presentationOptions: [],
+    },
     StatusBar: {
       overlaysWebView: true,
       style: 'DARK',
