@@ -12,4 +12,5 @@
   <string name="ionic_update_api">https://api.ionicjs.com</string>
   <string name="google_web_client_id">358709669585-0td9nf2p58ncgtoreopgqkq7vosco473.apps.googleusercontent.com</string>
   <string name="server_client_id">358709669585-0td9nf2p58ncgtoreopgqkq7vosco473.apps.googleusercontent.com</string>
+  <string name="default_notification_channel_id">expenses_wallet_general</string>
 </resources>

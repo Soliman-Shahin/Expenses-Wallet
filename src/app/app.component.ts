@@ -13,6 +13,9 @@ import { environment } from '../environments/environment';
 import { LayoutComponent } from './layout/pages/layout-component/layout.component';
 import { OnboardingComponent } from './shared/components/onboarding/onboarding.component';
 import { IonicModule } from '@ionic/angular';
+import { takeUntil } from 'rxjs/operators';
+import { PushNotificationService } from './core/services/push-notification.service';
+import { ConnectionService } from './core/services/connection.service';
 
 @Component({
     selector: 'app-root',
@@ -32,7 +35,9 @@ export class AppComponent extends BaseComponent implements OnInit {
     private directionService: DirectionService,
     public onboardingService: OnboardingService,
     private biometricService: BiometricService,
-    private backupService: BackupService
+    private backupService: BackupService,
+    private pushNotificationService: PushNotificationService,
+    private connectionService: ConnectionService
   ) {
     super();
     this.translate.setDefaultLang('en');
@@ -40,6 +45,7 @@ export class AppComponent extends BaseComponent implements OnInit {
 
   override ngOnInit(): void {
     super.ngOnInit();
+    this.connectionService.initialize();
     this.themeService.initTheme();
 
     if (Capacitor.isNativePlatform()) {
@@ -58,6 +64,18 @@ export class AppComponent extends BaseComponent implements OnInit {
     
     // Handle web OAuth callback after redirect
     this.handleWebOAuthCallback();
+
+    if (Capacitor.isNativePlatform()) {
+      void this.pushNotificationService.initializeIfEnabled().then(() => {
+        this.authService.user$
+          .pipe(takeUntil(this.destroy$))
+          .subscribe((user) => {
+            if (user) {
+              void this.pushNotificationService.initializeIfEnabled();
+            }
+          });
+      });
+    }
 
     // Check on resume
     App.addListener('resume', () => {

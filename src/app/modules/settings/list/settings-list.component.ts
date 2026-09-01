@@ -6,6 +6,7 @@ import { ModalController, IonicModule } from '@ionic/angular';
 import { AuthService } from 'src/app/modules/auth/services/auth.service';
 import { User } from 'src/app/modules/auth/models';
 import { TranslateModule } from '@ngx-translate/core';
+import { PushNotificationService } from 'src/app/core/services/push-notification.service';
 
 @Component({
   selector: 'app-settings-list',
@@ -37,6 +38,7 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
   ];
 
   private biometricService = inject(BiometricService);
+  private pushNotificationService = inject(PushNotificationService);
 
   constructor() {
     super();
@@ -59,8 +61,11 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
     this.biometricEnabled = this.biometricService.isEnabled;
     this.currentLanguage = this.currentLang;
     this.selectedTheme = this.currentTheme;
+    const notificationPermission =
+      await this.pushNotificationService.getCurrentPermissionState();
     this.notificationsEnabled =
-      localStorage.getItem('notifications') !== 'false';
+      localStorage.getItem('notifications') !== 'false' &&
+      notificationPermission === 'granted';
     this.autoBackupEnabled = localStorage.getItem('autoBackup') === 'true';
     this.cdr.markForCheck();
   }
@@ -132,16 +137,34 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
     this.cdr.markForCheck();
   }
 
-  toggleNotifications(event: any) {
-    this.notificationsEnabled = event.detail.checked;
-    localStorage.setItem('notifications', this.notificationsEnabled.toString());
-    const messageKey = this.notificationsEnabled
-      ? 'SETTINGS.NOTIFICATIONS_ENABLED'
-      : 'SETTINGS.NOTIFICATIONS_DISABLED';
-    this.toastService.presentSuccessToast(
-      'bottom',
-      this.translateService.instant(messageKey)
-    );
+  async toggleNotifications(event: any) {
+    const requestedEnabled = !!event.detail.checked;
+
+    if (requestedEnabled) {
+      const permission = await this.pushNotificationService.enable();
+      this.notificationsEnabled = permission === 'granted';
+      if (!this.notificationsEnabled) {
+        event.target.checked = false;
+        this.toastService.presentErrorToast(
+          'bottom',
+          this.translateService.instant(
+            'SETTINGS.NOTIFICATIONS_PERMISSION_DENIED'
+          )
+        );
+      } else {
+        this.toastService.presentSuccessToast(
+          'bottom',
+          this.translateService.instant('SETTINGS.NOTIFICATIONS_ENABLED')
+        );
+      }
+    } else {
+      await this.pushNotificationService.disable();
+      this.notificationsEnabled = false;
+      this.toastService.presentSuccessToast(
+        'bottom',
+        this.translateService.instant('SETTINGS.NOTIFICATIONS_DISABLED')
+      );
+    }
     this.cdr.markForCheck();
   }
 

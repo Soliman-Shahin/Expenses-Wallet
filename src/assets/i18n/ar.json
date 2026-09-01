@@ -243,6 +243,7 @@
     "NOTIFICATIONS_DESC": "تفعيل الإشعارات الفورية",
     "NOTIFICATIONS_ENABLED": "تم تفعيل الإشعارات",
     "NOTIFICATIONS_DISABLED": "تم إيقاف الإشعارات",
+    "NOTIFICATIONS_PERMISSION_DENIED": "تم رفض إذن الإشعارات. فعّله من إعدادات تطبيق أندرويد لتلقي التنبيهات.",
     "SECURITY": "الأمان",
     "BIOMETRIC": "المصادقة البيومترية",
     "BIOMETRIC_DESC": "استخدم البصمة أو الوجه لفتح التطبيق",
