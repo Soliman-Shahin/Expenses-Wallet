@@ -1,5 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { finalize } from 'rxjs';
@@ -40,7 +45,8 @@ export class NotificationDetailComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -53,7 +59,15 @@ export class NotificationDetailComponent implements OnInit {
 
     this.apiService
       .get<AppNotification>(`/notifications/${id}`)
-      .pipe(finalize(() => (this.loading = false)))
+      .pipe(
+        finalize(() => {
+          this.loading = false;
+          if (!this.notification && !this.error) {
+            this.error = 'This notification is unavailable.';
+          }
+          this.cdr.markForCheck();
+        })
+      )
       .subscribe({
         next: (notification) => {
           this.notification = notification;

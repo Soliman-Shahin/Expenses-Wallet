@@ -8,6 +8,10 @@ import {
   PushNotifications,
   Token,
 } from '@capacitor/push-notifications';
+import {
+  ActionPerformed as LocalNotificationActionPerformed,
+  LocalNotifications,
+} from '@capacitor/local-notifications';
 import { firstValueFrom } from 'rxjs';
 import { TokenService } from 'src/app/modules/auth/services/token.service';
 import { ApiService } from './api.service';
@@ -138,8 +142,7 @@ export class PushNotificationService {
     await PushNotifications.addListener(
       'pushNotificationReceived',
       (notification: PushNotificationSchema) => {
-        const notificationId = this.getSafeNotificationId(notification.data);
-        if (notificationId) this.rememberNotification(notificationId);
+        void this.presentForegroundNotification(notification);
       }
     );
 
@@ -147,6 +150,13 @@ export class PushNotificationService {
       'pushNotificationActionPerformed',
       (action: ActionPerformed) => {
         this.handleNotificationTap(action.notification);
+      }
+    );
+
+    await LocalNotifications.addListener(
+      'localNotificationActionPerformed',
+      (action: LocalNotificationActionPerformed) => {
+        this.handleNotificationData(action.notification.extra);
       }
     );
 
@@ -190,12 +200,51 @@ export class PushNotificationService {
   }
 
   private handleNotificationTap(notification: PushNotificationSchema): void {
-    const notificationId = this.getSafeNotificationId(notification.data);
+    this.handleNotificationData(notification.data);
+  }
+
+  private handleNotificationData(
+    data: Record<string, unknown> | undefined
+  ): void {
+    const notificationId = this.getSafeNotificationId(data);
     if (!notificationId) return;
 
     this.rememberNotification(notificationId);
     localStorage.setItem(PENDING_NOTIFICATION_KEY, notificationId);
     void this.processPendingNavigation();
+  }
+
+  private async presentForegroundNotification(
+    notification: PushNotificationSchema
+  ): Promise<void> {
+    const notificationId = this.getSafeNotificationId(notification.data);
+    if (!notificationId || !this.rememberNotification(notificationId)) return;
+
+    try {
+      await LocalNotifications.schedule({
+        notifications: [
+          {
+            id: this.toLocalNotificationId(notificationId),
+            title: notification.title || 'Expenses Wallet',
+            body: notification.body || '',
+            channelId: CHANNEL_ID,
+            smallIcon: 'ic_stat_notification',
+            autoCancel: true,
+            foreground: true,
+            extra: {
+              notificationId,
+              type:
+                typeof notification.data?.['type'] === 'string'
+                  ? notification.data['type']
+                  : 'info',
+              routeKey: 'notification-detail',
+            },
+          },
+        ],
+      });
+    } catch {
+      console.warn('[Push] Unable to present foreground notification');
+    }
   }
 
   private getSafeNotificationId(data: Record<string, unknown> | undefined) {
@@ -204,14 +253,19 @@ export class PushNotificationService {
     return typeof id === 'string' && /^[a-f\d]{24}$/i.test(id) ? id : null;
   }
 
-  private rememberNotification(id: string): void {
+  private rememberNotification(id: string): boolean {
     const ids = this.getSeenNotificationIds();
-    if (!ids.includes(id)) {
-      localStorage.setItem(
-        SEEN_NOTIFICATION_IDS_KEY,
-        JSON.stringify([id, ...ids].slice(0, 100))
-      );
-    }
+    if (ids.includes(id)) return false;
+
+    localStorage.setItem(
+      SEEN_NOTIFICATION_IDS_KEY,
+      JSON.stringify([id, ...ids].slice(0, 100))
+    );
+    return true;
+  }
+
+  private toLocalNotificationId(notificationId: string): number {
+    return parseInt(notificationId.slice(-8), 16) | 0;
   }
 
   private getSeenNotificationIds(): string[] {
