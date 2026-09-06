@@ -76,3 +76,25 @@
     }
   }
 }
+
+:host-context(app-home-page) .months-scroll-container {
+  padding-block: 8px;
+  .month-item {
+    min-width: 48px;
+    min-height: 48px;
+    margin-inline: 4px;
+    padding: 6px 8px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    backdrop-filter: none;
+    box-shadow: none;
+    animation: none;
+    transform: none;
+    &.selected {
+      background: var(--ew-wallet-inset);
+      box-shadow: inset 0 -2px var(--ion-color-primary);
+      transform: none;
+    }
+  }
+}

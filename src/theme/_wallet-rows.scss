@@ -1,0 +1,148 @@
+// Shared compact record rhythm for Home and Expenses.
+@mixin rows {
+  .transactions-list {
+    min-height: 0 !important;
+    height: auto !important;
+    background: var(--ion-item-background);
+    padding: 0;
+    border-radius: 12px;
+  }
+  .transaction-sliding {
+    margin: 0 !important;
+    border-radius: 0;
+    box-shadow: none;
+    animation: none;
+  }
+  .transaction-item {
+    --background: transparent;
+    --min-height: 76px;
+    --padding-start: 12px;
+    --padding-end: 12px;
+    --inner-padding-end: 0;
+    margin: 0 !important;
+    border: 0;
+    border-bottom: 1px solid var(--ew-wallet-line);
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .transaction-item:hover,
+  .transaction-item:active {
+    transform: none;
+    box-shadow: none;
+  }
+  .transaction-sliding:last-child .transaction-item {
+    border-bottom: 0;
+  }
+  .transaction-icon {
+    margin-inline: 0 10px;
+  }
+  .transaction-icon .category-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    box-shadow: none;
+  }
+  .transaction-content {
+    width: auto !important;
+    max-width: 100%;
+    min-width: 0;
+    padding-block: 12px;
+  }
+  .transaction-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .transaction-title {
+    width: auto !important;
+    max-width: 100%;
+    flex: 1 1 100px;
+    min-width: 0;
+    font-size: 15px !important;
+    line-height: 1.4;
+    font-weight: 600;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    margin: 0;
+  }
+  .transaction-amount {
+    max-width: 100%;
+    margin-inline-start: auto;
+    flex-shrink: 0;
+    direction: ltr;
+    unicode-bidi: isolate;
+  }
+  .transaction-amount .amount-value {
+    font-family: var(--ew-font-family-base) !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0 !important;
+    font-variant-numeric: tabular-nums;
+  }
+  .transaction-amount .amount-expense {
+    color: var(--ion-text-color) !important;
+  }
+  .transaction-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--ew-wallet-muted);
+  }
+  .transaction-category {
+    order: -1;
+    background: none;
+    padding: 0;
+    border: 0;
+    color: var(--ew-wallet-muted);
+    border-radius: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .transaction-date {
+    color: var(--ew-wallet-muted);
+    unicode-bidi: isolate;
+  }
+  .transaction-status {
+    flex-basis: 100%;
+    color: var(--ew-wallet-muted);
+    font-weight: 500;
+  }
+  .transaction-meta ion-icon {
+    display: none;
+  }
+  .empty-state-wrapper {
+    padding: 32px 20px;
+    min-height: 0;
+    background: none;
+    box-shadow: none;
+  }
+  .empty-icon-glow {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 12px;
+    background: var(--ew-wallet-inset);
+    box-shadow: none;
+    animation: none;
+  }
+  .empty-subtitle {
+    color: var(--ew-wallet-muted);
+  }
+
+  @media (max-width: 360px) {
+    .transaction-header {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 3px;
+    }
+    .transaction-amount {
+      margin-inline-start: 0;
+      justify-self: start;
+    }
+    .transaction-meta {
+      font-size: 12px;
+      white-space: normal;
+    }
+  }
+}

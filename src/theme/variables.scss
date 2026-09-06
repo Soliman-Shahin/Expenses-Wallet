@@ -23,12 +23,12 @@
   --ion-safe-area-top: max(env(safe-area-inset-top), 48px);
 
   // --- Brand Colors (Light Theme) ---
-  --ion-color-primary: #3867d6;
-  --ion-color-primary-rgb: 56, 103, 214;
+  --ion-color-primary: #1e3a8a; // Premium Slate/Navy Blue
+  --ion-color-primary-rgb: 30, 58, 138;
   --ion-color-primary-contrast: #ffffff;
   --ion-color-primary-contrast-rgb: 255, 255, 255;
-  --ion-color-primary-shade: #305abf;
-  --ion-color-primary-tint: #4a76dd;
+  --ion-color-primary-shade: #172554;
+  --ion-color-primary-tint: #2563eb;
 
   --ion-color-secondary: #0fb9b1;
   --ion-color-secondary-rgb: 15, 185, 177;
@@ -52,12 +52,12 @@
   --ion-color-success-shade: #1ca85e;
   --ion-color-success-tint: #36c579;
 
-  --ion-color-warning: #f7b731;
-  --ion-color-warning-rgb: 247, 183, 49;
-  --ion-color-warning-contrast: #000000;
-  --ion-color-warning-contrast-rgb: 0, 0, 0;
-  --ion-color-warning-shade: #d8a12b;
-  --ion-color-warning-tint: #f8be45;
+  --ion-color-warning: #f59e0b;
+  --ion-color-warning-rgb: 245, 158, 11;
+  --ion-color-warning-contrast: #17212e;
+  --ion-color-warning-contrast-rgb: 23, 33, 46;
+  --ion-color-warning-shade: #d97706;
+  --ion-color-warning-tint: #fbbf24;
 
   --ion-color-danger: #eb3b5a;
   --ion-color-danger-rgb: 235, 59, 90;
@@ -110,8 +110,8 @@
 
   // --- Gradients & Effects ---
   --gradient-direction: to right;
-  --brand-gradient: linear-gradient(var(--gradient-direction), var(--ion-color-primary), var(--ion-color-secondary));
-  --surface-gradient: linear-gradient(180deg, #f8f9fe 0%, #e8eafc 100%);
+  --brand-gradient: linear-gradient(var(--gradient-direction), var(--ion-color-primary), var(--ion-color-primary-tint));
+  --surface-gradient: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
   --glass-background: rgba(255, 255, 255, 0.55);
   --glass-background-dark: rgba(28, 30, 40, 0.65);
   --glass-blur: backdrop-filter: blur(18px);
@@ -221,14 +221,14 @@
   --ew-font-weight-bold: 700;
 
   // --- Fluid Font Sizes (using clamp) ---
-  --ew-font-size-xs: clamp(0.75rem, 0.69rem + 0.28vw, 0.88rem);   /* ~12px -> 14px */
-  --ew-font-size-sm: clamp(0.88rem, 0.80rem + 0.37vw, 1.06rem);   /* ~14px -> 17px */
-  --ew-font-size-base: clamp(1rem, 0.91rem + 0.46vw, 1.25rem);      /* ~16px -> 20px */
-  --ew-font-size-lg: clamp(1.13rem, 1.01rem + 0.58vw, 1.44rem);   /* ~18px -> 23px */
-  --ew-font-size-xl: clamp(1.25rem, 1.10rem + 0.74vw, 1.63rem);   /* ~20px -> 26px */
-  --ew-font-size-2xl: clamp(1.50rem, 1.30rem + 1.02vw, 2.00rem);    /* ~24px -> 32px */
-  --ew-font-size-3xl: clamp(1.88rem, 1.58rem + 1.48vw, 2.50rem);   /* ~30px -> 40px */
-  --ew-font-size-4xl: clamp(2.25rem, 1.85rem + 2.04vw, 3.13rem);   /* ~36px -> 50px */
+  --ew-font-size-xs: clamp(0.75rem, 0.70rem + 0.25vw, 0.875rem);  /* 12px -> 14px */
+  --ew-font-size-sm: clamp(0.875rem, 0.80rem + 0.35vw, 1rem);     /* 14px -> 16px */
+  --ew-font-size-base: clamp(1rem, 0.90rem + 0.5vw, 1.125rem);    /* 16px -> 18px */
+  --ew-font-size-lg: clamp(1.125rem, 1.05rem + 0.5vw, 1.25rem);   /* 18px -> 20px */
+  --ew-font-size-xl: clamp(1.25rem, 1.15rem + 0.75vw, 1.5rem);    /* 20px -> 24px */
+  --ew-font-size-2xl: clamp(1.5rem, 1.35rem + 1vw, 2rem);         /* 24px -> 32px */
+  --ew-font-size-3xl: clamp(1.875rem, 1.6rem + 1.5vw, 2.5rem);    /* 30px -> 40px */
+  --ew-font-size-4xl: clamp(2.25rem, 1.9rem + 2vw, 3rem);         /* 36px -> 48px */
 
   // --- Font Size Aliases (for compatibility) ---
   --ew-font-xs: var(--ew-font-size-xs);

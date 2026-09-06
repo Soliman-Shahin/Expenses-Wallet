@@ -1,0 +1,230 @@
+:root {
+  --ew-wallet-muted: #596574;
+  --ew-wallet-line: #dce2e9;
+  --ew-wallet-inset: #eef2f6;
+}
+.dark {
+  --ew-wallet-muted: #a4b0bf;
+  --ew-wallet-line: #303b49;
+  --ew-wallet-inset: #202a36;
+}
+button:focus-visible,
+a:focus-visible,
+ion-button:focus-visible,
+ion-tab-button:focus-visible,
+ion-item[button]:focus-visible {
+  outline: 2px solid var(--ion-color-primary);
+  outline-offset: 3px;
+}
+ion-button {
+  --border-radius: 12px;
+  --box-shadow: none;
+  min-height: 44px;
+}
+ion-modal.main-modal {
+  --border-radius: 20px;
+}
+[dir="rtl"] {
+  --ew-font-family-base: "Cairo", sans-serif;
+  --ew-font-family-heading: "Cairo", sans-serif;
+}
+app-home-page .dashboard {
+  .dash-header {
+    padding: calc(var(--ion-safe-area-top) + 12px) 20px 12px;
+  }
+  .dash-header__left {
+    min-width: 0;
+  }
+  .dash-name {
+    overflow-wrap: anywhere;
+  }
+  .dash-greeting,
+  .dash-date-day {
+    color: var(--ew-wallet-muted);
+  }
+  .dash-header__date {
+    background: none;
+    border: 0;
+    backdrop-filter: none;
+    flex-shrink: 0;
+  }
+  .card-section {
+    border: 0;
+    border-radius: 16px;
+    box-shadow: none;
+    padding: 16px;
+    margin: 12px 0;
+  }
+  .card-section:hover {
+    box-shadow: none;
+    transform: none;
+  }
+  .balance-card {
+    border-inline-start: 3px solid var(--ion-color-primary);
+  }
+  .transactions-card {
+    padding: 16px 4px 4px;
+  }
+  .transactions-card app-section-header {
+    display: block;
+    padding-inline: 12px;
+  }
+}
+app-balance-card {
+  .total-balance {
+    padding: 12px 0 0;
+    padding-inline-end: 44px;
+    margin-bottom: 20px;
+    text-align: start;
+  }
+  .total-balance .amount {
+    font-size: clamp(1.7rem, 7vw, 2.35rem);
+    line-height: 1.3;
+  }
+  .amount {
+    font-variant-numeric: tabular-nums;
+    direction: ltr;
+    unicode-bidi: isolate;
+    overflow-wrap: anywhere;
+    background: none !important;
+    -webkit-text-fill-color: currentColor !important;
+    text-shadow: none !important;
+    color: var(--ion-text-color) !important;
+  }
+  .toggle-visibility {
+    min-width: 44px;
+    min-height: 44px;
+    background: var(--ew-wallet-inset);
+    backdrop-filter: none;
+    border: 0;
+    border-radius: 12px;
+    color: var(--ion-text-color);
+  }
+  .income-expense-row {
+    gap: 12px;
+  }
+  .balance-item,
+  .balance-item.income,
+  .balance-item.expenses,
+  .balance-item.savings {
+    min-width: 0;
+    padding: 12px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--ew-wallet-inset);
+    gap: 6px;
+    box-shadow: none;
+    transform: none;
+    &::before {
+      display: none;
+    }
+    .amount {
+      font-size: 1rem;
+    }
+    .label {
+      color: var(--ew-wallet-muted);
+    }
+    ion-icon {
+      font-size: 20px;
+      margin: 0;
+      animation: none;
+    }
+  }
+  .balance-item.savings {
+    padding-block: 10px;
+  }
+}
+
+app-transactions-list {
+  ion-content {
+    --padding-bottom: calc(156px + env(safe-area-inset-bottom));
+  }
+  .category-ion-header,
+  .category-ion-header ion-toolbar {
+    background: var(--ion-background-color);
+    --background: var(--ion-background-color);
+    backdrop-filter: none;
+    box-shadow: none;
+  }
+  .category-ion-header .main-title {
+    color: var(--ion-text-color);
+    font-size: 22px;
+    background: none;
+    -webkit-text-fill-color: currentColor;
+  }
+  .category-ion-header .sub-title {
+    color: var(--ew-wallet-muted);
+  }
+  ion-searchbar {
+    --background: var(--ion-item-background);
+    --box-shadow: none;
+    --border-radius: 12px;
+  }
+}
+app-home-page,
+app-transactions-list {
+  .custom-segment {
+    background: var(--ew-wallet-inset);
+    box-shadow: none;
+    border-radius: 12px;
+    backdrop-filter: none;
+  }
+  .custom-segment ion-segment-button {
+    min-height: 44px;
+    --color: var(--ew-wallet-muted);
+    --color-checked: var(--ion-color-primary);
+    --indicator-box-shadow: none;
+  }
+  app-add-fab-button .fab-add {
+    --background: var(--ion-color-primary);
+    --color: var(--ion-color-primary-contrast);
+    --box-shadow: 0 2px 6px #0002;
+    --border-radius: 16px;
+    width: 52px;
+    height: 52px;
+    animation: none;
+  }
+  app-add-fab-button .fab-add:hover {
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  app-home-page *,
+  app-transactions *,
+  app-transactions-list *,
+  app-expense-form * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+app-home-page .custom-segment ion-segment-button::part(indicator-background),
+app-transactions-list
+  .custom-segment
+  ion-segment-button::part(indicator-background) {
+  background: var(--ion-item-background);
+  border-radius: 8px;
+  box-shadow: none;
+}
+app-home-page .custom-segment ion-segment-button,
+app-transactions-list .custom-segment ion-segment-button {
+  --color-checked: var(--ion-color-primary);
+}
+
+ion-modal.expense-record-modal {
+  --height: min(520px, 90dvh);
+  --width: min(100%, 480px);
+}
+@media (max-width: 360px) {
+  app-transactions-list .custom-segment ion-segment-button ion-icon {
+    display: none;
+  }
+  app-transactions-list .custom-segment ion-segment-button {
+    min-width: 0;
+    --padding-start: 4px;
+    --padding-end: 4px;
+  }
+}
+
+app-expense-detail ion-buttons ion-button {
+  --color: var(--ion-text-color);
+}

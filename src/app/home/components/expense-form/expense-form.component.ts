@@ -1,3 +1,4 @@
+import { expenseSyncLabel } from 'src/app/shared/utils/expense-presentation';
 import {
   AfterViewInit,
   Component,
@@ -9,7 +10,12 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormGroup,
+  Validators,
+  FormsModule,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { Observable, combineLatest, BehaviorSubject } from 'rxjs';
 import { map, startWith, finalize, takeUntil, tap } from 'rxjs/operators';
 
@@ -22,25 +28,26 @@ import { NgClass, AsyncPipe, DatePipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
-    selector: 'app-expense-form',
-    templateUrl: './expense-form.component.html',
-    styleUrls: ['./expense-form.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-    imports: [
-        IonicModule,
-        FormsModule,
-        ReactiveFormsModule,
-        NgClass,
-        AsyncPipe,
-        DatePipe,
-        TranslateModule,
-    ],
+  selector: 'app-expense-form',
+  templateUrl: './expense-form.component.html',
+  styleUrls: ['./expense-form.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    IonicModule,
+    FormsModule,
+    ReactiveFormsModule,
+    NgClass,
+    AsyncPipe,
+    DatePipe,
+    TranslateModule,
+  ],
 })
 export class ExpenseFormComponent
   extends BaseComponent
   implements OnInit, AfterViewInit, OnDestroy
 {
+  readonly syncLabel = expenseSyncLabel;
   @Input() expense?: Expense;
   @Input() onClose: () => void = () => {};
 
@@ -50,7 +57,7 @@ export class ExpenseFormComponent
   expenseForm!: FormGroup;
   isEditMode = false;
   maxDate = new Date().toISOString();
-  userCurrency = 'USD';
+  userCurrency = '';
 
   allCategories: Category[] = [];
   filteredCategories: Category[] = [];
@@ -75,7 +82,7 @@ export class ExpenseFormComponent
 
     super.ngOnInit();
     this.isEditMode = !!this.expense;
-    this.userCurrency = this.profileService.getProfile()?.currency || 'USD';
+    this.userCurrency = this.profileService.getProfile()?.currency || '';
     this.initForm();
     if (!this.categoriesLoaded) {
       this.loadCategories();
@@ -126,15 +133,19 @@ export class ExpenseFormComponent
 
     // Initialize typeSubject with the initial type
     this.typeSubject$.next(type);
-    
+
     // Subscribe to type changes to update filtered categories
     this.typeSubject$.pipe(takeUntil(this.destroy$)).subscribe((t) => {
-      this.filteredCategories = this.allCategories.filter((c) => c.type === t || (!c.type && t === 'outcome'));
-      
+      this.filteredCategories = this.allCategories.filter(
+        (c) => c.type === t || (!c.type && t === 'outcome')
+      );
+
       // Reset category if current selection doesn't match new type
       const currentCategoryId = this.expenseForm.get('category')?.value;
       if (currentCategoryId) {
-        const currentCategory = this.allCategories.find(c => c._id === currentCategoryId);
+        const currentCategory = this.allCategories.find(
+          (c) => c._id === currentCategoryId
+        );
         if (currentCategory && currentCategory.type !== t) {
           this.expenseForm.get('category')?.setValue('');
         }

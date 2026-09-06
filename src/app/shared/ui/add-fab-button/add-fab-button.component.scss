@@ -3,23 +3,25 @@
 }
 
 ion-fab {
-  margin-bottom: calc(50px + var(--ew-space-7)); // Push it above the floating tab bar
+  margin-bottom: calc(
+    50px + var(--ew-space-7)
+  ); // Push it above the floating tab bar
 }
 
 .fab-add {
-  --background: var(--gradient-primary-secondary);
-  --background-hover: var(--gradient-primary-secondary);
-  --color: #ffffff;
-  --box-shadow: 0 8px 24px rgba(var(--ion-color-primary-rgb), 0.4);
+  --background: var(--ion-color-primary);
+  --background-hover: var(--ion-color-primary);
+  --color: var(--ion-color-primary-contrast);
+  --box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  --border-radius: var(--ew-radius-full); 
-  border-radius: var(--ew-radius-full); 
+  --border-radius: 16px;
+  border-radius: 16px;
 
-  width: 60px;
-  height: 60px;
+  width: 52px;
+  height: 52px;
 
   // Pulse animation for attracting attention
-  animation: pulse 2s infinite;
+  animation: none;
 
   ion-icon {
     font-size: var(--ew-font-size-3xl); // Larger icon
@@ -27,7 +29,7 @@ ion-fab {
 
   // Hover state: change color and lift the button
   &:hover {
-    transform: translateY(-4px) scale(1.1);
+    transform: none;
     animation: none; // Stop pulse on interaction
   }
 
@@ -35,7 +37,8 @@ ion-fab {
   &:focus-visible {
     outline: var(--ew-border-width-md) solid var(--ion-color-secondary);
     outline-offset: var(--ew-border-width-md);
-    box-shadow: 0 0 0 var(--ew-border-width-lg) rgba(var(--ion-color-secondary-rgb), 0.25);
+    box-shadow: 0 0 0 var(--ew-border-width-lg)
+      rgba(var(--ion-color-secondary-rgb), 0.25);
     animation: none; // Stop pulse on interaction
   }
 }

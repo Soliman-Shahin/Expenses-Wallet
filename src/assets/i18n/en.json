@@ -1,4 +1,12 @@
 {
+  "MOBILE": {
+    "OFFLINE": "Offline",
+    "SYNCING": "Syncing",
+    "CURRENCY_UNAVAILABLE": "Currency unavailable",
+    "AMOUNT_ERROR": "Enter an amount of at least 0.01.",
+    "RECORD": "Transaction record",
+    "EDIT": "Edit record"
+  },
   "APP_TITLE": "Expenses wallet",
   "HELLO": "Hello! {{user}}",
   "WELCOME": "Welcome to Expenses Wallet!",

@@ -1,3 +1,5 @@
+import { expenseSyncLabel } from 'src/app/shared/utils/expense-presentation';
+import { ExpenseDetailComponent } from 'src/app/home/components/expense-detail/expense-detail.component';
 import { CommonModule } from '@angular/common';
 import {
   Component,
@@ -40,12 +42,13 @@ import { TranslateService } from '@ngx-translate/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TransactionsComponent implements OnChanges, OnDestroy {
+  readonly syncLabel = expenseSyncLabel;
   @Input() limit: number = 5;
   @Input() month?: number;
   @Input() year?: number;
 
   // ─── Public state for template ───────────────────────
-  userCurrency = 'USD';
+  userCurrency = '';
   txLoading = false;
   loadError: string | null = null;
   transactions: Expense[] = [];
@@ -74,10 +77,10 @@ export class TransactionsComponent implements OnChanges, OnDestroy {
   constructor() {
     // Load user currency
     this.loadUserCurrency();
-    
+
     // Load categories
     this.loadCategories();
-    
+
     // Single subscription: params change → debounce → HTTP call (only ONE call per change)
     this.params$
       .pipe(
@@ -93,8 +96,20 @@ export class TransactionsComponent implements OnChanges, OnDestroy {
 
               const queryParams: any = {};
               if (params.month && params.year) {
-                queryParams.startDate = new Date(params.year, params.month - 1, 1).toISOString();
-                queryParams.endDate = new Date(params.year, params.month, 0, 23, 59, 59, 999).toISOString();
+                queryParams.startDate = new Date(
+                  params.year,
+                  params.month - 1,
+                  1
+                ).toISOString();
+                queryParams.endDate = new Date(
+                  params.year,
+                  params.month,
+                  0,
+                  23,
+                  59,
+                  59,
+                  999
+                ).toISOString();
               }
               if (params.limit) queryParams.limit = params.limit;
 
@@ -111,12 +126,19 @@ export class TransactionsComponent implements OnChanges, OnDestroy {
             : (resp as any)?.data?.data || (resp as any)?.data || [];
 
           arr.sort((a, b) => {
-            const da = new Date((a as any)?.date || (a as any)?.createdAt || 0).getTime();
-            const db = new Date((b as any)?.date || (b as any)?.createdAt || 0).getTime();
+            const da = new Date(
+              (a as any)?.date || (a as any)?.createdAt || 0
+            ).getTime();
+            const db = new Date(
+              (b as any)?.date || (b as any)?.createdAt || 0
+            ).getTime();
             return db - da;
           });
 
-          this.transactions = arr.slice(0, Math.max(0, this.params$.value.limit || 5));
+          this.transactions = arr.slice(
+            0,
+            Math.max(0, this.params$.value.limit || 5)
+          );
           this.txLoading = false;
           this.cdr.markForCheck();
         },
@@ -129,8 +151,12 @@ export class TransactionsComponent implements OnChanges, OnDestroy {
       });
   }
 
+  get locale(): string {
+    return this.translateService.currentLang || 'en';
+  }
+
   loadUserCurrency() {
-    this.userCurrency = this.profileService.getProfile()?.currency || 'USD';
+    this.userCurrency = this.profileService.getProfile()?.currency || '';
   }
 
   loadCategories() {
@@ -151,7 +177,11 @@ export class TransactionsComponent implements OnChanges, OnDestroy {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['month'] || changes['year'] || changes['limit']) {
-      this.params$.next({ month: this.month, year: this.year, limit: this.limit });
+      this.params$.next({
+        month: this.month,
+        year: this.year,
+        limit: this.limit,
+      });
     }
   }
 
@@ -169,13 +199,15 @@ export class TransactionsComponent implements OnChanges, OnDestroy {
   }
 
   getOperationName(t: Expense): string {
-    return (t as any)?.description || (t as any)?.title || (t as any)?.name || '—';
+    return (
+      (t as any)?.description || (t as any)?.title || (t as any)?.name || '—'
+    );
   }
 
   private resolveCategory(t: Expense): any {
     let cat = (t as any)?.category;
     if (typeof cat === 'string') {
-      const found = this.categories.find(c => c._id === cat);
+      const found = this.categories.find((c) => c._id === cat);
       if (found) return found;
     }
     return cat;
@@ -191,7 +223,9 @@ export class TransactionsComponent implements OnChanges, OnDestroy {
     const cat = this.resolveCategory(t);
     if (!cat || typeof cat === 'string') return 'pricetag-outline';
     if (cat.icon) return cat.icon;
-    return cat.type === 'income' ? 'arrow-down-circle-outline' : 'arrow-up-circle-outline';
+    return cat.type === 'income'
+      ? 'arrow-down-circle-outline'
+      : 'arrow-up-circle-outline';
   }
 
   getCategoryColor(t: Expense): string {
@@ -220,6 +254,29 @@ export class TransactionsComponent implements OnChanges, OnDestroy {
     return false; // Simplified
   }
 
+  async onDetail(item: Expense) {
+    if (this.isOpeningModal) return;
+    this.isOpeningModal = true;
+    let role: string | undefined;
+    try {
+      const modal = await this.modalCtrl.create({
+        component: ExpenseDetailComponent,
+        componentProps: {
+          expense: item,
+          categoryName: this.getCategoryName(item),
+          currency: this.userCurrency,
+          locale: this.locale,
+        },
+        cssClass: 'main-modal expense-record-modal',
+      });
+      await modal.present();
+      role = (await modal.onDidDismiss()).role;
+    } finally {
+      this.isOpeningModal = false;
+    }
+    if (role === 'edit') await this.onEdit(item);
+  }
+
   async onEdit(item: Expense) {
     if (this.isOpeningModal) return;
     this.isOpeningModal = true;
@@ -244,13 +301,15 @@ export class TransactionsComponent implements OnChanges, OnDestroy {
     await this.alertService.showDeleteConfirm(name, async () => {
       this.expenseSvc.deleteExpense((item as any)._id).subscribe({
         next: () => {
-          this.toastService.presentSuccessToast('bottom',
+          this.toastService.presentSuccessToast(
+            'bottom',
             this.translateService.instant('EXPENSE.DELETE_SUCCESS')
           );
           this.refreshTransactions();
         },
         error: (err) => {
-          this.toastService.presentErrorToast('bottom',
+          this.toastService.presentErrorToast(
+            'bottom',
             this.translateService.instant('EXPENSE.DELETE_ERROR')
           );
           console.error(err);

@@ -1,3 +1,4 @@
+@use "src/theme/wallet-rows" as wallet;
 /* Redesigned Transactions List Stylesheet - Premium Visual Excellence */
 
 :host {
@@ -28,7 +29,9 @@
 
     ion-title {
       font-family: var(--ew-font-family-heading);
-      padding-top: calc(var(--ion-safe-area-top, 48px) + var(--ew-space-4)) !important;
+      padding-top: calc(
+        var(--ion-safe-area-top, 48px) + var(--ew-space-4)
+      ) !important;
       padding-bottom: var(--ew-space-4) !important;
       padding-inline-start: var(--ew-space-4) !important;
       padding-inline-end: var(--ew-space-4) !important;
@@ -94,8 +97,6 @@
   --padding-end: 0px !important;
   padding: 0 !important;
 }
-
-
 
 /* Spacing and margins for the main transactions container */
 .transactions-list {
@@ -185,8 +186,6 @@
   }
 }
 
-
-
 .transaction-content {
   flex: 1;
   display: flex;
@@ -235,7 +234,7 @@
 
   .transaction-category {
     &::before {
-      content: '•';
+      content: "•";
       display: inline-block;
       margin: 0 4px;
       opacity: 0.5;
@@ -407,11 +406,8 @@ ion-fab-button {
   --box-shadow: var(--ew-shadow-lg);
 }
 
-
 /* Date picker modal styles are now global in src/theme/_components.scss */
 /* (Moved to fix dark theme - Ionic modals render outside the component tree) */
-
-
 
 /* Header & Toolbar styling with notch alignment */
 .category-ion-header {
@@ -529,8 +525,6 @@ ion-searchbar {
   padding: var(--ew-space-2) 0 !important;
   --background: rgba(var(--ion-background-color-rgb), 0.8) !important;
 }
-
-
 
 @media (prefers-color-scheme: dark) {
   ion-searchbar,
@@ -823,7 +817,7 @@ ion-searchbar {
 
     // Subtle glow behind icon
     &::after {
-      content: '';
+      content: "";
       position: absolute;
       inset: 0;
       border-radius: inherit;
@@ -879,13 +873,13 @@ ion-searchbar {
   align-items: center;
   justify-content: space-between;
   padding: 10px 16px;
-  
+
   .current-month {
     font-weight: 700;
     font-size: 16px;
     color: var(--ew-text-color-primary);
   }
-  
+
   ion-button {
     --color: var(--ion-color-primary);
   }
@@ -897,7 +891,7 @@ ion-searchbar {
   text-align: center;
   padding: 8px 0;
   border-bottom: 1px solid rgba(var(--ion-text-color-rgb), 0.05);
-  
+
   .weekday {
     font-size: 12px;
     font-weight: 600;
@@ -908,13 +902,13 @@ ion-searchbar {
 
 .calendar-grid {
   padding: 8px;
-  
+
   .calendar-row {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     margin-bottom: 4px;
   }
-  
+
   .calendar-day {
     display: flex;
     align-items: center;
@@ -923,7 +917,7 @@ ion-searchbar {
     position: relative;
     cursor: pointer;
     z-index: 1;
-    
+
     span {
       display: flex;
       align-items: center;
@@ -936,51 +930,59 @@ ion-searchbar {
       color: var(--ew-text-color-primary);
       transition: all 0.2s ease;
     }
-    
+
     &.not-current-month span {
       color: rgba(var(--ion-text-color-rgb), 0.3);
     }
-    
+
     &.is-today span {
       color: var(--ion-color-primary);
       font-weight: 700;
     }
-    
+
     /* Range Highlights */
     &.in-range {
       background: rgba(var(--ion-color-primary-rgb), 0.1);
     }
-    
+
     &.selected-start {
-      background: linear-gradient(90deg, transparent 50%, rgba(var(--ion-color-primary-rgb), 0.1) 50%);
-      
+      background: linear-gradient(
+        90deg,
+        transparent 50%,
+        rgba(var(--ion-color-primary-rgb), 0.1) 50%
+      );
+
       span {
         background: var(--ion-color-primary);
         color: white;
         box-shadow: 0 4px 10px rgba(var(--ion-color-primary-rgb), 0.4);
       }
     }
-    
+
     &.selected-end {
-      background: linear-gradient(90deg, rgba(var(--ion-color-primary-rgb), 0.1) 50%, transparent 50%);
-      
+      background: linear-gradient(
+        90deg,
+        rgba(var(--ion-color-primary-rgb), 0.1) 50%,
+        transparent 50%
+      );
+
       span {
         background: var(--ion-color-primary);
         color: white;
         box-shadow: 0 4px 10px rgba(var(--ion-color-primary-rgb), 0.4);
       }
     }
-    
+
     &.selected-start.selected-end {
       background: transparent;
-      
+
       span {
         background: var(--ion-color-primary);
         color: white;
         box-shadow: 0 4px 10px rgba(var(--ion-color-primary-rgb), 0.4);
       }
     }
-    
+
     &:hover:not(.selected-start):not(.selected-end) span {
       background: rgba(var(--ion-text-color-rgb), 0.05);
     }
@@ -993,23 +995,66 @@ ion-searchbar {
   padding: 16px;
   border-top: 1px solid rgba(var(--ion-text-color-rgb), 0.05);
   background: rgba(var(--ion-text-color-rgb), 0.02);
-  
+
   .summary-item {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    
+
     .label {
       font-size: 12px;
       color: var(--ew-text-color-muted);
       font-weight: 600;
       text-transform: uppercase;
     }
-    
+
     .value {
       font-size: 14px;
       font-weight: 700;
       color: var(--ion-color-primary);
     }
+  }
+}
+
+:host {
+  @include wallet.rows;
+}
+
+:host {
+  .category-ion-header {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .category-ion-header ion-toolbar {
+    --background: var(--ion-background-color) !important;
+  }
+  .category-ion-header .title-toolbar {
+    --min-height: 64px;
+    padding-top: var(--ion-safe-area-top);
+  }
+  .category-ion-header ion-toolbar ion-title {
+    position: relative;
+    padding: 8px 0 !important;
+    width: auto;
+  }
+  .header-title-container .main-title {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+  .header-title-container .sub-title {
+    color: var(--ew-wallet-muted);
+  }
+  .category-ion-header ion-toolbar ion-buttons[slot="end"] ion-button {
+    width: 44px;
+    height: 44px;
+  }
+  ion-searchbar {
+    --background: var(--ion-item-background);
+    --border-radius: 12px !important;
+    --placeholder-color: var(--ew-wallet-muted);
+  }
+  ion-content {
+    --padding-bottom: calc(150px + env(safe-area-inset-bottom));
   }
 }

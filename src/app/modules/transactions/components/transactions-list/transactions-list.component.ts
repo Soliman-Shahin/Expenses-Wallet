@@ -1,3 +1,5 @@
+import { expenseSyncLabel } from 'src/app/shared/utils/expense-presentation';
+import { ExpenseDetailComponent } from 'src/app/home/components/expense-detail/expense-detail.component';
 import {
   Component,
   ChangeDetectionStrategy,
@@ -25,12 +27,7 @@ import { ExpenseFormComponent } from 'src/app/home/components/expense-form/expen
 import { ComponentStateService } from 'src/app/shared/services/component-state.service';
 import { FormsModule } from '@angular/forms';
 import { SkeletonBlockComponent } from '../../../../shared/ui/skeleton-block/skeleton-block.component';
-import {
-  NgClass,
-  LowerCasePipe,
-  CurrencyPipe,
-  DatePipe,
-} from '@angular/common';
+import { NgClass, LowerCasePipe, DecimalPipe, DatePipe } from '@angular/common';
 import { AddFabButtonComponent } from '../../../../shared/ui/add-fab-button/add-fab-button.component';
 import { TranslateModule } from '@ngx-translate/core';
 import { PlanService } from '../../../../core/services/plan.service';
@@ -64,13 +61,14 @@ interface TransactionItem {
     NgClass,
     AddFabButtonComponent,
     LowerCasePipe,
-    CurrencyPipe,
+    DecimalPipe,
     DatePipe,
     TranslateModule,
     PlanLimitBannerComponent,
   ],
 })
 export class TransactionsListComponent extends BaseComponent implements OnInit {
+  readonly syncLabel = expenseSyncLabel;
   // Signals for state management
   rawTransactions = signal<Expense[]>([]);
   transactions = computed(() => {
@@ -79,7 +77,7 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
     return items.sort((a, b) => b.date.getTime() - a.date.getTime());
   });
   categories = signal<Category[]>([]);
-  userCurrency = signal<string>('USD');
+  userCurrency = signal<string>('');
 
   // Filters signals
   searchTerm = signal<string>('');
@@ -184,7 +182,7 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
 
   loadUserCurrency() {
     const profile = this.profileService.getProfile();
-    this.userCurrency.set(profile?.currency || 'USD');
+    this.userCurrency.set(profile?.currency || '');
   }
 
   loadCategories() {
@@ -599,8 +597,27 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
     return item._id;
   }
 
-  onTransactionClick(item: TransactionItem) {
-    this.onEdit(item.original);
+  async onTransactionClick(item: TransactionItem) {
+    if (this.isOpeningModal) return;
+    this.isOpeningModal = true;
+    let role: string | undefined;
+    try {
+      const modal = await this.modalController.create({
+        component: ExpenseDetailComponent,
+        componentProps: {
+          expense: item.original,
+          categoryName: item.categoryName,
+          currency: this.userCurrency(),
+          locale: this.currentLang,
+        },
+        cssClass: 'main-modal expense-record-modal',
+      });
+      await modal.present();
+      role = (await modal.onDidDismiss()).role;
+    } finally {
+      this.isOpeningModal = false;
+    }
+    if (role === 'edit') await this.onEdit(item.original);
   }
 
   async onEdit(item: Expense) {

@@ -1,3 +1,4 @@
+@use "src/theme/wallet-rows" as wallet;
 
 /* Transaction icon wrapper */
 .transaction-icon {
@@ -43,7 +44,6 @@
   }
 }
 
-
 /* Match Categories list spacing */
 .transactions-list {
   background: transparent;
@@ -61,32 +61,34 @@
 }
 
 .transaction-item {
-  --background: var(--ion-item-background);
-  border-radius: 20px;
+  --background: transparent;
+  border-bottom: 1px solid rgba(var(--ion-text-color-rgb), 0.06);
+  border-radius: 0;
   margin: 0 !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  --min-height: 78px;
-  --padding-start: 14px;
-  --padding-end: 14px;
+  box-shadow: none;
+  --min-height: 72px;
+  --padding-start: 12px;
+  --padding-end: 12px;
   --inner-padding-end: 0;
 
-  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  transition: background-color 0.2s ease;
   --ripple-color: rgba(var(--ion-color-primary-rgb), 0.1);
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
-    border-color: rgba(var(--ion-color-primary-rgb), 0.25);
-    transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1),
-      box-shadow 0.3s ease, border-color 0.3s ease;
+    --background: rgba(var(--ion-text-color-rgb), 0.02);
+    transform: none;
+    box-shadow: none;
   }
 
   &:active {
-    transform: scale(0.985);
-    transition: transform 0.1s ease;
+    transform: scale(0.99);
   }
 }
 
+// Remove border from the last item
+.transaction-sliding:last-child .transaction-item {
+  border-bottom: none;
+}
 
 .transaction-content {
   flex: 1 !important;
@@ -136,7 +138,7 @@
 
   .transaction-category {
     &::before {
-      content: '•';
+      content: "•";
       display: inline-block;
       margin: 0 4px;
       opacity: 0.5;
@@ -152,8 +154,8 @@
 
   .amount-value {
     font-family: var(--ew-font-family-heading) !important;
-    font-weight: 700 !important;
-    font-size: 17px !important;
+    font-weight: 800 !important;
+    font-size: 18px !important;
     letter-spacing: -0.5px !important;
     white-space: nowrap !important;
   }
@@ -163,7 +165,9 @@
   }
 
   .amount-expense {
-    color: var(--ion-color-danger) !important;
+    color: var(
+      --ion-text-color
+    ) !important; // More subtle for expenses, letting minus sign do the work
   }
 }
 
@@ -264,3 +268,6 @@
   }
 }
 
+app-transactions {
+  @include wallet.rows;
+}
