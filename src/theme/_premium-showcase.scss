@@ -1,0 +1,495 @@
+// M.VD1: scoped showcase language pending visual approval.
+app-home-page:has(.dashboard),
+app-transactions-list,
+app-expense-form {
+  --ion-background-color: #f2f5fa;
+  --ion-background-color-rgb: 242, 245, 250;
+  --ion-item-background: #fff;
+  --ion-text-color: #142440;
+  --ion-text-color-rgb: 20, 36, 64;
+  --ion-color-primary: #2855e8;
+  --ion-color-primary-rgb: 40, 85, 232;
+  --ion-color-primary-contrast: #fff;
+  --ew-wallet-muted: #5d6c83;
+  --ew-wallet-line: #e0e7f1;
+  --ew-wallet-inset: #e8eef9;
+  --ew-text-color-primary: var(--ion-text-color);
+  --ew-text-color-muted: var(--ew-wallet-muted);
+  --ew-bold-shadow: 0 8px 26px #14244009;
+  --ew-bold-hero: linear-gradient(
+    115deg,
+    #101f42 0%,
+    #173777 64%,
+    #2855d9 100%
+  );
+  color: var(--ion-text-color);
+}
+.dark {
+  app-home-page:has(.dashboard),
+  app-transactions-list,
+  app-expense-form {
+    --ion-background-color: #0b1425;
+    --ion-background-color-rgb: 11, 20, 37;
+    --ion-item-background: #142139;
+    --ion-text-color: #eef3ff;
+    --ion-text-color-rgb: 238, 243, 255;
+    --ion-color-primary: #83a4ff;
+    --ion-color-primary-contrast: #101e3a;
+    --ew-wallet-muted: #a6b6d1;
+    --ew-wallet-line: #263650;
+    --ew-wallet-inset: #1c2d49;
+    --ew-bold-shadow: 0 8px 26px #00000020;
+    --ew-bold-hero: linear-gradient(
+      115deg,
+      #182d57 0%,
+      #1b3c83 64%,
+      #2e58d4 100%
+    );
+  }
+}
+app-home-page .dashboard {
+  .dash-name {
+    font-size: 28px;
+    letter-spacing: -0.7px;
+    font-weight: 700;
+  }
+  .dash-header {
+    padding-bottom: 8px;
+  }
+  .tabs-row {
+    margin-top: 4px;
+  }
+  .card-section.balance-card {
+    background: var(--ew-bold-hero);
+    border: 1px solid #ffffff20;
+    border-radius: 24px 24px 24px 8px;
+    box-shadow: 0 12px 28px #17377725;
+    padding: 22px 20px 18px;
+    position: relative;
+    overflow: hidden;
+    color: #fff;
+  }
+  .balance-card::before {
+    content: "";
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    inset-inline-end: -88px;
+    top: -78px;
+    border: 26px solid #ffffff07;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .hero-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding-inline-end: 44px;
+  }
+  .hero-heading h2 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: #dce7ff;
+  }
+  .hero-period {
+    font-size: 12px;
+    color: #b9cefa;
+    unicode-bidi: isolate;
+  }
+  .card-section.transactions-card {
+    background: var(--ion-item-background);
+    box-shadow: var(--ew-bold-shadow);
+    border-radius: 18px;
+  }
+  .charts-card {
+    background: var(--ion-item-background);
+    box-shadow: var(--ew-bold-shadow);
+  }
+  .salary-item {
+    background: var(--ew-wallet-inset);
+  }
+}
+app-home-page .dashboard .balance-card app-balance-card {
+  .balance-summary {
+    animation: none;
+  }
+  .total-balance {
+    padding: 18px 0 0;
+    margin-bottom: 22px;
+    gap: 8px;
+  }
+  .total-balance .amount {
+    font-size: clamp(27px, 8vw, 40px);
+    font-weight: 500;
+    letter-spacing: -1.1px;
+    line-height: 1.2;
+    color: #fff !important;
+  }
+  .toggle-visibility {
+    top: -40px;
+    background: #ffffff12;
+    color: #e2ebff;
+    border: 1px solid #ffffff20;
+    border-radius: 50%;
+  }
+  .income-expense-row {
+    border-top: 1px solid #ffffff26;
+    padding-top: 16px;
+    gap: 12px;
+  }
+  .balance-item.income,
+  .balance-item.expenses {
+    background: transparent;
+    padding: 0;
+    gap: 6px;
+    border-radius: 0;
+    .label {
+      color: #c7d8f7;
+      font-size: 12px;
+      font-weight: 400;
+    }
+    .amount {
+      color: #fff !important;
+      font-size: 15px;
+      font-weight: 500;
+      overflow: visible;
+      white-space: normal;
+    }
+    ion-icon {
+      font-size: 20px;
+    }
+  }
+  .balance-item.income ion-icon {
+    color: #7ae2bf;
+  }
+  .balance-item.expenses ion-icon {
+    color: #ffb3ab;
+  }
+  .balance-item.expenses {
+    border-inline-start: 1px solid #ffffff26;
+    padding-inline-start: 16px;
+  }
+}
+app-home-page,
+app-transactions-list {
+  .custom-segment {
+    border-radius: 14px;
+    padding: 4px;
+  }
+  .custom-segment ion-segment-button {
+    font-weight: 600;
+    --color-checked: var(--ion-color-primary);
+  }
+  .custom-segment ion-segment-button::part(indicator-background) {
+    border-radius: 10px;
+    box-shadow: 0 2px 8px #1424400a;
+  }
+  app-add-fab-button .fab-add {
+    --background: linear-gradient(135deg, #3467ff, #2547ca);
+    --color: white;
+    --box-shadow: 0 6px 18px #214ecd44;
+    --border-radius: 18px 18px 18px 6px;
+  }
+  .transactions-list {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--ew-bold-shadow);
+  }
+  .transaction-item {
+    --min-height: 82px;
+    --padding-start: 14px;
+    --padding-end: 14px;
+  }
+  .transaction-icon .category-icon {
+    width: 38px !important;
+    min-width: 38px !important;
+    height: 42px !important;
+    border-radius: 12px 12px 12px 4px;
+    box-shadow: inset 0 0 0 1px #ffffff20;
+  }
+  .transaction-icon .category-icon::after {
+    display: none;
+  }
+  .transaction-content {
+    gap: 5px !important;
+  }
+  .transaction-header {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px !important;
+    align-items: baseline !important;
+  }
+  .transaction-title {
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0 !important;
+  }
+  .transaction-amount .amount-value {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.3px !important;
+  }
+  .transaction-meta {
+    font-size: 11px !important;
+    gap: 4px 8px !important;
+    color: var(--ew-wallet-muted) !important;
+  }
+  .transaction-category::before {
+    display: none;
+  }
+  .transaction-meta ion-icon {
+    display: none !important;
+  }
+  .transaction-amount .amount-income {
+    color: #137956 !important;
+  }
+  .empty-state-wrapper {
+    padding: 36px 24px;
+  }
+  .empty-icon-glow {
+    border-radius: 16px 16px 16px 5px;
+    color: var(--ion-color-primary);
+  }
+}
+.dark app-home-page,
+.dark app-transactions-list {
+  .transaction-amount .amount-income {
+    color: #75dcbc !important;
+  }
+}
+app-transactions-list {
+  .category-ion-header {
+    border-bottom: 1px solid var(--ew-wallet-line);
+    padding-bottom: 8px;
+  }
+  .category-ion-header .header-title-container .main-title {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.7px;
+  }
+  ion-searchbar {
+    --background: var(--ion-item-background);
+    --box-shadow: var(--ew-bold-shadow);
+    --border-radius: 14px !important;
+    --color: var(--ion-text-color);
+  }
+  .cat-select-trigger {
+    border-radius: 12px;
+    background: var(--ion-item-background);
+    border-color: var(--ew-wallet-line);
+    min-height: 48px;
+  }
+  .cat-option:focus-visible,
+  .cat-clear-btn:focus-visible {
+    outline: 2px solid var(--ion-color-primary);
+    outline-offset: -3px;
+  }
+}
+app-expense-form .expense-modal-content {
+  .top-hero {
+    background: var(--ew-bold-hero);
+    color: #fff;
+    border: 0;
+    position: relative;
+    border-end-start-radius: 26px;
+    border-end-end-radius: 8px;
+  }
+  .transparent-header ion-toolbar {
+    --color: #fff;
+  }
+  .close-btn {
+    --color: #fff;
+  }
+  .hero-body {
+    padding: 10px 24px 26px;
+  }
+  .custom-segment {
+    background: #07152f50;
+    border: 1px solid #ffffff24;
+    border-radius: 14px;
+  }
+  .segment-btn {
+    color: #d2dfff;
+    font-weight: 500;
+    border-radius: 10px;
+  }
+  .segment-btn.active {
+    color: #142440;
+    background: #fff;
+    box-shadow: 0 3px 12px #07152f25;
+  }
+  .amount-label {
+    color: #c7d8f7;
+    margin-top: 24px;
+    font-size: 13px;
+  }
+  .currency-symbol {
+    color: #dce7ff;
+    font-size: 15px;
+    padding: 6px 8px;
+    border: 1px solid #ffffff30;
+    border-radius: 7px;
+  }
+  .huge-amount-input {
+    color: #fff;
+    font-size: 48px;
+    font-weight: 500;
+    --placeholder-color: #b3c7ed;
+    --placeholder-opacity: 1;
+    caret-color: #fff;
+  }
+  .bottom-sheet {
+    padding: 22px 24px max(20px, env(safe-area-inset-bottom));
+  }
+  .grouped-fields-list {
+    background: transparent;
+    border-radius: 0;
+    overflow: visible;
+  }
+  .form-field {
+    --min-height: 82px;
+    --padding-start: 0;
+    --inner-padding-end: 0;
+  }
+  .icon-box {
+    width: 38px;
+    height: 42px;
+    border-radius: 12px 12px 12px 4px;
+  }
+  .field-caption {
+    font-size: 12px;
+  }
+  .premium-label,
+  .premium-input {
+    font-weight: 500;
+  }
+  .submit-btn:not(.button-disabled) {
+    --background: linear-gradient(110deg, #2855e8, #376aff) !important;
+    --color: #fff !important;
+    --box-shadow: 0 5px 14px #2855e82b;
+  }
+  .submit-btn {
+    font-size: 16px;
+    font-weight: 700;
+    min-height: 54px;
+  }
+  .submit-btn.button-disabled {
+    --background: var(--ew-wallet-inset) !important;
+    --color: var(--ew-wallet-muted) !important;
+    --box-shadow: none;
+  }
+  .segment-btn:focus-visible,
+  .popover-item:focus-visible {
+    outline: 2px solid #83a4ff;
+    outline-offset: 2px;
+  }
+  .huge-amount-input:focus-within {
+    box-shadow: 0 2px 0 #a9c1ff;
+  }
+}
+@media (max-width: 360px) {
+  app-home-page .transaction-header,
+  app-transactions-list .transaction-header {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 3px !important;
+  }
+  app-home-page .transaction-amount,
+  app-transactions-list .transaction-amount {
+    margin-inline-start: 0;
+    justify-self: start;
+  }
+  app-expense-form .huge-amount-input {
+    font-size: 38px;
+  }
+}
+@media (max-height: 560px) {
+  app-expense-form .hero-body {
+    padding-block: 6px 12px;
+  }
+  app-expense-form .amount-label {
+    margin-top: 8px;
+  }
+  app-expense-form .huge-amount-input {
+    font-size: 32px;
+  }
+}
+app-home-page .dashboard .balance-card .hero-money {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+app-home-page .dashboard .balance-card .hero-currency {
+  font-size: 14px;
+  font-weight: 500;
+  color: #c7d8f7;
+  letter-spacing: 0.4px;
+}
+app-home-page .dashboard .transactions-card app-section-header {
+  margin-bottom: 4px;
+}
+app-home-page
+  .dashboard
+  .balance-card
+  app-balance-card
+  .balance-item.income
+  ion-icon {
+  color: #7ae2bf !important;
+}
+app-home-page
+  .dashboard
+  .balance-card
+  app-balance-card
+  .balance-item.expenses
+  ion-icon {
+  color: #ffb3ab !important;
+}
+app-home-page app-add-fab-button .fab-add,
+app-transactions-list app-add-fab-button .fab-add {
+  --background: linear-gradient(135deg, #3467ff, #2547ca) !important;
+  --color: #fff !important;
+  --border-radius: 18px 18px 18px 6px !important;
+}
+app-transactions-list .category-ion-header ion-searchbar {
+  --background: var(--ion-item-background) !important;
+  --placeholder-color: var(--ew-wallet-muted) !important;
+  --icon-color: var(--ew-wallet-muted);
+}
+app-transactions-list .category-ion-header .custom-segment ion-segment-button {
+  --color: var(--ew-wallet-muted) !important;
+  --color-checked: var(--ion-color-primary) !important;
+}
+app-transactions-list .category-ion-header ion-buttons ion-button {
+  --color: var(--ion-color-primary) !important;
+}
+app-home-page .transaction-item,
+app-transactions-list .transaction-item {
+  border-bottom-color: var(--ew-wallet-line) !important;
+}
+app-home-page .transaction-meta .transaction-category::before,
+app-transactions-list .transaction-meta .transaction-category::before {
+  display: none !important;
+}
+
+app-expense-form .expense-modal-content .top-hero ion-title {
+  color: #fff;
+}
+app-home-page .dashboard .balance-card app-balance-card .total-balance .amount {
+  font-size: clamp(28px, 9.7vw, 40px);
+}
+app-home-page .dashboard .transactions-card .section-header {
+  margin-bottom: 8px;
+}
+
+app-home-page:has(.dashboard) {
+  --ion-card-background: var(--ion-item-background);
+  --ew-text-color-secondary: var(--ew-wallet-muted);
+}
+app-home-page .dashboard .chart-container {
+  box-shadow: none;
+  border-radius: 14px;
+  border-bottom: 1px solid var(--ew-wallet-line);
+}

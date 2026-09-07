@@ -1,19 +1,14 @@
 <div class="icon-selector-container">
   @for (icon of icons; track trackByIcon($index, icon)) {
-    <ion-icon
-      class="icon"
-      [class.selected]="selectedIcon === icon"
-      [style.--active-color]="themeColor || 'var(--ion-color-primary)'"
-      [name]="icon"
-      size="large"
-      [title]="icon"
-      [attr.aria-label]="icon"
-      [attr.aria-pressed]="selectedIcon === icon"
-      role="radio"
-      tabindex="0"
-      (click)="selectIcon(icon)"
-      (keydown.enter)="selectIcon(icon)"
-      (keydown.space)="selectIcon(icon)"
-    ></ion-icon>
+  <button
+    type="button"
+    class="icon"
+    [class.selected]="selectedIcon === icon"
+    [attr.aria-label]="icon"
+    [attr.aria-pressed]="selectedIcon === icon"
+    (click)="selectIcon(icon)"
+  >
+    <ion-icon [name]="icon" aria-hidden="true"></ion-icon>
+  </button>
   }
 </div>

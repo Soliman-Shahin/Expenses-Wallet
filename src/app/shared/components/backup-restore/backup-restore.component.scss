@@ -1,3 +1,5 @@
+@use "src/theme/mobile-secondary" as secondary;
+@include secondary.page;
 :host {
   display: block;
 }
@@ -24,7 +26,11 @@
 }
 
 .google-drive-section {
-  background: linear-gradient(135deg, rgba(66, 133, 244, 0.1), rgba(234, 67, 53, 0.1));
+  background: linear-gradient(
+    135deg,
+    rgba(66, 133, 244, 0.1),
+    rgba(234, 67, 53, 0.1)
+  );
   border-radius: 20px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
@@ -432,4 +438,128 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+:host {
+  .backup-container {
+    padding: 0;
+  }
+  .header-section {
+    text-align: start;
+    margin-bottom: 20px;
+  }
+  .header-section h2 {
+    font-size: 22px;
+  }
+  .google-drive-section,
+  .auto-backup-section {
+    background: var(--ion-item-background);
+    border: 1px solid var(--ew-wallet-line);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 16px;
+    box-shadow: none;
+  }
+  .section-header {
+    gap: 12px;
+  }
+  .header-content {
+    min-width: 0;
+    gap: 10px !important;
+  }
+  .header-content > ion-icon {
+    font-size: 22px !important;
+    flex-shrink: 0;
+  }
+  .header-content h3 {
+    font-size: 15px !important;
+  }
+  .header-content p {
+    font-size: 12px !important;
+    color: var(--ew-wallet-muted) !important;
+  }
+  .email-badge {
+    direction: ltr;
+    unicode-bidi: isolate;
+    overflow-wrap: anywhere;
+  }
+  .actions-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .action-card {
+    padding: 14px;
+    border: 1px solid var(--ew-wallet-line);
+    border-radius: 12px;
+    background: var(--ion-item-background);
+    box-shadow: none;
+    transform: none;
+    text-align: start;
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: 4px 12px;
+    cursor: pointer;
+  }
+  .action-card .icon-box {
+    grid-row: span 2;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    margin: 0;
+    font-size: 22px;
+    background: var(--ew-wallet-inset);
+    color: var(--ion-color-primary);
+  }
+  .action-card h3 {
+    font-size: 15px;
+    margin: 0;
+  }
+  .action-card p {
+    font-size: 12px;
+    margin: 0;
+    color: var(--ew-wallet-muted);
+  }
+  .history-item {
+    padding: 12px;
+    border-radius: 10px;
+    box-shadow: none;
+    background: var(--ion-item-background);
+  }
+  .item-details {
+    min-width: 0;
+  }
+  .item-details h4 {
+    overflow-wrap: anywhere;
+  }
+  .btn-icon {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .empty-state {
+    padding: 24px 16px;
+  }
+  .empty-state ion-icon {
+    font-size: 32px;
+  }
+}
+
+:host .actions-grid .action-card {
+  padding: 14px;
+  border-radius: 12px;
+  box-shadow: none;
+  text-align: start;
+  background: var(--ion-item-background);
+  transform: none;
+}
+:host .actions-grid .action-card .icon-box {
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  border-radius: 8px;
+}
+:host .actions-grid .action-card h3,
+:host .actions-grid .action-card p {
+  margin: 0;
 }

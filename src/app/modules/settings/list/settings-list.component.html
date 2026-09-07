@@ -1,6 +1,7 @@
 <ion-header mode="ios" class="settings-header">
-  <ion-toolbar>
-  </ion-toolbar>
+  <ion-toolbar
+    ><ion-title>{{ "SIDEBAR.SETTINGS" | translate }}</ion-title></ion-toolbar
+  >
 </ion-header>
 
 <ion-content class="settings-content" [fullscreen]="true">
@@ -15,16 +16,17 @@
         lines="none"
       >
         <ion-avatar slot="start" class="profile-avatar">
-          <img
-            [src]="
-              currentUser?.image ||
-              'https://ionicframework.com/docs/img/demos/avatar.svg'
-            "
-          />
+          @if (currentUser?.image) { <img [src]="currentUser?.image" alt="" /> }
+          @else {
+          <ion-icon name="person-outline" aria-hidden="true"></ion-icon> }
         </ion-avatar>
         <ion-label>
           <h2 class="profile-name">
-            {{ currentUser?.username || currentUser?.email || "Expenses User" }}
+            {{
+              currentUser?.username ||
+                currentUser?.email ||
+                ("MOBILE_UI.ACCOUNT" | translate)
+            }}
           </h2>
           <p class="profile-desc">
             {{ "SETTINGS.MANAGE_PROFILE" | translate }}
@@ -46,6 +48,7 @@
         </ion-label>
         <ion-select
           slot="end"
+          [attr.aria-label]="'SETTINGS.LANGUAGE' | translate"
           [value]="currentLanguage"
           (ionChange)="onLanguageChange($event)"
           interface="popover"
@@ -69,6 +72,7 @@
         </ion-label>
         <ion-select
           slot="end"
+          [attr.aria-label]="'SETTINGS.THEME' | translate"
           [value]="selectedTheme"
           (ionChange)="onThemeChange($event)"
           interface="popover"
@@ -100,9 +104,10 @@
         </ion-label>
         <ion-toggle
           slot="end"
+          [attr.aria-label]="'SETTINGS.NOTIFICATIONS' | translate"
           [checked]="notificationsEnabled"
           (ionChange)="toggleNotifications($event)"
-          color="success"
+          color="primary"
         ></ion-toggle>
       </ion-item>
 
@@ -118,9 +123,10 @@
         </ion-label>
         <ion-toggle
           slot="end"
+          [attr.aria-label]="'SETTINGS.BIOMETRIC' | translate"
           [checked]="biometricEnabled"
           (ionChange)="toggleBiometric($event)"
-          color="success"
+          color="primary"
         ></ion-toggle>
       </ion-item>
       }
@@ -149,9 +155,10 @@
         </ion-label>
         <ion-toggle
           slot="end"
+          [attr.aria-label]="'SETTINGS.AUTO_BACKUP' | translate"
           [checked]="autoBackupEnabled"
           (ionChange)="toggleAutoBackup($event)"
-          color="success"
+          color="primary"
         ></ion-toggle>
       </ion-item>
 
@@ -184,7 +191,12 @@
     <div class="section-label">{{ "SETTINGS.SUBSCRIPTION" | translate }}</div>
     <ion-list inset="true" class="premium-list">
       <!-- Subscription Button -->
-      <ion-item button detail="true" (click)="navigateToSubscription()" lines="none">
+      <ion-item
+        button
+        detail="true"
+        (click)="navigateToSubscription()"
+        lines="none"
+      >
         <div slot="start" class="icon-wrapper color-purple">
           <ion-icon name="card"></ion-icon>
         </div>

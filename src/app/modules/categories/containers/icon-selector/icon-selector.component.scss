@@ -1,107 +1,60 @@
+:host {
+  display: block;
+}
+.color-selector-container,
 .icon-selector-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
-  gap: 10px;
-  padding: var(--ew-space-2) 0;
-  background: transparent;
-  border: none;
-  margin: var(--ew-space-2) 0;
-  max-height: 260px;
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  gap: 8px;
+  margin: 8px 0;
+  padding: 4px;
+}
+.icon-selector-container {
+  max-height: 220px;
   overflow-y: auto;
-  overflow-x: hidden;
-  width: 100%;
-  animation: fadeInScale 0.5s ease-out;
-
-  .icon {
-    animation: iconStagger 0.8s ease-out both;
-    
-    @for $i from 1 through 50 {
-      &:nth-child(#{$i}) {
-        animation-delay: #{$i * 0.015}s;
-      }
-    }
-  }
-
-  // Thin custom scrollbar for the icon grid
-  &::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: rgba(var(--ion-text-color-rgb), 0.12);
-    border-radius: 10px;
-    transition: background 0.3s ease;
-
-    &:hover {
-      background: rgba(var(--ion-text-color-rgb), 0.22);
-    }
-  }
 }
-
-.icon {
-  width: 52px;
-  height: 52px;
+.icon,
+.color-button,
+.color-palette {
+  box-sizing: border-box;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--ew-wallet-line);
+  border-radius: 10px;
+  padding: 10px;
+  background: var(--ew-wallet-inset);
+  color: var(--ion-text-color);
   cursor: pointer;
-  border: none; // remove hard border for a cleaner look
-  border-radius: 16px; // Modern smooth squircle
-  transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(var(--ion-text-color-rgb), 0.02);
-  color: var(--ew-text-color-muted);
+  display: grid;
+  place-items: center;
   position: relative;
-  overflow: visible; // allow glow to extend
-  font-size: 26px;
-
-  &:hover {
-    background: rgba(var(--ion-text-color-rgb), 0.06);
-    color: var(--ion-text-color);
-    transform: translateY(-2px);
-  }
-
-  &:active {
-    transform: translateY(0) scale(0.95);
-  }
-
-  &.selected {
-    background: var(--active-color) !important;
-    color: #ffffff !important;
-    transform: scale(1.08);
-    box-shadow: 0 8px 24px color-mix(in srgb, var(--active-color) 40%, transparent);
-    animation: iconBounce 0.4s ease-out;
-    z-index: 1; // ensure shadow sits above others
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
-
-    // Subtle inner light for a premium 3D feel
-    &::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.3);
-      pointer-events: none;
-    }
-  }
+}
+.selected {
+  outline: 2px solid var(--ion-color-primary);
+  outline-offset: 2px;
+}
+.color-button.selected::after {
+  content: "✓";
+  position: absolute;
+  inset: 10px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #18243a;
+  color: #fff;
+  font-size: 16px;
+}
+:is(button, ion-icon):focus-visible {
+  outline: 2px solid var(--ion-color-primary);
+  outline-offset: 2px;
+}
+.color-input {
+  display: none;
 }
 
-@keyframes iconBounce {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.15) rotate(-5deg); }
-  100% { transform: scale(1.06); }
-}
-
-@keyframes iconStagger {
-  from {
-    opacity: 0;
-    transform: translateY(15px) scale(0.85);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+.icon ion-icon {
+  width: 24px;
+  height: 24px;
+  font-size: 24px;
+  pointer-events: none;
 }

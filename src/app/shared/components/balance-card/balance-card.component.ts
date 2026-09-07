@@ -20,17 +20,13 @@ export interface BalanceCardData {
 }
 
 @Component({
-    selector: 'app-balance-card',
-    templateUrl: './balance-card.component.html',
-    styleUrls: ['./balance-card.component.scss'],
-    encapsulation: ViewEncapsulation.None,
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-    imports: [
-        IonicModule,
-        DecimalPipe,
-        TranslateModule,
-    ],
+  selector: 'app-balance-card',
+  templateUrl: './balance-card.component.html',
+  styleUrls: ['./balance-card.component.scss'],
+  encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [IonicModule, DecimalPipe, TranslateModule],
 })
 export class BalanceCardComponent {
   // Inputs
@@ -63,7 +59,7 @@ export class BalanceCardComponent {
   showBalance = computed(() => this._showBalanceSignal());
 
   formattedBalance = computed(() =>
-    this.formatAmount(this._balanceSignal(), this._showBalanceSignal())
+    this.formatAmount(this._balanceSignal(), this._showBalanceSignal(), false)
   );
 
   formattedIncome = computed(() =>
@@ -96,7 +92,11 @@ export class BalanceCardComponent {
   /**
    * Format amount with currency
    */
-  formatAmount(amount: number | null, show: boolean): string {
+  formatAmount(
+    amount: number | null,
+    show: boolean,
+    includeCurrency = true
+  ): string {
     if (!show) return '•••••';
     if (amount === null || amount === undefined) return '-';
 
@@ -105,7 +105,7 @@ export class BalanceCardComponent {
       maximumFractionDigits: 2,
     });
 
-    return `${formatted} ${this.currency}`;
+    return includeCurrency ? `${formatted} ${this.currency}` : formatted;
   }
 
   /**

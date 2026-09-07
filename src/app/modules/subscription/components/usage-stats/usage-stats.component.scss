@@ -1,3 +1,5 @@
+@use "src/theme/mobile-secondary" as secondary;
+@include secondary.page;
 .usage-stats-container {
   padding: 16px;
 }
@@ -239,4 +241,23 @@ ion-card-subtitle {
 
 .limits-info h4 {
   opacity: 1;
+}
+
+:host {
+  ion-card {
+    background: var(--ion-item-background);
+    border: 1px solid var(--ew-wallet-line);
+    border-radius: 12px;
+    box-shadow: none;
+    margin: 0 0 16px;
+  }
+  .usage-stats-container {
+    padding: 16px;
+  }
+  .plan-info-card ion-card-title {
+    font-size: 20px;
+  }
+  .usage-item {
+    font-variant-numeric: tabular-nums;
+  }
 }

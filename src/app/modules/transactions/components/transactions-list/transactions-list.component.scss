@@ -101,7 +101,7 @@
 /* Spacing and margins for the main transactions container */
 .transactions-list {
   background: transparent;
-  padding: var(--ew-space-2) 0 130px !important; // 130px bottom padding to prevent FAB/tabs overlay
+  padding: 0; // Content clearance belongs to ion-content, outside the list surface.
 }
 
 /* Spacing and margins for the sliding wrapper */
@@ -1055,6 +1055,6 @@ ion-searchbar {
     --placeholder-color: var(--ew-wallet-muted);
   }
   ion-content {
-    --padding-bottom: calc(150px + env(safe-area-inset-bottom));
+    --padding-bottom: var(--ew-core-bottom-clearance);
   }
 }

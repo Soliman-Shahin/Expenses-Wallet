@@ -1,7 +1,11 @@
-<ion-header mode="ios" class="settings-header" translucent="true">
+<ion-header mode="ios" class="settings-header" translucent="false">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-button routerLink="/categories/list" class="modern-back-btn">
+      <ion-button
+        routerLink="/categories/list"
+        class="modern-back-btn"
+        [attr.aria-label]="'COMMON.BACK' | translate"
+      >
         <ion-icon name="chevron-back"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -12,18 +16,10 @@
 </ion-header>
 
 <ion-content class="settings-content" [fullscreen]="true">
-  <ion-header collapse="condense" class="settings-header">
-    <ion-toolbar>
-      <ion-title size="large">{{
-        (editMode ? "CATEGORY.EDIT" : "CATEGORY.ADD") | translate
-      }}</ion-title>
-    </ion-toolbar>
-  </ion-header>
-
   @if (vm$ | async; as vm) {
   <!-- Live Preview -->
   <div class="preview-container ion-padding" [class.bump]="animatePreview">
-    <div class="category-item-preview card-glass">
+    <div class="category-item-preview">
       <div
         class="category-icon-preview"
         [style.background]="categoryForm.get('color')?.value"
@@ -61,6 +57,7 @@
     <ion-note
       color="danger"
       class="error-message ion-padding-start ion-padding-end"
+      role="alert"
     >
       <ion-icon name="alert-circle-outline"></ion-icon>
       {{ vm.errorMessage }}
@@ -116,7 +113,7 @@
               [selectedColor]="categoryForm.get('color')?.value"
               (color)="selectColor($event)"
               [attr.aria-label]="'CATEGORY.SELECT_COLOR' | translate"
-              role="radiogroup"
+              role="group"
             ></app-color-selector>
           </ion-col>
         </ion-row>
@@ -131,7 +128,7 @@
               [themeColor]="categoryForm.get('color')?.value"
               (icon)="selectIcon($event)"
               [attr.aria-label]="'CATEGORY.SELECT_ICON' | translate"
-              role="radiogroup"
+              role="group"
             ></app-icon-selector>
           </ion-col>
         </ion-row>

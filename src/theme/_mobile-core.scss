@@ -1,4 +1,5 @@
 :root {
+  --ew-core-bottom-clearance: calc(160px + env(safe-area-inset-bottom, 0px));
   --ew-wallet-muted: #596574;
   --ew-wallet-line: #dce2e9;
   --ew-wallet-inset: #eef2f6;
@@ -137,7 +138,7 @@ app-balance-card {
 
 app-transactions-list {
   ion-content {
-    --padding-bottom: calc(156px + env(safe-area-inset-bottom));
+    --padding-bottom: var(--ew-core-bottom-clearance);
   }
   .category-ion-header,
   .category-ion-header ion-toolbar {
@@ -211,7 +212,7 @@ app-transactions-list .custom-segment ion-segment-button {
 }
 
 ion-modal.expense-record-modal {
-  --height: min(520px, 90dvh);
+  --height: min(480px, 90dvh);
   --width: min(100%, 480px);
 }
 @media (max-width: 360px) {
@@ -227,4 +228,33 @@ ion-modal.expense-record-modal {
 
 app-expense-detail ion-buttons ion-button {
   --color: var(--ion-text-color);
+}
+
+// Keep the amount-first form and its action within a deliberate mobile sheet.
+ion-modal.main-modal:has(app-expense-form) {
+  --height: min(720px, 100dvh);
+}
+ion-popover.expense-date-popover {
+  --width: min(350px, calc(100vw - 24px));
+  --background: var(--ion-item-background);
+  --border-radius: 16px;
+  ion-datetime {
+    --background: var(--ion-item-background);
+    --background-rgb: 255, 255, 255;
+    --title-color: var(--ion-text-color);
+    --wheel-fade-background-rgb: var(--background-rgb);
+    --wheel-highlight-background: var(--ew-wallet-inset);
+    --wheel-highlight-border-radius: 8px;
+    color: var(--ion-text-color);
+    width: 100%;
+    max-width: none;
+  }
+}
+.dark ion-popover.expense-date-popover ion-datetime {
+  color-scheme: dark;
+  --background-rgb: 22, 27, 34;
+  --ion-color-step-300: #596574;
+  --ion-color-step-500: #a4b0bf;
+  --ion-color-step-600: #c9d1d9;
+  --ion-color-step-650: #c9d1d9;
 }

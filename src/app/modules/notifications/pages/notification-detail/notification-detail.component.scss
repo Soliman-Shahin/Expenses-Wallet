@@ -1,0 +1,31 @@
+@use "src/theme/mobile-secondary" as secondary;
+@include secondary.page;
+ion-card {
+  margin: 0;
+  border: 1px solid var(--ew-wallet-line);
+  border-radius: 12px;
+  box-shadow: none;
+  background: var(--ion-item-background);
+}
+ion-card-title {
+  font-size: 20px;
+  overflow-wrap: anywhere;
+}
+ion-card-content {
+  font-size: 15px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+ion-card-subtitle {
+  color: var(--ew-wallet-muted);
+  margin-top: 8px;
+}
+.notification-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 32px;
+  color: var(--ew-wallet-muted);
+}

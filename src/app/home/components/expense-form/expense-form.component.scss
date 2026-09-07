@@ -29,7 +29,7 @@ ion-title {
   height: 44px;
 }
 .hero-body {
-  padding: 12px 20px 20px;
+  padding: 12px 20px 16px;
 }
 .custom-segment {
   display: flex;
@@ -91,7 +91,7 @@ ion-title {
 }
 .grouped-fields-list {
   padding: 0;
-  margin: 0 0 20px;
+  margin: 0 0 12px;
   background: var(--ion-item-background);
   border-radius: 12px;
   overflow: hidden;
@@ -232,4 +232,39 @@ ion-title {
 }
 .field-error {
   padding-inline: 20px;
+}
+
+.form-field .premium-label,
+.premium-input {
+  text-align: start;
+}
+.amount-wrapper {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  text-align: left;
+}
+.currency-symbol {
+  max-width: 9rem;
+  overflow-wrap: anywhere;
+}
+.huge-amount-input {
+  text-align: left;
+  width: 100%;
+  min-width: 0;
+}
+.transparent-header ion-title {
+  text-align: start;
+  padding-inline: 8px 16px;
+}
+.form-actions-row {
+  align-items: stretch;
+  gap: 12px;
+}
+.submit-btn.button-disabled {
+  opacity: 1;
+  --background: var(--ew-wallet-inset) !important;
+  --color: var(--ew-wallet-muted) !important;
+  --border-color: var(--ew-wallet-line);
+  --border-style: solid;
+  --border-width: 1px;
 }

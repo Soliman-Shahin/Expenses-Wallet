@@ -1,3 +1,5 @@
+@use "src/theme/mobile-secondary" as secondary;
+@include secondary.page;
 ion-header {
   ion-toolbar {
     --background: var(--ion-background-color);
@@ -183,4 +185,48 @@ ion-content {
 .plans-grid,
 .usage-container {
   animation: fadeIn 0.4s ease-out;
+}
+
+:host {
+  .header-section {
+    background: none;
+    text-align: start;
+    padding: 20px 16px;
+  }
+  .header-section h1 {
+    font-size: 24px;
+    color: var(--ion-text-color);
+    margin: 0 0 8px;
+  }
+  .header-section p {
+    font-size: 14px;
+    opacity: 1;
+    color: var(--ew-wallet-muted);
+  }
+  .plans-grid {
+    padding-top: 0;
+  }
+  .plans-grid,
+  .usage-container {
+    animation: none;
+  }
+  .empty-state {
+    padding: 32px 20px;
+  }
+  .empty-state ion-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+    opacity: 1;
+  }
+  .empty-state h3 {
+    color: var(--ion-text-color);
+  }
+  .empty-state p {
+    color: var(--ew-wallet-muted);
+    opacity: 1;
+  }
+  .loading-container {
+    height: auto;
+    min-height: 180px;
+  }
 }

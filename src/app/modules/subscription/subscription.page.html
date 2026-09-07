@@ -1,7 +1,11 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-button (click)="goBack()">
+      <ion-button
+        class="modern-back-btn"
+        [attr.aria-label]="'COMMON.BACK' | translate"
+        (click)="goBack()"
+      >
         <ion-icon name="arrow-back"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -22,7 +26,6 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
-
   <!-- Plans Tab -->
   <div
     class="plans-container"

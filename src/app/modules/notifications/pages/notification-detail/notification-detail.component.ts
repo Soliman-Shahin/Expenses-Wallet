@@ -1,3 +1,4 @@
+import { TranslateModule } from '@ngx-translate/core';
 import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -14,28 +15,38 @@ import { ApiService } from 'src/app/core/services/api.service';
 @Component({
   selector: 'app-notification-detail',
   standalone: true,
-  imports: [CommonModule, IonicModule],
+  imports: [CommonModule, IonicModule, TranslateModule],
   template: `
     <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button defaultHref="/home"></ion-back-button>
         </ion-buttons>
-        <ion-title>Notification</ion-title>
+        <ion-title>{{ 'MOBILE_UI.NOTIFICATION' | translate }}</ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content class="ion-padding">
-      <ion-spinner *ngIf="loading"></ion-spinner>
+      <div *ngIf="loading" role="status" class="notification-loading">
+        <ion-spinner></ion-spinner
+        ><span>{{ 'COMMON.LOADING' | translate }}</span>
+      </div>
       <ion-card *ngIf="notification as item">
         <ion-card-header>
           <ion-card-title>{{ item.title }}</ion-card-title>
-          <ion-card-subtitle>{{ item.createdAt | date: 'medium' }}</ion-card-subtitle>
+          <ion-card-subtitle
+            ><bdi>{{
+              item.createdAt | date : 'medium'
+            }}</bdi></ion-card-subtitle
+          >
         </ion-card-header>
         <ion-card-content>{{ item.message }}</ion-card-content>
       </ion-card>
-      <ion-text color="danger" *ngIf="error">{{ error }}</ion-text>
+      <ion-text color="danger" role="alert" *ngIf="error">{{
+        error | translate
+      }}</ion-text>
     </ion-content>
   `,
+  styleUrls: ['./notification-detail.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NotificationDetailComponent implements OnInit {
@@ -53,7 +64,7 @@ export class NotificationDetailComponent implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id || !/^[a-f\d]{24}$/i.test(id)) {
       this.loading = false;
-      this.error = 'Notification not found.';
+      this.error = 'MOBILE_UI.NOT_FOUND';
       return;
     }
 
@@ -63,7 +74,7 @@ export class NotificationDetailComponent implements OnInit {
         finalize(() => {
           this.loading = false;
           if (!this.notification && !this.error) {
-            this.error = 'This notification is unavailable.';
+            this.error = 'MOBILE_UI.UNAVAILABLE';
           }
           this.cdr.markForCheck();
         })
@@ -76,7 +87,7 @@ export class NotificationDetailComponent implements OnInit {
             .subscribe({ error: () => undefined });
         },
         error: () => {
-          this.error = 'This notification is unavailable.';
+          this.error = 'MOBILE_UI.UNAVAILABLE';
         },
       });
   }

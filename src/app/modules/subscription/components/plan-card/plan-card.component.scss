@@ -1,3 +1,5 @@
+@use "src/theme/mobile-secondary" as secondary;
+@include secondary.page;
 ion-card {
   position: relative;
   border-radius: 16px;
@@ -197,4 +199,67 @@ ion-card-subtitle {
 
 .limits-info h4 {
   opacity: 1;
+}
+
+:host {
+  ion-card,
+  ion-card.current-plan,
+  ion-card.popular-plan {
+    background: var(--ion-item-background);
+    border: 1px solid var(--ew-wallet-line);
+    border-radius: 12px;
+    box-shadow: none;
+    transform: none;
+  }
+  ion-card.current-plan {
+    border-color: var(--ion-color-primary);
+  }
+  ion-card-header {
+    padding: 24px 16px 8px;
+  }
+  ion-card-title {
+    font-size: 22px;
+  }
+  .price-section {
+    padding: 12px 0;
+    margin-bottom: 16px;
+    border-color: var(--ew-wallet-line);
+  }
+  .price {
+    direction: ltr;
+    unicode-bidi: isolate;
+    font-variant-numeric: tabular-nums;
+    flex-wrap: wrap;
+  }
+  .price-section .price .amount {
+    font-size: 32px;
+    color: var(--ion-text-color);
+  }
+  .limits-section h4,
+  .features-section h4 {
+    color: var(--ion-text-color);
+  }
+  .limits-section,
+  .features-section {
+    margin-bottom: 16px;
+  }
+  .popular-badge {
+    right: auto;
+    inset-inline-end: 12px;
+  }
+  .current-badge {
+    left: auto;
+    right: auto;
+    inset-inline-start: 12px;
+  }
+  .popular-badge ion-badge,
+  .current-badge ion-badge {
+    border-radius: 6px;
+    padding: 6px 8px;
+    box-shadow: none;
+  }
+  .upgrade-button {
+    box-shadow: none;
+    margin-top: 12px;
+  }
 }

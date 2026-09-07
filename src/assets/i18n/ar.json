@@ -1,4 +1,13 @@
 {
+  "MOBILE_UI": {
+    "PROFILE_ERROR": "تعذّر تحديث الملف الشخصي. يرجى المحاولة لاحقًا.",
+    "SHARE_BACKUP": "مشاركة النسخة الاحتياطية",
+    "ACCOUNT": "حسابك",
+    "CATEGORY_ACTIONS": "إجراءات الفئة",
+    "NOTIFICATION": "إشعار",
+    "NOT_FOUND": "لم يتم العثور على الإشعار.",
+    "UNAVAILABLE": "هذا الإشعار غير متاح."
+  },
   "MOBILE": {
     "OFFLINE": "غير متصل",
     "SYNCING": "جارٍ المزامنة",

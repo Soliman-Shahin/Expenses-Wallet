@@ -15,29 +15,33 @@
 
   <!-- Contact Cards -->
   <div class="contact-grid">
-    <div class="contact-card email" (click)="openEmail()" button>
+    <button type="button" class="contact-card email" (click)="openEmail()">
       <div class="icon-box">
         <ion-icon name="mail-outline"></ion-icon>
       </div>
       <h3>{{ "HELP_PAGE.EMAIL" | translate }}</h3>
-      <p>support&#64;expenses-wallet.com</p>
-    </div>
+      <p dir="ltr">support&#64;expenses-wallet.com</p>
+    </button>
 
-    <div class="contact-card whatsapp" (click)="openWhatsApp()" button>
+    <button
+      type="button"
+      class="contact-card whatsapp"
+      (click)="openWhatsApp()"
+    >
       <div class="icon-box">
         <ion-icon name="logo-whatsapp"></ion-icon>
       </div>
       <h3>{{ "HELP_PAGE.WHATSAPP" | translate }}</h3>
       <p>{{ "HELP_PAGE.REPLY_FAST" | translate }}</p>
-    </div>
+    </button>
 
-    <div class="contact-card website" (click)="openWebsite()" button>
+    <button type="button" class="contact-card website" (click)="openWebsite()">
       <div class="icon-box">
         <ion-icon name="globe-outline"></ion-icon>
       </div>
       <h3>{{ "HELP_PAGE.WEBSITE" | translate }}</h3>
-      <p>www.expenses-wallet.com</p>
-    </div>
+      <p dir="ltr">www.expenses-wallet.com</p>
+    </button>
   </div>
 
   <!-- FAQ Section -->
@@ -48,14 +52,16 @@
 
     <ion-accordion-group>
       @for (faq of faqs; track faq; let i = $index) {
-        <ion-accordion [value]="'faq-' + i">
-          <ion-item slot="header" color="light">
-            <ion-label class="ion-text-wrap">{{ faq.question | translate }}</ion-label>
-          </ion-item>
-          <div class="ion-padding faq-answer" slot="content">
-            <p>{{ faq.answer | translate }}</p>
-          </div>
-        </ion-accordion>
+      <ion-accordion [value]="'faq-' + i">
+        <ion-item slot="header">
+          <ion-label class="ion-text-wrap"
+            >{{ faq.question | translate }}</ion-label
+          >
+        </ion-item>
+        <div class="ion-padding faq-answer" slot="content">
+          <p>{{ faq.answer | translate }}</p>
+        </div>
+      </ion-accordion>
       }
     </ion-accordion-group>
   </div>

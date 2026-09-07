@@ -1,320 +1,138 @@
-:host {
-  // ===================================================================
-  //  Modern Header & Toolbar Styling (Translucent Glassmorphism & Notch Fit)
-  // ===================================================================
-  ion-header {
-    &::after {
-      display: none;
-    }
-    background: transparent !important;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(var(--ion-text-color-rgb), 0.05);
+@use "src/theme/mobile-secondary" as secondary;
+@include secondary.page;
+ion-content {
+  --padding-bottom: var(--ew-core-bottom-clearance);
+}
+ion-toolbar {
+  --padding-start: 16px;
+  --padding-end: 16px;
+}
+ion-title {
+  position: relative;
+  padding: 14px 0;
+}
+.header-title-container {
+  display: grid;
+  gap: 4px;
+}
+.main-title {
+  font-size: 24px;
+  font-weight: 750;
+}
+.sub-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ew-wallet-muted);
+}
+ion-searchbar {
+  padding: 0;
+  --background: var(--ew-wallet-inset);
+  --border-radius: 12px;
+  --box-shadow: none;
+}
+.segment-toolbar {
+  padding-block: 8px;
+}
+ion-segment {
+  background: var(--ew-wallet-inset);
+  border-radius: 10px;
+}
+ion-segment-button {
+  min-width: 0;
+  min-height: 44px;
+  --color: var(--ew-wallet-muted);
+  --color-checked: var(--ion-color-primary);
+  font-size: 12px;
+  text-transform: none;
+}
+.categories-list {
+  padding: 0;
+  border: 1px solid var(--ew-wallet-line);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--ion-item-background);
+}
+.category-item {
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+  --background: transparent;
+  --min-height: 68px;
+  --padding-start: 12px;
+  --inner-padding-end: 4px;
+  border-bottom: 1px solid var(--ew-wallet-line);
+}
+.category-item:last-child {
+  border-bottom: 0;
+}
+.category-icon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  margin-inline-end: 12px;
+}
+.category-icon ion-icon {
+  font-size: 21px;
+  color: white;
+  filter: drop-shadow(0 1px 2px #0008);
+}
+.title {
+  font-size: 15px;
+  font-weight: 650;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.subtitle {
+  margin: 5px 0 0;
+}
+.type-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--ew-wallet-muted);
+}
+ion-buttons {
+  margin: 0;
+}
+ion-buttons ion-button,
+ion-reorder {
+  width: 44px;
+  min-height: 44px;
+  margin: 0;
+  color: var(--ew-wallet-muted);
+}
+.category-item.reorder-selected {
+  --background: var(--ion-item-background);
+}
+:host ::ng-deep app-add-fab-button ion-fab {
+  bottom: calc(81px + env(safe-area-inset-bottom, 0px));
+}
+.error-message {
+  display: block;
+  padding: 16px;
+  border-inline-start: 3px solid var(--ion-color-danger);
+  background: var(--ion-item-background);
+}
 
-    // Apply fixed safe padding-top to the title toolbar to clear the simulator/real device notch
-    .title-toolbar {
-      --background: rgba(var(--ion-background-color-rgb), 0.8) !important;
-      --padding-start: var(--ew-space-4);
-      --padding-end: var(--ew-space-4);
-      --padding-top: 0 !important;
-      --padding-bottom: 0 !important;
-    }
-
-    // Remaining toolbars for search and segments (no safe area padding top needed)
-    ion-toolbar {
-      --background: rgba(var(--ion-background-color-rgb), 0.8) !important;
-      --padding-start: var(--ew-space-4);
-      --padding-end: var(--ew-space-4);
-      --padding-top: 0;
-      --padding-bottom: 0;
-    }
-
-    ion-title {
-      font-family: var(--ew-font-family-heading);
-      padding-top: calc(
-        var(--ion-safe-area-top, 48px) + var(--ew-space-4)
-      ) !important;
-      padding-bottom: var(--ew-space-4) !important;
-      padding-inline-start: var(
-        --ew-space-4
-      ) !important; // Align perfectly with search bar and list card edges
-      padding-inline-end: var(--ew-space-4) !important;
-      text-align: start;
-    }
-  }
-
-  .header-title-container {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    line-height: 1.15;
-    padding: 0;
-
-    .main-title {
-      font-size: 28px;
-      font-weight: 900;
-      color: var(--ew-text-color-primary);
-      letter-spacing: -0.8px;
-    }
-
-    .sub-title {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--ew-text-color-muted);
-      margin-top: 2px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-  }
-
-  // ===================================================================
-  //  Search Bar Overhaul (Fixed Double-Bordering)
-  // ===================================================================
-  ion-searchbar {
-    --background: transparent; // Make searchbar wrapper transparent
-    --border-radius: var(--ew-radius-pill) !important;
-    --box-shadow: none;
-    --color: var(--ew-text-color-primary);
-    --placeholder-color: var(--ew-text-color-muted);
-    --icon-color: var(--ew-text-color-muted);
-    --clear-button-color: var(--ew-text-color-muted);
-
-    // Position search bar with margins instead of padding to avoid double-borders
-    padding: 0 !important;
-    margin: var(--ew-space-2) 0;
-
-    // Apply single border and background to the searchbar input wrapper directly
-    &::part(container) {
-      border: 1px solid rgba(var(--ion-text-color-rgb), 0.08);
-      border-radius: var(--ew-radius-pill);
-      background: rgba(var(--ion-text-color-rgb), 0.03) !important;
-      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    }
-
-    &.searchbar-has-focus::part(container) {
-      border-color: var(--ion-color-primary);
-      background: var(--ion-item-background) !important;
-      box-shadow: 0 0 0 3px rgba(var(--ion-color-primary-rgb), 0.15);
-    }
-  }
-
-  // ===================================================================
-  //  Segment (Filter) Overhaul - Modern Capsule Buttons (matches Transactions)
-  // ===================================================================
-  .segment-toolbar {
-    --padding-start: var(--ew-space-4) !important;
-    --padding-end: var(--ew-space-4) !important;
-    padding: var(--ew-space-2) 0 !important;
-    --background: rgba(var(--ion-background-color-rgb), 0.8) !important;
-  }
-
-
-  // ===================================================================
-  //  General List & Item Styling
-  // ===================================================================
-  .categories-list {
-    background: transparent;
-    padding: var(--ew-space-2) 0 130px !important;
-
-    // Fix Ionic's reorder-group background bleed issue
-    // ion-reorder-group creates a new stacking context; ensuring it has
-    // transparent background prevents white/default flicker during drag
-    ion-reorder-group {
-      background: transparent;
-      contain: layout; // Isolate the reorder animations from the rest of the page
-    }
-  }
-
-  .category-item {
-    --background: var(--ion-item-background);
-    border-radius: 20px;
-    margin: 0 0 14px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-    --min-height: 78px;
-    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1),
-      box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), border-color 0.3s ease;
-
-    // Physics-based staggered entrance animation
-    // Use "backwards" (not "both") so the item is only hidden during delay, never after animation completes
-    animation: itemAppear 320ms cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
-    animation-delay: calc(var(--animation-order, 0) * 40ms);
-
-    --ripple-color: rgba(var(--ion-color-primary-rgb), 0.1);
-
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
-      border-color: rgba(var(--ion-color-primary-rgb), 0.25);
-    }
-
-    &:active {
-      transform: scale(0.985);
-    }
-
-    .title {
-      font-family: var(--ew-font-family-base);
-      font-weight: var(--ew-font-weight-bold);
-      font-size: var(--ew-font-size-base);
-      color: var(--ew-text-color-primary);
-      margin: 0;
-    }
-
-    .subtitle {
-      margin: var(--ew-space-1) 0 0 0;
-      display: flex;
-      align-items: center;
-      gap: var(--ew-space-1);
-
-      .type-indicator {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        font-size: 11px;
-        font-weight: var(--ew-font-weight-semibold);
-        padding: 2px 8px;
-        border-radius: var(--ew-radius-sm);
-        line-height: 1.2;
-
-        &.income {
-          background: var(--success-alpha-10);
-          color: var(--ion-color-success);
-        }
-
-        &.outcome {
-          background: var(--danger-alpha-10);
-          color: var(--ion-color-danger);
-        }
-
-        ion-icon {
-          font-size: 12px;
-        }
-      }
-    }
-  }
-
-  // When reorder is active, disable all animations & transitions on items
-  // This prevents glitchy background flicker and transform conflicts during drag
-  ion-reorder-group.reorder-enabled .category-item,
-  ion-reorder-group.reorder-list-active .category-item {
-    animation: none !important;
-    transition: none !important;
-
-    &:hover {
-      transform: none;
-    }
-
-    &:active {
-      transform: none;
-    }
-  }
-
-  // Squircle category icon with customized glow
-
-  .category-icon {
-    height: 46px !important;
-    width: 46px !important;
-    min-width: 46px !important;
-    border-radius: 14px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-inline-end: var(--ew-space-4);
-    color: white;
-    flex-shrink: 0;
-    position: relative;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-
-    &::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: inherit;
-      border-radius: inherit;
-      filter: blur(8px);
-      opacity: 0.45;
-      z-index: -1;
-      transform: translateY(3px) scale(0.9);
-    }
-
-    ion-icon {
-      font-size: 24px;
-    }
-  }
-
-  ion-buttons[slot="end"] {
-    margin-inline-end: 8px;
-
-    ion-button {
-      --color: var(--ew-text-color-muted);
-      --background-hover: rgba(var(--ion-text-color-rgb), 0.06);
-      --border-radius: 50%;
-      height: 38px;
-      width: 38px;
-      margin: 0;
-
-      &:hover {
-        --color: var(--ion-color-primary);
-      }
-    }
-  }
-
-  ion-reorder {
-    color: var(--ew-text-color-muted);
-    opacity: 0.35;
-    transition: opacity 0.2s ease, color 0.2s ease;
-    margin-inline-end: 4px;
-    font-size: 20px;
-
-    &:hover {
-      opacity: 0.8;
-      color: var(--ion-color-primary);
-    }
-  }
-
-  // ===================================================================
-  //  Empty State Styling
-  // ===================================================================
-
-  // ===================================================================
-  //  Physics-based Entrance Animations
-  // ===================================================================
-  @keyframes itemAppear {
-    from {
-      opacity: 0;
-      transform: translateY(20px) scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-  }
-
-  // ===================================================================
-  //  Reorder Drag State Fixes
-  // ===================================================================
-
-  // Style for the item being actively dragged
-  // Ionic adds .reorder-selected to the dragged ion-item
-  .category-item.reorder-selected {
-    --background: var(--ion-item-background) !important;
-    animation: none !important;
-    transition: box-shadow 0.15s ease !important;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22) !important;
-    border-color: rgba(var(--ion-color-primary-rgb), 0.3) !important;
-    opacity: 0.92;
-    z-index: 100;
-
-    &:hover {
-      transform: none;
-    }
-  }
-
-  // Placeholder gap shown where the item will be dropped
-  // Ionic uses internal DOM manipulation; we add a subtle indicator
-  ion-reorder-group .reorder-item-ghost {
-    opacity: 0 !important; // Hide ghost (the placeholder) cleanly
-  }
+:host .custom-segment {
+  box-shadow: none;
+  backdrop-filter: none;
+  border-radius: 12px;
+}
+:host .custom-segment ion-segment-button {
+  --indicator-box-shadow: none;
+  --color-checked: var(--ion-color-primary);
+  border-radius: 8px;
+}
+:host .custom-segment ion-segment-button::part(indicator-background) {
+  background: var(--ion-item-background);
+  border-radius: 8px;
+  box-shadow: none;
+}
+:host ::ng-deep app-add-fab-button ion-fab {
+  margin-bottom: 0;
 }

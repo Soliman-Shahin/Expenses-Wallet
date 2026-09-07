@@ -1,4 +1,8 @@
-<ion-content class="expense-modal-content" [fullscreen]="true">
+<ion-content
+  [dir]="currentLang === 'ar' ? 'rtl' : 'ltr'"
+  class="expense-modal-content"
+  [fullscreen]="true"
+>
   <form
     #formContainer
     [formGroup]="expenseForm"
@@ -58,10 +62,10 @@
 
         <!-- Huge Amount Input -->
         <span class="amount-label">{{ "EXPENSE.AMOUNT" | translate }}</span>
-        <div class="amount-wrapper">
-          <span class="currency-symbol">{{
+        <div class="amount-wrapper" dir="ltr">
+          <bdi class="currency-symbol">{{
             userCurrency || ("MOBILE.CURRENCY_UNAVAILABLE" | translate)
-          }}</span>
+          }}</bdi>
           <ion-input
             type="number"
             inputmode="decimal"
@@ -140,15 +144,20 @@
             <ion-icon name="calendar-outline"></ion-icon>
           </div>
           <ion-label class="premium-label">
-            {{
+            <span class="field-caption">{{ "EXPENSE.DATE" | translate }}</span>
+            <bdi>{{
               (expenseForm.get("date")?.value
                 | date : "longDate" : undefined : currentLang) ||
                 ("EXPENSE.DATE" | translate)
-            }}
+            }}</bdi>
           </ion-label>
         </ion-item>
 
-        <ion-popover trigger="date-picker-trigger" cssClass="date-popover">
+        <ion-popover
+          trigger="date-picker-trigger"
+          cssClass="date-popover expense-date-popover"
+          [dir]="currentLang === 'ar' ? 'rtl' : 'ltr'"
+        >
           <ng-template>
             <ion-datetime
               [value]="expenseForm.get('date')?.value"
@@ -197,6 +206,7 @@
       [isOpen]="showCategoryPopover"
       (didDismiss)="closeCategoryPopover()"
       cssClass="custom-cat-popover"
+      [dir]="currentLang === 'ar' ? 'rtl' : 'ltr'"
       alignment="start"
       side="bottom"
     >

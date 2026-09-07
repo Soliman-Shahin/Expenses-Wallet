@@ -1,0 +1,202 @@
+// Scoped to remaining consumer screens; approved M.1 components do not import this.
+@mixin page {
+  :host ion-header ion-toolbar ion-title {
+    position: static !important;
+    height: auto !important;
+    padding: 12px 16px !important;
+    min-width: 0;
+  }
+  :host ion-select::part(icon) {
+    position: static;
+    inset: auto;
+    transform: none;
+    margin-inline-start: 8px;
+    flex-shrink: 0;
+  }
+  :host ion-select::part(container) {
+    padding: 0;
+  }
+
+  :host {
+    color: var(--ion-text-color);
+  }
+  ion-content {
+    --background: var(--ion-background-color);
+    --padding-bottom: calc(100px + env(safe-area-inset-bottom, 0px));
+  }
+  ion-header {
+    background: var(--ion-background-color);
+    backdrop-filter: none;
+  }
+  ion-header::after {
+    display: none;
+  }
+  ion-toolbar {
+    --background: var(--ion-background-color);
+    --border-color: var(--ew-wallet-line);
+  }
+  ion-title {
+    font-size: 20px;
+    font-weight: 700;
+    text-align: start;
+  }
+  ion-button {
+    --border-radius: 12px;
+    --box-shadow: none;
+    min-height: 44px;
+  }
+  ion-button.button-disabled {
+    opacity: 1;
+    --background: var(--ew-wallet-inset);
+    --color: var(--ew-wallet-muted);
+    --border-color: var(--ew-wallet-line);
+    --border-width: 1px;
+    --border-style: solid;
+  }
+  ion-select,
+  ion-toggle {
+    min-height: 44px;
+  }
+  ion-label {
+    white-space: normal !important;
+  }
+  .modern-back-btn {
+    width: 44px;
+    height: 44px;
+    margin: 4px;
+    --background: transparent;
+  }
+  :host-context([dir="rtl"]) .modern-back-btn ion-icon {
+    transform: scaleX(-1);
+  }
+  .empty-state,
+  .empty-state-wrapper {
+    padding: 32px 20px;
+    text-align: center;
+    color: var(--ew-wallet-muted);
+  }
+  .empty-state h3,
+  .empty-title {
+    color: var(--ion-text-color);
+    font-size: 18px;
+    margin: 12px 0 8px;
+  }
+  .empty-state p,
+  .empty-subtitle {
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0;
+  }
+  .empty-state > ion-icon,
+  .empty-icon-glow ion-icon {
+    font-size: 32px;
+    color: var(--ew-wallet-muted);
+    opacity: 1;
+  }
+  .empty-icon-glow {
+    background: none;
+    box-shadow: none;
+    width: auto;
+    height: auto;
+    margin: 0;
+  }
+  .error-message,
+  .array-error,
+  .field-error {
+    line-height: 1.5;
+  }
+  :is(button, a, [tabindex]):focus-visible {
+    outline: 2px solid var(--ion-color-primary);
+    outline-offset: 3px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+}
+@mixin settings {
+  @include page;
+  .settings-header {
+    background: var(--ion-background-color);
+    backdrop-filter: none;
+  }
+  .settings-header ion-toolbar {
+    --background: var(--ion-background-color);
+    --border-width: 0;
+  }
+  .settings-container {
+    padding: 12px 16px 20px;
+    max-width: 640px;
+    margin-inline: auto;
+  }
+  .section-label {
+    margin: 20px 4px 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ew-wallet-muted);
+  }
+  .premium-list {
+    margin: 0 0 16px;
+    padding: 0;
+    border-radius: 12px;
+    background: var(--ion-item-background);
+    border: 1px solid var(--ew-wallet-line);
+    box-shadow: none;
+    overflow: hidden;
+  }
+  .premium-list ion-item {
+    --background: transparent;
+    --min-height: 58px;
+    --padding-start: 12px;
+    --inner-padding-end: 12px;
+    border-bottom: 1px solid var(--ew-wallet-line);
+  }
+  .premium-list ion-item:last-child {
+    border-bottom: 0;
+  }
+  .premium-list h3 {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .premium-list p {
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--ew-wallet-muted);
+    margin-top: 4px;
+  }
+  .icon-wrapper {
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    background: var(--ew-wallet-inset);
+    color: var(--ion-color-primary);
+    margin-inline-end: 12px;
+  }
+  .icon-wrapper ion-icon {
+    font-size: 18px;
+  }
+  .modern-select {
+    width: auto;
+    max-width: 45%;
+    color: var(--ion-text-color);
+    font-size: 13px;
+  }
+  .right-align-input {
+    max-width: 100px;
+    direction: ltr;
+    text-align: end;
+    font-variant-numeric: tabular-nums;
+  }
+  .action-buttons-container {
+    display: grid;
+    gap: 8px;
+    padding: 8px 0;
+  }
+}

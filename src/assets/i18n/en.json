@@ -1,4 +1,13 @@
 {
+  "MOBILE_UI": {
+    "PROFILE_ERROR": "Could not refresh your profile. Please try again later.",
+    "SHARE_BACKUP": "Share backup",
+    "ACCOUNT": "Your account",
+    "CATEGORY_ACTIONS": "Category actions",
+    "NOTIFICATION": "Notification",
+    "NOT_FOUND": "Notification not found.",
+    "UNAVAILABLE": "This notification is unavailable."
+  },
   "MOBILE": {
     "OFFLINE": "Offline",
     "SYNCING": "Syncing",

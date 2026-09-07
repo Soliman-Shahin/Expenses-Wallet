@@ -30,7 +30,12 @@
     aria-live="polite"
     aria-describedby="balance-desc"
   >
-    <span class="amount" dir="ltr">{{ formattedBalance() }}</span>
+    <div class="hero-money" dir="ltr">
+      <span class="amount">{{ formattedBalance() }}</span>
+      @if (showBalance() && formattedBalance() !== '-') {
+      <bdi class="hero-currency">{{ currency }}</bdi>
+      }
+    </div>
     <!-- Percentage Change Badge -->
     @if (percentageChange !== null && showPercentageBadge) {
     <ion-badge

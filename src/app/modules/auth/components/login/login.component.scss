@@ -1,3 +1,5 @@
+@use "src/theme/mobile-secondary" as secondary;
+@include secondary.page;
 // ===================================================================
 //  LOGIN PAGE — Hero + Sheet Creative Layout
 // ===================================================================
@@ -30,8 +32,11 @@
   .hero-grid {
     position: absolute;
     inset: 0;
-    background-image:
-      radial-gradient(circle, rgba(88, 166, 255, 0.18) 1px, transparent 1px);
+    background-image: radial-gradient(
+      circle,
+      rgba(88, 166, 255, 0.18) 1px,
+      transparent 1px
+    );
     background-size: 28px 28px;
     opacity: 1;
     pointer-events: none;
@@ -48,7 +53,11 @@
   &--a {
     width: 220px;
     height: 220px;
-    background: radial-gradient(circle, rgba(56, 103, 214, 0.5), transparent 70%);
+    background: radial-gradient(
+      circle,
+      rgba(56, 103, 214, 0.5),
+      transparent 70%
+    );
     top: -60px;
     right: -40px;
     animation: orbDrift 8s ease-in-out infinite;
@@ -57,7 +66,11 @@
   &--b {
     width: 180px;
     height: 180px;
-    background: radial-gradient(circle, rgba(15, 185, 177, 0.4), transparent 70%);
+    background: radial-gradient(
+      circle,
+      rgba(15, 185, 177, 0.4),
+      transparent 70%
+    );
     bottom: 20px;
     left: -40px;
     animation: orbDrift 10s ease-in-out infinite reverse;
@@ -66,7 +79,11 @@
   &--c {
     width: 120px;
     height: 120px;
-    background: radial-gradient(circle, rgba(247, 120, 186, 0.3), transparent 70%);
+    background: radial-gradient(
+      circle,
+      rgba(247, 120, 186, 0.3),
+      transparent 70%
+    );
     top: 40%;
     left: 30%;
     animation: orbDrift 7s ease-in-out infinite 3s;
@@ -74,9 +91,16 @@
 }
 
 @keyframes orbDrift {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33%       { transform: translate(15px, -20px) scale(1.05); }
-  66%       { transform: translate(-10px, 10px) scale(0.95); }
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(15px, -20px) scale(1.05);
+  }
+  66% {
+    transform: translate(-10px, 10px) scale(0.95);
+  }
 }
 
 // Hero content centered
@@ -98,7 +122,7 @@
 
   // Outer spinning gradient ring
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     inset: -5px;
     border-radius: 50%;
@@ -116,13 +140,15 @@
 
   // Mask between ring and logo
   &::after {
-    content: '';
+    content: "";
     position: absolute;
     inset: 3px;
     border-radius: 50%;
     background: #0d1525;
 
-    .dark & { background: #060a10; }
+    .dark & {
+      background: #060a10;
+    }
   }
 }
 
@@ -146,13 +172,23 @@
 }
 
 @keyframes spinRing {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes logoAppear {
-  from { transform: scale(0.6); opacity: 0; }
-  to   { transform: scale(1);   opacity: 1; }
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 // App name in hero — glowing white text
@@ -178,8 +214,14 @@
 }
 
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 // ── Form Sheet (slides up over hero) ─────────────────────────────
@@ -196,7 +238,7 @@
 
   // Top accent gradient line
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 50%;
@@ -214,8 +256,14 @@
 }
 
 @keyframes sheetSlideUp {
-  from { opacity: 0; transform: translateY(40px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 // Drag handle
@@ -289,7 +337,12 @@
   .divider-line {
     flex: 1;
     height: 1px;
-    background: linear-gradient(to right, transparent, rgba(var(--ion-color-primary-rgb), 0.2), transparent);
+    background: linear-gradient(
+      to right,
+      transparent,
+      rgba(var(--ion-color-primary-rgb), 0.2),
+      transparent
+    );
   }
 
   .divider-text {
@@ -451,14 +504,24 @@ ion-list {
   margin: 0;
   opacity: 0.85;
 
-  &:hover { opacity: 1; }
+  &:hover {
+    opacity: 1;
+  }
 }
 
 // ── Submit Button ─────────────────────────────────────────────────
 .auth-submit-button {
   --border-radius: var(--ew-radius-pill);
-  --background: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-secondary) 100%);
-  --background-hover: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-secondary) 100%);
+  --background: linear-gradient(
+    135deg,
+    var(--ion-color-primary) 0%,
+    var(--ion-color-secondary) 100%
+  );
+  --background-hover: linear-gradient(
+    135deg,
+    var(--ion-color-primary) 0%,
+    var(--ion-color-secondary) 100%
+  );
   --box-shadow: 0 8px 24px rgba(var(--ion-color-primary-rgb), 0.35);
   --color: #fff;
   height: 54px;
@@ -473,23 +536,35 @@ ion-list {
 
   // Shimmer sweep
   &::after {
-    content: '';
+    content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.2) 50%, transparent 60%);
+    background: linear-gradient(
+      105deg,
+      transparent 40%,
+      rgba(255, 255, 255, 0.2) 50%,
+      transparent 60%
+    );
     transform: translateX(-100%);
     transition: transform 0.6s ease;
   }
 
-  &:hover::after { transform: translateX(100%); }
+  &:hover::after {
+    transform: translateX(100%);
+  }
 
   &:hover {
     --box-shadow: 0 12px 32px rgba(var(--ion-color-primary-rgb), 0.45);
     transform: translateY(-2px);
   }
 
-  &:active { transform: translateY(0); }
-  &[disabled] { opacity: 0.55; transform: none; }
+  &:active {
+    transform: translateY(0);
+  }
+  &[disabled] {
+    opacity: 0.55;
+    transform: none;
+  }
 }
 
 // ── Error Message ────────────────────────────────────────────────
@@ -505,7 +580,10 @@ ion-list {
   padding: 12px 16px;
   margin-bottom: 12px;
 
-  ion-icon { font-size: 18px; flex-shrink: 0; }
+  ion-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+  }
 }
 
 // ── Sign Up Link ─────────────────────────────────────────────────
@@ -524,7 +602,7 @@ ion-list {
     position: relative;
 
     &::after {
-      content: '';
+      content: "";
       position: absolute;
       bottom: -1px;
       left: 0;
@@ -534,6 +612,95 @@ ion-list {
       transition: width 0.25s ease;
     }
 
-    &:hover::after { width: 100%; }
+    &:hover::after {
+      width: 100%;
+    }
   }
+}
+:host {
+  .auth-hero {
+    background: #162b4d;
+    padding: calc(20px + env(safe-area-inset-top, 0px)) 20px 24px;
+  }
+  .orb,
+  .hero-grid,
+  .sheet-handle,
+  .logo-ring-wrap::before,
+  .logo-ring-wrap::after,
+  .auth-sheet::before {
+    display: none;
+  }
+  .hero-content,
+  .logo-ring-wrap,
+  .logo-ring,
+  .app-logo,
+  .app-name,
+  .app-tagline,
+  .auth-sheet,
+  .sheet-title,
+  .sheet-subtitle {
+    animation: none;
+  }
+  .logo-ring-wrap {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 12px;
+  }
+  .logo-ring {
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+    background: none;
+  }
+  .app-logo {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    box-shadow: none;
+  }
+  .app-name {
+    font-size: 23px;
+    color: #fff;
+  }
+  .app-tagline {
+    color: #cbd5e1;
+    font-size: 13px;
+  }
+  .auth-sheet {
+    margin-top: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 24px 20px calc(24px + env(safe-area-inset-bottom, 0px));
+  }
+  .sheet-title,
+  .sheet-subtitle {
+    text-align: start;
+  }
+  .sheet-subtitle {
+    color: var(--ew-wallet-muted);
+  }
+  .auth-submit-button {
+    --background: var(--ion-color-primary);
+    --box-shadow: none;
+    --border-radius: 12px;
+  }
+  .form-options {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  input[type="email"] {
+    direction: ltr;
+    text-align: start;
+  }
+}
+
+:host ion-button.auth-submit-button.button-disabled {
+  opacity: 1 !important;
+  --background: var(--ew-wallet-inset) !important;
+  --color: var(--ew-wallet-muted) !important;
+  --border-color: var(--ew-wallet-line);
+  --border-width: 1px;
+  --border-style: solid;
 }

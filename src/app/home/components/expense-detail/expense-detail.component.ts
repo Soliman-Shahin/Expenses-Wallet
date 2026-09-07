@@ -30,9 +30,8 @@ import { Expense } from 'src/app/shared/models/expense.model';
             ></ion-icon></ion-button
         ></ion-buttons> </ion-toolbar
     ></ion-header>
-    <ion-content>
+    <ion-content [dir]="locale === 'ar' ? 'rtl' : 'ltr'">
       <article [dir]="locale === 'ar' ? 'rtl' : 'ltr'">
-        <p class="eyebrow">{{ 'EXPENSE.DETAILS' | translate }}</p>
         <h1 dir="auto">{{ expense.description }}</h1>
         <p class="record-amount" dir="ltr">
           {{ expense.amount | number : '1.2-2' : locale }}
@@ -78,7 +77,7 @@ import { Expense } from 'src/app/shared/models/expense.model';
         font-size: 18px;
       }
       article {
-        padding: 24px 20px;
+        padding: 20px;
       }
       .eyebrow,
       dt {
@@ -86,7 +85,7 @@ import { Expense } from 'src/app/shared/models/expense.model';
         color: var(--ew-wallet-muted);
       }
       h1 {
-        margin: 8px 0 16px;
+        margin: 0 0 12px;
         font-size: 22px;
         line-height: 1.4;
         overflow-wrap: anywhere;
@@ -96,13 +95,18 @@ import { Expense } from 'src/app/shared/models/expense.model';
         font-weight: 700;
         font-variant-numeric: tabular-nums;
         unicode-bidi: isolate;
-        margin: 0 0 24px;
+        margin: 0 0 16px;
         overflow-wrap: anywhere;
       }
       .record-amount span {
         font-size: 16px;
         font-weight: 500;
         color: var(--ew-wallet-muted);
+      }
+      .record-status {
+        font-size: 13px;
+        color: var(--ew-wallet-muted);
+        margin: 0 0 16px;
       }
       dl {
         margin: 0;
@@ -112,7 +116,7 @@ import { Expense } from 'src/app/shared/models/expense.model';
         display: grid;
         grid-template-columns: minmax(72px, 1fr) minmax(0, 2fr);
         gap: 16px;
-        padding-block: 16px;
+        padding-block: 14px;
         border-bottom: 1px solid var(--ew-wallet-line);
       }
       dd {

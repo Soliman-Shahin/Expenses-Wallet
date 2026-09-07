@@ -371,7 +371,9 @@
             <ion-icon name="chevron-back-outline"></ion-icon>
           </ion-button>
           <div class="current-month">
-            {{ currentCalendarDate | date : "MMMM yyyy" }}
+            {{
+              currentCalendarDate | date : "MMMM yyyy" : undefined : currentLang
+            }}
           </div>
           <ion-button fill="clear" (click)="nextMonth()">
             <ion-icon name="chevron-forward-outline"></ion-icon>
@@ -381,7 +383,12 @@
         <!-- Weekdays -->
         <div class="calendar-weekdays">
           @for (day of weekDays; track day) {
-          <div class="weekday">{{ day }}</div>
+          <div class="weekday">
+            {{
+              "2023-01-0" + ($index + 1)
+                | date : "EEE" : undefined : currentLang
+            }}
+          </div>
           }
         </div>
 
@@ -399,7 +406,7 @@
               [class.in-range]="isDateInRange(day)"
               (click)="selectDate(day)"
             >
-              <span>{{ day.getDate() }}</span>
+              <span>{{ day.getDate() | number : "1.0-0" : currentLang }}</span>
             </div>
             }
           </div>
@@ -409,15 +416,22 @@
         <!-- Selection Summary -->
         <div class="selection-summary">
           <div class="summary-item">
-            <span class="label">Start:</span>
+            <span class="label">{{
+              "TRANSACTIONS.START_DATE" | translate
+            }}</span>
             <span class="value">{{
-              tempStartDate ? (tempStartDate | date : "mediumDate") : "Select"
+              tempStartDate
+                ? (tempStartDate
+                  | date : "mediumDate" : undefined : currentLang)
+                : ("EXPENSE.DATE" | translate)
             }}</span>
           </div>
           <div class="summary-item">
-            <span class="label">End:</span>
+            <span class="label">{{ "TRANSACTIONS.END_DATE" | translate }}</span>
             <span class="value">{{
-              tempEndDate ? (tempEndDate | date : "mediumDate") : "Select"
+              tempEndDate
+                ? (tempEndDate | date : "mediumDate" : undefined : currentLang)
+                : ("EXPENSE.DATE" | translate)
             }}</span>
           </div>
         </div>
