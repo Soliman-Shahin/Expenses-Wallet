@@ -43,7 +43,11 @@
 
   <!-- ── Expanded Details Panel ── -->
   @if (showDetails) {
-  <div class="sync-panel" role="region" aria-label="Sync details">
+  <div
+    class="sync-panel"
+    role="region"
+    [attr.aria-label]="'SYNC.SETTINGS_TITLE' | translate"
+  >
     <!-- Progress bar while syncing -->
     @if (isSyncing) {
     <div class="panel-progress">

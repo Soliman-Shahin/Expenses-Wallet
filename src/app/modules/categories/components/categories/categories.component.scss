@@ -136,3 +136,61 @@ ion-reorder {
 :host ::ng-deep app-add-fab-button ion-fab {
   margin-bottom: 0;
 }
+
+// Carry the approved transaction category geometry into category management.
+.main-title {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.7px;
+}
+.categories-list {
+  border-radius: 16px;
+  box-shadow: var(--ew-bold-shadow);
+}
+.category-item {
+  --min-height: 76px;
+  --padding-start: 14px;
+}
+.category-icon {
+  width: 38px;
+  height: 42px;
+  border-radius: 12px 12px 12px 4px;
+  box-shadow: inset 0 0 0 1px #ffffff20;
+}
+:host-context([dir="rtl"]) .category-icon {
+  border-radius: 12px 12px 4px 12px;
+}
+.title {
+  font-weight: 600;
+  line-height: 1.5;
+}
+ion-searchbar {
+  --background: var(--ion-item-background);
+  --color: var(--ion-text-color);
+  --placeholder-color: var(--ew-wallet-muted);
+  --icon-color: var(--ew-wallet-muted);
+  --box-shadow: var(--ew-bold-shadow);
+}
+:host ::ng-deep app-add-fab-button .fab-add {
+  --background: #2855e8 !important;
+  --color: #fff !important;
+  --border-radius: 18px 18px 18px 6px !important;
+  --box-shadow: 0 6px 18px #214ecd30;
+}
+.skeleton-list {
+  border-radius: 16px;
+  padding: 8px;
+  background: var(--ion-item-background);
+}
+@media (max-width: 360px) {
+  ion-segment-button ion-icon {
+    display: none;
+  }
+  ion-segment-button {
+    --padding-start: 4px;
+    --padding-end: 4px;
+  }
+  .category-icon {
+    margin-inline-end: 8px;
+  }
+}

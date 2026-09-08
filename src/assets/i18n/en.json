@@ -1,5 +1,7 @@
 {
   "MOBILE_UI": {
+    "NO_PLANS": "No subscription plans available at the moment.",
+    "USAGE_UNAVAILABLE": "Unable to load usage statistics.",
     "PROFILE_ERROR": "Could not refresh your profile. Please try again later.",
     "SHARE_BACKUP": "Share backup",
     "ACCOUNT": "Your account",

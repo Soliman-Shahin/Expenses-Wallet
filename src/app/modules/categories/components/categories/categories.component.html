@@ -50,7 +50,12 @@
   </ion-refresher>
   <!-- Skeleton loaders while fetching -->
   @if (vm.isLoading) {
-  <div class="skeleton-list">
+  <div
+    class="skeleton-list"
+    role="status"
+    [attr.aria-label]="'COMMON.LOADING' | translate"
+    aria-busy="true"
+  >
     @for (i of [1, 2, 3, 4, 5, 6]; track i) {
     <app-skeleton-block variant="list-item-avatar"></app-skeleton-block>
     }
@@ -82,7 +87,9 @@
           <ion-icon size="large" [name]="item.icon"></ion-icon>
         </span>
         <ion-label>
-          <h3 class="title">{{ item.title }}</h3>
+          <h3 class="title">
+            <bdi>{{ item.title }}</bdi>
+          </h3>
           <p class="subtitle">
             <span class="type-indicator" [ngClass]="item.type">
               <ion-icon

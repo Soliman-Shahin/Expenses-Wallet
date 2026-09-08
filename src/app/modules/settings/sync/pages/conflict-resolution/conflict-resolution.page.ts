@@ -8,11 +8,11 @@ import { IonicModule } from '@ionic/angular';
 import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
-    selector: 'app-conflict-resolution',
-    templateUrl: './conflict-resolution.page.html',
-    styleUrls: ['./conflict-resolution.page.scss'],
-    standalone: true,
-    imports: [IonicModule, TranslateModule],
+  selector: 'app-conflict-resolution',
+  templateUrl: './conflict-resolution.page.html',
+  styleUrls: ['./conflict-resolution.page.scss'],
+  standalone: true,
+  imports: [IonicModule, TranslateModule],
 })
 export class ConflictResolutionPage extends BaseComponent implements OnInit {
   private syncService = inject(SyncService);
@@ -75,7 +75,7 @@ export class ConflictResolutionPage extends BaseComponent implements OnInit {
   }
 
   formatDate(date: Date): string {
-    return new Intl.DateTimeFormat('en-US', {
+    return new Intl.DateTimeFormat(this.translateService.currentLang || 'en', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',

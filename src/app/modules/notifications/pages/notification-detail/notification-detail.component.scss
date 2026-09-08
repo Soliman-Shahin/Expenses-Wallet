@@ -29,3 +29,12 @@ ion-card-subtitle {
   padding: 32px;
   color: var(--ew-wallet-muted);
 }
+
+ion-text[role="alert"] {
+  display: block;
+  padding: 16px;
+  border-radius: 14px;
+  border-inline-start: 3px solid var(--ion-color-danger);
+  background: var(--ion-item-background);
+  line-height: 1.6;
+}

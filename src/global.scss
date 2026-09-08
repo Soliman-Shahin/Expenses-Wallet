@@ -20,6 +20,7 @@
 @use "theme/components/alert";
 @use "theme/mobile-core";
 @use "theme/premium-showcase";
+@use "theme/premium-secondary-overlays";
 
 // 1. Google Fonts
 // -------------------------------------------------------------------
@@ -98,5 +99,81 @@
     ion-label {
       color: #ffffff !important;
     }
+  }
+}
+
+// VD1.1: only the transaction-entry pickers inherit the approved showcase palette.
+ion-popover.custom-cat-popover,
+ion-popover.expense-date-popover {
+  --ion-item-background: #fff;
+  --ion-text-color: #142440;
+  --ion-color-primary: #2855e8;
+  --ion-color-primary-rgb: 40, 85, 232;
+  --ion-color-primary-contrast: #fff;
+  --ew-wallet-muted: #5d6c83;
+  --ew-wallet-line: #e0e7f1;
+  --ew-wallet-inset: #e8eef9;
+  --background: var(--ion-item-background);
+  --width: min(350px, calc(100vw - 24px));
+  --max-height: min(440px, 80dvh);
+  --border-radius: 16px;
+  &::part(content) {
+    border-radius: 16px;
+    background: var(--ion-item-background) !important;
+    border: 1px solid var(--ew-wallet-line) !important;
+    box-shadow: 0 12px 36px #07152f28;
+  }
+  .popover-content,
+  .popover-header,
+  .popover-options {
+    background: var(--ion-item-background) !important;
+  }
+  .popover-header {
+    border-bottom: 1px solid var(--ew-wallet-line) !important;
+  }
+  .popover-header h3 {
+    color: var(--ion-text-color) !important;
+  }
+  .popover-item {
+    min-height: 56px;
+  }
+  .popover-item-icon {
+    flex-shrink: 0;
+  }
+  .popover-item-text {
+    min-width: 0;
+    unicode-bidi: plaintext;
+  }
+  .popover-item.selected {
+    background: var(--ew-wallet-inset);
+    box-shadow: inset 3px 0 var(--ion-color-primary);
+  }
+  &[dir="rtl"] .popover-item.selected {
+    box-shadow: inset -3px 0 var(--ion-color-primary);
+  }
+  .popover-item:focus-visible {
+    outline: 2px solid var(--ion-color-primary);
+    outline-offset: -3px;
+  }
+  ion-datetime {
+    --background: var(--ion-item-background);
+    --background-rgb: 255, 255, 255;
+  }
+}
+.dark ion-popover.custom-cat-popover,
+.dark ion-popover.expense-date-popover {
+  color-scheme: dark;
+  --ion-item-background: #142139;
+  --ion-text-color: #eef3ff;
+  --ion-color-primary: #83a4ff;
+  --ion-color-primary-rgb: 131, 164, 255;
+  --ion-color-primary-contrast: #101e3a;
+  --ew-wallet-muted: #a6b6d1;
+  --ew-wallet-line: #263650;
+  --ew-wallet-inset: #1c2d49;
+  --background: #142139 !important;
+  ion-datetime {
+    --background-rgb: 20, 33, 57;
+    --wheel-fade-background-rgb: 20, 33, 57;
   }
 }

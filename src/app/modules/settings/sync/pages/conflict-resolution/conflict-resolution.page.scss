@@ -171,3 +171,51 @@ ion-content {
     box-shadow: none;
   }
 }
+
+:host ion-content {
+  --background: var(--ion-background-color);
+}
+:host .data-section,
+:host .merge-option {
+  background: var(--ew-wallet-inset);
+  border-color: var(--ew-wallet-line);
+  min-width: 0;
+}
+:host .data-content pre {
+  background: var(--ion-item-background);
+  font-size: 13px;
+}
+.no-conflicts h2 {
+  color: var(--ion-text-color);
+  font-size: 20px;
+}
+.no-conflicts p,
+.merge-option p {
+  color: var(--ew-wallet-muted);
+  line-height: 1.6;
+}
+.conflict-card ion-card-title {
+  line-height: 1.4;
+}
+
+.conflict-card ion-card-title {
+  font-size: 17px;
+  overflow-wrap: anywhere;
+}
+.conflict-card ion-card-subtitle {
+  font-size: 12px;
+  line-height: 1.6;
+}
+.conflict-card ion-card-content {
+  padding: 12px;
+}
+.data-comparison {
+  gap: 10px;
+}
+.data-section {
+  padding: 10px;
+}
+.data-content pre {
+  margin-block: 8px;
+  line-height: 1.5;
+}

@@ -50,7 +50,9 @@
       </div>
       @if (personalForm.get('username')?.value) {
       <div class="identity-text">
-        <h2 class="user-name">{{ personalForm.get("username")?.value }}</h2>
+        <h2 class="user-name">
+          <bdi>{{ personalForm.get("username")?.value }}</bdi>
+        </h2>
         <p class="identity-email">
           <bdi dir="ltr">{{ personalForm.get("email")?.value }}</bdi>
         </p>

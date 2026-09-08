@@ -17,7 +17,7 @@ import { Expense } from 'src/app/shared/models/expense.model';
   imports: [CommonModule, IonicModule, TranslateModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <ion-header class="ion-no-border"
+    <ion-header class="ion-no-border" [dir]="locale === 'ar' ? 'rtl' : 'ltr'"
       ><ion-toolbar>
         <ion-title>{{ 'MOBILE.RECORD' | translate }}</ion-title>
         <ion-buttons slot="end"
@@ -32,26 +32,50 @@ import { Expense } from 'src/app/shared/models/expense.model';
     ></ion-header>
     <ion-content [dir]="locale === 'ar' ? 'rtl' : 'ltr'">
       <article [dir]="locale === 'ar' ? 'rtl' : 'ltr'">
-        <h1 dir="auto">{{ expense.description }}</h1>
-        <p class="record-amount" dir="ltr">
-          {{ expense.amount | number : '1.2-2' : locale }}
-          <span>{{
-            currency || ('MOBILE.CURRENCY_UNAVAILABLE' | translate)
-          }}</span>
-        </p>
-        @if (syncLabel(expense); as status) {
-        <p class="record-status" role="status">{{ status | translate }}</p>
-        }
-        <dl>
-          <div>
-            <dt>{{ 'EXPENSE.CATEGORY' | translate }}</dt>
-            <dd dir="auto">{{ categoryName }}</dd>
+        <section class="record-hero">
+          <div class="record-identity">
+            <div
+              class="record-icon"
+              [style.--category-accent]="
+                categoryVisual?.color || 'var(--ion-color-primary)'
+              "
+            >
+              <ion-icon
+                [name]="categoryVisual?.icon || 'receipt-outline'"
+                aria-hidden="true"
+              ></ion-icon>
+            </div>
+            <div class="identity-copy">
+              <p class="eyebrow">
+                <bdi>{{ categoryName }}</bdi>
+              </p>
+              <h1 dir="auto">{{ expense.description }}</h1>
+            </div>
           </div>
-          <div>
-            <dt>{{ 'EXPENSE.DATE' | translate }}</dt>
-            <dd>{{ expense.date | date : 'medium' : undefined : locale }}</dd>
-          </div>
-        </dl>
+          <p class="amount-caption">{{ 'EXPENSE.AMOUNT' | translate }}</p>
+          <p class="record-amount" dir="ltr">
+            <bdi>{{ expense.amount | number : '1.2-2' : locale }}</bdi>
+            <bdi class="record-currency">{{
+              currency || ('MOBILE.CURRENCY_UNAVAILABLE' | translate)
+            }}</bdi>
+          </p>
+          <section class="record-context">
+            <div class="record-date">
+              <ion-icon name="calendar-outline" aria-hidden="true"></ion-icon>
+              <div>
+                <p class="eyebrow">{{ 'EXPENSE.DATE' | translate }}</p>
+                <p class="date-value">
+                  <bdi>{{
+                    expense.date | date : 'medium' : undefined : locale
+                  }}</bdi>
+                </p>
+              </div>
+            </div>
+          </section>
+          @if (syncLabel(expense); as status) {
+          <p class="record-status" role="status">{{ status | translate }}</p>
+          }
+        </section>
       </article>
     </ion-content>
     <ion-footer class="ion-no-border"
@@ -69,74 +93,163 @@ import { Expense } from 'src/app/shared/models/expense.model';
         flex-direction: column;
         height: 100%;
       }
+      ion-content {
+        --background: var(--ion-background-color);
+      }
       ion-toolbar {
-        --background: var(--ion-item-background);
+        --background: var(--ion-background-color);
         --color: var(--ion-text-color);
       }
       ion-title {
-        font-size: 18px;
+        font-size: 16px;
+        font-weight: 600;
+        text-align: start;
       }
       article {
+        padding: 4px 20px 20px;
+      }
+      .record-hero {
         padding: 20px;
+        border-radius: 20px 20px 20px 6px;
+        background: var(--ion-item-background);
+        box-shadow: var(--ew-bold-shadow);
+        border: 1px solid var(--ew-wallet-line);
+      }
+      [dir='rtl'] .record-hero {
+        border-radius: 20px 20px 6px 20px;
+      }
+      .record-identity {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      .record-icon {
+        display: grid;
+        place-items: center;
+        flex: 0 0 44px;
+        height: 48px;
+        border-radius: 13px 13px 13px 5px;
+        background: color-mix(
+          in srgb,
+          var(--category-accent) 14%,
+          var(--ion-item-background)
+        );
+        color: var(--ion-text-color);
+        border-inline-start: 3px solid var(--category-accent);
+      }
+      .record-icon ion-icon {
+        font-size: 24px;
+      }
+      .identity-copy {
+        min-width: 0;
       }
       .eyebrow,
-      dt {
-        font-size: 13px;
+      .amount-caption {
+        margin: 0 0 5px;
         color: var(--ew-wallet-muted);
+        font-size: 12px;
+        font-weight: 400;
+      }
+      .identity-copy .eyebrow {
+        font-weight: 500;
+        overflow-wrap: anywhere;
       }
       h1 {
-        margin: 0 0 12px;
-        font-size: 22px;
+        font-size: 20px;
+        font-weight: 600;
+        margin: 0;
         line-height: 1.4;
+        white-space: pre-wrap;
         overflow-wrap: anywhere;
+      }
+      .amount-caption {
+        margin-top: 24px;
       }
       .record-amount {
-        font-size: clamp(26px, 7vw, 36px);
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 6px 10px;
+        margin: 0;
+        font-size: clamp(36px, 11vw, 44px);
+        line-height: 1.2;
         font-weight: 700;
+        letter-spacing: -1px;
         font-variant-numeric: tabular-nums;
         unicode-bidi: isolate;
-        margin: 0 0 16px;
         overflow-wrap: anywhere;
+        color: var(--ion-text-color);
       }
-      .record-amount span {
-        font-size: 16px;
-        font-weight: 500;
+      .record-amount bdi {
+        min-width: 0;
+        max-width: 100%;
+      }
+      .record-currency {
         color: var(--ew-wallet-muted);
+        font-size: 14px;
+        letter-spacing: 0;
+        font-weight: 500;
       }
       .record-status {
-        font-size: 13px;
+        margin: 12px 0 0;
         color: var(--ew-wallet-muted);
-        margin: 0 0 16px;
-      }
-      dl {
-        margin: 0;
-        border-top: 1px solid var(--ew-wallet-line);
-      }
-      dl div {
-        display: grid;
-        grid-template-columns: minmax(72px, 1fr) minmax(0, 2fr);
-        gap: 16px;
-        padding-block: 14px;
-        border-bottom: 1px solid var(--ew-wallet-line);
-      }
-      dd {
-        margin: 0;
-        text-align: end;
-        overflow-wrap: anywhere;
+        font-size: 12px;
         line-height: 1.5;
       }
+      .record-context {
+        padding-top: 20px;
+      }
+      .record-date {
+        display: flex;
+        gap: 8px;
+        align-items: flex-start;
+      }
+      .record-date > ion-icon {
+        margin-top: 2px;
+        font-size: 16px;
+        color: var(--ew-wallet-muted);
+        flex-shrink: 0;
+      }
+      .record-date > div {
+        min-width: 0;
+      }
+      .date-value {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+      }
       ion-footer {
-        padding: 8px 16px max(12px, env(safe-area-inset-bottom));
-        background: var(--ion-item-background);
+        padding: 8px 20px max(12px, env(safe-area-inset-bottom));
+        background: var(--ion-background-color);
       }
       ion-button {
         min-height: 48px;
+      }
+      ion-footer ion-button {
+        margin: 0;
+        --background: linear-gradient(110deg, #2855e8, #376aff);
+        --color: #fff;
+        font-weight: 600;
+      }
+      @media (max-width: 360px) {
+        article {
+          padding-inline: 16px;
+        }
+        .record-hero {
+          padding: 16px;
+        }
       }
     `,
   ],
 })
 export class ExpenseDetailComponent {
   readonly syncLabel = expenseSyncLabel;
+  get categoryVisual() {
+    return typeof this.expense.category === 'object'
+      ? this.expense.category
+      : null;
+  }
   @Input({ required: true }) expense!: Expense;
   @Input() currency = '';
   @Input() categoryName = '—';

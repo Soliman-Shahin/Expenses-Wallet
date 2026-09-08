@@ -4,7 +4,13 @@ import {
   inject,
   OnInit,
 } from '@angular/core';
-import { AlertController, InfiniteScrollCustomEvent, ItemReorderEventDetail, RefresherCustomEvent, IonicModule } from '@ionic/angular';
+import {
+  AlertController,
+  InfiniteScrollCustomEvent,
+  ItemReorderEventDetail,
+  RefresherCustomEvent,
+  IonicModule,
+} from '@ionic/angular';
 import {
   BehaviorSubject,
   catchError,
@@ -25,21 +31,21 @@ import { PlanService } from '../../../../core/services/plan.service';
 import { PlanLimitBannerComponent } from '../../../../shared/components/plan-limit-banner/plan-limit-banner.component';
 
 @Component({
-    selector: 'app-categories',
-    templateUrl: './categories.component.html',
-    styleUrls: ['./categories.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-    imports: [
-        IonicModule,
-        SkeletonBlockComponent,
-        NgClass,
-        AddFabButtonComponent,
-        AsyncPipe,
-        LowerCasePipe,
-        TranslateModule,
-        PlanLimitBannerComponent,
-    ],
+  selector: 'app-categories',
+  templateUrl: './categories.component.html',
+  styleUrls: ['./categories.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    IonicModule,
+    SkeletonBlockComponent,
+    NgClass,
+    AddFabButtonComponent,
+    AsyncPipe,
+    LowerCasePipe,
+    TranslateModule,
+    PlanLimitBannerComponent,
+  ],
 })
 export class CategoriesComponent
   extends BaseListComponent<Category>
@@ -83,7 +89,7 @@ export class CategoriesComponent
 
   isActionSheetOpen = false;
   selectedCategory: Category | null = null;
-  
+
   // Plan Limits State
   canAddCategory = true;
   categoriesLimitInfo = { used: 0, limit: 0 as number | null, percentage: 0 };
@@ -108,15 +114,17 @@ export class CategoriesComponent
     }
     this.hasEntered = true;
   }
-  
+
   private checkPlanLimits() {
-    this.planService.currentPlan$.pipe(takeUntil(this.destroy$)).subscribe(planData => {
-      if (planData) {
-        this.canAddCategory = this.planService.canAddCategory();
-        this.categoriesLimitInfo = planData.usage.categories;
-        this.cdr.markForCheck();
-      }
-    });
+    this.planService.currentPlan$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((planData) => {
+        if (planData) {
+          this.canAddCategory = this.planService.canAddCategory();
+          this.categoriesLimitInfo = planData.usage.categories;
+          this.cdr.markForCheck();
+        }
+      });
   }
 
   private setupSubscription() {
@@ -128,7 +136,8 @@ export class CategoriesComponent
           this.errorMessage.next('');
         }),
         switchMap((params) =>
-          this.categoryService.getCategories(params, true).pipe( // forceRefresh = true
+          this.categoryService.getCategories(params, true).pipe(
+            // forceRefresh = true
             finalize(() => this.loading.next(false)),
             catchError((err) => {
               this.errorMessage.next(err.message);
@@ -182,7 +191,10 @@ export class CategoriesComponent
   navigateToAdd() {
     if (!this.canAddCategory) {
       this.router.navigate(['/subscription'], {
-        queryParams: { reason: 'limit_reached', limitType: 'SUBSCRIPTION.CATEGORIES_LIMIT' }
+        queryParams: {
+          reason: 'limit_reached',
+          limitType: 'SUBSCRIPTION.CATEGORIES_LIMIT',
+        },
       });
       return;
     }
@@ -212,17 +224,17 @@ export class CategoriesComponent
   async presentActionSheet(category: Category) {
     this.selectedCategory = category;
     const actionSheet = await this.alertController.create({
-      header: 'Actions',
+      header: this.translateService.instant('MOBILE_UI.CATEGORY_ACTIONS'),
       buttons: [
         {
-          text: 'Delete',
+          text: this.translateService.instant('COMMON.DELETE'),
           role: 'destructive',
           handler: () => {
             this.presentDeleteConfirm(this.selectedCategory?._id as string);
           },
         },
         {
-          text: 'Edit',
+          text: this.translateService.instant('CATEGORY.EDIT'),
           handler: () => {
             this.router.navigate([
               '/categories/edit',
@@ -231,7 +243,7 @@ export class CategoriesComponent
           },
         },
         {
-          text: 'Cancel',
+          text: this.translateService.instant('COMMON.CANCEL'),
           role: 'cancel',
         },
       ],

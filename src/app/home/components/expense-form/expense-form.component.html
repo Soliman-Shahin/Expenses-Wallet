@@ -60,7 +60,7 @@
           </div>
         </div>
 
-        <!-- Huge Amount Input -->
+        <!-- Amount entry -->
         <span class="amount-label">{{ "EXPENSE.AMOUNT" | translate }}</span>
         <div class="amount-wrapper" dir="ltr">
           <bdi class="currency-symbol">{{
@@ -95,7 +95,7 @@
           class="form-field"
           lines="full"
           [button]="true"
-          [detail]="false"
+          [detail]="true"
           id="cat-select-trigger"
           (click)="openCategoryPopover($event)"
         >
@@ -112,7 +112,7 @@
             <span class="field-caption">{{
               "EXPENSE.CATEGORY" | translate
             }}</span
-            >{{ getSelectedCategoryText() }}
+            ><bdi>{{ getSelectedCategoryText() }}</bdi>
           </ion-label>
         </ion-item>
 
@@ -137,7 +137,7 @@
           class="form-field"
           lines="none"
           [button]="true"
-          [detail]="false"
+          [detail]="true"
           id="date-picker-trigger"
         >
           <div class="icon-box date-icon-box" slot="start">
@@ -156,6 +156,8 @@
         <ion-popover
           trigger="date-picker-trigger"
           cssClass="date-popover expense-date-popover"
+          side="top"
+          alignment="center"
           [dir]="currentLang === 'ar' ? 'rtl' : 'ltr'"
         >
           <ng-template>
@@ -231,7 +233,7 @@
               >
                 <ion-icon [name]="category.icon"></ion-icon>
               </div>
-              <span class="popover-item-text">{{ category.title }}</span>
+              <bdi class="popover-item-text">{{ category.title }}</bdi>
               @if (expenseForm.get('category')?.value === category._id) {
               <ion-icon name="checkmark-circle" class="check-icon"></ion-icon>
               }

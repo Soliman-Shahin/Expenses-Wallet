@@ -263,3 +263,72 @@ ion-card-subtitle {
     margin-top: 12px;
   }
 }
+
+// Compact plan comparison and readable secondary text in both themes.
+:host ion-card {
+  border-radius: 16px;
+}
+:host ion-card-header {
+  padding: 20px 16px 4px;
+}
+:host ion-card-header ion-card-title {
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+:host ion-card-subtitle {
+  color: var(--ew-wallet-muted);
+  opacity: 1;
+  font-size: 13px;
+}
+:host ion-card-content {
+  padding: 12px 16px 16px;
+}
+:host .price-section {
+  text-align: start;
+  padding: 4px 0 12px;
+  margin-bottom: 12px;
+}
+:host .price-section .price {
+  justify-content: flex-start;
+}
+:host .price-section .currency,
+:host .price-section .period {
+  opacity: 1;
+  color: var(--ew-wallet-muted);
+  font-size: 13px;
+}
+:host .limits-section ion-item {
+  --min-height: 44px;
+  margin-bottom: 0;
+}
+:host .limits-section ion-item ion-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+:host .limits-section ion-item ion-label p,
+:host .features-section ion-item ion-label p {
+  opacity: 1;
+  color: var(--ew-wallet-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+:host .limits-section ion-item ion-label h3 {
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ion-text-color);
+  flex-shrink: 0;
+  margin: 0;
+}
+:host .limits-section ion-icon {
+  display: none;
+}
+:host .limits-section h4,
+:host .features-section h4 {
+  font-size: 14px;
+  margin: 0 0 8px;
+}
+:host .upgrade-button:hover:not([disabled]) {
+  transform: none;
+}

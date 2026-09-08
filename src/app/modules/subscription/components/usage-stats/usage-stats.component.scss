@@ -261,3 +261,50 @@ ion-card-subtitle {
     font-variant-numeric: tabular-nums;
   }
 }
+
+:host {
+  ion-card {
+    border-radius: 16px;
+  }
+  .plan-info-card ion-card-header ion-card-title {
+    color: var(--ion-text-color);
+  }
+  .plan-info-card ion-item ion-label p,
+  .usage-card .limits-info ion-item ion-label p,
+  .history-card ion-item ion-label p,
+  .usage-card .usage-item .usage-footer .remaining,
+  .usage-card .usage-item .usage-header .usage-count .limit,
+  .usage-card .usage-item .usage-header .usage-count .separator {
+    color: var(--ew-wallet-muted);
+    opacity: 1;
+  }
+  .usage-card .usage-item .usage-header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .usage-card .usage-item .usage-header .usage-title {
+    min-width: 0;
+    font-size: 13px;
+  }
+  .usage-count {
+    direction: ltr;
+    unicode-bidi: isolate;
+    flex-shrink: 0;
+  }
+  .usage-card .usage-item .usage-footer {
+    flex-wrap: wrap;
+    gap: 4px 8px;
+  }
+  .usage-card .limits-info {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-color: var(--ew-wallet-line);
+  }
+  .usage-card .limits-info h4 {
+    color: var(--ion-text-color);
+  }
+  .history-card ion-item {
+    background: var(--ew-wallet-inset);
+    --background: var(--ew-wallet-inset);
+  }
+}

@@ -68,7 +68,7 @@
     <div class="empty-state" *ngIf="availablePlans.length === 0">
       <ion-icon name="pricetags-outline"></ion-icon>
       <h3>{{ 'NO_DATA' | translate }}</h3>
-      <p>No subscription plans available at the moment.</p>
+      <p>{{ 'MOBILE_UI.NO_PLANS' | translate }}</p>
     </div>
   </div>
 
@@ -86,7 +86,7 @@
     <div class="empty-state" *ngIf="!currentPlan">
       <ion-icon name="stats-chart-outline"></ion-icon>
       <h3>{{ 'NO_DATA' | translate }}</h3>
-      <p>Unable to load usage statistics.</p>
+      <p>{{ 'MOBILE_UI.USAGE_UNAVAILABLE' | translate }}</p>
     </div>
   </div>
 </ion-content>

@@ -341,3 +341,102 @@
 .edit-avatar-btn {
   z-index: 3;
 }
+
+.avatar-section {
+  padding: 20px 16px;
+  border: 1px solid var(--ew-wallet-line);
+  border-radius: 20px 20px 20px 6px;
+  background: var(--ion-item-background);
+  box-shadow: var(--ew-bold-shadow);
+  border-inline-start: 3px solid var(--ion-color-primary);
+}
+.avatar-image {
+  border-radius: 18px 18px 18px 6px;
+}
+.avatar-image ion-icon {
+  color: var(--ion-color-primary);
+}
+.edit-avatar-btn {
+  border-color: var(--ion-item-background);
+}
+.user-name {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.completion-strip {
+  border: 0;
+  padding: 0 4px;
+}
+.stats-grid {
+  background: var(--ew-wallet-inset);
+  border-radius: 14px;
+  padding: 6px 14px;
+}
+.stat-box + .stat-box {
+  border-top: 1px solid var(--ew-wallet-line);
+}
+.stat-val {
+  unicode-bidi: isolate;
+  overflow-wrap: anywhere;
+  text-align: end;
+}
+.premium-card {
+  border-radius: 16px;
+  box-shadow: var(--ew-bold-shadow);
+}
+.header-titles h2 {
+  font-size: 18px;
+  font-weight: 600;
+}
+.header-icon {
+  width: 34px;
+  height: 38px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  background: var(--ew-wallet-inset);
+  border-radius: 11px 11px 11px 4px;
+}
+.form-actions ion-button {
+  min-height: 48px;
+  font-weight: 700;
+}
+.salary-item:first-child {
+  padding-top: 0;
+}
+.danger-card {
+  box-shadow: none;
+}
+.logout-btn {
+  background: rgba(var(--ion-color-danger-rgb), 0.06);
+}
+:host-context([dir="rtl"]) .avatar-section {
+  border-radius: 20px 20px 6px 20px;
+}
+@media (max-width: 360px) {
+  .profile-main {
+    padding-inline: 12px;
+  }
+  .avatar-section {
+    gap: 12px;
+    padding-inline: 12px;
+  }
+  .avatar-wrapper {
+    width: 60px;
+    height: 64px;
+  }
+  .user-name {
+    font-size: 23px;
+  }
+  .premium-card {
+    padding: 14px;
+  }
+  .stat-data {
+    flex-wrap: wrap;
+    gap: 4px 10px;
+  }
+  .stat-val {
+    margin-inline-start: auto;
+  }
+}

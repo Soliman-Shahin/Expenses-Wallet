@@ -129,7 +129,7 @@ ion-title {
 .form-actions-row {
   position: sticky;
   bottom: 0;
-  margin-top: auto;
+  margin-top: 8px;
   padding-block: 12px;
   display: flex;
   gap: 12px;
@@ -138,6 +138,7 @@ ion-title {
 }
 .submit-btn {
   flex: 1;
+  min-width: 0;
   min-height: 50px;
   margin: 0;
   --background: var(--ion-color-primary);
@@ -146,7 +147,11 @@ ion-title {
   --border-radius: 12px;
 }
 .delete-btn {
+  flex: 0 0 48px;
   min-width: 48px;
+  min-height: 48px;
+  --padding-start: 0;
+  --padding-end: 0;
   margin: 0;
 }
 .field-error {
