@@ -46,7 +46,7 @@
   border: 3px solid var(--ion-background-color);
   border-radius: 12px;
   background: var(--ion-color-primary);
-  color: var(--ion-color-primary-contrast);
+  // color: var(--ion-color-primary-contrast);
   display: grid;
   place-items: center;
 }
@@ -176,10 +176,11 @@
 }
 .btn-gradient {
   --background: var(--ion-color-primary);
-  --color: var(--ion-color-primary-contrast);
+  // --color: var(--ion-color-primary-contrast);
   margin: 0;
   font-size: 14px;
   font-weight: 650;
+  height: 30px;
 }
 .salary-item {
   padding-block: 12px;

@@ -35,7 +35,7 @@ app-expense-detail {
     --ion-item-background: #142139;
     --ion-text-color: #eef3ff;
     --ion-text-color-rgb: 238, 243, 255;
-    --ion-color-primary: #83a4ff;
+    --ion-color-primary: #1374e2;
     --ion-color-primary-contrast: #101e3a;
     --ew-wallet-muted: #a6b6d1;
     --ew-wallet-line: #263650;
@@ -134,6 +134,9 @@ app-home-page .dashboard .balance-card app-balance-card {
     color: #e2ebff;
     border: 1px solid #ffffff20;
     border-radius: 50%;
+    justify-content: center;
+    display: flex;
+    align-items: center;
   }
   .income-expense-row {
     border-top: 1px solid #ffffff26;
@@ -384,7 +387,7 @@ app-expense-form .expense-modal-content {
   }
   .segment-btn:focus-visible,
   .popover-item:focus-visible {
-    outline: 2px solid #83a4ff;
+    outline: 2px solid #1374e2;
     outline-offset: 2px;
   }
   .huge-amount-input:focus-within {
@@ -498,14 +501,35 @@ app-home-page .dashboard .chart-container {
 }
 
 // VD1.1 transaction-only density and picker affordances.
-ion-modal.main-modal:has(app-expense-form) { --height: min(620px, 100dvh); }
+ion-modal.main-modal:has(app-expense-form) {
+  --height: min(620px, 100dvh);
+}
 app-expense-form .expense-modal-content {
-  .form-field[button]::part(detail-icon) { color: var(--ew-wallet-muted); opacity: 1; font-size: 16px; }
-  .amount-wrapper { border-bottom: 2px solid var(--ew-wallet-line); }
-  .amount-wrapper:focus-within { border-color: var(--ion-color-primary); }
-  .huge-amount-input:focus-within { box-shadow: none; }
-  .desc-icon-box { display: none; }
-  .form-field:has(.premium-input) { --padding-start: 16px; --min-height: 80px; }
-  .premium-input { --background: transparent; }
-  .submit-btn { min-height: 52px; }
+  .form-field[button]::part(detail-icon) {
+    color: var(--ew-wallet-muted);
+    opacity: 1;
+    font-size: 16px;
+  }
+  .amount-wrapper {
+    border-bottom: 2px solid var(--ew-wallet-line);
+  }
+  .amount-wrapper:focus-within {
+    border-color: var(--ion-color-primary);
+  }
+  .huge-amount-input:focus-within {
+    box-shadow: none;
+  }
+  .desc-icon-box {
+    display: none;
+  }
+  .form-field:has(.premium-input) {
+    --padding-start: 16px;
+    --min-height: 80px;
+  }
+  .premium-input {
+    --background: transparent;
+  }
+  .submit-btn {
+    min-height: 52px;
+  }
 }

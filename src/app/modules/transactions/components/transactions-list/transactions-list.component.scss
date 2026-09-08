@@ -1,6 +1,3 @@
-@use "src/theme/wallet-rows" as wallet;
-/* Redesigned Transactions List Stylesheet - Premium Visual Excellence */
-
 :host {
   ion-header {
     &::after {
@@ -1014,10 +1011,6 @@ ion-searchbar {
       color: var(--ion-color-primary);
     }
   }
-}
-
-:host {
-  @include wallet.rows;
 }
 
 :host {

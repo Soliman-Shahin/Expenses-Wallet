@@ -284,7 +284,6 @@ export class TransactionsComponent implements OnChanges, OnDestroy {
       const modal = await this.modalCtrl.create({
         component: ExpenseFormComponent,
         componentProps: { expense: item },
-        cssClass: 'main-modal',
       });
       await modal.present();
       const { role } = await modal.onDidDismiss();

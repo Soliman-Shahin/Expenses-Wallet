@@ -168,7 +168,6 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
     try {
       const modal = await this.modalController.create({
         component: ExpenseFormComponent,
-        cssClass: 'main-modal',
       });
       await modal.present();
       const { role } = await modal.onDidDismiss();
@@ -627,7 +626,6 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
       const modal = await this.modalController.create({
         component: ExpenseFormComponent,
         componentProps: { expense: item },
-        cssClass: 'main-modal',
       });
       await modal.present();
       const { role } = await modal.onDidDismiss();
