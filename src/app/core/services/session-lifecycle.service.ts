@@ -1,5 +1,13 @@
 import { Injectable } from '@angular/core';
-import { Observable, catchError, from, of, switchMap, timeout } from 'rxjs';
+import {
+  Observable,
+  catchError,
+  from,
+  of,
+  switchMap,
+  timeout,
+  shareReplay,
+} from 'rxjs';
 import { AuthService } from 'src/app/modules/auth/services/auth.service';
 import { PushNotificationService } from './push-notification.service';
 
@@ -16,7 +24,9 @@ export class SessionLifecycleService {
       // Auxiliary teardown must not prevent explicit authentication logout.
       timeout(3000),
       catchError(() => of(undefined)),
-      switchMap(() => this.authService.logout())
+      switchMap(() => this.authService.logout()),
+      // Once requested, logout must survive the initiating view's destruction.
+      shareReplay({ bufferSize: 1, refCount: false })
     );
   }
 }

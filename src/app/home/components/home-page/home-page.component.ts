@@ -59,7 +59,7 @@ import { MonthsScrollHeaderComponent } from 'src/app/shared/components/months-sc
     CommonModule,
     RouterModule,
     IonicModule,
-    
+
     ReactiveFormsModule,
     TranslateModule,
     TransactionsComponent,
@@ -68,7 +68,7 @@ import { MonthsScrollHeaderComponent } from 'src/app/shared/components/months-sc
     SkeletonBlockComponent,
     SectionHeaderComponent,
     BalanceCardComponent,
-    MonthsScrollHeaderComponent
+    MonthsScrollHeaderComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [
@@ -161,8 +161,12 @@ export class HomePageComponent
   // Reactive month selection for Charts tab (supports custom date ranges)
   private readonly chartsMonthSelection$ = new BehaviorSubject<MonthYear>({
     ...this.selectedMonth,
-    startDate: new Date(new Date().getFullYear(), new Date().getMonth() - 6, new Date().getDate()).toISOString(),
-    endDate: new Date().toISOString()
+    startDate: new Date(
+      new Date().getFullYear(),
+      new Date().getMonth() - 6,
+      new Date().getDate()
+    ).toISOString(),
+    endDate: new Date().toISOString(),
   });
 
   private readonly dashboard = inject(DashboardFacade);
@@ -179,6 +183,7 @@ export class HomePageComponent
       }
       return this.dashboard.profile$.pipe(
         switchMap((profile) => {
+          if (!this.authService.isLoggedIn) return of(null);
           if (profile) {
             return of(profile);
           }
@@ -188,7 +193,8 @@ export class HomePageComponent
         })
       );
     }),
-    shareReplay(1)
+    takeUntil(this.destroy$),
+    shareReplay({ bufferSize: 1, refCount: true })
   );
 
   // Totals for Summary tab (always current month)
@@ -200,10 +206,10 @@ export class HomePageComponent
       if (!profile) {
         return of({ income: 0, expenses: 0, balance: 0 });
       }
-      
+
       // Summary tab always uses month/year (no custom ranges)
       const totals$ = this.dashboard.totalsForMonth(month.month, month.year);
-      
+
       return totals$.pipe(
         map((totals) => {
           const base = totals ?? { income: 0, expenses: 0, balance: 0 };
@@ -237,12 +243,16 @@ export class HomePageComponent
       if (!profile) {
         return of({ income: 0, expenses: 0, balance: 0 });
       }
-      
+
       // Use custom date range if provided, otherwise use month/year
-      const totals$ = month.startDate && month.endDate
-        ? this.dashboard.totalsForRange(new Date(month.startDate), new Date(month.endDate))
-        : this.dashboard.totalsForMonth(month.month, month.year);
-      
+      const totals$ =
+        month.startDate && month.endDate
+          ? this.dashboard.totalsForRange(
+              new Date(month.startDate),
+              new Date(month.endDate)
+            )
+          : this.dashboard.totalsForMonth(month.month, month.year);
+
       return totals$.pipe(
         map((totals) => {
           const base = totals ?? { income: 0, expenses: 0, balance: 0 };
@@ -277,7 +287,10 @@ export class HomePageComponent
       }
       // Use custom date range if provided
       if (m.startDate && m.endDate) {
-        return this.dashboard.expenseByCategoryForRange(new Date(m.startDate), new Date(m.endDate));
+        return this.dashboard.expenseByCategoryForRange(
+          new Date(m.startDate),
+          new Date(m.endDate)
+        );
       }
       return this.dashboard.expenseByCategoryForMonth(m.month, m.year);
     }),
@@ -295,7 +308,10 @@ export class HomePageComponent
       }
       // Use custom date range if provided
       if (m.startDate && m.endDate) {
-        return this.dashboard.monthlyExpensesForRange(new Date(m.startDate), new Date(m.endDate));
+        return this.dashboard.monthlyExpensesForRange(
+          new Date(m.startDate),
+          new Date(m.endDate)
+        );
       }
       return this.dashboard.monthlyExpensesForMonth(m.month, m.year);
     }),
@@ -438,23 +454,35 @@ export class HomePageComponent
   onRangeChange(range: DateRange): void {
     // Save the selected range so it persists when switching tabs
     this.selectedRange = range;
-    
+
     // Calculate date range based on selection
     const now = new Date();
     let startDate: Date;
-    
+
     switch (range) {
       case '1m':
         // Last 1 month
-        startDate = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+        startDate = new Date(
+          now.getFullYear(),
+          now.getMonth() - 1,
+          now.getDate()
+        );
         break;
       case '6m':
         // Last 6 months
-        startDate = new Date(now.getFullYear(), now.getMonth() - 6, now.getDate());
+        startDate = new Date(
+          now.getFullYear(),
+          now.getMonth() - 6,
+          now.getDate()
+        );
         break;
       case '1y':
         // Last 1 year
-        startDate = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+        startDate = new Date(
+          now.getFullYear() - 1,
+          now.getMonth(),
+          now.getDate()
+        );
         break;
       case 'all':
       default:
@@ -462,16 +490,16 @@ export class HomePageComponent
         startDate = new Date(2020, 0, 1);
         break;
     }
-    
+
     // Update the Charts tab selection to trigger data refresh
     // This will cause the charts to update with the new date range
     this.chartsMonthSelection$.next({
       month: now.getMonth() + 1,
       year: now.getFullYear(),
       startDate: startDate.toISOString(),
-      endDate: now.toISOString()
+      endDate: now.toISOString(),
     });
-    
+
     this.cdr.markForCheck();
   }
 
@@ -565,9 +593,9 @@ export class HomePageComponent
   private refreshData(): void {
     // Trigger data refresh by re-emitting current month for Summary
     // Create new object to trigger change detection
-    this.summaryMonthSelection$.next({ 
+    this.summaryMonthSelection$.next({
       month: this.selectedMonth.month,
-      year: this.selectedMonth.year
+      year: this.selectedMonth.year,
     });
     // Also refresh charts with current selection
     const currentCharts = this.chartsMonthSelection$.getValue();

@@ -10,9 +10,7 @@ import {
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ToastController } from '@ionic/angular';
-import { Router } from '@angular/router';
-import { TokenService } from 'src/app/modules/auth/services/token.service';
-import { AuthService } from 'src/app/modules/auth/services/auth.service';
+import { ConnectionService } from '../services/connection.service';
 
 function handleAccountLocked(error: HttpErrorResponse): string {
   const lockoutMinutes = error.error?.lockoutMinutes || 15;
@@ -137,9 +135,15 @@ export const errorInterceptor: HttpInterceptorFn = (
 ): Observable<HttpEvent<unknown>> => {
   if (!isApiUrl(req.url)) return next(req);
   const toastController = inject(ToastController);
+  const connection = inject(ConnectionService);
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
+      // Existing offline/local-data UI owns disconnected navigation, including
+      // network layers that report 5xx while the device is disconnected.
+      if (!connection.isOnline() || !navigator.onLine) {
+        return throwError(() => error);
+      }
       handleError(error, req, toastController);
       return throwError(() => error);
     })

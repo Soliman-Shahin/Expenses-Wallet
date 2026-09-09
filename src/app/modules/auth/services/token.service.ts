@@ -2,6 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { User } from '../models';
 import { StorageService } from './storage.service';
 import { SecureStorageService } from './secure-storage.service';
+import { Subject } from 'rxjs';
 
 interface Session {
   user: User | null;
@@ -11,6 +12,8 @@ interface Session {
 
 @Injectable({ providedIn: 'root' })
 export class TokenService {
+  private readonly sessionEnded = new Subject<void>();
+  readonly sessionEnded$ = this.sessionEnded.asObservable();
   user = signal<User | null>(null);
   private session: Session = { user: null, accessToken: '', refreshToken: '' };
   private persistent = false;
@@ -158,6 +161,7 @@ export class TokenService {
     this.persistent = false;
     this.session = { user: null, accessToken: '', refreshToken: '' };
     this.user.set(null);
+    this.sessionEnded.next();
     this.storage.remove('user');
     this.clearLegacy();
     void this.persist().catch(() =>

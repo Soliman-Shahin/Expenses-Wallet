@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
-import { catchError, switchMap } from 'rxjs/operators';
+import { catchError, switchMap, takeUntil } from 'rxjs/operators';
 import { throwError, of } from 'rxjs';
 import { TokenService } from '../services/token.service';
 import { AuthService } from '../services/auth.service';
@@ -68,6 +68,7 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
           )
         )
       );
-    })
+    }),
+    takeUntil(tokens.sessionEnded$)
   );
 };

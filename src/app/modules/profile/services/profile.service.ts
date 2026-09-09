@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { UserProfile } from '../models/profile.model';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, of, defer, EMPTY } from 'rxjs';
 import { ApiService } from 'src/app/core/services/api.service';
-import { catchError, map, tap, shareReplay } from 'rxjs/operators';
+import { catchError, map, tap, shareReplay, takeUntil } from 'rxjs/operators';
+import { TokenService } from 'src/app/modules/auth/services/token.service';
 import { StorageService } from 'src/app/modules/auth/services/storage.service';
 
 // Deprecated old storage key - kept for cleanup only
@@ -22,6 +23,7 @@ export class ProfileService {
   // Use app-wide storage (prefix ewallet_) so the key becomes 'ewallet_user'
   private storage = inject(StorageService);
   private api = inject(ApiService);
+  private tokens = inject(TokenService);
 
   constructor() {
     // Initialize stream with current value from storage
@@ -142,7 +144,12 @@ export class ProfileService {
    * Uses shareReplay to cache the result and share it among multiple subscribers.
    */
   fetchProfile(): Observable<UserProfile | null> {
-    return this.api.get<any>(this.PROFILE_ME_ENDPOINT).pipe(
+    return defer(() => {
+      // Observable auth consumers update after synchronous profile-clear emissions.
+      if (!this.tokens.getAccessToken() || !this.tokens.getUser()) return EMPTY;
+      return this.api.get<any>(this.PROFILE_ME_ENDPOINT);
+    }).pipe(
+      takeUntil(this.tokens.sessionEnded$),
       map((res) => this.normalizeProfile(res)),
       tap((profile) => {
         if (profile) this.saveProfile(profile);

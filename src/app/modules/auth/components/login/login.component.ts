@@ -118,11 +118,7 @@ export class LoginComponent extends BaseComponent implements OnInit {
 
   signInWithGoogle(): void {
     console.log('🔵 [LoginComponent] Google Sign-In button clicked!');
-    this.handleAuth(
-      this.authService.loginWithGoogle(
-        !!this.loginForm.get(this.formFields.rememberMe)?.value
-      )
-    );
+    this.handleAuth(this.authService.loginWithGoogle());
   }
 
   login(): void {

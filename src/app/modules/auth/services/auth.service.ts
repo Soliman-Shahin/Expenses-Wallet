@@ -94,8 +94,7 @@ export class AuthService {
     return this.authenticate('/user/signup', { email, password }, false);
   }
 
-  loginWithGoogle(persistent = false): Observable<void> {
-    sessionStorage.setItem('ewallet_oauth_persistent', String(persistent));
+  loginWithGoogle(): Observable<void> {
     const platform = Capacitor.getPlatform?.() || 'web';
     const hasGoogleAuthPlugin = !!(
       (window as any)?.Capacitor?.Plugins?.GoogleAuth ||
@@ -144,7 +143,7 @@ export class AuthService {
             await this.authenticate(
               `/user/auth/google/native`,
               { idToken },
-              persistent
+              true
             ).toPromise();
             return;
           } catch (err) {
@@ -328,7 +327,7 @@ export class AuthService {
         this.profileService.clearProfile();
         this.redirectUrl = null;
         void this.tokenService.flush().catch(() => undefined);
-        void this.router.navigateByUrl('/auth/login', { replaceUrl: true });
+        await this.router.navigateByUrl('/auth/login', { replaceUrl: true });
       }
     })();
     return from(task);
@@ -347,12 +346,10 @@ export class AuthService {
     const refreshToken = payload?.tokens?.refreshToken || payload?.refreshToken;
     if (!user || !accessToken || !refreshToken)
       return throwError(() => new Error('Invalid OAuth payload'));
-    const persistent =
-      sessionStorage.getItem('ewallet_oauth_persistent') === 'true';
     sessionStorage.removeItem('ewallet_oauth_persistent');
     this.loggingOut = false;
     return from(
-      this.tokenService.saveSession(user, accessToken, refreshToken, persistent)
+      this.tokenService.saveSession(user, accessToken, refreshToken, true)
     );
   }
 }
