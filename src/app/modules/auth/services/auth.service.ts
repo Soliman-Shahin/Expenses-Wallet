@@ -1,136 +1,127 @@
 import {
+  HttpBackend,
   HttpClient,
   HttpErrorResponse,
-  HttpBackend,
 } from '@angular/common/http';
 import { Injectable, inject, NgZone } from '@angular/core';
 import { Capacitor } from '@capacitor/core';
 import { Router } from '@angular/router';
-import { NavController } from '@ionic/angular';
-import { Observable, throwError, from, of, EMPTY } from 'rxjs';
-import { catchError, tap, map } from 'rxjs/operators';
+import { Observable, from, EMPTY, throwError, firstValueFrom } from 'rxjs';
+import {
+  catchError,
+  map,
+  switchMap,
+  finalize,
+  shareReplay,
+  timeout,
+} from 'rxjs/operators';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { environment } from 'src/environments/environment';
 import { AuthResponse, User } from '../models';
-import { ApiService } from 'src/app/core/services';
-import { ProfileService } from 'src/app/modules/profile/services/profile.service';
-import { StorageService } from './storage.service';
 import { TokenService } from './token.service';
+import { StorageService } from './storage.service';
+import { ProfileService } from 'src/app/modules/profile/services/profile.service';
 import { EncryptionService } from 'src/app/core/services/encryption.service';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
   private router = inject(Router);
-  private navCtrl = inject(NavController);
-  private apiService = inject(ApiService);
-  private storageService = inject(StorageService);
   private zone = inject(NgZone);
-  private profileService = inject(ProfileService);
   private tokenService = inject(TokenService);
+  private storageService = inject(StorageService);
+  private profileService = inject(ProfileService);
   private encryptionService = inject(EncryptionService);
-  // Raw backend to create HttpClient that bypasses interceptors when needed
   private httpBackend = inject(HttpBackend);
-
+  private refreshInFlight?: Observable<{
+    accessToken: string;
+    refreshToken: string;
+  }>;
+  private startup?: Promise<void>;
+  private loggingOut = false;
   public user = this.tokenService.user;
   public user$ = toObservable(this.user);
-
-  public isLoggedIn$: Observable<boolean> = this.user$.pipe(
-    map((user) => !!user)
-  );
-
-  // Store the URL to redirect to after login
+  public isLoggedIn$ = this.user$.pipe(map((user) => !!user));
   public redirectUrl: string | null = null;
-
-  // Getter for current user state
   get isLoggedIn(): boolean {
-    // Check both token and user data to ensure complete authentication state
-    const hasToken = !!this.tokenService.getAccessToken();
-    const hasUser = !!this.user();
-    
-    // If we have a token but no user, try to restore user from storage
-    if (hasToken && !hasUser) {
-      const storedUser = this.tokenService.getUser();
-      if (storedUser) {
-        this.tokenService.setUser(storedUser);
-        return true;
-      }
-      // Token exists but no user data - invalid state
-      return false;
-    }
-    
-    return hasToken && hasUser;
+    return !!this.tokenService.getAccessToken() && !!this.user();
   }
-
-  // Alias for current user
   get currentUser(): User | null {
     return this.user();
   }
-
-  // Observable of user changes
   get userChanges(): Observable<User | null> {
     return this.user$;
   }
-
-  constructor() {
-    this.initializeUser();
-  }
-
-  /**
-   * Gets the current user's ID if available
-   * @returns The current user's ID or null if not authenticated
-   */
   getCurrentUserId(): string | null {
     return this.user()?._id || null;
   }
+  getUserId(): string | null {
+    return this.getCurrentUserId();
+  }
+  getRefreshToken(): string | null {
+    return this.tokenService.getRefreshToken();
+  }
 
-  private initializeUser(): void {
-    const user =
-      (this.storageService.get('user') as User | null) ??
-      this.tokenService.getUser();
-    if (user) {
-      this.tokenService.setUser(user);
+  initializeSession(): Promise<void> {
+    return (this.startup ??= (async () => {
+      try {
+        await this.tokenService.initialize();
+        await this.renewIfNeeded();
+      } catch {
+        /* Offline or protected storage unavailable: retain recoverable credentials. */
+      }
+    })());
+  }
+
+  async renewIfNeeded(): Promise<void> {
+    await this.tokenService.initialize();
+    if (
+      !this.loggingOut &&
+      this.tokenService.isAccessTokenExpired() &&
+      this.getRefreshToken()
+    ) {
+      await firstValueFrom(this.refreshAccessToken());
     }
   }
 
-  // Authentication methods
-  login(email: string, password: string): Observable<AuthResponse> {
-    return this.authenticate(`/user/login`, { email, password });
+  login(
+    email: string,
+    password: string,
+    persistent = false
+  ): Observable<AuthResponse> {
+    return this.authenticate('/user/login', { email, password }, persistent);
   }
-
   signup(email: string, password: string): Observable<AuthResponse> {
-    return this.authenticate(`/user/signup`, { email, password });
+    return this.authenticate('/user/signup', { email, password }, false);
   }
 
-  /**
-   * Google Sign-In with platform detection:
-   * - Native (Android/iOS): Uses Capacitor GoogleAuth plugin
-   * - Web: Redirects to backend OAuth flow, returns to /auth/callback
-   */
-  loginWithGoogle(): Observable<void> {
+  loginWithGoogle(persistent = false): Observable<void> {
+    sessionStorage.setItem('ewallet_oauth_persistent', String(persistent));
     const platform = Capacitor.getPlatform?.() || 'web';
     const hasGoogleAuthPlugin = !!(
       (window as any)?.Capacitor?.Plugins?.GoogleAuth ||
       (window as any)?.GoogleAuth
     );
-    
-    const isNative = (platform === 'android' || platform === 'ios') && hasGoogleAuthPlugin;
-    
+
+    const isNative =
+      (platform === 'android' || platform === 'ios') && hasGoogleAuthPlugin;
+
     if (isNative) {
       return from(
         (async () => {
           const GA =
             (window as any)?.Capacitor?.Plugins?.GoogleAuth ||
             (window as any)?.GoogleAuth;
-          
+
           if (!GA) {
             throw new Error('GoogleAuth plugin not available');
           }
 
           try {
             // Initialize if needed
-            if (typeof GA.initialize === 'function' && environment.google?.webClientId) {
+            if (
+              typeof GA.initialize === 'function' &&
+              environment.google?.webClientId
+            ) {
               try {
                 await GA.initialize({
                   clientId: environment.google.webClientId,
@@ -138,21 +129,27 @@ export class AuthService {
                   grantOfflineAccess: true,
                 });
               } catch (initError) {
-                console.warn('[AuthService] GoogleAuth init warning:', initError);
+                console.warn('Google authentication initialization failed');
               }
             }
 
             const res = await GA.signIn();
-            const idToken: string = res?.authentication?.idToken || res?.idToken || '';
-            
+            const idToken: string =
+              res?.authentication?.idToken || res?.idToken || '';
+
             if (!idToken) {
               throw new Error('Failed to obtain Google idToken');
             }
 
-            await this.authenticate(`/user/auth/google/native`, { idToken }).toPromise();
+            await this.authenticate(
+              `/user/auth/google/native`,
+              { idToken },
+              persistent
+            ).toPromise();
             return;
           } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+            const errorMessage =
+              err instanceof Error ? err.message : 'Unknown error occurred';
             throw new Error(`Google Sign-In failed: ${errorMessage}`);
           }
         })()
@@ -173,274 +170,189 @@ export class AuthService {
     return EMPTY;
   }
 
-
-  private authenticate(
-    url: string,
-    credentials: Record<string, any>
-  ): Observable<AuthResponse> {
-    const fullUrl = `${environment.apiUrl}${url}`;
-
-    // Encrypt credentials only if encryption is enabled
-    const payload = environment.enableEncryption
+  private payload(credentials: Record<string, unknown>): any {
+    return environment.enableEncryption
       ? { data: this.encryptionService.encrypt(credentials) }
       : credentials;
-
-    // On native (Android/iOS), prefer Capacitor HTTP plugin to bypass WebView CORS
-    if (Capacitor.isNativePlatform()) {
-      const Http = (window as any)?.Capacitor?.Plugins?.Http;
-      if (Http && typeof Http.post === 'function') {
-        return from(
-          Http.post({
+  }
+  private unwrap(response: any): any {
+    if (typeof response?.data === 'string')
+      return this.encryptionService.decrypt(response.data);
+    return response;
+  }
+  private authenticate(
+    path: string,
+    credentials: Record<string, any>,
+    persistent = false
+  ): Observable<AuthResponse> {
+    const fullUrl = environment.apiUrl + path;
+    const payload = this.payload(credentials);
+    const nativeHttp = Capacitor.isNativePlatform()
+      ? (window as any)?.Capacitor?.Plugins?.Http
+      : null;
+    const request: Observable<any> = nativeHttp?.post
+      ? from(
+          nativeHttp.post({
             url: fullUrl,
             headers: { 'Content-Type': 'application/json' },
             data: payload,
           })
         ).pipe(
-          map((resp: any) => {
-            // Plugin returns { status, data, headers, url }
-            let response = resp?.data;
-
-            // Decrypt response if needed
-            if (
-              response &&
-              response.data &&
-              typeof response.data === 'string'
-            ) {
-              const decrypted = this.encryptionService.decrypt(response.data);
-              if (decrypted) {
-                response = decrypted;
-              }
-            }
-
-            if (!response?.data?.user) {
-              const message = response?.error?.message || 'Invalid credentials';
+          map((res: any) => {
+            if (res.status >= 400)
               throw new HttpErrorResponse({
-                status: 401,
-                statusText: 'Unauthorized',
-                error: { message },
+                status: res.status,
+                error: res.data,
               });
+            return res.data;
+          })
+        )
+      : new HttpClient(this.httpBackend).post(fullUrl, payload);
+    return request.pipe(
+      timeout(15000),
+      switchMap((raw) =>
+        from(
+          (async () => {
+            const response = this.unwrap(raw);
+            const data = response?.data;
+            const accessToken = data?.tokens?.accessToken ?? data?.accessToken;
+            const refreshToken =
+              data?.tokens?.refreshToken ?? data?.refreshToken;
+            if (!data?.user || !accessToken || !refreshToken)
+              throw new Error('Invalid authentication response');
+            this.loggingOut = false;
+            try {
+              await this.tokenService.saveSession(
+                data.user,
+                accessToken,
+                refreshToken,
+                persistent
+              );
+            } catch {
+              this.tokenService.removeSession();
+              throw new Error('Unable to save session on this device');
             }
-
-            const user = response.data.user as AuthResponse['data']['user'];
-            const accessTokenNormalized =
-              response?.data?.tokens?.accessToken ??
-              response?.data?.accessToken ??
-              response?.data?.token ??
-              '';
-            const refreshTokenNormalized =
-              response?.data?.tokens?.refreshToken ??
-              response?.data?.refreshToken ??
-              '';
-            const tokens = {
-              accessToken: accessTokenNormalized,
-              refreshToken: refreshTokenNormalized,
-            } as NonNullable<AuthResponse['data']['tokens']>;
-
-            if (tokens?.accessToken)
-              this.tokenService.setAccessToken(tokens.accessToken);
-            if (tokens?.refreshToken)
-              this.tokenService.setRefreshToken(tokens.refreshToken);
-            if (user && user._id) this.tokenService.setUserId(user._id);
-            this.storageService.set('user', user);
-            this.tokenService.setUser(user);
-
-            const redirectUrl = this.redirectUrl || '/home';
+            const redirect = this.redirectUrl || '/home';
             this.redirectUrl = null;
-            this.zone.run(() => {
-              this.router.navigateByUrl(redirectUrl);
-            });
-
+            this.zone.run(() => void this.router.navigateByUrl(redirect));
             return response as AuthResponse;
-          }),
-          catchError(this.handleError)
-        );
-      }
-      // If plugin not available, fall back to web path below (may hit CORS on native)
-    }
-
-    // Web: Use a bare HttpClient (bypasses interceptors and ApiService error wrapping)
-    const http = new HttpClient(this.httpBackend);
-    return http.post<any>(fullUrl, payload).pipe(
-      map((res) => {
-        let response = res;
-        // Decrypt response if needed
-        if (response && response.data && typeof response.data === 'string') {
-          const decrypted = this.encryptionService.decrypt(response.data);
-          if (decrypted) {
-            response = decrypted;
-          }
-        }
-
-        // Some backends may return { success: false, error: { message } } with 200
-        if (!response?.data?.user) {
-          const message = response?.error?.message || 'Invalid credentials';
-          throw new HttpErrorResponse({
-            status: 401,
-            statusText: 'Unauthorized',
-            error: { message },
-          });
-        }
-
-        const user = response.data.user as AuthResponse['data']['user'];
-        // Normalize tokens from different backend shapes
-        const accessTokenNormalized =
-          response?.data?.tokens?.accessToken ??
-          response?.data?.accessToken ??
-          response?.data?.token ??
-          '';
-        const refreshTokenNormalized =
-          response?.data?.tokens?.refreshToken ??
-          response?.data?.refreshToken ??
-          '';
-        const tokens = {
-          accessToken: accessTokenNormalized,
-          refreshToken: refreshTokenNormalized,
-        } as NonNullable<AuthResponse['data']['tokens']>;
-
-        // Store tokens (secure) and user data
-        if (tokens?.accessToken) {
-          this.tokenService.setAccessToken(tokens.accessToken);
-        }
-        if (tokens?.refreshToken) {
-          this.tokenService.setRefreshToken(tokens.refreshToken);
-        }
-        if (user && user._id) {
-          this.tokenService.setUserId(user._id);
-        }
-        this.storageService.set('user', user);
-        this.tokenService.setUser(user);
-
-        // Navigate to redirect URL or home
-        const redirectUrl = this.redirectUrl || '/home';
-        this.redirectUrl = null;
-        this.zone.run(() => {
-          this.router.navigateByUrl(redirectUrl);
-        });
-
-        return response as AuthResponse;
-      }),
-      // Preserve original HttpErrorResponse so components can display messages
-      catchError(this.handleError)
+          })()
+        )
+      )
     );
   }
 
-  logout(): Observable<void> {
-    // Authentication teardown remains synchronous so interceptor/internal
-    // callers cannot leave a stale session by forgetting to subscribe.
-    this.tokenService.removeSession();
-    this.storageService.clear();
-    this.profileService.clearProfile();
-    this.redirectUrl = null;
-    try {
-      location.replace('/home');
-    } catch {
-      (window as any).location.href = '/home';
-    }
-    return of(undefined);
-  }
-
-  /**
-   * Calls the backend to refresh the access token using the stored refresh token.
-   * Returns an object: { accessToken, refreshToken }
-   */
   refreshAccessToken(): Observable<{
     accessToken: string;
     refreshToken: string;
   }> {
-    const refreshToken = this.getRefreshToken();
-    // Use a bare HttpClient that bypasses interceptors to avoid cycles
-    const http = new HttpClient(this.httpBackend);
-
-    const encryptedBody = {
-      data: this.encryptionService.encrypt({ refreshToken }),
-    };
-
-    return http
-      .post<any>(`${environment.apiUrl}/user/refresh-token`, encryptedBody)
+    if (this.refreshInFlight) return this.refreshInFlight;
+    const credential = this.getRefreshToken();
+    const revision = this.tokenService.revision;
+    if (!credential || this.loggingOut)
+      return throwError(() => new HttpErrorResponse({ status: 401 }));
+    this.refreshInFlight = new HttpClient(this.httpBackend)
+      .post<any>(
+        environment.apiUrl + '/user/refresh-token',
+        this.payload({ refreshToken: credential })
+      )
       .pipe(
-        map((res) => {
-          let response = res;
-          // Decrypt response if needed
-          if (response && response.data && typeof response.data === 'string') {
-            const decrypted = this.encryptionService.decrypt(response.data);
-            if (decrypted) {
-              response = decrypted;
-            }
-          }
-
-          // Response: { accessToken, refreshToken }
-          if (response && response.accessToken && response.refreshToken) {
-            // Store new tokens
-            this.tokenService.setAccessToken(response.accessToken);
-            this.tokenService.setRefreshToken(response.refreshToken);
-            return {
-              accessToken: response.accessToken,
-              refreshToken: response.refreshToken,
-            };
-          } else {
-            this.logout();
-            throw new Error('Invalid token refresh response');
-          }
+        timeout(15000),
+        switchMap((raw) =>
+          from(
+            (async () => {
+              const data = this.unwrap(raw)?.data;
+              if (!data?.accessToken || !data?.refreshToken)
+                throw new Error('Invalid renewal response');
+              if (revision !== this.tokenService.revision)
+                throw new Error('Session changed');
+              await this.tokenService.updateTokens(
+                data.accessToken,
+                data.refreshToken
+              );
+              return {
+                accessToken: data.accessToken as string,
+                refreshToken: data.refreshToken as string,
+              };
+            })()
+          )
+        ),
+        catchError((error) => {
+          if (
+            (error.status === 401 || error.status === 403) &&
+            revision === this.tokenService.revision
+          )
+            this.expireSession();
+          return throwError(() => error);
         }),
-        catchError((err) => {
-          this.logout();
-          return throwError(() => err);
-        })
+        finalize(() => (this.refreshInFlight = undefined)),
+        shareReplay({ bufferSize: 1, refCount: false })
       );
+    return this.refreshInFlight;
   }
 
-  // Error handling: rethrow original HttpErrorResponse to keep status/body
-  private handleError(error: HttpErrorResponse): Observable<never> {
-    return throwError(() => error);
+  expireSession(): void {
+    if (!this.tokenService.getAccessToken() && !this.getRefreshToken()) return;
+    this.tokenService.removeSession();
+    if (!this.router.url.startsWith('/auth/')) {
+      this.redirectUrl = this.router.url;
+      void this.router.navigate(['/auth/login']);
+    }
   }
 
-  getRefreshToken(): string | null {
-    return this.tokenService.getRefreshToken();
+  logout(): Observable<void> {
+    // Execute even for legacy callers that do not subscribe. Wait only a bounded
+    // time for in-flight rotation, then revoke its latest credential if available.
+    this.loggingOut = true;
+    const task = (async () => {
+      try {
+        if (this.refreshInFlight)
+          await firstValueFrom(this.refreshInFlight.pipe(timeout(3000)));
+        const refreshToken = this.getRefreshToken();
+        if (refreshToken)
+          await firstValueFrom(
+            new HttpClient(this.httpBackend)
+              .post(
+                environment.apiUrl + '/user/logout',
+                this.payload({ refreshToken })
+              )
+              .pipe(timeout(3000))
+          );
+      } catch {
+        /* Local logout must work offline. */
+      } finally {
+        this.tokenService.removeSession();
+        this.storageService.clear();
+        // clear() removes the policy marker: restore it before any native reload.
+        localStorage.setItem('ewallet_auth_persistent', 'false');
+        this.profileService.clearProfile();
+        this.redirectUrl = null;
+        void this.tokenService.flush().catch(() => undefined);
+        void this.router.navigateByUrl('/auth/login', { replaceUrl: true });
+      }
+    })();
+    return from(task);
   }
 
-  getUserId(): string | null {
-    return this.currentUser?._id || null;
-  }
-
-  /**
-   * Handle OAuth payload delivered via mobile deep link (base64-encoded JSON in URL hash)
-   * @param payloadB64 base64 string of JSON: { user, tokens: { accessToken, refreshToken } }
-   */
   handleOAuthDeepLink(payloadB64: string): Observable<void> {
     try {
-      const json = atob(payloadB64);
-      const parsed = JSON.parse(json);
-      return this.handleOAuthCallback(parsed);
-    } catch (e) {
-      return throwError(() => e);
+      return this.handleOAuthCallback(JSON.parse(atob(payloadB64)));
+    } catch {
+      return throwError(() => new Error('Invalid OAuth payload'));
     }
   }
-
-  /**
-   * Handle OAuth callback payload (already parsed)
-   * @param payload { user, tokens: { accessToken, refreshToken } }
-   */
   handleOAuthCallback(payload: any): Observable<void> {
-    try {
-      const user = payload?.user as User | undefined;
-      const accessToken =
-        payload?.tokens?.accessToken || payload?.accessToken || payload?.token;
-      const refreshToken = payload?.tokens?.refreshToken || payload?.refreshToken;
-      if (!user || !accessToken || !refreshToken) {
-        return throwError(() => new Error('Invalid OAuth payload'));
-      }
-
-      // Persist tokens & user
-      this.tokenService.setAccessToken(accessToken);
-      this.tokenService.setRefreshToken(refreshToken);
-      if (user && (user as any)._id) {
-        this.tokenService.setUserId((user as any)._id);
-      }
-      this.storageService.set('user', user);
-      this.tokenService.setUser(user);
-      return of(undefined);
-    } catch (e) {
-      return throwError(() => e);
-    }
+    const user = payload?.user;
+    const accessToken = payload?.tokens?.accessToken || payload?.accessToken;
+    const refreshToken = payload?.tokens?.refreshToken || payload?.refreshToken;
+    if (!user || !accessToken || !refreshToken)
+      return throwError(() => new Error('Invalid OAuth payload'));
+    const persistent =
+      sessionStorage.getItem('ewallet_oauth_persistent') === 'true';
+    sessionStorage.removeItem('ewallet_oauth_persistent');
+    this.loggingOut = false;
+    return from(
+      this.tokenService.saveSession(user, accessToken, refreshToken, persistent)
+    );
   }
 }

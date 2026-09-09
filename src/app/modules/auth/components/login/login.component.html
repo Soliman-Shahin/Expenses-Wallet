@@ -1,101 +1,112 @@
 <ion-content [fullscreen]="true">
   @if (vm$ | async; as vm) {
-    <div class="auth-page">
-      <!-- ══ Hero / Brand Zone ══ -->
-      <div class="auth-hero">
-        <div class="orb orb--a"></div>
-        <div class="orb orb--b"></div>
-        <div class="orb orb--c"></div>
-        <div class="hero-grid"></div>
-        <div class="hero-content">
-          <!-- Spinning gradient ring around logo -->
-          <div class="logo-ring-wrap">
-            <div class="logo-ring">
-              <img src="assets/icon/icon.png" alt="App Logo" class="app-logo" />
-            </div>
+  <div class="auth-page">
+    <!-- ══ Hero / Brand Zone ══ -->
+    <div class="auth-hero">
+      <div class="orb orb--a"></div>
+      <div class="orb orb--b"></div>
+      <div class="orb orb--c"></div>
+      <div class="hero-grid"></div>
+      <div class="hero-content">
+        <!-- Spinning gradient ring around logo -->
+        <div class="logo-ring-wrap">
+          <div class="logo-ring">
+            <img src="assets/icon/icon.png" alt="App Logo" class="app-logo" />
           </div>
-          <h1 class="app-name">{{ "APP_TITLE" | translate }}</h1>
-          <p class="app-tagline">{{ 'AUTH.APP_TAGLINE' | translate }}</p>
         </div>
-      </div>
-      <!-- ══ Form Sheet (slides up over hero) ══ -->
-      <div class="auth-sheet">
-        <div class="sheet-handle"></div>
-        <h2 class="sheet-title">{{ "AUTH.WELCOME_BACK" | translate }}</h2>
-        <p class="sheet-subtitle">{{ "AUTH.SIGN_IN_TO_CONTINUE" | translate }}</p>
-        <!-- Social Login -->
-        <div class="social-login-buttons">
-          <ion-button
-            expand="block"
-            fill="outline"
-            class="google-btn"
-            (click)="signInWithGoogle()"
-            [disabled]="vm.isLoading"
-            >
-            <ion-icon slot="start" name="logo-google"></ion-icon>
-            {{ "AUTH.CONTINUE_WITH_GOOGLE" | translate }}
-          </ion-button>
-        </div>
-        <div class="divider">
-          <span class="divider-line"></span>
-          <span class="divider-text">{{ "AUTH.OR" | translate }}</span>
-          <span class="divider-line"></span>
-        </div>
-        <form [formGroup]="loginForm" (ngSubmit)="login()" class="login-form">
-          <!-- Error message -->
-          @if (vm.errorMessage) {
-            <ion-note color="danger" class="error-message">
-              <ion-icon name="alert-circle-outline"></ion-icon>
-              {{ vm.errorMessage }}
-            </ion-note>
-          }
-          <ion-list>
-            <app-ui-input
-              id="login-email"
-              [formControlName]="formFields.email"
-              type="email"
-              [placeholder]="'AUTH.EMAIL_PLACEHOLDER' | translate"
-              autocomplete="email"
-              inputmode="email"
-              [required]="true"
-              startIcon="mail-outline"
-            ></app-ui-input>
-            <app-ui-input
-              id="login-password"
-              [formControlName]="formFields.password"
-              type="password"
-              [placeholder]="'AUTH.PASSWORD_PLACEHOLDER' | translate"
-              autocomplete="current-password"
-              [required]="true"
-              startIcon="lock-closed-outline"
-              [togglePassword]="true"
-            ></app-ui-input>
-          </ion-list>
-          <!-- Remember Me & Forgot Password -->
-          <div class="form-options">
-            <label class="remember-me-label">
-              <ion-checkbox [formControlName]="formFields.rememberMe"></ion-checkbox>
-              <span>{{ "AUTH.REMEMBER_ME" | translate }}</span>
-            </label>
-            <ion-button fill="clear" size="small" routerLink="/auth/forgot-password" class="forgot-password">
-              {{ "AUTH.FORGOT_PASSWORD" | translate }}
-            </ion-button>
-          </div>
-          <!-- Submit -->
-          <ion-button
-            type="submit"
-            expand="block"
-            [disabled]="loginForm.invalid || vm.isLoading"
-            class="auth-submit-button"
-            >
-            <span>{{ "AUTH.SIGN_IN" | translate }}</span>
-          </ion-button>
-        </form>
-        <div class="signup-link-container ion-text-center">
-          {{ "AUTH.DONT_HAVE_ACCOUNT" | translate }}
-          <a routerLink="/auth/signup" class="signup-link">{{ "AUTH.SIGN_UP" | translate }}</a>
-        </div>
+        <h1 class="app-name">{{ "APP_TITLE" | translate }}</h1>
+        <p class="app-tagline">{{ "AUTH.APP_TAGLINE" | translate }}</p>
       </div>
     </div>
+    <!-- ══ Form Sheet (slides up over hero) ══ -->
+    <div class="auth-sheet">
+      <div class="sheet-handle"></div>
+      <h2 class="sheet-title">{{ "AUTH.WELCOME_BACK" | translate }}</h2>
+      <p class="sheet-subtitle">{{ "AUTH.SIGN_IN_TO_CONTINUE" | translate }}</p>
+      <!-- Social Login -->
+      <div class="social-login-buttons">
+        <ion-button
+          expand="block"
+          fill="outline"
+          class="google-btn"
+          (click)="signInWithGoogle()"
+          [disabled]="vm.isLoading"
+        >
+          <ion-icon slot="start" name="logo-google"></ion-icon>
+          {{ "AUTH.CONTINUE_WITH_GOOGLE" | translate }}
+        </ion-button>
+      </div>
+      <div class="divider">
+        <span class="divider-line"></span>
+        <span class="divider-text">{{ "AUTH.OR" | translate }}</span>
+        <span class="divider-line"></span>
+      </div>
+      <form [formGroup]="loginForm" (ngSubmit)="login()" class="login-form">
+        <!-- Error message -->
+        @if (vm.errorMessage) {
+        <ion-note color="danger" class="error-message">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          {{ vm.errorMessage }}
+        </ion-note>
+        }
+        <ion-list>
+          <app-ui-input
+            [errorsAfterTouch]="true"
+            id="login-email"
+            [formControlName]="formFields.email"
+            type="email"
+            [placeholder]="'AUTH.EMAIL_PLACEHOLDER' | translate"
+            autocomplete="email"
+            inputmode="email"
+            [required]="true"
+            startIcon="mail-outline"
+          ></app-ui-input>
+          <app-ui-input
+            [errorsAfterTouch]="true"
+            id="login-password"
+            [formControlName]="formFields.password"
+            type="password"
+            [placeholder]="'AUTH.PASSWORD_PLACEHOLDER' | translate"
+            autocomplete="current-password"
+            [required]="true"
+            startIcon="lock-closed-outline"
+            [togglePassword]="true"
+          ></app-ui-input>
+        </ion-list>
+        <!-- Remember Me & Forgot Password -->
+        <div class="form-options">
+          <label class="remember-me-label">
+            <ion-checkbox
+              [formControlName]="formFields.rememberMe"
+            ></ion-checkbox>
+            <span>{{ "AUTH.REMEMBER_ME" | translate }}</span>
+          </label>
+          <ion-button
+            fill="clear"
+            size="small"
+            routerLink="/auth/forgot-password"
+            class="forgot-password"
+          >
+            {{ "AUTH.FORGOT_PASSWORD" | translate }}
+          </ion-button>
+        </div>
+        <!-- Submit -->
+        <ion-button
+          type="submit"
+          expand="block"
+          [disabled]="loginForm.invalid || vm.isLoading"
+          class="auth-submit-button"
+        >
+          <span>{{ "AUTH.SIGN_IN" | translate }}</span>
+        </ion-button>
+      </form>
+      <div class="signup-link-container ion-text-center">
+        {{ "AUTH.DONT_HAVE_ACCOUNT" | translate }}
+        <a routerLink="/auth/signup" class="signup-link">{{
+          "AUTH.SIGN_UP" | translate
+        }}</a>
+      </div>
+    </div>
+  </div>
   }
 </ion-content>

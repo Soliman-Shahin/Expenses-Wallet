@@ -1,211 +1,197 @@
 import { Injectable, signal } from '@angular/core';
-import { LocalStorageKeys, User } from 'src/app/modules/auth/models';
+import { User } from '../models';
 import { StorageService } from './storage.service';
 import { SecureStorageService } from './secure-storage.service';
 
-@Injectable({
-  providedIn: 'root',
-})
-export class TokenService {
-  private readonly localStorageKeys: LocalStorageKeys = {
-    accessToken: 'access-token',
-    refreshToken: 'refresh-token',
-    userId: 'user-id',
-    user: 'user',
-    userLang: 'user-lang',
-  };
+interface Session {
+  user: User | null;
+  accessToken: string;
+  refreshToken: string;
+}
 
+@Injectable({ providedIn: 'root' })
+export class TokenService {
   user = signal<User | null>(null);
+  private session: Session = { user: null, accessToken: '', refreshToken: '' };
+  private persistent = false;
+  private writes: Promise<void> = Promise.resolve();
+  private initialization?: Promise<void>;
+  private readonly policyKey = 'ewallet_auth_persistent';
+  revision = 0;
 
   constructor(
     private storage: StorageService,
     private secure: SecureStorageService
-  ) {
-    // Migrate old tokens if they exist
-    this.migrateOldTokens();
-    // Initialize user signal from storage on app start
-    this.initializeUserFromStorage();
+  ) {}
+
+  initialize(): Promise<void> {
+    return (this.initialization ??= this.restore().catch((error) => {
+      this.initialization = undefined;
+      throw error;
+    }));
   }
 
-  /**
-   * Migrate tokens from old storage format to new format
-   * Old format: 'ewallet_ewallet_secure_access-token'
-   * New format: 'ewallet_secure_access-token'
-   */
-  private migrateOldTokens(): void {
-    try {
-      const oldAccessTokenKey = 'ewallet_ewallet_secure_access-token';
-      const oldRefreshTokenKey = 'ewallet_ewallet_secure_refresh-token';
-      
-      const oldAccessToken = localStorage.getItem(oldAccessTokenKey);
-      const oldRefreshToken = localStorage.getItem(oldRefreshTokenKey);
-      
-      if (oldAccessToken) {
-        console.log('🔄 [TokenService] Migrating old access token...');
-        this.setAccessToken(JSON.parse(oldAccessToken));
-        localStorage.removeItem(oldAccessTokenKey);
-      }
-      
-      if (oldRefreshToken) {
-        console.log('🔄 [TokenService] Migrating old refresh token...');
-        this.setRefreshToken(JSON.parse(oldRefreshToken));
-        localStorage.removeItem(oldRefreshTokenKey);
-      }
-    } catch (error) {
-      console.warn('⚠️ [TokenService] Token migration failed:', error);
+  private async restore(): Promise<void> {
+    const revision = this.revision;
+    const policy = localStorage.getItem(this.policyKey);
+    if (policy === 'false') return;
+    let saved: Session | null = null;
+    const raw = await this.secure.read();
+    if (raw) saved = JSON.parse(raw);
+    // Preserve existing installs once; move credentials out of legacy native localStorage.
+    if (!saved && policy === null) {
+      const accessToken =
+        this.storage.get<string>('secure_access-token') ||
+        this.storage.get<string>('ewallet_secure_access-token');
+      const refreshToken =
+        this.storage.get<string>('secure_refresh-token') ||
+        this.storage.get<string>('ewallet_secure_refresh-token');
+      const user = this.storage.get<User>('user');
+      if (accessToken && refreshToken && user)
+        saved = { accessToken, refreshToken, user };
     }
+    if (
+      revision !== this.revision ||
+      !saved?.accessToken ||
+      !saved?.refreshToken ||
+      !saved?.user
+    )
+      return;
+    this.persistent = true;
+    this.session = saved;
+    this.user.set(saved.user);
+    this.storage.set('user', saved.user);
+    await this.persist();
+    this.clearLegacy();
   }
 
-  /**
-   * Initialize user signal from storage
-   * This ensures authentication state persists across page reloads
-   */
-  private initializeUserFromStorage(): void {
-    try {
-      const storedUser = this.getUser();
-      const accessToken = this.getAccessToken();
-      
-      console.log('🔍 [TokenService] Checking stored auth state:', {
-        hasUser: !!storedUser,
-        hasToken: !!accessToken,
-        tokenLength: accessToken?.length || 0
-      });
-      
-      // Only restore user if we have both user data and a valid token
-      if (storedUser && accessToken) {
-        // Check if token is expired
-        if (!this.isTokenExpired(accessToken)) {
-          this.user.set(storedUser);
-          console.log('✅ [TokenService] User state restored from storage');
-        } else {
-          // Token expired, clear invalid session
-          console.warn('⚠️ [TokenService] Token expired, clearing session');
-          this.removeSession();
-        }
-      } else {
-        console.warn('⚠️ [TokenService] No valid session found in storage');
-      }
-    } catch (error) {
-      console.error('❌ [TokenService] Failed to initialize user from storage:', error);
-      // Clear potentially corrupted data
-      this.removeSession();
-    }
+  private clearLegacy(): void {
+    [
+      'secure_access-token',
+      'secure_refresh-token',
+      'ewallet_secure_access-token',
+      'ewallet_secure_refresh-token',
+      'user-id',
+    ].forEach((k) => this.storage.remove(k));
   }
 
-  // Use StorageService for all storage operations
-  private getItem<T = string>(key: string): T | null {
-    return this.storage.get<T>(key);
+  async saveSession(
+    user: User,
+    accessToken: string,
+    refreshToken: string,
+    persistent: boolean
+  ): Promise<void> {
+    this.revision++;
+    this.persistent = persistent;
+    // Preserve the profile cache contract, but never persist password/session fields.
+    const {
+      password: _password,
+      sessions: _sessions,
+      ...safeUser
+    } = user as User & { password?: unknown; sessions?: unknown };
+    user = safeUser as User;
+    this.session = { user, accessToken, refreshToken };
+    this.storage.set('user', user);
+    this.user.set(user);
+    await this.persist();
+    this.clearLegacy();
   }
 
-  private setItem<T = string>(key: string, value: T): void {
-    this.storage.set<T>(key, value);
+  async updateTokens(accessToken: string, refreshToken: string): Promise<void> {
+    this.session = { ...this.session, accessToken, refreshToken };
+    await this.persist();
   }
 
-  private removeItem(key: string): void {
-    this.storage.remove(key);
+  private persist(): Promise<void> {
+    const persistent = this.persistent;
+    const snapshot = JSON.stringify(this.session);
+    localStorage.setItem(this.policyKey, String(persistent));
+    const write = this.writes
+      .catch(() => undefined)
+      .then(() =>
+        persistent ? this.secure.write(snapshot) : this.secure.clear()
+      );
+    this.writes = write;
+    return write;
   }
 
   getAccessToken(): string | null {
-    return this.secure.get(this.localStorageKeys.accessToken);
+    return this.session.accessToken || null;
   }
-
   getRefreshToken(): string | null {
-    return this.secure.get(this.localStorageKeys.refreshToken);
+    return this.session.refreshToken || null;
   }
-
-  getUserId(): string | null {
-    return this.getItem<string>(this.localStorageKeys.userId);
-  }
-
   getUser(): User | null {
-    return this.getItem<User>(this.localStorageKeys.user);
+    return this.user();
   }
-
+  getUserId(): string | null {
+    return this.user()?._id || null;
+  }
   getUserLang(): string | null {
-    return this.getItem<string>(this.localStorageKeys.userLang);
+    return this.storage.get<string>('user-lang');
   }
-
-  setAccessToken(accessToken: string): void {
-    this.secure.set(this.localStorageKeys.accessToken, accessToken);
+  setUserLang(value: string): void {
+    this.storage.set('user-lang', value);
   }
-
-  setRefreshToken(refreshToken: string): void {
-    this.secure.set(this.localStorageKeys.refreshToken, refreshToken);
-  }
-
-  setUserId(userId: string): void {
-    this.setItem<string>(this.localStorageKeys.userId, userId);
-  }
-
+  setUserId(_value: string): void {} // User ID is owned by the session user.
   setUser(user: User): void {
-    this.setItem<User>(this.localStorageKeys.user, user);
+    this.session.user = user;
     this.user.set(user);
+    if (this.session.accessToken)
+      void this.persist().catch(() =>
+        console.warn('Session storage unavailable')
+      );
   }
-
-  setUserLang(userLang: string): void {
-    this.setItem<string>(this.localStorageKeys.userLang, userLang);
+  setAccessToken(value: string): void {
+    this.session.accessToken = value;
   }
-
-  setSession(userId: string, accessToken: string, refreshToken: string): void {
-    this.setUserId(userId);
-    this.setAccessToken(accessToken);
-    this.setRefreshToken(refreshToken);
+  setRefreshToken(value: string): void {
+    this.session.refreshToken = value;
   }
-
+  setSession(_id: string, accessToken: string, refreshToken: string): void {
+    void this.updateTokens(accessToken, refreshToken).catch(() =>
+      console.warn('Session storage unavailable')
+    );
+  }
   removeSession(): void {
-    // Remove user-related keys from normal storage
-    [
-      this.localStorageKeys.user,
-      this.localStorageKeys.userId,
-      this.localStorageKeys.userLang,
-    ].forEach((key) => this.removeItem(key));
-    // Remove tokens from secure storage
-    this.secure.remove(this.localStorageKeys.accessToken);
-    this.secure.remove(this.localStorageKeys.refreshToken);
+    this.revision++;
+    this.persistent = false;
+    this.session = { user: null, accessToken: '', refreshToken: '' };
     this.user.set(null);
+    this.storage.remove('user');
+    this.clearLegacy();
+    void this.persist().catch(() =>
+      console.warn('Session storage cleanup unavailable')
+    );
   }
-
+  async flush(): Promise<void> {
+    await this.writes;
+  }
   getPayload(): any {
-    const token = this.getAccessToken();
-    if (token) {
-      try {
-        const payload = token.split('.')[1];
-        return JSON.parse(atob(payload)).data ?? null;
-      } catch (error) {
-        console.error('Error parsing payload:', error);
-        return null;
-      }
-    }
-    return null;
-  }
-
-  // Token expiration helpers
-  isTokenExpired(token: string | null): boolean {
-    if (!token) return true;
     try {
-      const parts = token.split('.');
-      if (parts.length !== 3) return true; // Invalid JWT format
-      
-      const payload = JSON.parse(atob(parts[1]));
-      const exp = payload.exp;
-      
-      // If no expiration, consider token valid (some tokens don't expire)
-      if (!exp) return false;
-      
-      // Add 30 second buffer to account for clock skew
-      const currentTime = Math.floor(Date.now() / 1000);
-      return currentTime > (exp - 30);
-    } catch (e) {
-      console.error('Error checking token expiration:', e);
+      return this.decode(this.getAccessToken()!).data ?? null;
+    } catch {
+      return null;
+    }
+  }
+  private decode(token: string): any {
+    return JSON.parse(
+      atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))
+    );
+  }
+  isTokenExpired(token: string | null): boolean {
+    try {
+      const exp = this.decode(token!).exp;
+      return !exp || Date.now() / 1000 >= exp - 30;
+    } catch {
       return true;
     }
   }
-
   isAccessTokenExpired(): boolean {
     return this.isTokenExpired(this.getAccessToken());
   }
-
+  // Refresh credentials are opaque: only the server can determine expiry/revocation.
   isRefreshTokenExpired(): boolean {
-    return this.isTokenExpired(this.getRefreshToken());
+    return !this.getRefreshToken();
   }
 }

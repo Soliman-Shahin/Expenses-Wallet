@@ -1,10 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, Input,
+import {
+  Component,
+  ChangeDetectionStrategy,
+  Input,
   forwardRef,
   Injector,
   OnInit,
   ViewChild,
-  ChangeDetectorRef
+  ChangeDetectorRef,
 } from '@angular/core';
 import {
   ControlValueAccessor,
@@ -35,10 +38,11 @@ import { TranslateModule } from '@ngx-translate/core';
       multi: true,
     },
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UiInputComponent implements ControlValueAccessor, OnInit {
   @Input() label = '';
+  @Input() errorsAfterTouch = false;
   @Input() placeholder = '';
   @Input() type: 'text' | 'email' | 'password' | 'number' = 'text';
   @Input() startIcon?: string;
@@ -98,7 +102,9 @@ export class UiInputComponent implements ControlValueAccessor, OnInit {
 
   get isInvalid(): boolean {
     const c = this.ngControl?.control;
-    return !!c && c.invalid && (c.dirty || c.touched);
+    return (
+      !!c && c.invalid && (c.touched || (!this.errorsAfterTouch && c.dirty))
+    );
   }
 
   get ariaInvalid(): 'true' | 'false' {

@@ -21,7 +21,7 @@ export class EncryptionService {
         key || this.TRANSPORT_KEY
       ).toString();
     } catch (e) {
-      console.error('Encryption failed', e);
+      console.warn('Cryptographic operation failed');
       return '';
     }
   }
@@ -33,7 +33,7 @@ export class EncryptionService {
       const decryptedData = bytes.toString(CryptoJS.enc.Utf8);
       return isObject ? JSON.parse(decryptedData) : decryptedData;
     } catch (e) {
-      console.error('Decryption failed', e);
+      console.warn('Cryptographic operation failed');
       return null;
     }
   }

@@ -1,6 +1,18 @@
 import { Component, ChangeDetectionStrategy, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { BehaviorSubject, combineLatest, finalize, Observable, takeUntil } from 'rxjs';
+import {
+  FormControl,
+  FormGroup,
+  Validators,
+  FormsModule,
+  ReactiveFormsModule,
+} from '@angular/forms';
+import {
+  BehaviorSubject,
+  combineLatest,
+  finalize,
+  Observable,
+  takeUntil,
+} from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { BaseComponent } from 'src/app/shared/base/base.component';
@@ -11,12 +23,20 @@ import { AsyncPipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
-    selector: 'app-login',
-    templateUrl: './login.component.html',
-    styleUrls: ['./login.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-    imports: [IonicModule, FormsModule, ReactiveFormsModule, UiInputComponent, RouterLink, AsyncPipe, TranslateModule]
+  selector: 'app-login',
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    IonicModule,
+    FormsModule,
+    ReactiveFormsModule,
+    UiInputComponent,
+    RouterLink,
+    AsyncPipe,
+    TranslateModule,
+  ],
 })
 export class LoginComponent extends BaseComponent implements OnInit {
   loginForm!: FormGroup;
@@ -50,11 +70,13 @@ export class LoginComponent extends BaseComponent implements OnInit {
     this.loading.next(false);
     this.errorMessage.next('');
     if (this.loginForm) {
-      this.loginForm.reset({ [this.formFields.rememberMe]: this.loginForm.get(this.formFields.rememberMe)?.value });
+      this.loginForm.reset({
+        email: localStorage.getItem('savedEmail') || '',
+        password: '',
+        rememberMe: this.loginForm.get(this.formFields.rememberMe)?.value,
+      });
     }
   }
-
-
 
   togglePasswordVisibility(): void {
     this.hide = !this.hide;
@@ -62,16 +84,25 @@ export class LoginComponent extends BaseComponent implements OnInit {
 
   private initForm(): void {
     const savedEmail = localStorage.getItem('savedEmail') || '';
-    const rememberMe = savedEmail !== '';
+    const rememberMe =
+      localStorage.getItem('ewallet_auth_persistent') === 'true';
 
     this.loginForm = new FormGroup({
       [this.formFields.email]: new FormControl(savedEmail, {
-        validators: [Validators.required, Validators.email, Validators.maxLength(100)],
-        updateOn: 'blur',
+        validators: [
+          Validators.required,
+          Validators.email,
+          Validators.maxLength(100),
+        ],
+        updateOn: 'change',
       }),
       [this.formFields.password]: new FormControl('', {
-        validators: [Validators.required, Validators.minLength(6), Validators.maxLength(50)],
-        updateOn: 'blur',
+        validators: [
+          Validators.required,
+          Validators.minLength(6),
+          Validators.maxLength(50),
+        ],
+        updateOn: 'change',
       }),
       [this.formFields.rememberMe]: new FormControl(rememberMe),
     });
@@ -87,7 +118,11 @@ export class LoginComponent extends BaseComponent implements OnInit {
 
   signInWithGoogle(): void {
     console.log('🔵 [LoginComponent] Google Sign-In button clicked!');
-    this.handleAuth(this.authService.loginWithGoogle());
+    this.handleAuth(
+      this.authService.loginWithGoogle(
+        !!this.loginForm.get(this.formFields.rememberMe)?.value
+      )
+    );
   }
 
   login(): void {
@@ -104,7 +139,7 @@ export class LoginComponent extends BaseComponent implements OnInit {
       localStorage.removeItem('savedEmail');
     }
 
-    this.handleAuth(this.authService.login(email, password));
+    this.handleAuth(this.authService.login(email, password, !!rememberMe));
   }
 
   private handleAuth(authObservable: Observable<any>): void {

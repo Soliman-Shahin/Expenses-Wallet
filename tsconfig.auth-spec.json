@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.spec.json",
+  "include": [
+    "src/app/modules/auth/services/auth-session.spec.ts",
+    "src/**/*.d.ts"
+  ]
+}

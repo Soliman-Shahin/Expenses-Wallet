@@ -1,3 +1,4 @@
+import { isApiUrl } from '../../modules/auth/helper/authInterceptor';
 import { inject } from '@angular/core';
 import {
   HttpRequest,
@@ -13,29 +14,6 @@ import { Router } from '@angular/router';
 import { TokenService } from 'src/app/modules/auth/services/token.service';
 import { AuthService } from 'src/app/modules/auth/services/auth.service';
 
-async function handleUnauthorized(
-  router: Router,
-  tokenService: TokenService,
-  authService: AuthService,
-  currentUrl?: string
-): Promise<void> {
-  // Clear session using TokenService to ensure proper cleanup
-  tokenService.removeSession();
-  
-  // Store the attempted URL for redirecting after login
-  const returnUrl = currentUrl || router.url;
-  if (returnUrl &&
-      returnUrl !== '/' &&
-      returnUrl !== '/home' &&
-      !returnUrl.includes('/auth/login') &&
-      !returnUrl.includes('/auth/signup')) {
-    authService.redirectUrl = returnUrl;
-  }
-  
-  // Navigate to login
-  await router.navigate(['/auth/login']);
-}
-
 function handleAccountLocked(error: HttpErrorResponse): string {
   const lockoutMinutes = error.error?.lockoutMinutes || 15;
   const attemptsRemaining = error.error?.attemptsRemaining;
@@ -50,7 +28,9 @@ function handleRateLimit(error: HttpErrorResponse): string {
   if (retryAfter) {
     const seconds = parseInt(retryAfter, 10);
     const minutes = Math.ceil(seconds / 60);
-    return `Too many requests. Please try again in ${minutes} minute${minutes > 1 ? 's' : ''}.`;
+    return `Too many requests. Please try again in ${minutes} minute${
+      minutes > 1 ? 's' : ''
+    }.`;
   }
   return `Too many requests. Please slow down and try again later.`;
 }
@@ -66,7 +46,10 @@ function extractValidationErrors(error: HttpErrorResponse): string {
   return error.error?.message || 'Validation failed. Please check your input.';
 }
 
-async function showErrorToast(toastController: ToastController, message: string): Promise<void> {
+async function showErrorToast(
+  toastController: ToastController,
+  message: string
+): Promise<void> {
   const toast = await toastController.create({
     message: message,
     duration: 4000,
@@ -80,10 +63,7 @@ async function showErrorToast(toastController: ToastController, message: string)
 async function handleError(
   error: HttpErrorResponse,
   request: HttpRequest<unknown>,
-  toastController: ToastController,
-  router: Router,
-  tokenService: TokenService,
-  authService: AuthService
+  toastController: ToastController
 ): Promise<void> {
   let errorMessage = 'An unexpected error occurred';
   let shouldShowToast = true;
@@ -93,19 +73,23 @@ async function handleError(
       errorMessage = 'No internet connection. Please check your network.';
       break;
     case 400:
-      errorMessage = error.error?.message || 'Invalid request. Please check your input.';
+      errorMessage =
+        error.error?.message || 'Invalid request. Please check your input.';
       break;
     case 401:
       errorMessage = 'Session expired. Please login again.';
       // Get current URL from router, not from request
-      await handleUnauthorized(router, tokenService, authService, router.url);
+      // Authentication teardown is owned by the renewal interceptor.
       break;
     case 403:
-      errorMessage = error.error?.message || "You don't have permission to access this resource.";
-      await handleUnauthorized(router, tokenService, authService, router.url);
+      errorMessage =
+        error.error?.message ||
+        "You don't have permission to access this resource.";
+      // Forbidden is an authorization result, not a reason to destroy the session.
       break;
     case 404:
-      errorMessage = error.error?.message || 'The requested resource was not found.';
+      errorMessage =
+        error.error?.message || 'The requested resource was not found.';
       break;
     case 422:
       errorMessage = extractValidationErrors(error);
@@ -139,8 +123,7 @@ async function handleError(
   console.error('HTTP Error:', {
     status: error.status,
     message: errorMessage,
-    url: request.url,
-    error: error.error,
+    url: new URL(request.url, window.location.origin).pathname,
   });
 
   if (shouldShowToast) {
@@ -152,14 +135,12 @@ export const errorInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
   next: HttpHandlerFn
 ): Observable<HttpEvent<unknown>> => {
+  if (!isApiUrl(req.url)) return next(req);
   const toastController = inject(ToastController);
-  const router = inject(Router);
-  const tokenService = inject(TokenService);
-  const authService = inject(AuthService);
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      handleError(error, req, toastController, router, tokenService, authService);
+      handleError(error, req, toastController);
       return throwError(() => error);
     })
   );

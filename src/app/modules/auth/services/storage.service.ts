@@ -25,7 +25,7 @@ export class StorageService {
     try {
       this.storage.setItem(this.prefix + key, JSON.stringify(value));
     } catch (error) {
-      console.error('StorageService set error:', error);
+      console.warn('Browser storage operation failed');
     }
   }
 
@@ -34,7 +34,7 @@ export class StorageService {
       const item = this.storage.getItem(this.prefix + key);
       return item ? (JSON.parse(item) as T) : null;
     } catch (error) {
-      console.error('StorageService get error:', error);
+      console.warn('Browser storage operation failed');
       return null;
     }
   }
@@ -43,7 +43,7 @@ export class StorageService {
     try {
       this.storage.removeItem(this.prefix + key);
     } catch (error) {
-      console.error('StorageService remove error:', error);
+      console.warn('Browser storage operation failed');
     }
   }
 
@@ -54,7 +54,7 @@ export class StorageService {
         .filter((k) => k.startsWith(this.prefix))
         .forEach((k) => this.storage.removeItem(k));
     } catch (error) {
-      console.error('StorageService clear error:', error);
+      console.warn('Browser storage operation failed');
     }
   }
 }
