@@ -6,6 +6,7 @@ import {
 import { Injectable, inject, NgZone } from '@angular/core';
 import { Capacitor } from '@capacitor/core';
 import { Router } from '@angular/router';
+import { NavController } from '@ionic/angular';
 import { Observable, from, EMPTY, throwError, firstValueFrom } from 'rxjs';
 import {
   catchError,
@@ -26,6 +27,7 @@ import { EncryptionService } from 'src/app/core/services/encryption.service';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private router = inject(Router);
+  private navController = inject(NavController);
   private zone = inject(NgZone);
   private tokenService = inject(TokenService);
   private storageService = inject(StorageService);
@@ -327,7 +329,9 @@ export class AuthService {
         this.profileService.clearProfile();
         this.redirectUrl = null;
         void this.tokenService.flush().catch(() => undefined);
-        await this.router.navigateByUrl('/auth/login', { replaceUrl: true });
+        await this.navController.navigateRoot('/auth/login', {
+          replaceUrl: true,
+        });
       }
     })();
     return from(task);

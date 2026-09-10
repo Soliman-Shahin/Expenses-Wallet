@@ -16,7 +16,7 @@ import {
 } from '@angular/common/http/testing';
 import { Router } from '@angular/router';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { IonicModule, ToastController } from '@ionic/angular';
+import { IonicModule, ToastController, NavController } from '@ionic/angular';
 import { TranslateModule } from '@ngx-translate/core';
 import { Capacitor } from '@capacitor/core';
 import { NativeBiometric } from '@capgo/capacitor-native-biometric';
@@ -79,6 +79,10 @@ describe('AUTH.1 consumer sessions', () => {
         provideHttpClientTesting(),
         { provide: Router, useValue: router },
         {
+          provide: NavController,
+          useValue: { navigateRoot: router.navigateByUrl },
+        },
+        {
           provide: ProfileService,
           useValue: { clearProfile: jasmine.createSpy() },
         },
@@ -103,12 +107,10 @@ describe('AUTH.1 consumer sessions', () => {
     flushMicrotasks();
   }
   function respondRefresh() {
-    requests
-      .expectOne(refreshUrl)
-      .flush({
-        success: true,
-        data: { accessToken: jwt(7200), refreshToken: 'refresh-two' },
-      });
+    requests.expectOne(refreshUrl).flush({
+      success: true,
+      data: { accessToken: jwt(7200), refreshToken: 'refresh-two' },
+    });
     flushMicrotasks();
   }
 
@@ -280,16 +282,14 @@ describe('AUTH.1 consumer sessions', () => {
   }));
   it('login persists credentials, never the raw password', fakeAsync(() => {
     auth.login(user.email, 'synthetic-password-never-save', true).subscribe();
-    requests
-      .expectOne(environment.apiUrl + '/user/login')
-      .flush({
-        success: true,
-        data: {
-          user: { ...user, password: 'synthetic-password-never-save' },
-          accessToken: jwt(3600),
-          refreshToken: 'refresh-one',
-        },
-      });
+    requests.expectOne(environment.apiUrl + '/user/login').flush({
+      success: true,
+      data: {
+        user: { ...user, password: 'synthetic-password-never-save' },
+        accessToken: jwt(3600),
+        refreshToken: 'refresh-one',
+      },
+    });
     flushMicrotasks();
     expect(JSON.stringify(localStorage)).not.toContain(
       'synthetic-password-never-save'

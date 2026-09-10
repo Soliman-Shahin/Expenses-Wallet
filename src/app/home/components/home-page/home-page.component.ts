@@ -404,7 +404,8 @@ export class HomePageComponent
     super.ngOnInit();
     this.vm$.pipe(takeUntil(this.destroy$)).subscribe((vm) => {
       this.latestVm = vm;
-      this.setLoading(vm.loading);
+      // vm.loading observes shared state; writing it back can replay stale
+      // loading after logout/navigation clears the operation that owns it.
       this.createInjectors(vm);
       this.cdr.markForCheck();
     });

@@ -1,4 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { AsyncPipe } from '@angular/common';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { HomePageComponent } from '../../../home/components/home-page/home-page.component';
 import {
   TestBed,
   fakeAsync,
@@ -17,7 +20,14 @@ import {
 import { Router, provideRouter } from '@angular/router';
 import { ToastController } from '@ionic/angular';
 import { Capacitor } from '@capacitor/core';
-import { Subject, finalize, of, switchMap } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  Subject,
+  finalize,
+  of,
+  switchMap,
+} from 'rxjs';
 import { AuthService } from './auth.service';
 import { TokenService } from './token.service';
 import { SecureStorageService } from './secure-storage.service';
@@ -35,6 +45,21 @@ import { environment } from 'src/environments/environment';
 
 @Component({ standalone: true, template: 'Login' })
 class LoginDestination {}
+
+@Component({
+  standalone: true,
+  imports: [AsyncPipe],
+  template: `
+    @if (loader.isLoading$ | async) {
+    <div class="custom-loader-overlay" aria-busy="true">Loading</div>
+    }
+    <button (click)="clicked = true">Login</button>
+  `,
+})
+class LoaderView {
+  readonly loader = inject(LoadingService);
+  clicked = false;
+}
 
 describe('AUTH.1 post-QA regressions', () => {
   let auth: AuthService;
@@ -126,6 +151,79 @@ describe('AUTH.1 post-QA regressions', () => {
     expect(state.loading()).toBeFalse();
     expect(loader.isLoading).toBeFalse();
   }));
+
+  for (const unrelated of [false, true]) {
+    it(
+      'does not replay cached Home loading after logout; unrelated loader = ' +
+        unrelated,
+      fakeAsync(() => {
+        seed();
+        void router.navigateByUrl('/home');
+        flushMicrotasks();
+        const fixture = TestBed.createComponent(LoaderView);
+        fixture.detectChanges();
+        // Use Home's real subscription and the same delayed signal boundary as vm$.
+        // Ionic may retain Home during navigation.
+        const data = new BehaviorSubject(0);
+        const home: any = Object.create(HomePageComponent.prototype);
+        home.state = state;
+        home.destroy$ = new Subject<void>();
+        home.cdr = { markForCheck: () => {} };
+        home.createInjectors = () => {};
+        home.setupRouteDataSubscription = () => {};
+        home.vm$ = combineLatest({
+          loading: TestBed.runInInjectionContext(() =>
+            toObservable(state.loading)
+          ),
+          data,
+        });
+        spyOn(BaseComponent.prototype, 'ngOnInit').and.stub();
+        home.ngOnInit();
+        const caller: any = Object.create(BaseComponent.prototype);
+        caller.state = state;
+        caller.destroy$ = new Subject<void>();
+        caller.sessionLifecycleService = new SessionLifecycleService(auth, {
+          deactivateCurrentDevice: async () => {},
+        } as any);
+        caller.logOut();
+        flushMicrotasks();
+        fixture.detectChanges();
+        tick(151);
+        fixture.detectChanges();
+        expect(home.latestVm.loading).toBeTrue();
+        expect(
+          fixture.nativeElement.querySelector('.custom-loader-overlay')
+        ).not.toBeNull();
+        if (unrelated) loader.show('unrelated-export');
+        requests.expectOne(url('/user/logout')).flush({});
+        flushMicrotasks();
+        expect(router.url).toBe('/auth/login');
+        expect(state.loading()).toBeFalse();
+        // Data can emit before the cleared loading signal reaches combineLatest.
+        data.next(1);
+        expect(state.loading()).toBeFalse();
+        fixture.detectChanges();
+        tick(151);
+        fixture.detectChanges();
+        expect(loader.isLoading).toBe(unrelated);
+        if (unrelated) {
+          expect(
+            fixture.nativeElement.querySelector('.custom-loader-overlay')
+          ).not.toBeNull();
+          loader.hide('unrelated-export');
+          fixture.detectChanges();
+        }
+        expect(
+          fixture.nativeElement.querySelector('.custom-loader-overlay')
+        ).toBeNull();
+        fixture.nativeElement.querySelector('button').click();
+        expect(fixture.componentInstance.clicked).toBeTrue();
+        requests.expectNone(url('/user/me'));
+        home.ngOnDestroy();
+        fixture.destroy();
+      })
+    );
+  }
 
   for (const fails of [false, true]) {
     it(

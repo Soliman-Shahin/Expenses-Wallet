@@ -83,7 +83,7 @@
           <!-- Logout Button (conditional) -->
           @if (vm.profile.isLoggedIn) {
             <ion-item
-              (click)="logOut()"
+              (click)="closeMenu(); logOut()"
               button
               role="menuitem"
               tabindex="0"
