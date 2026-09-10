@@ -1,4 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AsyncPipe } from '@angular/common';
 import {
   FormControl,
   FormGroup,
@@ -7,7 +8,7 @@ import {
   AbstractControl,
   ValidationErrors,
 } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { TranslateModule } from '@ngx-translate/core';
 import { BehaviorSubject, finalize } from 'rxjs';
@@ -21,7 +22,13 @@ const same = (control: AbstractControl): ValidationErrors | null =>
 @Component({
   selector: 'app-forgot-password',
   standalone: true,
-  imports: [IonicModule, ReactiveFormsModule, RouterLink, TranslateModule],
+  imports: [
+    IonicModule,
+    ReactiveFormsModule,
+    RouterLink,
+    TranslateModule,
+    AsyncPipe,
+  ],
   template: ` <ion-content
     ><main class="recovery">
       <div class="recovery-card">
@@ -127,6 +134,8 @@ export class ForgotPasswordComponent {
         <p>{{ 'AUTH.RESET_INVALID' | translate }}</p>
         } @else if (done()) {
         <p class="success">{{ 'AUTH.RESET_SUCCESS' | translate }}</p>
+        } @else if (error()) {
+        <p class="error">{{ 'AUTH.RESET_INVALID' | translate }}</p>
         } @else {
         <form [formGroup]="form" (ngSubmit)="submit()">
           <ion-item
@@ -203,11 +212,14 @@ export class ForgotPasswordComponent {
 export class ResetPasswordComponent {
   private auth = inject(AuthService);
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   token = this.route.snapshot.queryParamMap.get('token');
   private loadingState = new BehaviorSubject(false);
   private doneState = new BehaviorSubject(false);
+  private errorState = new BehaviorSubject(false);
   loading = () => this.loadingState.value;
   done = () => this.doneState.value;
+  error = () => this.errorState.value;
   form = new FormGroup(
     {
       password: new FormControl('', [
@@ -224,6 +236,12 @@ export class ResetPasswordComponent {
     this.auth
       .resetPassword(this.token, this.form.value.password!)
       .pipe(finalize(() => this.loadingState.next(false)))
-      .subscribe({ next: () => this.doneState.next(true) });
+      .subscribe({
+        next: () => {
+          this.doneState.next(true);
+          void this.router.navigateByUrl('/auth/login');
+        },
+        error: () => this.errorState.next(true),
+      });
   }
 }
