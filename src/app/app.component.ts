@@ -94,10 +94,28 @@ export class AppComponent extends BaseComponent implements OnInit {
       this.checkBiometric();
     });
 
-    // Handle OAuth deep link redirects on native (Android/iOS)
-    App.addListener('appUrlOpen', (event: { url: string }) => {
+    // Handle OAuth and the narrowly-scoped password-reset deep link.
+    const handleNativeUrl = (event: { url: string }) => {
       try {
         const url = event?.url || '';
+        const parsed = new URL(url);
+        if (
+          parsed.protocol === 'expenseswallet:' &&
+          parsed.hostname === 'auth'
+        ) {
+          const token = parsed.pathname === '/reset-password'
+            ? parsed.searchParams.get('token')
+            : null;
+          if (token && /^[a-f0-9]{64}$/i.test(token)) {
+            this.zone.run(
+              () =>
+                void this.router.navigate(['/auth/reset-password'], {
+                  queryParams: { token },
+                })
+            );
+          }
+          return;
+        }
         // Expect shape: scheme://...#payload=<base64>
         const hash = url.split('#')[1] || '';
         const params = new URLSearchParams(hash);
@@ -116,6 +134,10 @@ export class AppComponent extends BaseComponent implements OnInit {
       } catch (err) {
         this.handleError('Failed to parse deep link.', err, true);
       }
+    };
+    App.addListener('appUrlOpen', handleNativeUrl);
+    void App.getLaunchUrl().then((event) => {
+      if (event?.url) handleNativeUrl(event);
     });
   }
 
