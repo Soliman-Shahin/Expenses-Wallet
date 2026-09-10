@@ -23,6 +23,7 @@ import { TokenService } from './token.service';
 import { StorageService } from './storage.service';
 import { ProfileService } from 'src/app/modules/profile/services/profile.service';
 import { EncryptionService } from 'src/app/core/services/encryption.service';
+import { ApiService } from 'src/app/core/services/api.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -33,6 +34,7 @@ export class AuthService {
   private storageService = inject(StorageService);
   private profileService = inject(ProfileService);
   private encryptionService = inject(EncryptionService);
+  private apiService = inject(ApiService);
   private httpBackend = inject(HttpBackend);
   private refreshInFlight?: Observable<{
     accessToken: string;
@@ -102,6 +104,12 @@ export class AuthService {
       { email, password, ...consent },
       false
     );
+  }
+  requestPasswordReset(email: string): Observable<any> {
+    return this.apiService.post('/user/password/forgot', { email });
+  }
+  resetPassword(token: string, password: string): Observable<any> {
+    return this.apiService.post('/user/password/reset', { token, password });
   }
 
   loginWithGoogle(consent?: Record<string, unknown>): Observable<void> {
