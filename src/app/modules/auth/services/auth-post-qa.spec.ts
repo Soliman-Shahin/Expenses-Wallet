@@ -423,3 +423,34 @@ describe('AUTH.1 post-QA regressions', () => {
     );
   }));
 });
+
+describe('AUTH.2 offline cold start', () => {
+  it('resolves logged-out startup without protected-storage or network dependency', async () => {
+    const secure = {
+      read: jasmine.createSpy().and.returnValue(new Promise(() => {})),
+    } as any;
+    const token = new TokenService(new StorageService(), secure);
+    spyOnProperty(navigator, 'onLine', 'get').and.returnValue(false);
+    await expectAsync(token.initialize()).toBeResolved();
+    expect(token.getAccessToken()).toBeNull();
+    expect(secure.read).not.toHaveBeenCalled();
+  });
+
+  it('still restores a persistent authenticated session while offline', async () => {
+    const session = {
+      user: { _id: 'offline-user' },
+      accessToken: 'access',
+      refreshToken: 'refresh',
+    };
+    const secure = {
+      read: jasmine.createSpy().and.resolveTo(JSON.stringify(session)),
+      write: jasmine.createSpy().and.resolveTo(),
+    } as any;
+    localStorage.setItem('ewallet_auth_persistent', 'true');
+    spyOnProperty(navigator, 'onLine', 'get').and.returnValue(false);
+    const token = new TokenService(new StorageService(), secure);
+    await token.initialize();
+    expect(secure.read).toHaveBeenCalled();
+    expect(token.getRefreshToken()).toBe('refresh');
+  });
+});

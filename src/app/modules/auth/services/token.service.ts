@@ -39,8 +39,21 @@ export class TokenService {
     const policy = localStorage.getItem(this.policyKey);
     if (policy === 'false') return;
     let saved: Session | null = null;
-    const raw = await this.secure.read();
-    if (raw) saved = JSON.parse(raw);
+    // A fresh logged-out offline launch has no session to restore. Avoid
+    // waiting on native protected-storage discovery in that case; persistent
+    // sessions (policy=true) still restore from protected storage offline.
+    const hasLegacyCredentials =
+      policy === null &&
+      !!(
+        this.storage.get<string>('secure-access-token') ||
+        this.storage.get<string>('ewallet_secure-access-token') ||
+        this.storage.get<string>('secure-refresh-token') ||
+        this.storage.get<string>('ewallet_secure-refresh-token')
+      );
+    if (policy === 'true' || hasLegacyCredentials || navigator.onLine) {
+      const raw = await this.secure.read();
+      if (raw) saved = JSON.parse(raw);
+    }
     // Preserve existing installs once; move credentials out of legacy native localStorage.
     if (!saved && policy === null) {
       const accessToken =
