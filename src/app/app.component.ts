@@ -103,10 +103,11 @@ export class AppComponent extends BaseComponent implements OnInit {
           parsed.protocol === 'expenseswallet:' &&
           parsed.hostname === 'auth'
         ) {
-          const token = parsed.pathname === '/reset-password'
-            ? parsed.searchParams.get('token')
-            : null;
-          if (token && /^[a-f0-9]{64}$/i.test(token)) {
+          const token =
+            parsed.pathname === '/reset-password'
+              ? parsed.searchParams.get('token')
+              : null;
+          if (token) {
             this.zone.run(
               () =>
                 void this.router.navigate(['/auth/reset-password'], {
