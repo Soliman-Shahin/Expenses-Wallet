@@ -92,11 +92,19 @@ export class AuthService {
   ): Observable<AuthResponse> {
     return this.authenticate('/user/login', { email, password }, persistent);
   }
-  signup(email: string, password: string): Observable<AuthResponse> {
-    return this.authenticate('/user/signup', { email, password }, false);
+  signup(
+    email: string,
+    password: string,
+    consent: Record<string, unknown>
+  ): Observable<AuthResponse> {
+    return this.authenticate(
+      '/user/signup',
+      { email, password, ...consent },
+      false
+    );
   }
 
-  loginWithGoogle(): Observable<void> {
+  loginWithGoogle(consent?: Record<string, unknown>): Observable<void> {
     const platform = Capacitor.getPlatform?.() || 'web';
     const hasGoogleAuthPlugin = !!(
       (window as any)?.Capacitor?.Plugins?.GoogleAuth ||
@@ -144,7 +152,7 @@ export class AuthService {
 
             await this.authenticate(
               `/user/auth/google/native`,
-              { idToken },
+              { idToken, ...(consent || {}) },
               true
             ).toPromise();
             return;
@@ -166,7 +174,9 @@ export class AuthService {
     }
 
     // Web: Redirect to backend OAuth (will redirect back to /auth/callback)
-    const authUrl = `${environment.apiUrl}/user/google`;
+    const authUrl = `${environment.apiUrl}/user/google${
+      consent ? '?consent=1' : ''
+    }`;
     window.location.href = authUrl;
     return EMPTY;
   }

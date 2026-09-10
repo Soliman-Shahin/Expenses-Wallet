@@ -63,6 +63,11 @@ export const routes: Routes = [
     canLoad: [AuthGuardService],
   },
   {
+    path: 'legal',
+    loadChildren: () =>
+      import('./modules/legal/legal.routes').then((m) => m.routes),
+  },
+  {
     path: 'notifications',
     loadChildren: () =>
       import('./modules/notifications/notifications.routes').then(

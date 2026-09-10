@@ -1,5 +1,13 @@
 import { Component, ChangeDetectionStrategy, OnInit } from '@angular/core';
-import { AbstractControl, FormGroup, ValidationErrors, ValidatorFn, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import {
+  AbstractControl,
+  FormGroup,
+  ValidationErrors,
+  ValidatorFn,
+  Validators,
+  FormsModule,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { finalize, takeUntil } from 'rxjs/operators';
 import { BaseComponent } from 'src/app/shared/base/base.component';
@@ -8,14 +16,23 @@ import { UiInputComponent } from '../../../../shared/ui/ui-input/ui-input.compon
 import { RouterLink } from '@angular/router';
 import { AsyncPipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
+import { CONSENT_VERSIONS } from 'src/app/config/consent.config';
 
 @Component({
-    selector: 'app-signup',
-    templateUrl: './signup.component.html',
-    styleUrls: ['./signup.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-    imports: [IonicModule, FormsModule, ReactiveFormsModule, UiInputComponent, RouterLink, AsyncPipe, TranslateModule]
+  selector: 'app-signup',
+  templateUrl: './signup.component.html',
+  styleUrls: ['./signup.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    IonicModule,
+    FormsModule,
+    ReactiveFormsModule,
+    UiInputComponent,
+    RouterLink,
+    AsyncPipe,
+    TranslateModule,
+  ],
 })
 export class SignupComponent extends BaseComponent implements OnInit {
   signupForm!: FormGroup;
@@ -218,30 +235,39 @@ export class SignupComponent extends BaseComponent implements OnInit {
   }
 
   signInWithGoogle(): void {
-    // TODO: Implement Google Sign In
-    this.toastService.presentSuccessToast(
-      'bottom',
-      this.translateService.instant('AUTH.GOOGLE_SIGNUP_COMING_SOON')
-    );
+    if (!this.termsAccepted?.value) {
+      this.isSubmitted = true;
+      this.signupForm.markAllAsTouched();
+      return;
+    }
+    this.loading.next(true);
+    this.authService
+      .loginWithGoogle({
+        termsAccepted: true,
+        privacyAccepted: true,
+        ...CONSENT_VERSIONS,
+      })
+      .pipe(
+        finalize(() => this.loading.next(false)),
+        takeUntil(this.destroy$)
+      )
+      .subscribe({
+        error: (error) =>
+          this.errorMessage.next(
+            error?.error?.message ||
+              this.translateService.instant('AUTH.SIGNUP_ERROR')
+          ),
+      });
   }
-
 
   // Open terms and conditions
   openTerms(): void {
-    // TODO: Implement terms and conditions modal or navigation
-    this.toastService.presentSuccessToast(
-      'bottom',
-      this.translateService.instant('AUTH.TERMS_NOT_AVAILABLE')
-    );
+    void this.router.navigateByUrl('/legal/terms');
   }
 
   // Open privacy policy
   openPrivacyPolicy(): void {
-    // TODO: Implement privacy policy modal or navigation
-    this.toastService.presentSuccessToast(
-      'bottom',
-      this.translateService.instant('AUTH.PRIVACY_POLICY_NOT_AVAILABLE')
-    );
+    void this.router.navigateByUrl('/legal/privacy');
   }
 
   // Handle form submission
@@ -256,10 +282,14 @@ export class SignupComponent extends BaseComponent implements OnInit {
     this.loading.next(true);
     this.errorMessage.next('');
 
-    const { name, email, password } = this.signupForm.value;
+    const { email, password } = this.signupForm.value;
 
     this.authService
-      .signup(email, password)
+      .signup(email, password, {
+        termsAccepted: true,
+        privacyAccepted: true,
+        ...CONSENT_VERSIONS,
+      })
       .pipe(
         finalize(() => this.loading.next(false)),
         takeUntil(this.destroy$)

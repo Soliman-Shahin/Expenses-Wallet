@@ -2,30 +2,30 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { BaseComponent } from 'src/app/shared/base/base.component';
 import { IonicModule } from '@ionic/angular';
 import { TranslateModule } from '@ngx-translate/core';
+import { RouterLink } from '@angular/router';
 
 @Component({
-    selector: 'app-help-page',
-    templateUrl: './help.page.html',
-    styleUrls: ['./help.page.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-    imports: [IonicModule, TranslateModule]
+  selector: 'app-help-page',
+  templateUrl: './help.page.html',
+  styleUrls: ['./help.page.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [IonicModule, TranslateModule, RouterLink],
 })
 export class HelpPageComponent extends BaseComponent {
-  
   faqs = [
     {
       question: 'HELP_PAGE.FAQ_1_Q',
-      answer: 'HELP_PAGE.FAQ_1_A'
+      answer: 'HELP_PAGE.FAQ_1_A',
     },
     {
       question: 'HELP_PAGE.FAQ_2_Q',
-      answer: 'HELP_PAGE.FAQ_2_A'
+      answer: 'HELP_PAGE.FAQ_2_A',
     },
     {
       question: 'HELP_PAGE.FAQ_3_Q',
-      answer: 'HELP_PAGE.FAQ_3_A'
-    }
+      answer: 'HELP_PAGE.FAQ_3_A',
+    },
   ];
 
   openEmail() {
