@@ -58,43 +58,67 @@ export class ExpenseService {
         switchMap((expenses) => {
           return this.offlineStorage.getEntities<any>('expense').pipe(
             map((localExpenses) => {
-              const pendingLocal = localExpenses.filter(e => e._syncStatus === SyncStatus.PENDING);
-              const pendingActive = pendingLocal.filter(e => !e._isDeleted);
-              const pendingDeletes = new Set(pendingLocal.filter(e => e._isDeleted).map(e => e._id));
-              
-              const apiIds = new Set(expenses.map(e => e._id));
-              const apiClientIds = new Set(expenses.map(e => (e as any)._clientId).filter(Boolean));
-              let uniquePending = pendingActive.filter(e => !apiIds.has(e._id) && !apiClientIds.has(e._id));
-              
+              const pendingLocal = localExpenses.filter(
+                (e) => e._syncStatus === SyncStatus.PENDING
+              );
+              const pendingActive = pendingLocal.filter((e) => !e._isDeleted);
+              const pendingDeletes = new Set(
+                pendingLocal.filter((e) => e._isDeleted).map((e) => e._id)
+              );
+
+              const apiIds = new Set(expenses.map((e) => e._id));
+              const apiClientIds = new Set(
+                expenses.map((e) => (e as any)._clientId).filter(Boolean)
+              );
+              let uniquePending = pendingActive.filter(
+                (e) => !apiIds.has(e._id) && !apiClientIds.has(e._id)
+              );
+
               // Basic rudimentary filtering for pending items so they somewhat match the query
               if (params.startDate && params.endDate) {
                 const start = new Date(params.startDate).getTime();
                 const end = new Date(params.endDate).getTime();
-                uniquePending = uniquePending.filter(e => {
+                uniquePending = uniquePending.filter((e) => {
                   const d = new Date(e.date).getTime();
                   return d >= start && d <= end;
                 });
               }
               if (params.category) {
-                uniquePending = uniquePending.filter(e => {
-                   const catId = typeof e.category === 'object' ? e.category._id : e.category;
-                   return catId === params.category;
+                uniquePending = uniquePending.filter((e) => {
+                  const catId =
+                    typeof e.category === 'object'
+                      ? e.category._id
+                      : e.category;
+                  return catId === params.category;
                 });
               }
 
-              const pendingMap = new Map(pendingActive.map(e => [e._id, e]));
+              const pendingMap = new Map(pendingActive.map((e) => [e._id, e]));
               const filteredApi = expenses
-                .filter(e => !pendingDeletes.has(e._id) && !pendingDeletes.has((e as any)._clientId))
-                .map(e => {
+                .filter(
+                  (e) =>
+                    !pendingDeletes.has(e._id) &&
+                    !pendingDeletes.has((e as any)._clientId)
+                )
+                .map((e) => {
                   if (pendingMap.has(e._id)) return pendingMap.get(e._id);
-                  if ((e as any)._clientId && pendingMap.has((e as any)._clientId)) {
-                    return { ...pendingMap.get((e as any)._clientId), _id: e._id };
+                  if (
+                    (e as any)._clientId &&
+                    pendingMap.has((e as any)._clientId)
+                  ) {
+                    return {
+                      ...pendingMap.get((e as any)._clientId),
+                      _id: e._id,
+                    };
                   }
                   return e;
                 });
               const merged = [...uniquePending, ...filteredApi] as Expense[];
-              merged.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-              
+              merged.sort(
+                (a, b) =>
+                  new Date(b.date).getTime() - new Date(a.date).getTime()
+              );
+
               return { apiExpenses: expenses, mergedExpenses: merged };
             })
           );
@@ -118,18 +142,24 @@ export class ExpenseService {
               if (params?.startDate && params?.endDate) {
                 const start = new Date(params.startDate).getTime();
                 const end = new Date(params.endDate).getTime();
-                filtered = filtered.filter(e => {
+                filtered = filtered.filter((e) => {
                   const d = new Date(e.date).getTime();
                   return d >= start && d <= end;
                 });
               }
               if (params?.category) {
-                filtered = filtered.filter(e => {
-                  const catId = typeof e.category === 'object' ? e.category._id : e.category;
+                filtered = filtered.filter((e) => {
+                  const catId =
+                    typeof e.category === 'object'
+                      ? e.category._id
+                      : e.category;
                   return catId === params.category;
                 });
               }
-              filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+              filtered.sort(
+                (a, b) =>
+                  new Date(b.date).getTime() - new Date(a.date).getTime()
+              );
               return filtered;
             })
           );
@@ -143,33 +173,54 @@ export class ExpenseService {
         switchMap((expenses) => {
           return this.offlineStorage.getEntities<any>('expense').pipe(
             map((localExpenses) => {
-              const pendingLocal = localExpenses.filter(e => e._syncStatus === SyncStatus.PENDING);
-              
+              const pendingLocal = localExpenses.filter(
+                (e) => e._syncStatus === SyncStatus.PENDING
+              );
+
               // Find pending creates/updates
-              const pendingActive = pendingLocal.filter(e => !e._isDeleted);
+              const pendingActive = pendingLocal.filter((e) => !e._isDeleted);
               // Find pending deletes
-              const pendingDeletes = new Set(pendingLocal.filter(e => e._isDeleted).map(e => e._id));
-              
+              const pendingDeletes = new Set(
+                pendingLocal.filter((e) => e._isDeleted).map((e) => e._id)
+              );
+
               // Filter out API items that were deleted locally but not yet synced
-              const apiIds = new Set(expenses.map(e => e._id));
-              const apiClientIds = new Set(expenses.map(e => (e as any)._clientId).filter(Boolean));
-              const uniquePending = pendingActive.filter(e => !apiIds.has(e._id) && !apiClientIds.has(e._id));
-              
-              const pendingMap = new Map(pendingActive.map(e => [e._id, e]));
+              const apiIds = new Set(expenses.map((e) => e._id));
+              const apiClientIds = new Set(
+                expenses.map((e) => (e as any)._clientId).filter(Boolean)
+              );
+              const uniquePending = pendingActive.filter(
+                (e) => !apiIds.has(e._id) && !apiClientIds.has(e._id)
+              );
+
+              const pendingMap = new Map(pendingActive.map((e) => [e._id, e]));
               const filteredApi = expenses
-                .filter(e => !pendingDeletes.has(e._id) && !pendingDeletes.has((e as any)._clientId))
-                .map(e => {
+                .filter(
+                  (e) =>
+                    !pendingDeletes.has(e._id) &&
+                    !pendingDeletes.has((e as any)._clientId)
+                )
+                .map((e) => {
                   if (pendingMap.has(e._id)) return pendingMap.get(e._id);
-                  if ((e as any)._clientId && pendingMap.has((e as any)._clientId)) {
-                    return { ...pendingMap.get((e as any)._clientId), _id: e._id };
+                  if (
+                    (e as any)._clientId &&
+                    pendingMap.has((e as any)._clientId)
+                  ) {
+                    return {
+                      ...pendingMap.get((e as any)._clientId),
+                      _id: e._id,
+                    };
                   }
                   return e;
                 });
-              
+
               const merged = [...uniquePending, ...filteredApi] as Expense[];
               // Sort by date descending
-              merged.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-              
+              merged.sort(
+                (a, b) =>
+                  new Date(b.date).getTime() - new Date(a.date).getTime()
+              );
+
               return { apiExpenses: expenses, mergedExpenses: merged };
             })
           );
@@ -201,20 +252,22 @@ export class ExpenseService {
   }
 
   getExpense(id: string): Observable<Expense> {
-    const offlineFetch$ = this.offlineStorage.getEntity<any>('expense', id).pipe(
-      switchMap((local) => {
-        if (local) return of(local as Expense);
-        return throwError(() => new Error('Expense not found offline'));
-      })
-    );
+    const offlineFetch$ = this.offlineStorage
+      .getEntity<any>('expense', id)
+      .pipe(
+        switchMap((local) => {
+          if (local) return of(local as Expense);
+          return throwError(() => new Error('Expense not found offline'));
+        })
+      );
 
     if (id.startsWith('offline_')) {
       return offlineFetch$;
     }
 
-    return this.apiService.get<Expense>(`${this.endpoint}/${id}`).pipe(
-      catchError(() => offlineFetch$)
-    );
+    return this.apiService
+      .get<Expense>(`${this.endpoint}/${id}`)
+      .pipe(catchError(() => offlineFetch$));
   }
 
   createExpense(expense: Partial<Expense>): Observable<Expense> {
@@ -222,7 +275,8 @@ export class ExpenseService {
 
     // If it's an offline category, we cannot send it directly to the server!
     // We must save it locally so SyncService handles it in a batch.
-    const hasOfflineCategory = expense.category && expense.category.toString().startsWith('offline_');
+    const hasOfflineCategory =
+      expense.category && expense.category.toString().startsWith('offline_');
 
     if (!isOnline || hasOfflineCategory) {
       // 🔌 Offline: Save locally with PENDING status
@@ -235,7 +289,7 @@ export class ExpenseService {
         this.totalsCache.clear();
         // Mirror to offline storage (marked as SYNCED)
         this.offlineStorage
-          .saveEntity('expense', {
+          .saveSyncedEntity('expense', {
             ...createdExpense,
             _syncStatus: SyncStatus.SYNCED,
           } as any)
@@ -256,7 +310,8 @@ export class ExpenseService {
 
     // If it's an offline ID, or if it has an offline category, we cannot send it to the server directly via PUT.
     // We must update it locally and let the sync engine push it later.
-    const hasOfflineCategory = expense.category && expense.category.toString().startsWith('offline_');
+    const hasOfflineCategory =
+      expense.category && expense.category.toString().startsWith('offline_');
 
     if (!isOnline || id.startsWith('offline_') || hasOfflineCategory) {
       // 🔌 Offline: update locally with PENDING status
@@ -268,7 +323,7 @@ export class ExpenseService {
         this.expensesCache$ = null;
         this.totalsCache.clear();
         this.offlineStorage
-          .saveEntity('expense', {
+          .saveSyncedEntity('expense', {
             ...updatedExpense,
             _syncStatus: SyncStatus.SYNCED,
           } as any)

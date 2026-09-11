@@ -3,10 +3,12 @@ import {
   ChangeDetectionStrategy,
   inject,
   OnInit,
+  ViewChild,
 } from '@angular/core';
 import {
-  AlertController,
+  ActionSheetController,
   InfiniteScrollCustomEvent,
+  IonSearchbar,
   ItemReorderEventDetail,
   RefresherCustomEvent,
   IonicModule,
@@ -51,7 +53,7 @@ export class CategoriesComponent
   extends BaseListComponent<Category>
   implements OnInit
 {
-  private alertController = inject(AlertController);
+  private actionSheetController = inject(ActionSheetController);
   private translate = inject(TranslateService);
   private planService = inject(PlanService);
 
@@ -89,6 +91,10 @@ export class CategoriesComponent
 
   isActionSheetOpen = false;
   selectedCategory: Category | null = null;
+  searchQuery = '';
+  activeType: 'all' | 'income' | 'outcome' = 'all';
+
+  @ViewChild('categorySearch') categorySearch?: IonSearchbar;
 
   // Plan Limits State
   canAddCategory = true;
@@ -223,23 +229,21 @@ export class CategoriesComponent
 
   async presentActionSheet(category: Category) {
     this.selectedCategory = category;
-    const actionSheet = await this.alertController.create({
+    const selectedId = category._id as string;
+    const actionSheet = await this.actionSheetController.create({
       header: this.translateService.instant('MOBILE_UI.CATEGORY_ACTIONS'),
       buttons: [
         {
-          text: this.translateService.instant('COMMON.DELETE'),
-          role: 'destructive',
-          handler: () => {
-            this.presentDeleteConfirm(this.selectedCategory?._id as string);
-          },
+          text: this.translateService.instant('CATEGORY.EDIT'),
+          icon: 'create-outline',
+          handler: () => this.router.navigate(['/categories/edit', selectedId]),
         },
         {
-          text: this.translateService.instant('CATEGORY.EDIT'),
+          text: this.translateService.instant('COMMON.DELETE'),
+          icon: 'trash-outline',
+          role: 'destructive',
           handler: () => {
-            this.router.navigate([
-              '/categories/edit',
-              this.selectedCategory?._id,
-            ]);
+            setTimeout(() => void this.presentDeleteConfirm(selectedId));
           },
         },
         {
@@ -296,7 +300,10 @@ export class CategoriesComponent
   }
 
   filter(event: any) {
-    const query = event.target.value.toLowerCase();
+    const query = String(event.target.value ?? '')
+      .trim()
+      .toLowerCase();
+    this.searchQuery = query;
     const currentParams = this.#paramsSub.getValue();
     this.#paramsSub.next({
       ...currentParams,
@@ -307,12 +314,30 @@ export class CategoriesComponent
 
   filterByType(event: any) {
     const type = event.detail.value;
+    this.activeType = type === 'all' ? 'all' : type;
     const currentParams = this.#paramsSub.getValue();
     this.#paramsSub.next({
       ...currentParams,
       skip: 0,
       type: type === 'all' ? undefined : type,
     });
+  }
+
+  hasActiveFilters(): boolean {
+    return !!this.searchQuery || this.activeType !== 'all';
+  }
+
+  clearFilters(): void {
+    if (!this.hasActiveFilters()) return;
+    if (this.categorySearch) {
+      this.categorySearch.value = '';
+      void this.categorySearch.getInputElement().then((input) => {
+        input.value = '';
+      });
+    }
+    this.searchQuery = '';
+    this.activeType = 'all';
+    this.#paramsSub.next({ ...this.#defaultParams });
   }
 
   setOpen(isOpen: boolean) {

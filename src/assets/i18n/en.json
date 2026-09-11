@@ -96,6 +96,9 @@
   "DASHBOARD": "Dashboard",
   "TRANSACTIONS": {
     "TITLE": "Transactions",
+    "COUNT_ONE": "transaction",
+    "COUNT_TWO": "transactions",
+    "COUNT_OTHER": "transactions",
     "ADD": "Add transaction",
     "RECENT": "Recent transactions",
     "NO_RECENT": "No recent transactions",
@@ -334,6 +337,9 @@
     "MONTHLY_EXPENSE_TREND": "Monthly expense trend"
   },
   "CATEGORIES": {
+    "COUNT_ONE": "category",
+    "COUNT_TWO": "categories",
+    "COUNT_OTHER": "categories",
     "EMPTY_TITLE": "No categories yet",
     "EMPTY_MESSAGE": "Add categories to organize your expenses.",
     "INCOME": "Income",

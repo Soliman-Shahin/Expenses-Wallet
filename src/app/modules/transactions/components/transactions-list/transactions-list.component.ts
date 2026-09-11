@@ -78,6 +78,9 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
   });
   categories = signal<Category[]>([]);
   userCurrency = signal<string>('');
+  hasLoadedTransactions = false;
+  contentLoading = signal(false);
+  private loadSequence = 0;
 
   // Filters signals
   searchTerm = signal<string>('');
@@ -200,7 +203,8 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
   }
 
   loadTransactions() {
-    this.setLoading(true);
+    const requestSequence = ++this.loadSequence;
+    this.contentLoading.set(true);
     this.setError(null);
 
     const params: any = {};
@@ -243,8 +247,10 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
       .getExpenses(params, true)
       .pipe(
         finalize(() => {
-          this.setLoading(false);
-          this.cdr.markForCheck();
+          if (requestSequence === this.loadSequence) {
+            this.contentLoading.set(false);
+            this.cdr.markForCheck();
+          }
         }),
         takeUntil(this.destroy$)
       )
@@ -261,15 +267,20 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
                   (response as any)?.data ||
                   [];
             }
-            this.rawTransactions.set(rawExpenses);
+            if (requestSequence === this.loadSequence) {
+              this.rawTransactions.set(rawExpenses);
+              this.hasLoadedTransactions = true;
+            }
           } catch (err) {
             console.error('Error processing transactions:', err);
             this.setError('Failed to process data');
           }
         },
         error: (err: any) => {
-          this.setError('Failed to load transactions');
-          console.error('Error loading transactions:', err);
+          if (requestSequence === this.loadSequence) {
+            this.setError('Failed to load transactions');
+            this.hasLoadedTransactions = true;
+          }
         },
       });
   }
@@ -334,7 +345,7 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
   }
 
   onSearchChange(event: any) {
-    this.searchSubject.next(event.target.value);
+    this.searchSubject.next(String(event.target.value ?? '').trim());
   }
 
   onFilterChange(event?: any) {
@@ -560,6 +571,25 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
     this.tempEndDate = null;
     this.showDatePicker.set(false);
     this.loadTransactions();
+  }
+
+  clearAllFilters() {
+    this.searchTerm.set('');
+    this.selectedCategories.set([]);
+    this.selectedType.set('');
+    this.startDate.set(null);
+    this.endDate.set(null);
+    this.loadTransactions();
+  }
+
+  hasActiveFilters(): boolean {
+    return (
+      !!this.searchTerm() ||
+      this.selectedCategories().length > 0 ||
+      !!this.selectedType() ||
+      !!this.startDate() ||
+      !!this.endDate()
+    );
   }
 
   getDateRangeText(): string {

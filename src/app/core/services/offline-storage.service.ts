@@ -1,11 +1,17 @@
 import { Injectable, inject } from '@angular/core';
-import { SyncEntity, SyncStatus, OfflineData, SyncOperation, SyncQueue } from 'src/app/shared/models/sync.model';
+import {
+  SyncEntity,
+  SyncStatus,
+  OfflineData,
+  SyncOperation,
+  SyncQueue,
+} from 'src/app/shared/models/sync.model';
 import { Observable, BehaviorSubject, from, of } from 'rxjs';
 import { map, catchError, tap, take } from 'rxjs/operators';
 import { DatabaseService } from './database.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class OfflineStorageService {
   private db = inject(DatabaseService);
@@ -15,7 +21,7 @@ export class OfflineStorageService {
     isProcessing: false,
     lastProcessed: new Date(),
     totalProcessed: 0,
-    totalErrors: 0
+    totalErrors: 0,
   });
 
   public syncQueue$ = this.syncQueueSubject.asObservable();
@@ -26,16 +32,42 @@ export class OfflineStorageService {
 
   // ==================== ENTITY MANAGEMENT ====================
 
-  saveEntity<T extends SyncEntity>(entityType: string, entity: T): Observable<T> {
+  saveEntity<T extends SyncEntity>(
+    entityType: string,
+    entity: T
+  ): Observable<T> {
     return from(this.saveEntityAsync(entityType, entity)).pipe(
-      catchError(error => {
+      catchError((error) => {
         console.error(`Error saving ${entityType}:`, error);
         return of(entity);
       })
     );
   }
 
-  private async saveEntityAsync<T extends SyncEntity>(entityType: string, entity: T): Promise<T> {
+  /** Persist a server-confirmed entity without creating a new sync operation. */
+  saveSyncedEntity<T extends SyncEntity>(
+    entityType: string,
+    entity: T
+  ): Observable<T> {
+    return from(
+      this.db.getTable(entityType).put({
+        ...entity,
+        _syncStatus: SyncStatus.SYNCED,
+        _lastModified: entity._lastModified || new Date(),
+      })
+    ).pipe(
+      map(() => entity),
+      catchError((error) => {
+        console.error(`Error saving synced ${entityType}:`, error);
+        return of(entity);
+      })
+    );
+  }
+
+  private async saveEntityAsync<T extends SyncEntity>(
+    entityType: string,
+    entity: T
+  ): Promise<T> {
     const table = this.db.getTable(entityType);
     const existing = await table.get(entity._id);
 
@@ -45,68 +77,103 @@ export class OfflineStorageService {
         ...existing,
         ...entity,
         _lastModified: new Date(),
-        _version: (existing._version || 0) + 1
+        _version: (existing._version || 0) + 1,
       };
     } else {
       updatedEntity = {
         ...entity,
         _lastModified: new Date(),
         _version: 1,
-        _syncStatus: SyncStatus.PENDING
+        _syncStatus: SyncStatus.PENDING,
       };
     }
 
     await table.put(updatedEntity);
-    await this.addToSyncQueueAsync('UPDATE', entityType, entity._id, updatedEntity);
+    await this.addToSyncQueueAsync(
+      'UPDATE',
+      entityType,
+      entity._id,
+      updatedEntity
+    );
     return updatedEntity;
   }
 
-  getEntity<T extends SyncEntity>(entityType: string, id: string): Observable<T | null> {
+  getEntity<T extends SyncEntity>(
+    entityType: string,
+    id: string
+  ): Observable<T | null> {
     return from(this.db.getTable(entityType).get(id)).pipe(
-      map(res => (res as T) || null)
+      map((res) => (res as T) || null)
     );
   }
 
   getEntities<T extends SyncEntity>(entityType: string): Observable<T[]> {
-    return from(this.db.getTable(entityType).filter((e: any) => !e._isDeleted).toArray()).pipe(
-      map(res => res as T[])
+    return from(
+      this.db
+        .getTable(entityType)
+        .filter((e: any) => !e._isDeleted)
+        .toArray()
+    ).pipe(
+      map((res) => {
+        const seen = new Set<string>();
+        return (res as T[]).filter((entity: any) => {
+          const key = entity._clientId || entity._id;
+          if (!key || seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+      })
     );
   }
 
-  getAllEntitiesForBackup<T extends SyncEntity>(entityType: string): Observable<T[]> {
+  getAllEntitiesForBackup<T extends SyncEntity>(
+    entityType: string
+  ): Observable<T[]> {
     return from(this.db.getTable(entityType).toArray()).pipe(
-      map(res => res as T[])
+      map((res) => res as T[])
     );
   }
 
-  replaceEntities<T extends SyncEntity>(entityType: string, entities: T[]): Observable<boolean> {
+  replaceEntities<T extends SyncEntity>(
+    entityType: string,
+    entities: T[]
+  ): Observable<boolean> {
     return from(this.db.getTable(entityType).bulkPut(entities)).pipe(
       map(() => true),
-      catchError(error => {
+      catchError((error) => {
         console.error(`Error replacing ${entityType} entities:`, error);
         return of(false);
       })
     );
   }
 
-  mergeEntities<T extends SyncEntity>(entityType: string, serverEntities: T[]): Observable<boolean> {
+  mergeEntities<T extends SyncEntity>(
+    entityType: string,
+    serverEntities: T[]
+  ): Observable<boolean> {
     return from(this.mergeEntitiesAsync(entityType, serverEntities)).pipe(
-      catchError(error => {
+      catchError((error) => {
         console.error(`Error merging ${entityType} entities:`, error);
         return of(false);
       })
     );
   }
 
-  private async mergeEntitiesAsync<T extends SyncEntity>(entityType: string, serverEntities: T[]): Promise<boolean> {
+  private async mergeEntitiesAsync<T extends SyncEntity>(
+    entityType: string,
+    serverEntities: T[]
+  ): Promise<boolean> {
     const table = this.db.getTable(entityType);
     const localEntities = await table.toArray();
-    
+
     for (const serverEntity of serverEntities) {
       // Find local entity by _id OR by _clientId
-      const localEntity = localEntities.find((e: any) => 
-        e._id === serverEntity._id || 
-        (serverEntity._clientId && e._id === serverEntity._clientId)
+      const localEntity = localEntities.find(
+        (e: any) =>
+          e._id === serverEntity._id ||
+          (serverEntity._clientId &&
+            (e._id === serverEntity._clientId ||
+              e._clientId === serverEntity._clientId))
       );
 
       if (serverEntity._isDeleted) {
@@ -117,7 +184,7 @@ export class OfflineStorageService {
       }
 
       if (localEntity) {
-        // If we found it by _clientId (i.e. the local item is an offline item), 
+        // If we found it by _clientId (i.e. the local item is an offline item),
         // we MUST delete the old offline ID record because its primary key will change.
         if (localEntity._id !== serverEntity._id) {
           await table.delete(localEntity._id);
@@ -139,14 +206,17 @@ export class OfflineStorageService {
 
   deleteEntity(entityType: string, id: string): Observable<boolean> {
     return from(this.deleteEntityAsync(entityType, id)).pipe(
-      catchError(error => {
+      catchError((error) => {
         console.error(`Error deleting ${entityType}:`, error);
         return of(false);
       })
     );
   }
 
-  private async deleteEntityAsync(entityType: string, id: string): Promise<boolean> {
+  private async deleteEntityAsync(
+    entityType: string,
+    id: string
+  ): Promise<boolean> {
     const table = this.db.getTable(entityType);
     const entity = await table.get(id);
 
@@ -171,11 +241,23 @@ export class OfflineStorageService {
     return Math.random().toString(36).substring(2, 9) + Date.now().toString(36);
   }
 
-  addToSyncQueue(type: 'CREATE' | 'UPDATE' | 'DELETE', entityType: string, entityId: string, data: any): void {
-    this.addToSyncQueueAsync(type, entityType, entityId, data).catch(console.error);
+  addToSyncQueue(
+    type: 'CREATE' | 'UPDATE' | 'DELETE',
+    entityType: string,
+    entityId: string,
+    data: any
+  ): void {
+    this.addToSyncQueueAsync(type, entityType, entityId, data).catch(
+      console.error
+    );
   }
 
-  private async addToSyncQueueAsync(type: 'CREATE' | 'UPDATE' | 'DELETE', entityType: string, entityId: string, data: any): Promise<void> {
+  private async addToSyncQueueAsync(
+    type: 'CREATE' | 'UPDATE' | 'DELETE',
+    entityType: string,
+    entityId: string,
+    data: any
+  ): Promise<void> {
     const operation: SyncOperation = {
       id: this.generateId(),
       type,
@@ -185,7 +267,7 @@ export class OfflineStorageService {
       timestamp: new Date(),
       retryCount: 0,
       maxRetries: 3,
-      status: SyncStatus.PENDING
+      status: SyncStatus.PENDING,
     };
 
     await this.db.syncOperations.put(operation);
@@ -193,17 +275,28 @@ export class OfflineStorageService {
   }
 
   removeFromSyncQueue(operationId: string): void {
-    this.db.syncOperations.delete(operationId).then(() => this.loadSyncQueue()).catch(console.error);
+    this.db.syncOperations
+      .delete(operationId)
+      .then(() => this.loadSyncQueue())
+      .catch(console.error);
   }
 
-  updateSyncOperation(operationId: string, updates: Partial<SyncOperation>): void {
-    this.db.syncOperations.update(operationId, updates).then(() => this.loadSyncQueue()).catch(console.error);
+  updateSyncOperation(
+    operationId: string,
+    updates: Partial<SyncOperation>
+  ): void {
+    this.db.syncOperations
+      .update(operationId, updates)
+      .then(() => this.loadSyncQueue())
+      .catch(console.error);
   }
 
   getPendingOperations(): Observable<SyncOperation[]> {
     return this.syncQueue$.pipe(
       take(1),
-      map(queue => queue.operations.filter(op => op.status === SyncStatus.PENDING))
+      map((queue) =>
+        queue.operations.filter((op) => op.status === SyncStatus.PENDING)
+      )
     );
   }
 
@@ -213,7 +306,7 @@ export class OfflineStorageService {
       const currentQueue = this.syncQueueSubject.value;
       this.syncQueueSubject.next({
         ...currentQueue,
-        operations: ops
+        operations: ops,
       });
     } catch (error) {
       console.error('Error loading sync queue:', error);
@@ -223,31 +316,45 @@ export class OfflineStorageService {
   // ==================== BACKUP & RESTORE ====================
 
   createBackup(): Observable<OfflineData> {
-    return from(Promise.all([
-      this.db.expenses.toArray(),
-      this.db.categories.toArray(),
-      this.db.users.toArray()
-    ])).pipe(
+    return from(
+      Promise.all([
+        this.db.expenses.toArray(),
+        this.db.categories.toArray(),
+        this.db.users.toArray(),
+      ])
+    ).pipe(
       map(([expenses, categories, users]) => {
         return {
           expenses,
           categories,
           user: users[0] || null,
           lastBackup: new Date(),
-          version: '1.0.0'
+          version: '1.0.0',
         };
       })
     );
   }
 
   restoreBackup(backup: OfflineData): Observable<boolean> {
-    return from(Promise.all([
-      this.db.expenses.clear().then(() => this.db.expenses.bulkPut(backup.expenses)),
-      this.db.categories.clear().then(() => this.db.categories.bulkPut(backup.categories)),
-      this.db.users.clear().then(() => backup.user ? this.db.users.put(backup.user).then(() => {}) : Promise.resolve())
-    ])).pipe(
+    return from(
+      Promise.all([
+        this.db.expenses
+          .clear()
+          .then(() => this.db.expenses.bulkPut(backup.expenses)),
+        this.db.categories
+          .clear()
+          .then(() => this.db.categories.bulkPut(backup.categories)),
+        this.db.users
+          .clear()
+          .then(() =>
+            backup.user
+              ? this.db.users.put(backup.user).then(() => {})
+              : Promise.resolve()
+          ),
+      ])
+    ).pipe(
       map(() => true),
-      catchError(error => {
+      catchError((error) => {
         console.error('Error restoring backup:', error);
         return of(false);
       })
@@ -257,12 +364,14 @@ export class OfflineStorageService {
   // ==================== CLEANUP ====================
 
   clearOfflineData(): Observable<boolean> {
-    return from(Promise.all([
-      this.db.expenses.clear(),
-      this.db.categories.clear(),
-      this.db.users.clear(),
-      this.db.syncOperations.clear()
-    ])).pipe(
+    return from(
+      Promise.all([
+        this.db.expenses.clear(),
+        this.db.categories.clear(),
+        this.db.users.clear(),
+        this.db.syncOperations.clear(),
+      ])
+    ).pipe(
       tap(() => this.loadSyncQueue()),
       map(() => {
         this.syncQueueSubject.next({
@@ -270,11 +379,11 @@ export class OfflineStorageService {
           isProcessing: false,
           lastProcessed: new Date(),
           totalProcessed: 0,
-          totalErrors: 0
+          totalErrors: 0,
         });
         return true;
       }),
-      catchError(error => {
+      catchError((error) => {
         console.error('Error clearing offline data:', error);
         return of(false);
       })
@@ -282,12 +391,12 @@ export class OfflineStorageService {
   }
 
   getStorageSize(): Observable<number> {
-    return from(Promise.all([
-      this.db.expenses.count(),
-      this.db.categories.count(),
-      this.db.syncOperations.count()
-    ])).pipe(
-      map(([expenses, categories, ops]) => expenses + categories + ops)
-    );
+    return from(
+      Promise.all([
+        this.db.expenses.count(),
+        this.db.categories.count(),
+        this.db.syncOperations.count(),
+      ])
+    ).pipe(map(([expenses, categories, ops]) => expenses + categories + ops));
   }
 }

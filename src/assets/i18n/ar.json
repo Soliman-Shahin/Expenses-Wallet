@@ -95,6 +95,9 @@
   },
   "DASHBOARD": "الرئيسية",
   "TRANSACTIONS": {
+    "COUNT_ONE": "معاملة واحدة",
+    "COUNT_TWO": "معاملتان",
+    "COUNT_OTHER": "معاملات",
     "TITLE": "المعاملات",
     "ADD": "إضافة معاملة",
     "RECENT": "أحدث المعاملات",
@@ -306,6 +309,9 @@
     "MONTHLY_EXPENSE_TREND": "اتجاه المصروفات الشهري"
   },
   "CATEGORIES": {
+    "COUNT_ONE": "فئة واحدة",
+    "COUNT_TWO": "فئتان",
+    "COUNT_OTHER": "فئات",
     "EMPTY_TITLE": "لا توجد فئات بعد",
     "EMPTY_MESSAGE": "أضف بعض الفئات لتنظيم مصروفاتك.",
     "INCOME": "الدخل",

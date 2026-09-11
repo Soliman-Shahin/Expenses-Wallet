@@ -6,7 +6,14 @@
         @if (transactions()) {
         <span class="sub-title"
           >{{ transactions().length }}
-          {{ "TRANSACTIONS.TITLE" | translate | lowercase }}</span
+          {{
+            (transactions().length === 1
+              ? "TRANSACTIONS.COUNT_ONE"
+              : transactions().length === 2
+              ? "TRANSACTIONS.COUNT_TWO"
+              : "TRANSACTIONS.COUNT_OTHER"
+            ) | translate
+          }}</span
         >
         }
       </div>
@@ -212,7 +219,7 @@
   </ion-refresher>
 
   <!-- Skeleton loaders while fetching -->
-  @if (isLoading) {
+  @if (contentLoading() && !hasLoadedTransactions) {
   <div
     class="skeleton-list content-list-loading"
     role="status"
@@ -223,7 +230,7 @@
     <app-skeleton-block variant="list-item-avatar"></app-skeleton-block>
     }
   </div>
-  } @if (!isLoading && transactionsLimitInfo.percentage >= 75) {
+  } @if (!contentLoading() && transactionsLimitInfo.percentage >= 75) {
   <app-plan-limit-banner
     limitType="SUBSCRIPTION.TRANSACTIONS_LIMIT"
     [used]="transactionsLimitInfo.used"
@@ -233,7 +240,7 @@
   }
 
   <!-- Error State -->
-  @if (state.error() && !isLoading) {
+  @if (state.error() && !contentLoading()) {
   <div class="ion-text-center ion-padding">
     <ion-icon
       name="warning-outline"
@@ -247,7 +254,7 @@
   }
 
   <!-- Content after loading -->
-  @if (!isLoading && !state.error()) { @if (transactions().length > 0) {
+  @if (!contentLoading() && !state.error()) { @if (transactions().length > 0) {
   <ion-list class="transactions-list">
     @for (t of transactions(); track trackById(i, t); let i = $index) {
     <ion-item-sliding class="transaction-sliding" [style.--animation-order]="i">
@@ -323,13 +330,27 @@
     </ion-item-sliding>
     }
   </ion-list>
-  } @if (transactions().length === 0) {
+  } @if (transactions().length === 0 && hasActiveFilters()) {
+  <div class="empty-state-wrapper filtered-empty-state">
+    <div class="empty-icon-glow">
+      <ion-icon name="search-outline"></ion-icon>
+    </div>
+    <h3 class="empty-title">{{ "TRANSACTIONS.NONE_FOUND" | translate }}</h3>
+    <ion-button fill="outline" (click)="clearAllFilters()">{{
+      "FILTERS.CLEAR_FILTERS" | translate
+    }}</ion-button>
+  </div>
+  } @if (transactions().length === 0 && !hasActiveFilters()) {
   <div class="empty-state-wrapper">
     <div class="empty-icon-glow">
       <ion-icon name="receipt-outline"></ion-icon>
     </div>
     <h3 class="empty-title">{{ "TRANSACTIONS.EMPTY_TITLE" | translate }}</h3>
     <p class="empty-subtitle">{{ "TRANSACTIONS.EMPTY_MESSAGE" | translate }}</p>
+    <ion-button (click)="openAddTransactionModal()">
+      <ion-icon slot="start" name="add-outline"></ion-icon>
+      {{ "TRANSACTIONS.ADD" | translate }}
+    </ion-button>
   </div>
   }
   <!-- Empty State -->

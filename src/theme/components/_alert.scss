@@ -9,6 +9,7 @@
   --min-width: 280px;
 
   .alert-wrapper {
+    border: 1px solid var(--ew-wallet-line);
     border-radius: 20px !important;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
     overflow: hidden;
@@ -22,10 +23,7 @@
 
     /* Dark mode support */
     @media (prefers-color-scheme: dark) {
-      background: rgba(
-        var(--ion-background-color-rgb, 18, 18, 18),
-        0.95
-      ) !important;
+      background: #142139 !important;
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5),
         0 0 0 1px rgba(255, 255, 255, 0.1) !important;
     }
@@ -257,6 +255,30 @@
         font-weight: 800;
         box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.1);
       }
+    }
+  }
+}
+
+/* Delete confirmations use a restrained danger treatment, separate from
+   ordinary informational confirmations. */
+.alert-delete {
+  .alert-head h2 {
+    color: var(--ion-text-color) !important;
+
+    &::before {
+      content: "!";
+      background: rgba(var(--ion-color-danger-rgb), 0.14);
+      color: var(--ion-color-danger);
+      box-shadow: none;
+    }
+  }
+
+  .alert-button-confirm {
+    background: var(--ion-color-danger) !important;
+    color: var(--ion-color-danger-contrast) !important;
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(var(--ion-color-danger-rgb), 0.28) !important;
     }
   }
 }
