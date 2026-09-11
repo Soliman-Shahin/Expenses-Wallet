@@ -339,6 +339,40 @@
   font-size: 11px;
   color: var(--ew-wallet-muted);
 }
+
+.profile-identity {
+  padding-block: 8px 20px;
+}
+
+.identity-text {
+  min-width: 0;
+}
+
+.user-name,
+.identity-email {
+  overflow-wrap: anywhere;
+}
+
+.identity-member {
+  display: block;
+  margin-top: 6px;
+  color: var(--ew-wallet-muted);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+
+.stat-unavailable {
+  color: var(--ew-wallet-muted);
+}
+
+.form-actions ion-button ion-spinner {
+  margin-inline-end: 8px;
+}
+
+.edit-avatar-btn {
+  min-width: 44px;
+  min-height: 44px;
+}
 .edit-avatar-btn {
   z-index: 3;
 }

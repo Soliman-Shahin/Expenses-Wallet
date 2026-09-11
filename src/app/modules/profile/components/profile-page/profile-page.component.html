@@ -16,7 +16,7 @@
     }}</ion-note>
     }
     <!-- ── Avatar Section (Overlapping Hero) ── -->
-    <div class="avatar-section">
+    <div class="avatar-section profile-identity">
       <div
         class="avatar-wrapper"
         [class.loading]="vm.isLoadingAvatar"
@@ -29,9 +29,7 @@
         }
         <div
           class="avatar-image"
-          [style.background-image]="
-            vm.profile?.avatarUrl ? 'url(' + vm.profile?.avatarUrl + ')' : ''
-          "
+          [style.background-image]="avatarUrl ? 'url(' + avatarUrl + ')' : ''"
           [attr.aria-label]="'PROFILE.AVATAR' | translate"
         >
           @if (!vm.profile?.avatarUrl && !vm.isLoadingAvatar) {
@@ -53,7 +51,8 @@
           (change)="onAvatarSelected($event)"
         />
       </div>
-      @if (personalForm.get('username')?.value) {
+      @if (personalForm.get('username')?.value ||
+      personalForm.get('email')?.value || getMemberSince()) {
       <div class="identity-text">
         <h2 class="user-name">
           <bdi>{{ personalForm.get("username")?.value }}</bdi>
@@ -61,6 +60,12 @@
         <p class="identity-email">
           <bdi dir="ltr">{{ personalForm.get("email")?.value }}</bdi>
         </p>
+        @if (getMemberSince()) {
+        <span class="identity-member"
+          >{{ "PROFILE.STATS.MEMBER_SINCE" | translate }} ·
+          {{ getMemberSince() }}</span
+        >
+        }
       </div>
       }
     </div>
@@ -119,7 +124,9 @@
           <span class="stat-lbl">{{
             "PROFILE.STATS.MEMBER_SINCE" | translate
           }}</span>
-          <span class="stat-val">{{ getMemberSince() }}</span>
+          @if (getMemberSince()) {
+          <span class="stat-val">{{ getMemberSince() }}</span> } @else {
+          <span class="stat-val stat-unavailable">—</span> }
         </div>
       </div>
     </div>
@@ -182,8 +189,15 @@
                 type="submit"
                 expand="block"
                 class="btn-gradient"
-                [disabled]="personalForm.invalid || vm.isLoadingPersonal"
+                [disabled]="
+                  personalForm.invalid ||
+                  !personalForm.dirty ||
+                  vm.isLoadingPersonal
+                "
+                [attr.aria-label]="'PROFILE.PERSONAL_INFO.SAVE' | translate"
               >
+                @if (vm.isLoadingPersonal) {
+                <ion-spinner name="crescent"></ion-spinner> }
                 <span>{{ "PROFILE.PERSONAL_INFO.SAVE" | translate }}</span>
               </ion-button>
             </div>
@@ -334,8 +348,13 @@
                 type="submit"
                 expand="block"
                 class="btn-gradient"
-                [disabled]="salaryForm.invalid || vm.isLoadingSalary"
+                [disabled]="
+                  salaryForm.invalid || !salaryForm.dirty || vm.isLoadingSalary
+                "
+                [attr.aria-label]="'PROFILE.SALARY.SAVE' | translate"
               >
+                @if (vm.isLoadingSalary) {
+                <ion-spinner name="crescent"></ion-spinner> }
                 <span>{{ "PROFILE.SALARY.SAVE" | translate }}</span>
               </ion-button>
             </div>

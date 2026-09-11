@@ -79,6 +79,7 @@ export class ProfileService {
       salary: salaryArr,
       currency: data.currency ?? 'USD',
       avatarUrl: data.avatarUrl ?? data.image ?? undefined,
+      createdAt: data.createdAt ?? data.created_at ?? undefined,
     } as UserProfile;
     return profile;
   }

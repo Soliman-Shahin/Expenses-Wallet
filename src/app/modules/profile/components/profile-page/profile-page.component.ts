@@ -25,7 +25,7 @@ import { catchError, finalize, tap } from 'rxjs/operators';
 import { ItemReorderEventDetail, IonicModule } from '@ionic/angular';
 import { UiInputComponent } from '../../../../shared/ui/ui-input/ui-input.component';
 import { AsyncPipe, DecimalPipe } from '@angular/common';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { SkeletonBlockComponent } from '../../../../shared/ui/skeleton-block/skeleton-block.component';
 
 @Component({
@@ -61,6 +61,7 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
   private errorMessage$ = new BehaviorSubject<string | null>(null);
 
   private readonly profileService = inject(ProfileService);
+  private readonly translate = inject(TranslateService);
 
   vm$ = combineLatest({
     profile: this.profileService.profile$,
@@ -118,7 +119,7 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
         }),
         takeUntil(this.destroy$),
         catchError((err) => {
-          this.errorMessage$.next(err);
+          this.errorMessage$.next('MOBILE_UI.PROFILE_ERROR');
           return [];
         })
       )
@@ -147,11 +148,14 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
   }
 
   private patchFromProfile(profile: UserProfile): void {
-    this.personalForm.patchValue({
-      username: profile.username,
-      email: profile.email,
-      phone: profile.phone,
-    });
+    this.personalForm.patchValue(
+      {
+        username: profile.username,
+        email: profile.email,
+        phone: profile.phone,
+      },
+      { emitEvent: false }
+    );
     // Patch salary details array
     const arr = this.details;
     while (arr.length) arr.removeAt(0);
@@ -163,8 +167,15 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
       // Ensure at least one row exists for UX
       arr.push(this.createDetailGroup('Salary', 0));
     }
-    this.salaryForm.patchValue({ currency: profile.currency });
+    this.salaryForm.patchValue(
+      { currency: profile.currency },
+      { emitEvent: false }
+    );
     this.avatarUrl = profile.avatarUrl ?? null;
+    this.personalForm.markAsPristine();
+    this.salaryForm.markAsPristine();
+    this.isPersonalFormDirty = false;
+    this.isSalaryFormDirty = false;
   }
 
   // Salary details helpers
@@ -193,6 +204,8 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
   addDetail(): void {
     this.details.push(this.createDetailGroup('Salary', 0));
     this.details.updateValueAndValidity();
+    this.salaryForm.markAsDirty();
+    this.isSalaryFormDirty = true;
   }
 
   removeDetail(id: string | null | undefined): void {
@@ -202,6 +215,8 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
     if (index > -1 && this.details.length > 1) {
       this.details.removeAt(index);
       this.details.updateValueAndValidity();
+      this.salaryForm.markAsDirty();
+      this.isSalaryFormDirty = true;
     }
   }
 
@@ -308,16 +323,17 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
   getMemberSince(): string {
     const profile = this.profileService.getProfile();
     if (!profile || !profile.createdAt) {
-      return '2024';
+      return '';
     }
 
     const date = new Date(profile.createdAt);
-    const year = date.getFullYear();
-    const month = date.toLocaleString('default', { month: 'short' });
-    return `${month} ${year}`;
+    if (Number.isNaN(date.getTime())) return '';
+    const language = this.translate.currentLang || this.translate.getDefaultLang() || 'en';
+    return date.toLocaleDateString(language.startsWith('ar') ? 'ar' : 'en', { month: 'short', year: 'numeric' });
   }
 
   savePersonal(): void {
+    if (this.isLoadingPersonal$.value) return;
     if (this.personalForm.invalid) {
       this.personalForm.markAllAsTouched();
       this.toastService.presentErrorToast(
@@ -339,6 +355,8 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
         takeUntil(this.destroy$),
         tap((updated) => {
           if (updated) {
+            this.personalForm.markAsPristine();
+            this.isPersonalFormDirty = false;
             this.toastService.presentSuccessToast(
               'top',
               'PROFILE.TOASTS.PERSONAL_SAVED'
@@ -348,7 +366,7 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
           }
         }),
         catchError((err) => {
-          this.errorMessage$.next(err);
+          this.errorMessage$.next('PROFILE.TOASTS.PERSONAL_FAILED');
           return [];
         })
       )
@@ -356,13 +374,9 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
   }
 
   saveSalary(): void {
+    if (this.isLoadingSalary$.value) return;
     if (this.salaryForm.invalid) {
       this.salaryForm.markAllAsTouched();
-      console.warn(
-        'Salary form invalid:',
-        this.salaryForm.errors,
-        this.salaryForm
-      );
       this.toastService.presentErrorToast(
         'top',
         'PROFILE.TOASTS.SALARY_INVALID'
@@ -373,7 +387,7 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
     this.setLoading(true);
     this.errorMessage$.next(null);
     const detailsRaw = this.details.getRawValue() || [];
-    const salaryPayload = detailsRaw.map((d: any) => ({
+    const salaryPayload = detailsRaw.map((d: { label?: unknown; amount?: unknown }) => ({
       label: String(d?.label ?? 'Salary'),
       amount: Number(d?.amount ?? 0),
     }));
@@ -381,9 +395,7 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
     const payload: Partial<UserProfile> = {
       salary: salaryPayload,
       currency,
-    } as any;
-
-    console.log('[Profile] Saving salary payload:', payload);
+    };
 
     this.profileService
       .updateProfile(payload)
@@ -395,8 +407,8 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
         takeUntil(this.destroy$),
         tap((updated) => {
           if (updated) {
-            console.log('[Profile] Salary saved, backend responded:', updated);
             this.salaryForm.markAsPristine();
+            this.isSalaryFormDirty = false;
             this.toastService.presentSuccessToast(
               'top',
               'PROFILE.TOASTS.SALARY_SAVED'
@@ -406,7 +418,7 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
           }
         }),
         catchError((err) => {
-          this.errorMessage$.next(err);
+          this.errorMessage$.next('PROFILE.TOASTS.SALARY_FAILED');
           return [];
         })
       )
@@ -443,6 +455,9 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
       return;
     }
 
+    // Show the selected image immediately while the existing upload flow completes.
+    this.avatarUrl = URL.createObjectURL(file);
+
     this.isLoadingAvatar$.next(true);
     this.setLoading(true);
     this.errorMessage$.next(null);
@@ -468,7 +483,7 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
           }
         }),
         catchError((err) => {
-          this.errorMessage$.next(err);
+          this.errorMessage$.next('PROFILE.TOASTS.AVATAR_FAILED');
           return [];
         })
       )
