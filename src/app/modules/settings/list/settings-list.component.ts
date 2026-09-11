@@ -87,10 +87,6 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
       if (verified) {
         await this.biometricService.setEnabled(true);
         this.biometricEnabled = true;
-        this.toastService.presentSuccessToast(
-          'bottom',
-          this.translateService.instant('SETTINGS.BIOMETRIC_ENABLED')
-        );
       } else {
         event.target.checked = false;
         this.biometricEnabled = false;
@@ -102,10 +98,6 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
     } else {
       await this.biometricService.setEnabled(false);
       this.biometricEnabled = false;
-      this.toastService.presentSuccessToast(
-        'bottom',
-        this.translateService.instant('SETTINGS.BIOMETRIC_DISABLED')
-      );
     }
     this.cdr.markForCheck();
   }
@@ -114,10 +106,6 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
     const newLang = lang || (this.currentLang === 'ar' ? 'en' : 'ar');
     super.changeLanguage(newLang);
     this.currentLanguage = newLang;
-    this.toastService.presentSuccessToast(
-      'bottom',
-      this.translateService.instant('SETTINGS.LANGUAGE_CHANGED')
-    );
     this.cdr.markForCheck();
   }
 
@@ -131,10 +119,6 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
     this.selectedTheme = theme;
 
     this.themeService.setTheme(theme);
-    this.toastService.presentSuccessToast(
-      'bottom',
-      this.translateService.instant('SETTINGS.THEME_CHANGED')
-    );
     this.cdr.markForCheck();
   }
 
@@ -153,18 +137,10 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
           )
         );
       } else {
-        this.toastService.presentSuccessToast(
-          'bottom',
-          this.translateService.instant('SETTINGS.NOTIFICATIONS_ENABLED')
-        );
       }
     } else {
       await this.pushNotificationService.disable();
       this.notificationsEnabled = false;
-      this.toastService.presentSuccessToast(
-        'bottom',
-        this.translateService.instant('SETTINGS.NOTIFICATIONS_DISABLED')
-      );
     }
     this.cdr.markForCheck();
   }
@@ -183,10 +159,6 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
           this.authService.getCurrentUserId() || undefined
         );
         this.biometricSignInEnabled = true;
-        this.toastService.presentSuccessToast(
-          'bottom',
-          this.translateService.instant('SETTINGS.BIOMETRIC_SIGNIN_ENABLED')
-        );
       } catch {
         event.target.checked = false;
         this.biometricSignInEnabled = false;
@@ -199,10 +171,6 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
       try {
         await this.biometricSignInService.revoke();
         this.biometricSignInEnabled = false;
-        this.toastService.presentSuccessToast(
-          'bottom',
-          this.translateService.instant('SETTINGS.BIOMETRIC_SIGNIN_DISABLED')
-        );
       } catch {
         event.target.checked = true;
         this.toastService.presentErrorToast(
@@ -219,13 +187,6 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
   toggleAutoBackup(event: any) {
     this.autoBackupEnabled = event.detail.checked;
     localStorage.setItem('autoBackup', this.autoBackupEnabled.toString());
-    const messageKey = this.autoBackupEnabled
-      ? 'SETTINGS.AUTO_BACKUP_ENABLED'
-      : 'SETTINGS.AUTO_BACKUP_DISABLED';
-    this.toastService.presentSuccessToast(
-      'bottom',
-      this.translateService.instant(messageKey)
-    );
     this.cdr.markForCheck();
   }
 

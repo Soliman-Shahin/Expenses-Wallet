@@ -9,8 +9,8 @@ import {
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { ToastController } from '@ionic/angular';
 import { ConnectionService } from '../services/connection.service';
+import { ToastService } from '../../shared/services/toast.service';
 
 function handleAccountLocked(error: HttpErrorResponse): string {
   const lockoutMinutes = error.error?.lockoutMinutes || 15;
@@ -44,24 +44,10 @@ function extractValidationErrors(error: HttpErrorResponse): string {
   return error.error?.message || 'Validation failed. Please check your input.';
 }
 
-async function showErrorToast(
-  toastController: ToastController,
-  message: string
-): Promise<void> {
-  const toast = await toastController.create({
-    message: message,
-    duration: 4000,
-    position: 'top',
-    color: 'danger',
-    buttons: [{ text: 'Dismiss', role: 'cancel' }],
-  });
-  await toast.present();
-}
-
 async function handleError(
   error: HttpErrorResponse,
   request: HttpRequest<unknown>,
-  toastController: ToastController
+  toastService: ToastService
 ): Promise<void> {
   let errorMessage = 'An unexpected error occurred';
   let shouldShowToast = true;
@@ -125,7 +111,7 @@ async function handleError(
   });
 
   if (shouldShowToast) {
-    await showErrorToast(toastController, errorMessage);
+    await toastService.presentErrorToast('top', errorMessage);
   }
 }
 
@@ -134,7 +120,7 @@ export const errorInterceptor: HttpInterceptorFn = (
   next: HttpHandlerFn
 ): Observable<HttpEvent<unknown>> => {
   if (!isApiUrl(req.url)) return next(req);
-  const toastController = inject(ToastController);
+  const toastService = inject(ToastService);
   const connection = inject(ConnectionService);
 
   return next(req).pipe(
@@ -144,7 +130,7 @@ export const errorInterceptor: HttpInterceptorFn = (
       if (!connection.isOnline() || !navigator.onLine) {
         return throwError(() => error);
       }
-      handleError(error, req, toastController);
+      handleError(error, req, toastService);
       return throwError(() => error);
     })
   );
