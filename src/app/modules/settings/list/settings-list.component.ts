@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { BaseComponent } from 'src/app/shared/base/base.component';
 import { Subscription } from 'rxjs';
 import { BiometricService } from 'src/app/core/services/biometric.service';
+import { BiometricSignInService } from 'src/app/modules/auth/services/biometric-signin.service';
 import { ModalController, IonicModule } from '@ionic/angular';
 import { AuthService } from 'src/app/modules/auth/services/auth.service';
 import { User } from 'src/app/modules/auth/models';
@@ -18,6 +19,7 @@ import { PushNotificationService } from 'src/app/core/services/push-notification
 export class SettingsListComponent extends BaseComponent implements OnInit {
   biometricAvailable = false;
   biometricEnabled = false;
+  biometricSignInEnabled = false;
 
   currentLanguage = 'en';
   selectedTheme = 'light';
@@ -38,6 +40,7 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
   ];
 
   private biometricService = inject(BiometricService);
+  private biometricSignInService = inject(BiometricSignInService);
   private pushNotificationService = inject(PushNotificationService);
 
   constructor() {
@@ -59,6 +62,8 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
   async loadSettings() {
     this.biometricAvailable = await this.biometricService.isAvailable();
     this.biometricEnabled = this.biometricService.isEnabled;
+    this.biometricSignInEnabled =
+      await this.biometricSignInService.hasEnrollment();
     this.currentLanguage = this.currentLang;
     this.selectedTheme = this.currentTheme;
     const notificationPermission =
@@ -168,6 +173,53 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
         'bottom',
         this.translateService.instant('SETTINGS.NOTIFICATIONS_DISABLED')
       );
+    }
+    this.cdr.markForCheck();
+  }
+
+  async toggleBiometricSignIn(event: any) {
+    const enabled = !!event.detail.checked;
+    if (enabled) {
+      if (!this.authService.isLoggedIn || !this.biometricAvailable) {
+        event.target.checked = false;
+        return;
+      }
+      try {
+        await this.biometricSignInService.enroll(
+          'This device',
+          'android',
+          this.authService.getCurrentUserId() || undefined
+        );
+        this.biometricSignInEnabled = true;
+        this.toastService.presentSuccessToast(
+          'bottom',
+          this.translateService.instant('SETTINGS.BIOMETRIC_SIGNIN_ENABLED')
+        );
+      } catch {
+        event.target.checked = false;
+        this.biometricSignInEnabled = false;
+        this.toastService.presentErrorToast(
+          'bottom',
+          this.translateService.instant('SETTINGS.BIOMETRIC_SIGNIN_FAILED')
+        );
+      }
+    } else {
+      try {
+        await this.biometricSignInService.revoke();
+        this.biometricSignInEnabled = false;
+        this.toastService.presentSuccessToast(
+          'bottom',
+          this.translateService.instant('SETTINGS.BIOMETRIC_SIGNIN_DISABLED')
+        );
+      } catch {
+        event.target.checked = true;
+        this.toastService.presentErrorToast(
+          'bottom',
+          this.translateService.instant(
+            'SETTINGS.BIOMETRIC_SIGNIN_REVOKE_FAILED'
+          )
+        );
+      }
     }
     this.cdr.markForCheck();
   }

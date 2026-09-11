@@ -129,6 +129,22 @@
           color="primary"
         ></ion-toggle>
       </ion-item>
+      <ion-item lines="none">
+        <div slot="start" class="icon-wrapper color-green">
+          <ion-icon name="finger-print"></ion-icon>
+        </div>
+        <ion-label>
+          <h3>{{ "SETTINGS.BIOMETRIC_SIGNIN" | translate }}</h3>
+          <p>{{ "SETTINGS.BIOMETRIC_SIGNIN_DESC" | translate }}</p>
+        </ion-label>
+        <ion-toggle
+          slot="end"
+          [attr.aria-label]="'SETTINGS.BIOMETRIC_SIGNIN' | translate"
+          [checked]="biometricSignInEnabled"
+          (ionChange)="toggleBiometricSignIn($event)"
+          color="primary"
+        ></ion-toggle>
+      </ion-item>
       }
     </ion-list>
 

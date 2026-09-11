@@ -1,4 +1,9 @@
-import { Component, ChangeDetectionStrategy, OnInit } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  OnInit,
+  inject,
+} from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -21,6 +26,8 @@ import { UiInputComponent } from '../../../../shared/ui/ui-input/ui-input.compon
 import { RouterLink } from '@angular/router';
 import { AsyncPipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
+import { BiometricSignInService } from '../../services/biometric-signin.service';
+import { Platform } from '@ionic/angular';
 
 @Component({
   selector: 'app-login',
@@ -43,6 +50,11 @@ export class LoginComponent extends BaseComponent implements OnInit {
   hide = true;
   private readonly loading = new BehaviorSubject<boolean>(false);
   private readonly errorMessage = new BehaviorSubject<string>('');
+  biometricSignInAvailable = false;
+  biometricSignInInProgress = false;
+  private biometricLoaderShown = false;
+  private biometricSignInService = inject(BiometricSignInService);
+  private platform = inject(Platform);
 
   readonly vm$ = combineLatest({
     isLoading: this.loading.asObservable(),
@@ -63,10 +75,35 @@ export class LoginComponent extends BaseComponent implements OnInit {
   override ngOnInit(): void {
     super.ngOnInit();
     this.initForm();
+    void this.refreshBiometricSignInAvailability();
+  }
+
+  private async refreshBiometricSignInAvailability() {
+    await this.platform.ready();
+    this.biometricSignInAvailable =
+      (await this.biometricSignInService.isAvailable()) &&
+      (await this.biometricSignInService.hasEnrollment());
+    this.cdr.markForCheck();
+  }
+  signInWithBiometrics(): void {
+    if (this.biometricSignInInProgress) return;
+    this.biometricSignInInProgress = true;
+    this.biometricLoaderShown = false;
+    this.handleAuth(
+      this.biometricSignInService.signIn(() => {
+        this.biometricLoaderShown = true;
+        this.loadingService.show(
+          'auth-biometric',
+          this.translateService.instant('AUTH.BIOMETRIC_SIGNIN_PROCESSING')
+        );
+      }),
+      true
+    );
   }
 
   // Ensure UI resets correctly when returning to login (e.g., after logout)
   ionViewWillEnter(): void {
+    void this.refreshBiometricSignInAvailability();
     this.loading.next(false);
     this.errorMessage.next('');
     if (this.loginForm) {
@@ -117,7 +154,6 @@ export class LoginComponent extends BaseComponent implements OnInit {
   }
 
   signInWithGoogle(): void {
-    console.log('🔵 [LoginComponent] Google Sign-In button clicked!');
     this.handleAuth(this.authService.loginWithGoogle());
   }
 
@@ -138,14 +174,25 @@ export class LoginComponent extends BaseComponent implements OnInit {
     this.handleAuth(this.authService.login(email, password, !!rememberMe));
   }
 
-  private handleAuth(authObservable: Observable<any>): void {
+  private handleAuth(
+    authObservable: Observable<any>,
+    biometricTransaction = false
+  ): void {
     this.loading.next(true);
     this.errorMessage.next('');
 
     authObservable
       .pipe(
         takeUntil(this.destroy$),
-        finalize(() => this.loading.next(false))
+        finalize(() => {
+          this.loading.next(false);
+          if (biometricTransaction && this.biometricLoaderShown) {
+            this.loadingService.hide('auth-biometric');
+            this.biometricLoaderShown = false;
+          }
+          if (biometricTransaction) this.biometricSignInInProgress = false;
+          this.cdr.markForCheck();
+        })
       )
       .subscribe({
         next: (res) => {

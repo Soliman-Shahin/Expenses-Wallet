@@ -94,6 +94,19 @@ export class AuthService {
   ): Observable<AuthResponse> {
     return this.authenticate('/user/login', { email, password }, persistent);
   }
+  loginWithBiometric(
+    deviceId: string,
+    credential: string,
+    expectedUserId?: string
+  ): Observable<AuthResponse> {
+    return this.authenticate(
+      '/user/biometric/signin',
+      { deviceId, credential },
+      true,
+      false,
+      expectedUserId
+    );
+  }
   signup(
     email: string,
     password: string,
@@ -202,10 +215,12 @@ export class AuthService {
   private authenticate(
     path: string,
     credentials: Record<string, any>,
-    persistent = false
+    persistent = false,
+    encrypt = true,
+    expectedUserId?: string
   ): Observable<AuthResponse> {
     const fullUrl = environment.apiUrl + path;
-    const payload = this.payload(credentials);
+    const payload = encrypt ? this.payload(credentials) : credentials;
     const nativeHttp = Capacitor.isNativePlatform()
       ? (window as any)?.Capacitor?.Plugins?.Http
       : null;
@@ -239,6 +254,10 @@ export class AuthService {
               data?.tokens?.refreshToken ?? data?.refreshToken;
             if (!data?.user || !accessToken || !refreshToken)
               throw new Error('Invalid authentication response');
+            if (expectedUserId && data.user._id !== expectedUserId)
+              throw new Error(
+                'Biometric enrollment belongs to another account'
+              );
             this.loggingOut = false;
             try {
               await this.tokenService.saveSession(

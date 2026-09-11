@@ -269,6 +269,12 @@
     "BIOMETRIC_ENABLED": "تم تفعيل المصادقة البيومترية",
     "BIOMETRIC_DISABLED": "تم إيقاف المصادقة البيومترية",
     "BIOMETRIC_FAILED": "فشل التحقق البيومتري",
+    "BIOMETRIC_SIGNIN": "تسجيل الدخول بالبصمة",
+    "BIOMETRIC_SIGNIN_DESC": "استخدم البصمة لتسجيل الدخول بعد الخروج",
+    "BIOMETRIC_SIGNIN_ENABLED": "تم تفعيل تسجيل الدخول بالبصمة",
+    "BIOMETRIC_SIGNIN_DISABLED": "تمت إزالة تسجيل الدخول بالبصمة",
+    "BIOMETRIC_SIGNIN_FAILED": "فشل إعداد تسجيل الدخول بالبصمة",
+    "BIOMETRIC_SIGNIN_REVOKE_FAILED": "تعذر تأكيد إزالة تسجيل الدخول بالبصمة",
     "DATA_BACKUP": "البيانات والنسخ الاحتياطي",
     "AUTO_BACKUP": "النسخ الاحتياطي التلقائي",
     "AUTO_BACKUP_DESC": "نسخ احتياطي تلقائي لبياناتك",
@@ -347,6 +353,8 @@
     "DELETE_SUCCESS": "تم حذف العنصر بنجاح."
   },
   "AUTH": {
+    "SIGN_IN_WITH_BIOMETRICS": "تسجيل الدخول باستخدام البصمة",
+    "BIOMETRIC_SIGNIN_PROCESSING": "جارٍ تسجيل الدخول بأمان…",
     "SIGN_IN": "تسجيل الدخول",
     "SIGN_UP": "إنشاء حساب جديد",
     "SIGN_OUT": "تسجيل الخروج",

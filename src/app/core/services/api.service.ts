@@ -13,10 +13,7 @@ export class ApiService {
   private readonly baseUrl = environment.apiUrl;
   private connectionService = inject(ConnectionService);
 
-  constructor(
-    private http: HttpClient,
-    private storageService: TokenService
-  ) {}
+  constructor(private http: HttpClient, private storageService: TokenService) {}
 
   private getHeadersObject(): { [key: string]: string } {
     let token = '';
@@ -67,7 +64,9 @@ export class ApiService {
       });
     }
 
-    const timeoutDuration = this.connectionService.isBackendReachable() ? 15000 : 2000;
+    const timeoutDuration = this.connectionService.isBackendReachable()
+      ? 15000
+      : 2000;
 
     return this.http
       .get<any>(`${this.baseUrl}${path}`, {
@@ -107,7 +106,9 @@ export class ApiService {
       ...extraHeaders,
     });
 
-    const timeoutDuration = this.connectionService.isBackendReachable() ? 15000 : 2000;
+    const timeoutDuration = this.connectionService.isBackendReachable()
+      ? 15000
+      : 2000;
 
     return this.http
       .post<any>(`${this.baseUrl}${path}`, body, {
@@ -152,17 +153,16 @@ export class ApiService {
       ...extraHeaders,
     });
 
-    const timeoutDuration = this.connectionService.isBackendReachable() ? 15000 : 2000;
+    const timeoutDuration = this.connectionService.isBackendReachable()
+      ? 15000
+      : 2000;
 
     return this.http
       .post<T>(`${this.baseUrl}${path}`, formData, {
         headers: mergedHeaders,
         params: options.params,
       })
-      .pipe(
-        timeout(timeoutDuration),
-        catchError(this.handleError.bind(this))
-      );
+      .pipe(timeout(timeoutDuration), catchError(this.handleError.bind(this)));
   }
 
   put<T>(
@@ -170,7 +170,9 @@ export class ApiService {
     body: any,
     options: { params?: HttpParams } = {}
   ): Observable<T> {
-    const timeoutDuration = this.connectionService.isBackendReachable() ? 15000 : 2000;
+    const timeoutDuration = this.connectionService.isBackendReachable()
+      ? 15000
+      : 2000;
 
     return this.http
       .put<any>(`${this.baseUrl}${path}`, body, {
@@ -192,19 +194,19 @@ export class ApiService {
 
   delete<T>(
     path: string,
-    options: { params?: HttpParams } = {}
+    options: { params?: HttpParams; body?: unknown } = {}
   ): Observable<T> {
-    const timeoutDuration = this.connectionService.isBackendReachable() ? 15000 : 2000;
+    const timeoutDuration = this.connectionService.isBackendReachable()
+      ? 15000
+      : 2000;
 
     return this.http
       .delete<T>(`${this.baseUrl}${path}`, {
         headers: this.getHeaders(),
         params: options.params,
+        body: options.body,
       })
-      .pipe(
-        timeout(timeoutDuration),
-        catchError(this.handleError.bind(this))
-      );
+      .pipe(timeout(timeoutDuration), catchError(this.handleError.bind(this)));
   }
 
   patch<T>(
@@ -212,7 +214,9 @@ export class ApiService {
     body: any,
     options: { params?: HttpParams } = {}
   ): Observable<T> {
-    const timeoutDuration = this.connectionService.isBackendReachable() ? 15000 : 2000;
+    const timeoutDuration = this.connectionService.isBackendReachable()
+      ? 15000
+      : 2000;
 
     return this.http
       .patch<{ data: T }>(`${this.baseUrl}${path}`, body, {

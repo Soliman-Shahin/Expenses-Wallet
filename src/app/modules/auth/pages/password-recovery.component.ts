@@ -13,6 +13,7 @@ import { IonicModule } from '@ionic/angular';
 import { TranslateModule } from '@ngx-translate/core';
 import { BehaviorSubject, finalize } from 'rxjs';
 import { AuthService } from '../services/auth.service';
+import { BiometricSignInService } from '../services/biometric-signin.service';
 
 const same = (control: AbstractControl): ValidationErrors | null =>
   control.get('password')?.value === control.get('confirm')?.value
@@ -211,6 +212,7 @@ export class ForgotPasswordComponent {
 })
 export class ResetPasswordComponent {
   private auth = inject(AuthService);
+  private biometricSignIn = inject(BiometricSignInService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   token = this.route.snapshot.queryParamMap.get('token');
@@ -238,6 +240,7 @@ export class ResetPasswordComponent {
       .pipe(finalize(() => this.loadingState.next(false)))
       .subscribe({
         next: () => {
+          void this.biometricSignIn.clearLocalEnrollment();
           this.doneState.next(true);
           void this.router.navigateByUrl('/auth/login');
         },

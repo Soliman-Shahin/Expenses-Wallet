@@ -325,6 +325,27 @@
       --box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
     }
   }
+
+  .biometric-signin-btn {
+    --border-radius: var(--ew-radius-pill);
+    --border-style: solid;
+    --border-width: 1px;
+    --border-color: rgba(var(--ion-color-primary-rgb), 0.35);
+    --background: rgba(var(--ion-color-primary-rgb), 0.04);
+    --background-hover: rgba(var(--ion-color-primary-rgb), 0.1);
+    --color: var(--ion-color-primary);
+    --box-shadow: none;
+    height: 48px;
+    margin: 12px 0 0;
+    font-size: var(--ew-font-size-sm);
+    font-weight: var(--ew-font-weight-semibold);
+    text-transform: none;
+
+    ion-icon {
+      margin-inline-end: var(--ew-space-3);
+      font-size: 19px;
+    }
+  }
 }
 
 // ── Divider ──────────────────────────────────────────────────────

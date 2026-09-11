@@ -16,7 +16,7 @@ export class SecureStorageService {
     )
       return null;
     // The plugin field is named password; its value is a session bundle, never a user password.
-    return (await this.native.getCredentials({ server: this.server })).password;
+    return (await this.native.getCredentials({ server: this.server })).password || null;
   }
 
   async write(value: string): Promise<void> {
@@ -34,7 +34,16 @@ export class SecureStorageService {
 
   async clear(): Promise<void> {
     localStorage.removeItem(this.key);
-    if (Capacitor.isNativePlatform())
-      await this.native.deleteCredentials({ server: this.server });
+    if (Capacitor.isNativePlatform()) {
+      // @capgo/capacitor-native-biometric currently clears its shared
+      // preferences globally inside deleteCredentials(), which would erase
+      // AUTH.5 installation/enrollment namespaces. Overwrite only the AUTH.1
+      // session value; an empty value is treated as absent by read().
+      await this.native.setCredentials({
+        server: this.server,
+        username: 'cleared',
+        password: '',
+      });
+    }
   }
 }

@@ -35,6 +35,18 @@
           <ion-icon slot="start" name="logo-google"></ion-icon>
           {{ "AUTH.CONTINUE_WITH_GOOGLE" | translate }}
         </ion-button>
+        @if (biometricSignInAvailable) {
+        <ion-button
+          expand="block"
+          fill="outline"
+          class="biometric-signin-btn"
+          (click)="signInWithBiometrics()"
+          [disabled]="vm.isLoading"
+        >
+          <ion-icon slot="start" name="finger-print"></ion-icon>
+          {{ "AUTH.SIGN_IN_WITH_BIOMETRICS" | translate }}
+        </ion-button>
+        }
       </div>
       <div class="divider">
         <span class="divider-line"></span>
