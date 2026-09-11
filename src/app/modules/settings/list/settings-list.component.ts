@@ -22,7 +22,7 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
   biometricSignInEnabled = false;
 
   currentLanguage = 'en';
-  selectedTheme = 'light';
+  selectedTheme = 'auto';
   notificationsEnabled = true;
   autoBackupEnabled = false;
 
@@ -65,7 +65,7 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
     this.biometricSignInEnabled =
       await this.biometricSignInService.hasEnrollment();
     this.currentLanguage = this.currentLang;
-    this.selectedTheme = this.currentTheme;
+    this.selectedTheme = this.themeService.getPreference();
     const notificationPermission =
       await this.pushNotificationService.getCurrentPermissionState();
     this.notificationsEnabled =
@@ -130,15 +130,7 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
     const theme = event.detail.value;
     this.selectedTheme = theme;
 
-    // Apply theme immediately
-    const currentTheme = this.themeService.getCurrentTheme();
-    if (theme === 'dark' && currentTheme !== 'dark') {
-      this.themeService.toggleTheme();
-    } else if (theme === 'light' && currentTheme === 'dark') {
-      this.themeService.toggleTheme();
-    }
-
-    localStorage.setItem('theme', theme);
+    this.themeService.setTheme(theme);
     this.toastService.presentSuccessToast(
       'bottom',
       this.translateService.instant('SETTINGS.THEME_CHANGED')

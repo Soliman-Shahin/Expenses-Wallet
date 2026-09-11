@@ -48,6 +48,7 @@ import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { AppComponent } from './app/app.component';
 import { provideServiceWorker } from '@angular/service-worker';
+import { ThemeService } from './app/shared/services/themeToggle.service';
 
 export function HttpLoaderFactory(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -129,6 +130,13 @@ if (!(window as any).__appBootstrapped) {
           };
         },
         deps: [PermissionService, TokenService, AuthService],
+        multi: true,
+      },
+      {
+        provide: APP_INITIALIZER,
+        useFactory: (themeService: ThemeService) => () =>
+          themeService.initTheme(),
+        deps: [ThemeService],
         multi: true,
       },
       provideAnimations(),
