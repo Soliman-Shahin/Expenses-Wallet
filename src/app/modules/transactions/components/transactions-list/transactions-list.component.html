@@ -213,7 +213,12 @@
 
   <!-- Skeleton loaders while fetching -->
   @if (isLoading) {
-  <div class="skeleton-list">
+  <div
+    class="skeleton-list content-list-loading"
+    role="status"
+    [attr.aria-label]="'COMMON.LOADING' | translate"
+    aria-busy="true"
+  >
     @for (i of [1, 2, 3, 4, 5, 6]; track i) {
     <app-skeleton-block variant="list-item-avatar"></app-skeleton-block>
     }

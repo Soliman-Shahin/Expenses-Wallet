@@ -14,6 +14,7 @@ import {
 } from '../../shared/models/plan.model';
 import { PlanCardComponent } from './components/plan-card/plan-card.component';
 import { UsageStatsComponent } from './components/usage-stats/usage-stats.component';
+import { SkeletonBlockComponent } from '../../shared/ui/skeleton-block/skeleton-block.component';
 
 @Component({
   selector: 'app-subscription',
@@ -26,6 +27,7 @@ import { UsageStatsComponent } from './components/usage-stats/usage-stats.compon
     TranslateModule,
     PlanCardComponent,
     UsageStatsComponent,
+    SkeletonBlockComponent,
   ],
 })
 export class SubscriptionPage implements OnInit {

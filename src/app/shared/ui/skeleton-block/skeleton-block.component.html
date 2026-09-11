@@ -1,28 +1,54 @@
-
 @switch (variant) {
-  <!-- Avatar List Item Variant -->
-  @case ('list-item-avatar') {
-    <div class="skeleton-list-item-avatar">
-      <ion-skeleton-text animated class="skeleton-avatar"></ion-skeleton-text>
-      <div class="skeleton-text-container">
-        <ion-skeleton-text animated class="skeleton-line-md"></ion-skeleton-text>
-        <ion-skeleton-text animated class="skeleton-line-sm"></ion-skeleton-text>
-      </div>
-    </div>
-  }
-  <!-- Default Skeleton Variants -->
-  @default {
+<!-- Avatar List Item Variant -->
+@case ('list-item-avatar') {
+<div class="skeleton-list-item-avatar">
+  <ion-skeleton-text
+    [animated]="animated"
+    class="skeleton-avatar"
+  ></ion-skeleton-text>
+  <div class="skeleton-text-container">
     <ion-skeleton-text
-      animated
-      [ngClass]="{
-        'skeleton-line': variant === 'line',
-        'skeleton-title': variant === 'title',
-        'skeleton-card-sm': variant === 'card-sm',
-        'skeleton-card-md': variant === 'card-md',
-        'skeleton-card-lg': variant === 'card-lg',
-        'skeleton-card-xl': variant === 'card-xl',
-        'skeleton-chart': variant === 'chart'
-      }"
+      [animated]="animated"
+      class="skeleton-line-md"
     ></ion-skeleton-text>
-  }
+    <ion-skeleton-text
+      [animated]="animated"
+      class="skeleton-line-sm"
+    ></ion-skeleton-text>
+  </div>
+</div>
+} @case ('detail') {
+<div class="skeleton-detail">
+  <ion-skeleton-text
+    [animated]="animated"
+    class="skeleton-detail-title"
+  ></ion-skeleton-text>
+  <ion-skeleton-text
+    [animated]="animated"
+    class="skeleton-detail-meta"
+  ></ion-skeleton-text>
+  <ion-skeleton-text
+    [animated]="animated"
+    class="skeleton-detail-body"
+  ></ion-skeleton-text>
+  <ion-skeleton-text
+    [animated]="animated"
+    class="skeleton-detail-body short"
+  ></ion-skeleton-text>
+</div>
 }
+<!-- Default Skeleton Variants -->
+@default {
+<ion-skeleton-text
+  [animated]="animated"
+  [ngClass]="{
+    'skeleton-line': variant === 'line',
+    'skeleton-title': variant === 'title',
+    'skeleton-card-sm': variant === 'card-sm',
+    'skeleton-card-md': variant === 'card-md',
+    'skeleton-card-lg': variant === 'card-lg',
+    'skeleton-card-xl': variant === 'card-xl',
+    'skeleton-chart': variant === 'chart'
+  }"
+></ion-skeleton-text>
+} }

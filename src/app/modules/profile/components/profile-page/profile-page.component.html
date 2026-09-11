@@ -2,8 +2,13 @@
 <ion-content class="profile-content" [fullscreen]="true">
   <div class="profile-main">
     @if (vm.isLoadingProfile) {
-    <div role="status" class="profile-state">
-      {{ "COMMON.LOADING" | translate }}
+    <div
+      role="status"
+      aria-busy="true"
+      [attr.aria-label]="'COMMON.LOADING' | translate"
+      class="profile-state"
+    >
+      <app-skeleton-block variant="detail"></app-skeleton-block>
     </div>
     } @if (vm.errorMessage && !vm.isLoadingProfile) {
     <ion-note color="danger" role="alert">{{

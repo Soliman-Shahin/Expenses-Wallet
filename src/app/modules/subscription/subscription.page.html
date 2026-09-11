@@ -25,6 +25,20 @@
   </ion-toolbar>
 </ion-header>
 
+<div
+  class="content-loading-state"
+  *ngIf="isLoading"
+  role="status"
+  aria-busy="true"
+  [attr.aria-label]="'COMMON.LOADING' | translate"
+>
+  <app-skeleton-block variant="title"></app-skeleton-block>
+  <div class="content-loading-cards">
+    <app-skeleton-block variant="card-md"></app-skeleton-block
+    ><app-skeleton-block variant="card-md"></app-skeleton-block>
+  </div>
+</div>
+
 <ion-content [fullscreen]="true">
   <!-- Plans Tab -->
   <div

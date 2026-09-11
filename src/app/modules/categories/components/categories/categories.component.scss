@@ -182,6 +182,10 @@ ion-searchbar {
   padding: 8px;
   background: var(--ion-item-background);
 }
+.content-list-loading {
+  display: grid;
+  gap: 4px;
+}
 @media (max-width: 360px) {
   ion-segment-button ion-icon {
     display: none;

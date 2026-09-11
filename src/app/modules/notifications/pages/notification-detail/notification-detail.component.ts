@@ -11,11 +11,12 @@ import { IonicModule } from '@ionic/angular';
 import { finalize } from 'rxjs';
 import { AppNotification } from 'src/app/core/models/app-notification.model';
 import { ApiService } from 'src/app/core/services/api.service';
+import { SkeletonBlockComponent } from 'src/app/shared/ui/skeleton-block/skeleton-block.component';
 
 @Component({
   selector: 'app-notification-detail',
   standalone: true,
-  imports: [CommonModule, IonicModule, TranslateModule],
+  imports: [CommonModule, IonicModule, TranslateModule, SkeletonBlockComponent],
   template: `
     <ion-header>
       <ion-toolbar>
@@ -26,9 +27,14 @@ import { ApiService } from 'src/app/core/services/api.service';
       </ion-toolbar>
     </ion-header>
     <ion-content class="ion-padding">
-      <div *ngIf="loading" role="status" class="notification-loading">
-        <ion-spinner></ion-spinner
-        ><span>{{ 'COMMON.LOADING' | translate }}</span>
+      <div
+        *ngIf="loading"
+        role="status"
+        aria-busy="true"
+        [attr.aria-label]="'COMMON.LOADING' | translate"
+        class="notification-loading"
+      >
+        <app-skeleton-block variant="detail"></app-skeleton-block>
       </div>
       <ion-card *ngIf="notification as item">
         <ion-card-header>
