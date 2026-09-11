@@ -238,6 +238,26 @@ ion-title {
 .field-error {
   padding-inline: 20px;
 }
+.inline-field-error {
+  margin: -8px 0 8px;
+  color: var(--ion-color-danger);
+  font-size: 12px;
+}
+.submit-btn ion-spinner {
+  width: 20px;
+  height: 20px;
+}
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 
 .form-field .premium-label,
 .premium-input {

@@ -47,18 +47,41 @@ import { Expense } from 'src/app/shared/models/expense.model';
             </div>
             <div class="identity-copy">
               <p class="eyebrow">
-                <bdi>{{ categoryName }}</bdi>
+                <bdi>{{
+                  categoryName || ('EXPENSE.CATEGORY' | translate)
+                }}</bdi>
               </p>
               <h1 dir="auto">{{ expense.description }}</h1>
             </div>
           </div>
           <p class="amount-caption">{{ 'EXPENSE.AMOUNT' | translate }}</p>
           <p class="record-amount" dir="ltr">
-            <bdi>{{ expense.amount | number : '1.2-2' : locale }}</bdi>
+            <bdi
+              [class.income-amount]="isIncome"
+              [class.outcome-amount]="!isIncome"
+            >
+              {{ isIncome ? '+' : '-'
+              }}{{ absoluteAmount | number : '1.2-2' : locale }}
+            </bdi>
             <bdi class="record-currency">{{
               currency || ('MOBILE.CURRENCY_UNAVAILABLE' | translate)
             }}</bdi>
           </p>
+          <div
+            class="record-type"
+            [class.income]="isIncome"
+            [class.outcome]="!isIncome"
+          >
+            <ion-icon
+              [name]="
+                isIncome ? 'trending-down-outline' : 'trending-up-outline'
+              "
+              aria-hidden="true"
+            ></ion-icon>
+            <span>{{
+              (isIncome ? 'COMMON.INCOME' : 'COMMON.OUTCOME') | translate
+            }}</span>
+          </div>
           <section class="record-context">
             <div class="record-date">
               <ion-icon name="calendar-outline" aria-hidden="true"></ion-icon>
@@ -66,7 +89,9 @@ import { Expense } from 'src/app/shared/models/expense.model';
                 <p class="eyebrow">{{ 'EXPENSE.DATE' | translate }}</p>
                 <p class="date-value">
                   <bdi>{{
-                    expense.date | date : 'medium' : undefined : locale
+                    isValidDate
+                      ? (expense.date | date : 'medium' : undefined : locale)
+                      : ('EXPENSE.DATE' | translate)
                   }}</bdi>
                 </p>
               </div>
@@ -104,6 +129,7 @@ import { Expense } from 'src/app/shared/models/expense.model';
         font-size: 16px;
         font-weight: 600;
         text-align: start;
+        padding-inline-start: 1.5rem;
       }
       article {
         padding: 4px 20px 20px;
@@ -184,11 +210,35 @@ import { Expense } from 'src/app/shared/models/expense.model';
         min-width: 0;
         max-width: 100%;
       }
+      .record-amount .income-amount {
+        color: var(--ion-color-success);
+      }
+      .record-amount .outcome-amount {
+        color: var(--ion-color-danger);
+      }
       .record-currency {
         color: var(--ew-wallet-muted);
         font-size: 14px;
         letter-spacing: 0;
         font-weight: 500;
+      }
+      .record-type {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 10px;
+        padding: 5px 9px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 650;
+        background: var(--ew-wallet-inset);
+        color: var(--ew-wallet-muted);
+      }
+      .record-type.income {
+        color: var(--ion-color-success);
+      }
+      .record-type.outcome {
+        color: var(--ion-color-danger);
       }
       .record-status {
         margin: 12px 0 0;
@@ -252,7 +302,7 @@ export class ExpenseDetailComponent {
   }
   @Input({ required: true }) expense!: Expense;
   @Input() currency = '';
-  @Input() categoryName = '—';
+  @Input() categoryName = '';
   @Input() locale = 'en';
   private readonly modal = inject(ModalController);
   close() {
@@ -260,5 +310,22 @@ export class ExpenseDetailComponent {
   }
   edit() {
     return this.modal.dismiss(null, 'edit');
+  }
+
+  get isIncome(): boolean {
+    const categoryType = this.categoryVisual?.type;
+    return (
+      categoryType === 'income' || (this.expense as any)?.type === 'income'
+    );
+  }
+
+  get absoluteAmount(): number | null {
+    const amount = Number(this.expense?.amount);
+    return Number.isFinite(amount) ? Math.abs(amount) : null;
+  }
+
+  get isValidDate(): boolean {
+    const timestamp = new Date(this.expense?.date).getTime();
+    return Number.isFinite(timestamp);
   }
 }

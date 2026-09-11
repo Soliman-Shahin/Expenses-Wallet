@@ -65,6 +65,8 @@ export class ExpenseFormComponent
   private typeSubject$ = new BehaviorSubject<'income' | 'outcome'>('outcome');
   private categoriesLoaded = false;
   private initialized = false;
+  private initialFormValue: Record<string, unknown> | null = null;
+  isDeleteSubmitting = false;
 
   vm$ = combineLatest([toObservable(this.state.loading)]).pipe(
     map(([isLoading]) => ({ isLoading }))
@@ -124,12 +126,17 @@ export class ExpenseFormComponent
         [Validators.required, Validators.min(0.01)],
       ],
       category: [categoryId, Validators.required],
-      description: [this.expense?.description, Validators.required],
+      description: [
+        this.expense?.description,
+        [Validators.required, Validators.pattern(/\S/)],
+      ],
       date: [
         this.expense?.date || new Date().toISOString(),
         Validators.required,
       ],
     });
+
+    this.initialFormValue = this.expenseForm.getRawValue();
 
     // Initialize typeSubject with the initial type
     this.typeSubject$.next(type);
@@ -174,17 +181,27 @@ export class ExpenseFormComponent
   }
 
   async onDelete(): Promise<void> {
+    if (this.isDeleteSubmitting || this.state.loading()) return;
+    this.isDeleteSubmitting = true;
     const confirmed = await this.alertService.showDeleteConfirm(
       this.expense?.description || '',
       async () => this.deleteExpense()
     );
+    if (!confirmed) {
+      this.isDeleteSubmitting = false;
+    }
   }
 
   private deleteExpense(): void {
     this.setLoading(true);
     this.expenseService
       .deleteExpense(this.expense!._id)
-      .pipe(finalize(() => this.setLoading(false)))
+      .pipe(
+        finalize(() => {
+          this.setLoading(false);
+          this.isDeleteSubmitting = false;
+        })
+      )
       .subscribe({
         next: () => {
           this.toastService.presentSuccessToast(
@@ -210,7 +227,11 @@ export class ExpenseFormComponent
       event.stopPropagation();
     }
 
-    if (this.expenseForm.invalid || this.isSubmitting) {
+    if (
+      this.expenseForm.invalid ||
+      this.isSubmitting ||
+      (this.isEditMode && !this.hasFormChanges())
+    ) {
       return;
     }
     this.isSubmitting = true;
@@ -253,6 +274,16 @@ export class ExpenseFormComponent
           this.handleError(message, error, true);
         },
       });
+  }
+
+  hasFormChanges(): boolean {
+    if (!this.isEditMode || !this.initialFormValue) return true;
+    const current = this.expenseForm.getRawValue();
+    return ['type', 'amount', 'category', 'description', 'date'].some(
+      (key) =>
+        String(current[key] ?? '') !==
+        String(this.initialFormValue?.[key] ?? '')
+    );
   }
 
   close(): void {
