@@ -49,9 +49,9 @@
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
   <!-- Skeleton loaders while fetching -->
-  @if (vm.isLoading) {
+  @if (vm.isLoading && !vm.response) {
   <div
-    class="skeleton-list content-list-loading"
+    class="skeleton-list content-list-loading categories-content-skeleton"
     role="status"
     [attr.aria-label]="'COMMON.LOADING' | translate"
     aria-busy="true"
@@ -81,10 +81,13 @@
       >
         <span
           class="category-icon"
-          [style.background]="item.color"
+          [style.background]="item.color || 'var(--ion-color-primary)'"
           aria-hidden="true"
         >
-          <ion-icon size="large" [name]="item.icon"></ion-icon>
+          <ion-icon
+            size="large"
+            [name]="item.icon || 'pricetag-outline'"
+          ></ion-icon>
         </span>
         <ion-label>
           <h3 class="title">
@@ -131,10 +134,14 @@
     </div>
     <h3 class="empty-title">{{ "CATEGORIES.EMPTY_TITLE" | translate }}</h3>
     <p class="empty-subtitle">{{ "CATEGORIES.EMPTY_MESSAGE" | translate }}</p>
+    <ion-button class="empty-create-button" (click)="navigateToAdd()">
+      <ion-icon slot="start" name="add-outline"></ion-icon>
+      {{ "CATEGORY.ADD" | translate }}
+    </ion-button>
   </div>
   } @if (vm.errorMessage && !vm.isLoading) {
   <ion-note color="danger" class="error-message" role="alert"
-    >{{ vm.errorMessage
+    >{{ vm.errorMessage | translate
     }}<ion-button
       fill="clear"
       (click)="filter({ target: { value: activatedParams.q || '' } })"

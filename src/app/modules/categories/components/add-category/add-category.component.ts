@@ -127,26 +127,30 @@ export class AddCategoryComponent extends BaseComponent implements OnInit {
               title: category.title || '',
               icon: category.icon || 'add',
               color: category.color || '#28ba62',
-              type: category.type || 'outcome'
+              type: category.type || 'outcome',
             });
             this.cdr.markForCheck(); // Trigger change detection for OnPush
           },
           error: (error) => {
-            this.errorMessage.next(error.message);
+            this.errorMessage.next('COMMON.ERRORS.LOAD_DATA');
           },
         });
     }
   }
 
   addCategory(): void {
+    if (this.loading.getValue()) return;
     this.formSubmitted = true;
     if (this.categoryForm.invalid) {
       return;
     }
+    const title = String(this.categoryForm.get('title')?.value ?? '').trim();
+    this.categoryForm.patchValue({ title }, { emitEvent: false });
+    if (!title) return;
     this.loading.next(true);
     this.errorMessage.next('');
     this.categoryService
-      .createCategory(this.categoryForm.value)
+      .createCategory(this.categoryForm.getRawValue())
       .pipe(
         takeUntil(this.destroy$),
         finalize(() => {
@@ -166,20 +170,27 @@ export class AddCategoryComponent extends BaseComponent implements OnInit {
         },
         error: (error) => {
           this.formSubmitted = false;
-          this.errorMessage.next(error.message);
+          this.errorMessage.next('COMMON.ERRORS.DEFAULT');
         },
       });
   }
 
   updateCategory(): void {
-    if (!this.categoryId) {
+    if (
+      !this.categoryId ||
+      this.loading.getValue() ||
+      !this.categoryForm.dirty
+    ) {
       return;
     }
 
+    const title = String(this.categoryForm.get('title')?.value ?? '').trim();
+    this.categoryForm.patchValue({ title }, { emitEvent: false });
+    if (!title) return;
     this.loading.next(true);
     this.errorMessage.next('');
     this.categoryService
-      .updateCategory(this.categoryId, this.categoryForm.value)
+      .updateCategory(this.categoryId, this.categoryForm.getRawValue())
       .pipe(
         takeUntil(this.destroy$),
         finalize(() => this.loading.next(false))
@@ -193,7 +204,7 @@ export class AddCategoryComponent extends BaseComponent implements OnInit {
           this.router.navigate(['/categories/list']);
         },
         error: (error) => {
-          this.errorMessage.next(error.message);
+          this.errorMessage.next('COMMON.ERRORS.DEFAULT');
         },
       });
   }

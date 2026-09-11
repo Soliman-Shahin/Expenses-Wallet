@@ -140,7 +140,7 @@ export class CategoriesComponent
             // forceRefresh = true
             finalize(() => this.loading.next(false)),
             catchError((err) => {
-              this.errorMessage.next(err.message);
+              this.errorMessage.next('COMMON.ERRORS.LOAD_DATA');
               return of(null);
             })
           )
@@ -260,6 +260,7 @@ export class CategoriesComponent
   }
 
   deleteCategory(id: string) {
+    if (this.loading.getValue()) return;
     this.loading.next(true);
     this.errorMessage.next('');
     this.categoryService
@@ -268,7 +269,7 @@ export class CategoriesComponent
         takeUntil(this.destroy$),
         finalize(() => this.loading.next(false)),
         catchError((err) => {
-          this.errorMessage.next(err.message);
+          this.errorMessage.next('COMMON.ERRORS.DEFAULT');
           return of(null);
         })
       )

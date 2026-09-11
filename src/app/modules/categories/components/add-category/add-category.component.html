@@ -60,7 +60,7 @@
       role="alert"
     >
       <ion-icon name="alert-circle-outline"></ion-icon>
-      {{ vm.errorMessage }}
+      {{ vm.errorMessage | translate }}
     </ion-note>
     }
     <form [formGroup]="categoryForm">
@@ -142,7 +142,11 @@
               expand="block"
               shape="round"
               size="large"
-              [disabled]="!categoryForm.valid || vm.isLoading"
+              [disabled]="
+                !categoryForm.valid ||
+                (!categoryForm.dirty && editMode) ||
+                vm.isLoading
+              "
               [attr.aria-label]="
                 (editMode ? 'COMMON.UPDATE' : 'COMMON.CREATE') | translate
               "
