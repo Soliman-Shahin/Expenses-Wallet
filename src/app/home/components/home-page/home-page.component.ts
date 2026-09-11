@@ -112,6 +112,7 @@ export class HomePageComponent
   salaryBreakdownPieChartInjector!: Injector;
 
   latestVm: any;
+  hasRenderedHomeContent = false;
 
   // Subscribe to vm$ for latest values (for injectors)
   // (Removed duplicate ngOnInit here)
@@ -157,6 +158,7 @@ export class HomePageComponent
   private readonly summaryMonthSelection$ = new BehaviorSubject<MonthYear>(
     this.selectedMonth
   );
+  private readonly summaryRefresh$ = new BehaviorSubject<number>(0);
 
   // Reactive month selection for Charts tab (supports custom date ranges)
   private readonly chartsMonthSelection$ = new BehaviorSubject<MonthYear>({
@@ -201,6 +203,7 @@ export class HomePageComponent
   private readonly totalsByMonth$ = combineLatest([
     this.summaryMonthSelection$,
     this.dashboardProfile$,
+    this.summaryRefresh$,
   ]).pipe(
     switchMap(([month, profile]) => {
       if (!profile) {
@@ -213,20 +216,8 @@ export class HomePageComponent
       return totals$.pipe(
         map((totals) => {
           const base = totals ?? { income: 0, expenses: 0, balance: 0 };
-          const salaryDetails = Array.isArray(profile?.salary)
-            ? profile.salary
-            : [];
-          const totalSalary = salaryDetails.reduce(
-            (sum, item) => sum + (Number(item?.amount) || 0),
-            0
-          );
-
-          if ((base.income ?? 0) === 0 && totalSalary > 0) {
-            const income = totalSalary;
-            const expenses = base.expenses ?? 0;
-            return { income, expenses, balance: income - expenses };
-          }
-          return base;
+          const result = this.dashboard.withProfileIncome(base, profile);
+          return result;
         })
       );
     }),
@@ -256,20 +247,7 @@ export class HomePageComponent
       return totals$.pipe(
         map((totals) => {
           const base = totals ?? { income: 0, expenses: 0, balance: 0 };
-          const salaryDetails = Array.isArray(profile?.salary)
-            ? profile.salary
-            : [];
-          const totalSalary = salaryDetails.reduce(
-            (sum, item) => sum + (Number(item?.amount) || 0),
-            0
-          );
-
-          if ((base.income ?? 0) === 0 && totalSalary > 0) {
-            const income = totalSalary;
-            const expenses = base.expenses ?? 0;
-            return { income, expenses, balance: income - expenses };
-          }
-          return base;
+          return this.dashboard.withProfileIncome(base, profile);
         })
       );
     }),
@@ -394,7 +372,10 @@ export class HomePageComponent
   }
 
   get displayUsername(): string {
-    return this.user?.['username'] || 'User';
+    return (
+      this.user?.['username'] ||
+      this.translateService.instant('USER.DEFAULT_NAME')
+    );
   }
 
   /**
@@ -404,6 +385,9 @@ export class HomePageComponent
     super.ngOnInit();
     this.vm$.pipe(takeUntil(this.destroy$)).subscribe((vm) => {
       this.latestVm = vm;
+      if (vm.profile) {
+        this.hasRenderedHomeContent = true;
+      }
       // vm.loading observes shared state; writing it back can replay stale
       // loading after logout/navigation clears the operation that owns it.
       this.createInjectors(vm);
@@ -592,12 +576,9 @@ export class HomePageComponent
 
   // Refresh data method
   private refreshData(): void {
-    // Trigger data refresh by re-emitting current month for Summary
-    // Create new object to trigger change detection
-    this.summaryMonthSelection$.next({
-      month: this.selectedMonth.month,
-      year: this.selectedMonth.year,
-    });
+    // Explicitly invalidate the current-month totals without changing the
+    // selected month or relying on same-value stream emissions.
+    this.summaryRefresh$.next(this.summaryRefresh$.value + 1);
     // Also refresh charts with current selection
     const currentCharts = this.chartsMonthSelection$.getValue();
     this.chartsMonthSelection$.next({ ...currentCharts });
@@ -608,6 +589,15 @@ export class HomePageComponent
     }
 
     this.cdr.markForCheck();
+  }
+
+  refreshSummaryTotals(): void {
+    this.summaryRefresh$.next(this.summaryRefresh$.value + 1);
+    this.cdr.markForCheck();
+  }
+
+  onTransactionsDataChanged(): void {
+    this.refreshSummaryTotals();
   }
 
   // Toggle language between Arabic and English

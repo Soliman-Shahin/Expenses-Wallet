@@ -770,6 +770,23 @@ app-line-chart {
   }
 }
 
+.home-content-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: calc(var(--ion-safe-area-top, 48px) + 20px) 20px 40px;
+}
+
+.home-content-skeleton > app-skeleton-block {
+  display: block;
+}
+
+.home-skeleton-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
 // ── Error State ───────────────────────────────────────────────────
 .error-state {
   display: flex;

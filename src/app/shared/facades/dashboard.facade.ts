@@ -77,6 +77,32 @@ export class DashboardFacade {
     );
   }
 
+  /**
+   * Profile salary is stored separately from expense transactions. The API
+   * totals endpoint aggregates transaction categories only, so callers must
+   * combine the two sources consistently.
+   */
+  withProfileIncome(
+    totals: { income: number; expenses: number; balance: number },
+    profile: { salary?: Array<{ amount?: number }> | number } | null
+  ) {
+    const salaryEntries = Array.isArray(profile?.salary)
+      ? profile.salary
+      : profile?.salary != null
+      ? [{ amount: profile.salary }]
+      : [];
+    const salaryIncome = salaryEntries.reduce(
+      (sum, item) => sum + (Number(item?.amount) || 0),
+      0
+    );
+    const income = totals.income + salaryIncome;
+    return {
+      income,
+      expenses: totals.expenses,
+      balance: income - totals.expenses,
+    };
+  }
+
   totalsForMonth(
     month: number,
     year: number
@@ -241,10 +267,12 @@ export class DashboardFacade {
   ): Observable<NamedValue[]> {
     const startInclusive = startDate.getTime();
     const endExclusive = endDate.getTime();
-    
+
     // Calculate number of days in the range
-    const daysDiff = Math.ceil((endExclusive - startInclusive) / (1000 * 60 * 60 * 24));
-    
+    const daysDiff = Math.ceil(
+      (endExclusive - startInclusive) / (1000 * 60 * 60 * 24)
+    );
+
     return this.expenses.getExpenses().pipe(
       map((resp) => {
         const expArr: Expense[] = Array.isArray(resp)
@@ -267,8 +295,12 @@ export class DashboardFacade {
             if (typeLower === 'income') return;
             const amt = Number(e.amount);
             if (!Number.isFinite(amt) || Number.isNaN(amt)) return;
-            const expenseDate = new Date((e as any)?.date || (e as any)?.createdAt);
-            const dayIndex = Math.floor((expenseDate.getTime() - startInclusive) / (1000 * 60 * 60 * 24));
+            const expenseDate = new Date(
+              (e as any)?.date || (e as any)?.createdAt
+            );
+            const dayIndex = Math.floor(
+              (expenseDate.getTime() - startInclusive) / (1000 * 60 * 60 * 24)
+            );
             if (dayIndex >= 0 && dayIndex < daysDiff) daily[dayIndex] += amt;
           });
         return daily.map((v, i) => {

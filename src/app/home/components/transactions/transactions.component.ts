@@ -11,6 +11,8 @@ import {
   SimpleChanges,
   ViewEncapsulation,
   inject,
+  Output,
+  EventEmitter,
 } from '@angular/core';
 import { IonicModule, ModalController } from '@ionic/angular';
 import { TranslateModule } from '@ngx-translate/core';
@@ -46,6 +48,7 @@ export class TransactionsComponent implements OnChanges, OnDestroy {
   @Input() limit: number = 5;
   @Input() month?: number;
   @Input() year?: number;
+  @Output() dataChanged = new EventEmitter<void>();
 
   // ─── Public state for template ───────────────────────
   userCurrency = '';
@@ -71,6 +74,7 @@ export class TransactionsComponent implements OnChanges, OnDestroy {
   private readonly alertService = inject(AlertService);
   private readonly toastService = inject(ToastService);
   private readonly translateService = inject(TranslateService);
+
   private readonly profileService = inject(ProfileService);
   private readonly categoryService = inject(CategoryService);
 
@@ -289,6 +293,7 @@ export class TransactionsComponent implements OnChanges, OnDestroy {
       const { role } = await modal.onDidDismiss();
       if (role === 'confirm' || role === 'delete') {
         this.refreshTransactions();
+        this.dataChanged.emit();
       }
     } finally {
       this.isOpeningModal = false;
@@ -305,6 +310,7 @@ export class TransactionsComponent implements OnChanges, OnDestroy {
             this.translateService.instant('EXPENSE.DELETE_SUCCESS')
           );
           this.refreshTransactions();
+          this.dataChanged.emit();
         },
         error: (err) => {
           this.toastService.presentErrorToast(

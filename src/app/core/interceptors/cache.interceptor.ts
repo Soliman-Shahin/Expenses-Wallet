@@ -18,6 +18,18 @@ const MAX_CACHE_SIZE = 50;
 const CACHE_TTL = 5 * 60 * 1000;
 let isCleanupScheduled = false;
 
+/** Invalidate cached GET responses affected by a mutation. */
+export function invalidateHttpCache(path: string): number {
+  let removed = 0;
+  for (const key of cache.keys()) {
+    if (key.includes(path)) {
+      cache.delete(key);
+      removed++;
+    }
+  }
+  return removed;
+}
+
 function isExpired(entry: CacheEntry): boolean {
   return Date.now() - entry.timestamp > CACHE_TTL;
 }
@@ -25,7 +37,7 @@ function isExpired(entry: CacheEntry): boolean {
 function cleanupExpired(): void {
   const now = Date.now();
   let cleaned = 0;
-  
+
   cache.forEach((entry, key) => {
     if (now - entry.timestamp > CACHE_TTL) {
       cache.delete(key);
@@ -50,7 +62,6 @@ export const cacheInterceptor: HttpInterceptorFn = (
   if (req.method !== 'GET') {
     return next(req);
   }
-
   const cached = cache.get(req.urlWithParams);
   if (cached && !isExpired(cached)) {
     console.log('✅ [Cache] HIT:', req.urlWithParams);
@@ -60,14 +71,13 @@ export const cacheInterceptor: HttpInterceptorFn = (
   if (cached) {
     cache.delete(req.urlWithParams);
   }
-
   return next(req).pipe(
     tap((event) => {
       if (event instanceof HttpResponse) {
         if (cache.size >= MAX_CACHE_SIZE) {
           const firstKey = cache.keys().next().value;
           if (firstKey !== undefined) {
-             cache.delete(firstKey);
+            cache.delete(firstKey);
           }
         }
 

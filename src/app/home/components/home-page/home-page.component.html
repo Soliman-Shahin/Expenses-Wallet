@@ -5,7 +5,23 @@
   [scrollX]="false"
   [fullscreen]="true"
 >
-  @if (vm$ | async; as vm) { @if (!vm.loading) {
+  @if (vm$ | async; as vm) { @if (vm.loading && !hasRenderedHomeContent) {
+  <div
+    class="home-content-skeleton"
+    role="status"
+    aria-busy="true"
+    [attr.aria-label]="'COMMON.LOADING' | translate"
+  >
+    <app-skeleton-block variant="line"></app-skeleton-block>
+    <app-skeleton-block variant="card-md"></app-skeleton-block>
+    <div class="home-skeleton-stats">
+      <app-skeleton-block variant="card-sm"></app-skeleton-block>
+      <app-skeleton-block variant="card-sm"></app-skeleton-block>
+    </div>
+    <app-skeleton-block variant="list-item-avatar"></app-skeleton-block>
+    <app-skeleton-block variant="list-item-avatar"></app-skeleton-block>
+  </div>
+  } @if (!vm.loading || hasRenderedHomeContent) {
   <!-- Error State -->
   @if (state.error()) {
   <div class="error-state ion-text-center">
@@ -298,6 +314,7 @@
           [limit]="5"
           [month]="selectedMonth.month"
           [year]="selectedMonth.year"
+          (dataChanged)="onTransactionsDataChanged()"
         ></app-transactions>
       </section>
     </div>

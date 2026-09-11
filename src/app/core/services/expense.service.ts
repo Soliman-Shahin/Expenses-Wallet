@@ -8,6 +8,7 @@ import { AuthService } from 'src/app/modules/auth/services/auth.service';
 import { OfflineStorageService } from './offline-storage.service';
 import { ConnectionService } from './connection.service';
 import { SyncStatus } from 'src/app/shared/models/sync.model';
+import { invalidateHttpCache } from '../interceptors/cache.interceptor';
 
 @Injectable({
   providedIn: 'root',
@@ -287,6 +288,7 @@ export class ExpenseService {
       tap((createdExpense) => {
         this.expensesCache$ = null;
         this.totalsCache.clear();
+        invalidateHttpCache('/expenses');
         // Mirror to offline storage (marked as SYNCED)
         this.offlineStorage
           .saveSyncedEntity('expense', {
@@ -322,6 +324,7 @@ export class ExpenseService {
       tap((updatedExpense) => {
         this.expensesCache$ = null;
         this.totalsCache.clear();
+        invalidateHttpCache('/expenses');
         this.offlineStorage
           .saveSyncedEntity('expense', {
             ...updatedExpense,
@@ -347,6 +350,7 @@ export class ExpenseService {
         tap(() => {
           this.expensesCache$ = null;
           this.totalsCache.clear();
+          invalidateHttpCache('/expenses');
         }),
         map(() => ({ success: true, offline: true }))
       );
@@ -356,6 +360,7 @@ export class ExpenseService {
       tap(() => {
         this.expensesCache$ = null;
         this.totalsCache.clear();
+        invalidateHttpCache('/expenses');
         // Also mark as deleted in local storage
         this.offlineStorage.deleteEntity('expense', id).subscribe();
       }),
@@ -367,6 +372,7 @@ export class ExpenseService {
           tap(() => {
             this.expensesCache$ = null;
             this.totalsCache.clear();
+            invalidateHttpCache('/expenses');
           }),
           map(() => ({ success: true, offline: true }))
         );
@@ -425,6 +431,7 @@ export class ExpenseService {
       tap(() => {
         this.expensesCache$ = null;
         this.totalsCache.clear();
+        invalidateHttpCache('/expenses');
         console.log(
           `📴 [ExpenseService] Saved offline (${type}):`,
           offlineEntity._id
