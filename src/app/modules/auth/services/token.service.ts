@@ -1,4 +1,5 @@
 import { Injectable, signal } from '@angular/core';
+import { Capacitor } from '@capacitor/core';
 import { User } from '../models';
 import { StorageService } from './storage.service';
 import { SecureStorageService } from './secure-storage.service';
@@ -19,6 +20,7 @@ export class TokenService {
   private persistent = false;
   private writes: Promise<void> = Promise.resolve();
   private initialization?: Promise<void>;
+  private locked = false;
   private readonly policyKey = 'ewallet_auth_persistent';
   revision = 0;
 
@@ -75,7 +77,11 @@ export class TokenService {
       return;
     this.persistent = true;
     this.session = saved;
-    this.user.set(saved.user);
+    this.locked =
+      Capacitor.isNativePlatform() &&
+      policy === 'true' &&
+      this.storage.get<boolean>('biometric_enabled') === true;
+    if (!this.locked) this.user.set(saved.user);
     this.storage.set('user', saved.user);
     await this.persist();
     this.clearLegacy();
@@ -99,6 +105,7 @@ export class TokenService {
   ): Promise<void> {
     this.revision++;
     this.persistent = persistent;
+    this.locked = false;
     // Preserve the profile cache contract, but never persist password/session fields.
     const {
       password: _password,
@@ -132,16 +139,37 @@ export class TokenService {
   }
 
   getAccessToken(): string | null {
-    return this.session.accessToken || null;
+    return this.locked ? null : this.session.accessToken || null;
   }
   getRefreshToken(): string | null {
     return this.session.refreshToken || null;
   }
   getUser(): User | null {
-    return this.user();
+    return this.locked ? null : this.user();
   }
   getUserId(): string | null {
-    return this.user()?._id || null;
+    return this.locked ? null : this.user()?._id || null;
+  }
+  isBiometricUnlockRequired(): boolean {
+    return this.locked;
+  }
+  requireBiometricUnlock(): void {
+    if (this.hasRestoredSession()) {
+      this.locked = true;
+      this.user.set(null);
+    }
+  }
+  hasRestoredSession(): boolean {
+    return (
+      !!this.session.accessToken &&
+      !!this.session.refreshToken &&
+      !!this.session.user
+    );
+  }
+  unlockBiometricSession(): void {
+    if (!this.locked || !this.session.user) return;
+    this.locked = false;
+    this.user.set(this.session.user);
   }
   getUserLang(): string | null {
     return this.storage.get<string>('user-lang');
@@ -172,10 +200,12 @@ export class TokenService {
   removeSession(): void {
     this.revision++;
     this.persistent = false;
+    this.locked = false;
     this.session = { user: null, accessToken: '', refreshToken: '' };
     this.user.set(null);
     this.sessionEnded.next();
     this.storage.remove('user');
+    this.storage.remove('biometric_enabled');
     this.clearLegacy();
     void this.persist().catch(() =>
       console.warn('Session storage cleanup unavailable')

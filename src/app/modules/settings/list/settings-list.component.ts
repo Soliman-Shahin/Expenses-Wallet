@@ -74,6 +74,10 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
     const isEnabled = event.detail.checked;
 
     if (isEnabled) {
+      if (!this.authService.isLoggedIn) {
+        event.target.checked = false;
+        return;
+      }
       const verified = await this.biometricService.verifyIdentity();
       if (verified) {
         await this.biometricService.setEnabled(true);

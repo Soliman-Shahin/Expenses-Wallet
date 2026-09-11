@@ -63,35 +63,4 @@ export class BiometricService {
       return false;
     }
   }
-
-  async setCredentials(
-    username: string,
-    password: string,
-    server: string
-  ): Promise<void> {
-    if (!this.platform.is('capacitor')) return;
-    await NativeBiometric.setCredentials({
-      username,
-      password,
-      server,
-    });
-  }
-
-  async getCredentials(server: string): Promise<any> {
-    if (!this.platform.is('capacitor')) return null;
-    try {
-      return await NativeBiometric.getCredentials({
-        server,
-      });
-    } catch (e) {
-      return null;
-    }
-  }
-
-  async deleteCredentials(server: string): Promise<void> {
-    if (!this.platform.is('capacitor')) return;
-    await NativeBiometric.deleteCredentials({
-      server,
-    });
-  }
 }
