@@ -156,7 +156,12 @@
           <ion-icon name="document-text-outline"></ion-icon>
         </div>
         <div class="item-details">
-          <h4>{{ backup.name }}</h4>
+          <h4>
+            {{ "BACKUP.RECORD" | translate }}
+            <span class="record-time">{{
+              backup.timestamp | date : "shortTime"
+            }}</span>
+          </h4>
           <div class="meta">
             <span class="date">{{ backup.timestamp | date : "medium" }}</span>
             <span class="separator">•</span>
@@ -169,19 +174,10 @@
               {{ "BACKUP.ENCRYPTED" | translate }}
             </span>
             }
-            <span class="tag items"
+            <span class="tag items" [class.zero-items]="backup.itemCount === 0"
               >{{ backup.itemCount }} {{ "BACKUP.ITEMS" | translate }}</span
             >
           </div>
-        </div>
-        <div class="item-actions">
-          <button
-            class="btn-icon"
-            [attr.aria-label]="'MOBILE_UI.SHARE_BACKUP' | translate"
-            (click)="shareBackup(backup)"
-          >
-            <ion-icon name="share-social-outline"></ion-icon>
-          </button>
         </div>
       </div>
       }

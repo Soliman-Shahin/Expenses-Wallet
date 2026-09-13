@@ -5,6 +5,9 @@ import { OfflineStorageService } from './offline-storage.service';
 import { EncryptionService } from './encryption.service';
 import { StorageService } from 'src/app/modules/auth/services/storage.service';
 import { GoogleDriveService } from './google-drive.service';
+import { TokenService } from 'src/app/modules/auth/services/token.service';
+import { ExpenseService } from './expense.service';
+import { CategoryService } from 'src/app/modules/categories/services/categories.service';
 
 export interface BackupData {
   version: string;
@@ -42,18 +45,20 @@ export class BackupService {
   private readonly BACKUP_VERSION = '1.0.0';
   private readonly BACKUP_STORAGE_KEY = 'backup_history';
   private readonly MAX_BACKUP_HISTORY = 10;
-  private readonly SETTINGS_KEY = 'app_settings';
   private readonly AUTO_BACKUP_KEY = 'auto_backup_settings';
   private readonly AUTO_BACKUP_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
   private readonly GOOGLE_DRIVE_SETTINGS_KEY = 'google_drive_backup_settings';
-  
+
   private autoBackupTimer: any;
 
   constructor(
     private offlineStorage: OfflineStorageService,
     private encryptionService: EncryptionService,
     private storageService: StorageService,
-    private googleDriveService: GoogleDriveService
+    private googleDriveService: GoogleDriveService,
+    private tokenService: TokenService,
+    private expenseService: ExpenseService,
+    private categoryService: CategoryService
   ) {
     this.initAutoBackup();
   }
@@ -66,13 +71,14 @@ export class BackupService {
     password?: string
   ): Observable<BackupData> {
     return forkJoin({
-      expenses: this.offlineStorage.getAllEntitiesForBackup('expense'),
-      categories: this.offlineStorage.getAllEntitiesForBackup('category'),
-      user: this.offlineStorage.getAllEntitiesForBackup('user'),
+      expenses: this.expenseService.getExpenses(undefined, true),
+      categories: this.categoryService
+        .getCategories({ skip: 0, limit: 1000, sort: 'createdAt' }, true)
+        .pipe(map((result) => result.data)),
       settings: of(this.getSettings()),
       profileImage: from(this.getProfileImage()),
     }).pipe(
-      switchMap(({ expenses, categories, user, settings, profileImage }) => {
+      switchMap(({ expenses, categories, settings, profileImage }) => {
         const backupData: BackupData = {
           version: this.BACKUP_VERSION,
           timestamp: new Date(),
@@ -80,7 +86,9 @@ export class BackupService {
           data: {
             expenses: expenses || [],
             categories: categories || [],
-            user: user?.[0] || null,
+            user: this.tokenService.getUserId()
+              ? { _id: this.tokenService.getUserId() }
+              : null,
             settings: settings,
           },
           profileImage: profileImage,
@@ -142,18 +150,75 @@ export class BackupService {
     try {
       const backup: BackupData = JSON.parse(fileContent);
 
-      if (!backup.version || !backup.data) {
+      if (backup.version !== this.BACKUP_VERSION || !backup.data) {
         throw new Error('Invalid backup file format');
       }
 
       if (backup.encrypted) {
-        return await this.decryptBackup(backup, password);
+        const decrypted = await this.decryptBackup(backup, password);
+        this.validateBackupData(decrypted);
+        return decrypted;
       }
 
+      this.validateBackupData(backup);
       return backup;
     } catch (error) {
-      console.error('Error importing backup:', error);
-      throw new Error('Failed to import backup. Please check the file format.');
+      const safeError = new Error('Failed to import backup');
+      (safeError as any).code =
+        (error as any)?.message === 'Backup decryption failed'
+          ? 'BACKUP_CRYPTO_FAILURE'
+          : 'BACKUP_INVALID';
+      throw safeError;
+    }
+  }
+
+  private validateBackupData(backup: BackupData): void {
+    if (
+      !Array.isArray(backup.data?.expenses) ||
+      !Array.isArray(backup.data?.categories)
+    ) {
+      throw new Error('Invalid backup file format');
+    }
+    for (const entities of [backup.data.expenses, backup.data.categories]) {
+      const ids = new Set<string>();
+      const clientIds = new Set<string>();
+      for (const entity of entities) {
+        if (
+          !entity ||
+          typeof entity !== 'object' ||
+          (!entity._id && !entity._clientId)
+        ) {
+          throw new Error('Invalid backup file format');
+        }
+        if (entity._id && ids.has(String(entity._id)))
+          throw new Error('Invalid backup file format');
+        if (entity._clientId && clientIds.has(String(entity._clientId)))
+          throw new Error('Invalid backup file format');
+        if (entity._id) ids.add(String(entity._id));
+        if (entity._clientId) clientIds.add(String(entity._clientId));
+      }
+    }
+    if (
+      backup.data.user !== null &&
+      backup.data.user !== undefined &&
+      typeof backup.data.user !== 'object'
+    ) {
+      throw new Error('Invalid backup file format');
+    }
+  }
+
+  assertRestoreOwnership(backup: BackupData): void {
+    const currentUserId = this.tokenService.getUserId();
+    const backupOwnerId = backup.data.user?._id;
+    if (!currentUserId || !backupOwnerId) {
+      const error = new Error('Backup ownership cannot be verified');
+      (error as any).code = 'BACKUP_OWNER_UNKNOWN';
+      throw error;
+    }
+    if (String(currentUserId) !== String(backupOwnerId)) {
+      const error = new Error('Backup belongs to another account');
+      (error as any).code = 'BACKUP_OWNER_MISMATCH';
+      throw error;
     }
   }
 
@@ -164,27 +229,26 @@ export class BackupService {
     backup: BackupData,
     includeProfileImage: boolean = true
   ): Observable<boolean> {
-    return from(
-      Promise.all([
-        this.offlineStorage.replaceEntities('expense', backup.data.expenses).toPromise(),
-        this.offlineStorage.replaceEntities('category', backup.data.categories).toPromise(),
-        backup.data.user
-          ? this.offlineStorage.replaceEntities('user', [backup.data.user]).toPromise()
-          : Promise.resolve(),
-        backup.data.settings
-          ? this.saveSettings(backup.data.settings)
-          : Promise.resolve(),
-        includeProfileImage && backup.profileImage
-          ? this.restoreProfileImage(backup.profileImage)
-          : Promise.resolve(),
-      ])
-    ).pipe(
-      map(() => true),
-      catchError((error) => {
-        console.error('Error restoring backup:', error);
-        return of(false);
-      })
-    );
+    return this.offlineStorage
+      .replaceEntitiesAtomically(backup.data.expenses, backup.data.categories)
+      .pipe(
+        switchMap((dataRestored) => {
+          if (!dataRestored) return of(false);
+          // Core records are atomic. Supplemental settings are intentionally not
+          // restored: app_settings has no writers outside this service and must
+          // never become a broad security/settings import surface.
+          if (includeProfileImage && backup.profileImage) {
+            return from(this.restoreProfileImage(backup.profileImage)).pipe(
+              map(() => true)
+            );
+          }
+          return of(true);
+        }),
+        catchError((error) => {
+          console.error('Error restoring backup:', error);
+          return of(false);
+        })
+      );
   }
 
   /**
@@ -261,9 +325,8 @@ export class BackupService {
     backup: BackupData,
     password?: string
   ): Promise<BackupData> {
-    const dataString = JSON.stringify(backup.data);
     const encryptedData = await this.encryptionService.encrypt(
-      dataString,
+      backup.data,
       password
     );
 
@@ -280,11 +343,24 @@ export class BackupService {
   ): Promise<BackupData> {
     if (!backup.encrypted) return backup;
 
-    const decryptedData = await this.encryptionService.decrypt(
-      backup.data as any,
-      password,
-      true
-    );
+    const payload = backup.data as any;
+    let decryptedData: any;
+    try {
+      decryptedData = await this.encryptionService.decrypt(
+        payload,
+        password,
+        true
+      );
+    } catch {
+      const error = new Error('Backup decryption failed');
+      (error as any).code = 'BACKUP_CRYPTO_FAILURE';
+      throw error;
+    }
+    if (!decryptedData) {
+      const error = new Error('Backup decryption failed');
+      (error as any).code = 'BACKUP_CRYPTO_FAILURE';
+      throw error;
+    }
 
     return {
       ...backup,
@@ -312,13 +388,7 @@ export class BackupService {
   }
 
   private getSettings(): any {
-    return this.storageService.get(this.SETTINGS_KEY) || {};
-  }
-
-  private saveSettings(settings: any): Promise<void> {
-    return Promise.resolve(
-      this.storageService.set(this.SETTINGS_KEY, settings)
-    );
+    return {};
   }
 
   private generateId(): string {
@@ -338,8 +408,16 @@ export class BackupService {
   /**
    * Get auto backup settings
    */
-  getAutoBackupSettings(): { enabled: boolean; frequency: number; lastBackup?: Date } {
-    const settings = this.storageService.get<{ enabled: boolean; frequency: number; lastBackup?: Date }>(this.AUTO_BACKUP_KEY);
+  getAutoBackupSettings(): {
+    enabled: boolean;
+    frequency: number;
+    lastBackup?: Date;
+  } {
+    const settings = this.storageService.get<{
+      enabled: boolean;
+      frequency: number;
+      lastBackup?: Date;
+    }>(this.AUTO_BACKUP_KEY);
     return settings || { enabled: false, frequency: this.AUTO_BACKUP_INTERVAL };
   }
 
@@ -369,9 +447,14 @@ export class BackupService {
 
     const settings = this.getAutoBackupSettings();
     const now = new Date().getTime();
-    const lastBackup = settings.lastBackup ? new Date(settings.lastBackup).getTime() : 0;
+    const lastBackup = settings.lastBackup
+      ? new Date(settings.lastBackup).getTime()
+      : 0;
     const timeSinceLastBackup = now - lastBackup;
-    const timeUntilNextBackup = Math.max(0, settings.frequency - timeSinceLastBackup);
+    const timeUntilNextBackup = Math.max(
+      0,
+      settings.frequency - timeSinceLastBackup
+    );
 
     this.autoBackupTimer = setTimeout(() => {
       this.performAutoBackup();
@@ -402,12 +485,12 @@ export class BackupService {
         // Save backup to local storage
         const backupJson = JSON.stringify(backup, null, 2);
         const blob = new Blob([backupJson], { type: 'application/json' });
-        
+
         // Store in IndexedDB or localStorage
         this.storageService.set('last_auto_backup', {
           timestamp: new Date(),
           size: blob.size,
-          data: backupJson
+          data: backupJson,
         });
 
         // Update last backup time
@@ -421,11 +504,17 @@ export class BackupService {
           const fileName = `auto-backup-${new Date().toISOString()}.json`;
           this.googleDriveService.uploadBackup(fileName, backupJson).subscribe({
             next: (file) => {
-              console.log('✅ Auto backup uploaded to Google Drive:', file.name);
+              console.log(
+                '✅ Auto backup uploaded to Google Drive:',
+                file.name
+              );
             },
             error: (error) => {
-              console.error('❌ Failed to upload backup to Google Drive:', error);
-            }
+              console.error(
+                '❌ Failed to upload backup to Google Drive:',
+                error
+              );
+            },
           });
         }
 
@@ -433,7 +522,7 @@ export class BackupService {
       },
       error: (error) => {
         console.error('❌ Auto backup failed:', error);
-      }
+      },
     });
   }
 
@@ -448,7 +537,10 @@ export class BackupService {
    * Get Google Drive backup settings
    */
   getGoogleDriveSettings(): { enabled: boolean; email?: string } {
-    const settings = this.storageService.get<{ enabled: boolean; email?: string }>(this.GOOGLE_DRIVE_SETTINGS_KEY);
+    const settings = this.storageService.get<{
+      enabled: boolean;
+      email?: string;
+    }>(this.GOOGLE_DRIVE_SETTINGS_KEY);
     return settings || { enabled: false };
   }
 
@@ -459,7 +551,7 @@ export class BackupService {
     const email = this.googleDriveService.getUserEmail();
     this.storageService.set(this.GOOGLE_DRIVE_SETTINGS_KEY, {
       enabled,
-      email: email || undefined
+      email: email || undefined,
     });
   }
 

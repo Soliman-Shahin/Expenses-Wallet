@@ -320,6 +320,15 @@
   animation: alertFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Ionic AlertButton cssClass is applied to the rendered button inside the
+   alert overlay. Keep sentence case scoped to Backup & Restore alerts. */
+ion-alert.backup-restore-alert .backup-restore-alert-action,
+ion-alert.backup-restore-alert
+  .backup-restore-alert-action
+  .alert-button-inner {
+  text-transform: none;
+}
+
 /* Mobile Responsive */
 @media (max-width: 576px) {
   .custom-alert {

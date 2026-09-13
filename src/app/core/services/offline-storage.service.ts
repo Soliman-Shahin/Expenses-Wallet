@@ -147,6 +147,37 @@ export class OfflineStorageService {
     );
   }
 
+  async hasUnsyncedChanges(): Promise<boolean> {
+    const operations = await this.db.syncOperations.toArray();
+    return operations.some(
+      (operation) =>
+        operation.status === SyncStatus.PENDING ||
+        operation.status === SyncStatus.ERROR
+    );
+  }
+
+  replaceEntitiesAtomically(
+    expenses: any[],
+    categories: any[]
+  ): Observable<boolean> {
+    return from(
+      this.db.transaction(
+        'rw',
+        this.db.expenses,
+        this.db.categories,
+        async () => {
+          await this.db.expenses.clear();
+          await this.db.categories.clear();
+          await this.db.expenses.bulkPut(expenses);
+          await this.db.categories.bulkPut(categories);
+        }
+      )
+    ).pipe(
+      map(() => true),
+      catchError(() => of(false))
+    );
+  }
+
   mergeEntities<T extends SyncEntity>(
     entityType: string,
     serverEntities: T[]
