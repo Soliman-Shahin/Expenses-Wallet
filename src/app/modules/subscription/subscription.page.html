@@ -79,10 +79,18 @@
     </div>
 
     <!-- Empty State -->
-    <div class="empty-state" *ngIf="availablePlans.length === 0">
+    <div class="empty-state" *ngIf="availablePlans.length === 0 && !loadError">
       <ion-icon name="pricetags-outline"></ion-icon>
       <h3>{{ 'NO_DATA' | translate }}</h3>
       <p>{{ 'MOBILE_UI.NO_PLANS' | translate }}</p>
+    </div>
+    <div
+      class="empty-state error-state"
+      *ngIf="availablePlans.length === 0 && loadError"
+    >
+      <ion-icon name="cloud-offline-outline"></ion-icon>
+      <h3>{{ 'SUBSCRIPTION.LOAD_FAILED_TITLE' | translate }}</h3>
+      <p>{{ 'SUBSCRIPTION.LOAD_FAILED' | translate }}</p>
     </div>
   </div>
 

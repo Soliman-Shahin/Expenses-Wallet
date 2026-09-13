@@ -1,7 +1,7 @@
 @use "src/theme/mobile-secondary" as secondary;
 @include secondary.page;
 .usage-stats-container {
-  padding: 16px;
+  padding: 12px 16px 24px;
 }
 
 .text-danger {
@@ -9,20 +9,43 @@
 }
 
 ion-card {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .plan-info-card {
+  background: linear-gradient(
+    135deg,
+    rgba(var(--ion-color-primary-rgb), 0.12),
+    var(--ion-item-background)
+  );
+  border-color: rgba(var(--ion-color-primary-rgb), 0.28);
+
   ion-card-header {
-    padding-bottom: 8px;
+    padding: 16px 16px 8px;
 
     ion-card-title {
-      font-size: 24px;
+      font-size: 23px;
       font-weight: 700;
       color: var(--ion-color-primary);
     }
+  }
+
+  .summary-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .summary-heading ion-card-subtitle {
+    margin-bottom: 4px;
+  }
+  .summary-heading ion-badge {
+    flex: 0 0 auto;
+    border-radius: 999px;
+    padding: 6px 9px;
+    font-size: 10px;
   }
 
   ion-list {
@@ -57,8 +80,18 @@ ion-card {
 }
 
 .usage-card {
+  ion-card-header {
+    padding: 16px 16px 8px;
+  }
+  ion-card-content {
+    padding: 8px 16px 16px;
+  }
   .usage-item {
-    margin-bottom: 24px;
+    margin-bottom: 16px;
+    padding: 12px;
+    border: 1px solid var(--ew-wallet-line);
+    border-radius: 12px;
+    background: var(--ew-wallet-inset);
 
     &:last-child {
       margin-bottom: 0;
@@ -102,9 +135,9 @@ ion-card {
     }
 
     ion-progress-bar {
-      height: 8px;
-      border-radius: 4px;
-      margin-bottom: 8px;
+      height: 6px;
+      border-radius: 999px;
+      margin: 10px 0 8px;
     }
 
     .usage-footer {
@@ -125,8 +158,8 @@ ion-card {
   }
 
   .limits-info {
-    margin-top: 32px;
-    padding-top: 24px;
+    margin-top: 20px;
+    padding-top: 16px;
     border-top: 1px solid var(--ion-color-light);
 
     h4 {
@@ -145,7 +178,7 @@ ion-card {
       --padding-start: 0;
       --inner-padding-end: 0;
       --background: transparent;
-      margin-bottom: 8px;
+      margin-bottom: 4px;
 
       ion-icon {
         font-size: 20px;
@@ -171,19 +204,27 @@ ion-card {
 }
 
 .history-card {
+  ion-card-header {
+    padding: 16px 16px 8px;
+  }
+  ion-card-content {
+    padding: 8px 16px 12px;
+  }
   ion-list {
     padding: 0;
+    background: transparent;
   }
 
   ion-item {
     --padding-start: 8px;
     --inner-padding-end: 8px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     border-radius: 8px;
-    background: var(--ion-color-light);
+    background: var(--ew-wallet-inset);
+    --background: var(--ew-wallet-inset);
 
     ion-icon {
-      font-size: 24px;
+      font-size: 21px;
       margin-inline-end: 12px;
     }
 
@@ -201,7 +242,7 @@ ion-card {
 
     ion-badge {
       font-size: 11px;
-      padding: 4px 12px;
+      padding: 4px 9px;
       border-radius: 12px;
     }
   }
@@ -252,7 +293,7 @@ ion-card-subtitle {
     margin: 0 0 16px;
   }
   .usage-stats-container {
-    padding: 16px;
+    padding: 12px 16px 24px;
   }
   .plan-info-card ion-card-title {
     font-size: 20px;
@@ -306,5 +347,112 @@ ion-card-subtitle {
   .history-card ion-item {
     background: var(--ew-wallet-inset);
     --background: var(--ew-wallet-inset);
+  }
+  .history-entry ion-label {
+    min-width: 0;
+  }
+  .history-entry ion-label h3,
+  .history-entry ion-label p {
+    overflow-wrap: anywhere;
+  }
+}
+
+/* Usage dashboard rhythm: one strong surface per section, with compact
+   supporting rows and a neutral zero-state progress track. */
+:host .usage-stats-container {
+  padding: 8px 16px 40px;
+}
+:host .plan-info-card ion-card-header {
+  padding: 10px 16px 2px;
+}
+:host .plan-info-card ion-card-content {
+  padding: 0 16px 8px;
+}
+:host .summary-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+:host .summary-details ion-item {
+  min-height: 32px;
+  margin: 0;
+}
+:host .usage-card ion-card-header,
+:host .history-card ion-card-header {
+  padding: 14px 16px 6px;
+}
+:host .usage-card ion-card-content,
+:host .history-card ion-card-content {
+  padding: 6px 16px 10px;
+}
+:host .usage-card .usage-item {
+  margin-bottom: 10px;
+  padding: 9px 10px;
+}
+:host .usage-card .usage-item ion-progress-bar {
+  --background: var(--ew-wallet-line);
+  --progress-background: var(--ion-color-primary);
+  height: 6px;
+  margin: 8px 0 6px;
+}
+:host .usage-card .limits-info {
+  margin-top: 12px;
+  padding-top: 10px;
+}
+:host .usage-card .limits-info h4 {
+  margin-bottom: 6px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+:host .usage-card .limits-info ion-item {
+  min-height: 36px;
+  margin: 0;
+}
+:host .usage-card .limits-info ion-item ion-icon {
+  font-size: 17px;
+}
+:host .usage-card .limits-info ion-item ion-label p {
+  margin: 0;
+}
+:host .usage-card .limits-info ion-item ion-label h3 {
+  font-size: 16px;
+}
+:host .history-card ion-item {
+  --min-height: 50px;
+  margin-bottom: 2px;
+  border-radius: 0;
+  border-bottom: 1px solid var(--ew-wallet-line);
+  background: transparent;
+  --background: transparent;
+}
+:host .history-card ion-item:last-child {
+  border-bottom: 0;
+}
+:host .history-card .timeline-marker {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  margin-inline-end: 10px;
+  background: var(--ion-color-medium);
+}
+:host .history-card .history-entry:first-child .timeline-marker {
+  background: var(--ion-color-success);
+  box-shadow: 0 0 0 4px rgba(var(--ion-color-success-rgb), 0.12);
+}
+:host .history-card .history-entry ion-label {
+  margin: 6px 0;
+}
+
+@media (max-width: 360px) {
+  :host .usage-card .usage-item {
+    padding: 8px;
+  }
+  :host .usage-card .usage-header .usage-title {
+    font-size: 12px;
+  }
+  :host .usage-card .limits-info ion-item ion-label h3 {
+    font-size: 15px;
   }
 }

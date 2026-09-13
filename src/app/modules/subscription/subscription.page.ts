@@ -1,11 +1,10 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { PlanService } from '../../core/services/plan.service';
 import { ToastService } from '../../shared/services/toast.service';
-import { LoadingService } from '../../core/services/loading.service';
 import {
   Plan,
   PlanSlug,
@@ -33,15 +32,18 @@ import { SkeletonBlockComponent } from '../../shared/ui/skeleton-block/skeleton-
 export class SubscriptionPage implements OnInit {
   private planService = inject(PlanService);
   private toastService = inject(ToastService);
-  private loadingService = inject(LoadingService);
+  private translateService = inject(TranslateService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private changeDetectorRef = inject(ChangeDetectorRef);
 
   // State
   availablePlans: Plan[] = [];
   currentPlan: MyPlanResponse | null = null;
   selectedSegment: 'plans' | 'usage' = 'plans';
   isLoading = false;
+  loadError = false;
+  private isChangingPlan = false;
   from?: string;
 
   // Query params (for redirects from guards/interceptors)
@@ -62,8 +64,9 @@ export class SubscriptionPage implements OnInit {
   }
 
   async loadData() {
+    if (this.isLoading) return;
     this.isLoading = true;
-    await this.loadingService.show('LOADING');
+    this.loadError = false;
 
     try {
       // Load available plans and current plan in parallel
@@ -74,20 +77,21 @@ export class SubscriptionPage implements OnInit {
 
       this.availablePlans = plans;
       this.currentPlan = myPlan;
+      this.changeDetectorRef.markForCheck();
 
       // Show contextual message based on reason
       this.showContextualMessage();
     } catch (error) {
-      console.error('Error loading subscription data:', error);
+      console.warn('Subscription data unavailable');
+      this.loadError = true;
       await this.toastService.show({
-        message: 'Failed to load subscription plans',
+        message: 'SUBSCRIPTION.LOAD_FAILED',
         color: 'danger',
         duration: 3000,
         position: 'bottom',
       });
     } finally {
       this.isLoading = false;
-      await this.loadingService.hide('LOADING');
     }
   }
 
@@ -120,10 +124,11 @@ export class SubscriptionPage implements OnInit {
   }
 
   async onUpgrade(plan: Plan) {
+    if (this.isChangingPlan || this.isLoading) return;
     // Don't allow downgrade to free
     if (plan.slug === PlanSlug.FREE) {
       await this.toastService.show({
-        message: 'Please contact support to downgrade your plan',
+        message: 'SUBSCRIPTION.DOWNGRADE_CONTACT_SUPPORT',
         color: 'warning',
         duration: 3000,
         position: 'bottom',
@@ -134,7 +139,7 @@ export class SubscriptionPage implements OnInit {
     // Check if already on this plan
     if (this.currentPlan?.context.planSlug === plan.slug) {
       await this.toastService.show({
-        message: 'You are already on this plan',
+        message: 'SUBSCRIPTION.ALREADY_ON_PLAN',
         color: 'medium',
         duration: 2000,
         position: 'bottom',
@@ -142,30 +147,34 @@ export class SubscriptionPage implements OnInit {
       return;
     }
 
-    await this.loadingService.show('LOADING');
-
+    this.isChangingPlan = true;
     try {
       await this.planService.upgradePlan(plan.slug);
+      const refreshedPlan = await this.planService.getMyPlan();
+      this.currentPlan = refreshedPlan;
+      this.changeDetectorRef.markForCheck();
 
       await this.toastService.show({
-        message: `Successfully upgraded to ${plan.name}!`,
+        message: this.translateService.instant('SUBSCRIPTION.UPGRADE_SUCCESS', {
+          plan: plan.name,
+        }),
         color: 'success',
         duration: 3000,
         position: 'bottom',
       });
 
       // Reload data
-      await this.loadData();
+      this.loadError = false;
     } catch (error: any) {
-      console.error('Error upgrading plan:', error);
+      console.warn('Subscription upgrade unavailable');
       await this.toastService.show({
-        message: error.error?.message || 'Failed to upgrade plan',
+        message: 'SUBSCRIPTION.UPGRADE_FAILED',
         color: 'danger',
         duration: 3000,
         position: 'bottom',
       });
     } finally {
-      await this.loadingService.hide('LOADING');
+      this.isChangingPlan = false;
     }
   }
 
