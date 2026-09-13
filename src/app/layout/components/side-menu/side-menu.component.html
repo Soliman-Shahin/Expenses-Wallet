@@ -6,138 +6,141 @@
   contentId="main-content"
   swipeGesture="true"
   (ionDidOpen)="onMenuOpen()"
-  >
+>
   <ion-content
     class="ion-padding"
     role="navigation"
     [attr.aria-label]="'SIDEBAR.MAIN_MENU' | translate"
     tabindex="0"
-    >
+  >
     @if (vm$ | async; as vm) {
-      <!-- Profile Header or Login Prompt -->
-      @if (vm.profile.isLoggedIn) {
-        <div
-          class="user-info"
-          [routerLink]="['/profile']"
-          (click)="closeMenu()"
-          >
-          <div class="avatar">
-            <div class="avatar-circle">
-              <img
-                #img
-                [src]="vm.profile.user?.avatarUrl || vm.profile.user?.image || defaultAvatar"
-                (error)="img.src = defaultAvatar"
-                [alt]="'USER_AVATAR' | translate"
-                />
-              </div>
-            </div>
-            <div class="user-details">
-              <h3>
-                {{
-                vm.profile.user?.username || ("USER.DEFAULT_NAME" | translate)
-                }}
-              </h3>
-              <p>
-                {{ vm.profile.user?.email || ("USER.DEFAULT_EMAIL" | translate) }}
-              </p>
-            </div>
-          </div>
-        } @else {
-          <div class="login-prompt">
-            <ion-button
-              expand="block"
-              fill="clear"
-              routerLink="/auth/login"
-              (click)="closeMenu()"
-              >
-              <ion-icon slot="start" name="log-in-outline"></ion-icon>
-              {{ "LOGIN" | translate }}
-            </ion-button>
-          </div>
-        }
-        <!-- Dynamic Menu Items -->
-        <ion-list lines="none" role="menu" class="main-menu-list">
-          @for (item of vm.links; track item) {
-            <ion-item
-              [routerLink]="item.link"
-              (click)="closeMenu()"
-              [class.active]="isActive(item.link, vm.activeLink)"
-              button
-              role="menuitem"
-              >
-              <ion-icon [name]="item.icon" slot="start"></ion-icon>
-              <ion-label>{{ item.title | translate }}</ion-label>
-            </ion-item>
+    <!-- Profile Header or Login Prompt -->
+    @if (vm.profile.isLoggedIn) {
+    <div class="user-info" (click)="navigateFromMenu('/profile')" role="link">
+      <div class="avatar">
+        <div class="avatar-circle">
+          @if ((vm.storedProfile?.avatarUrl || vm.profile.user?.image) &&
+          !avatarFailed) {
+          <img
+            #img
+            [src]="vm.storedProfile?.avatarUrl || vm.profile.user?.image"
+            (error)="onAvatarError()"
+            (load)="onAvatarLoad()"
+            [alt]="'USER_AVATAR' | translate"
+          />
+          } @else {
+          <span aria-hidden="true">{{ initials(vm.profile.user) }}</span>
           }
-        </ion-list>
-        <!-- Common Bottom Menu Items -->
-        <ion-list lines="none" class="bottom-menu" role="menu">
-
-          <!-- Sync Status Widget (only when logged in) -->
-          @if (vm.profile.isLoggedIn) {
-            <div class="sync-status-wrapper">
-              <app-sync-status></app-sync-status>
-            </div>
-          }
-
-          <!-- Logout Button (conditional) -->
-          @if (vm.profile.isLoggedIn) {
-            <ion-item
-              (click)="closeMenu(); logOut()"
-              button
-              role="menuitem"
-              tabindex="0"
-              >
-              <ion-icon name="log-out-outline" slot="start"></ion-icon>
-              <ion-label>{{ "LOGOUT" | translate }}</ion-label>
-            </ion-item>
-          }
-          <!-- Language Toggle -->
-          <ion-item
-            (click)="changeLanguage()"
-            button
-            role="menuitem"
-            tabindex="0"
-            [attr.aria-label]="'LANG.CHANGE_LANG' | translate"
-            >
-            <ion-icon
-            [name]="
-              vm.language === 'ar' ? 'language-outline' : 'language-outline'
-            "
-              slot="start"
-            ></ion-icon>
-            <ion-label>{{
-              (vm.language === "en" ? "ARABIC" : "ENGLISH") | translate
-            }}</ion-label>
-            <ion-icon
-              [name]="vm.language === 'ar' ? 'arrow-forward' : 'arrow-back'"
-              slot="end"
-            ></ion-icon>
-          </ion-item>
-          <!-- Theme Toggle -->
-          <ion-item>
-            <ion-icon name="contrast-outline" slot="start"></ion-icon>
-            <ion-label>{{ "THEME" | translate }}</ion-label>
-            <app-theme-toggle slot="end"></app-theme-toggle>
-          </ion-item>
-          <!-- Help & About -->
-          <ion-item
-            (click)="closeMenu()"
-            routerLink="/help"
-            button
-            role="menuitem"
-            tabindex="0"
-            [attr.aria-current]="isActive('/help', vm.activeLink) ? 'page' : null"
-            >
-            <ion-icon name="help-circle-outline" slot="start"></ion-icon>
-            <ion-label>{{ "HELP" | translate }}</ion-label>
-          </ion-item>
-          <!-- App Version -->
-          <ion-item class="version-info" tabindex="-1" role="none">
-            <ion-icon name="information-circle-outline" slot="start"></ion-icon>
-            <ion-label>{{ "VERSION" | translate }}</ion-label>
-          </ion-item>
-        </ion-list>
+        </div>
+      </div>
+      <div class="user-details">
+        <h3>
+          {{ vm.profile.user?.username || ("USER.DEFAULT_NAME" | translate) }}
+        </h3>
+        <p>
+          {{ vm.profile.user?.email || "" }}
+        </p>
+      </div>
+      <ion-icon
+        class="profile-chevron"
+        name="chevron-forward-outline"
+        aria-hidden="true"
+      ></ion-icon>
+    </div>
+    } @else {
+    <div class="login-prompt">
+      <ion-button
+        expand="block"
+        fill="clear"
+        routerLink="/auth/login"
+        (click)="closeMenu()"
+      >
+        <ion-icon slot="start" name="log-in-outline"></ion-icon>
+        {{ "LOGIN" | translate }}
+      </ion-button>
+    </div>
+    }
+    <!-- Dynamic Menu Items -->
+    <ion-list lines="none" role="menu" class="main-menu-list">
+      @for (item of vm.links; track item) {
+      <ion-item
+        (click)="navigateFromMenu(item.link)"
+        [class.active]="isActive(item.link, vm.activeLink)"
+        button
+        role="menuitem"
+      >
+        <ion-icon [name]="item.icon" slot="start"></ion-icon>
+        <ion-label>{{ item.title | translate }}</ion-label>
+      </ion-item>
       }
-    </ion-content>
-  </ion-menu>
+    </ion-list>
+    <!-- Sync and utility actions -->
+    <ion-list lines="none" class="bottom-menu" role="menu">
+      <!-- Sync Status Widget (only when logged in) -->
+      @if (vm.profile.isLoggedIn) {
+      <div class="sync-status-wrapper">
+        <app-sync-status></app-sync-status>
+      </div>
+      }
+
+      <!-- Language Toggle -->
+      <ion-item
+        (click)="changeLanguage()"
+        button
+        role="menuitem"
+        tabindex="0"
+        [attr.aria-label]="'LANG.CHANGE_LANG' | translate"
+      >
+        <ion-icon
+          [name]="
+            vm.language === 'ar' ? 'language-outline' : 'language-outline'
+          "
+          slot="start"
+        ></ion-icon>
+        <ion-label>{{
+          (vm.language === "en" ? "ARABIC" : "ENGLISH") | translate
+        }}</ion-label>
+        <ion-icon
+          [name]="vm.language === 'ar' ? 'chevron-left' : 'chevron-right'"
+          slot="end"
+        ></ion-icon>
+      </ion-item>
+      <!-- Theme Toggle -->
+      <ion-item>
+        <ion-icon name="contrast-outline" slot="start"></ion-icon>
+        <ion-label>{{ "THEME" | translate }}</ion-label>
+        <app-theme-toggle slot="end"></app-theme-toggle>
+      </ion-item>
+      <!-- Help & About -->
+      <ion-item
+        (click)="navigateFromMenu('/help')"
+        button
+        role="menuitem"
+        tabindex="0"
+        [attr.aria-current]="isActive('/help', vm.activeLink) ? 'page' : null"
+      >
+        <ion-icon name="help-circle-outline" slot="start"></ion-icon>
+        <ion-label>{{ "HELP" | translate }}</ion-label>
+      </ion-item>
+      <!-- App Version -->
+      <ion-item class="version-info" tabindex="-1" role="none">
+        <ion-icon name="information-circle-outline" slot="start"></ion-icon>
+        <ion-label>{{ "VERSION" | translate }}</ion-label>
+      </ion-item>
+      <!-- Logout is intentionally last in the actionable menu. -->
+      @if (vm.profile.isLoggedIn) {
+      <ion-item
+        class="logout-item"
+        (click)="onLogout()"
+        button
+        role="menuitem"
+        tabindex="0"
+      >
+        <ion-icon name="log-out-outline" slot="start"></ion-icon>
+        <ion-label>{{ "LOGOUT" | translate }}</ion-label>
+      </ion-item>
+      }
+    </ion-list>
+    }
+  </ion-content>
+</ion-menu>

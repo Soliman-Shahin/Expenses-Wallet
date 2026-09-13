@@ -4,6 +4,7 @@ import {
   OnInit,
   ViewChild,
   AfterViewInit,
+  inject,
 } from '@angular/core';
 import { NavigationEnd, RouterLink } from '@angular/router';
 import { Observable, combineLatest } from 'rxjs';
@@ -15,6 +16,7 @@ import { ThemeToggleComponent } from '../../../shared/components/theme-toggle/th
 import { AsyncPipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { SyncStatusComponent } from '../../../shared/components/sync-status/sync-status.component';
+import { ProfileService } from '../../../modules/profile/services/profile.service';
 
 @Component({
   selector: 'app-side-menu',
@@ -36,9 +38,10 @@ export class SideMenuComponent
   implements OnInit, AfterViewInit
 {
   @ViewChild('menu') menu!: IonMenu;
-  private menuInitialized = false;
-  private firstMenuItem?: HTMLElement;
-  defaultAvatar = 'https://ionicframework.com/docs/img/demos/avatar.svg';
+  private navigationInProgress = false;
+  private logoutInProgress = false;
+  avatarFailed = false;
+  private readonly profileService = inject(ProfileService);
 
   private readonly activeLink$ = this.router.events.pipe(
     filter((event): event is NavigationEnd => event instanceof NavigationEnd),
@@ -48,6 +51,7 @@ export class SideMenuComponent
 
   vm$!: Observable<{
     profile: { user: any | null; isLoggedIn: boolean };
+    storedProfile: { avatarUrl?: string } | null;
     links: MenuItem[];
     language: string;
     activeLink: string;
@@ -58,15 +62,51 @@ export class SideMenuComponent
     await this.menuCtrl?.close();
   }
 
+  async navigateFromMenu(link: string): Promise<void> {
+    if (this.navigationInProgress) return;
+    this.navigationInProgress = true;
+    try {
+      await this.closeMenu();
+      if (!this.isActive(link, this.router.url.split('?')[0])) {
+        await this.router.navigateByUrl(link);
+      }
+    } finally {
+      this.navigationInProgress = false;
+    }
+  }
+
+  async onLogout(): Promise<void> {
+    if (this.logoutInProgress) return;
+    this.logoutInProgress = true;
+    await this.closeMenu();
+    this.logOut();
+  }
+
   override ngOnInit() {
     super.ngOnInit();
 
     this.vm$ = combineLatest({
       profile: this.profile$,
+      storedProfile: this.profileService.profile$,
       links: this.links$,
       language: this.language$,
       activeLink: this.activeLink$,
     });
+  }
+
+  protected override onUserChanged(): void {
+    // The component shell survives auth transitions; never carry a prior
+    // user's in-flight guard into the next session.
+    this.logoutInProgress = false;
+    this.avatarFailed = false;
+  }
+
+  onAvatarError(): void {
+    this.avatarFailed = true;
+  }
+
+  onAvatarLoad(): void {
+    this.avatarFailed = false;
   }
 
   onMenuOpen() {
@@ -92,49 +132,31 @@ export class SideMenuComponent
   private async initializeMenu() {
     try {
       await this.menuCtrl?.enable(true, 'main-menu');
-      this.menuInitialized = true;
     } catch (error) {
       console.error('Error initializing menu:', error);
     }
-
-    // Log menu state changes
-    this.menu.ionWillOpen.subscribe(() => {
-      const sideMenu = document.querySelector('app-side-menu');
-      if (sideMenu) {
-        sideMenu.classList.add('menu-open');
-      }
-    });
-
-    this.menu.ionDidOpen.subscribe(() => {});
-
-    this.menu.ionWillClose.subscribe(() => {});
-
-    this.menu.ionDidClose.subscribe(() => {
-      const sideMenu = document.querySelector('app-side-menu');
-      if (sideMenu) {
-        sideMenu.classList.remove('menu-open');
-      }
-    });
-
-    // Set up menu focus management
-    const menuSub = this.menu.ionWillOpen.subscribe(() => {
-      // Store the first focusable element when menu opens
-      setTimeout(() => {
-        const menuContent = document.querySelector('ion-menu ion-content');
-        if (menuContent) {
-          const focusable = menuContent.querySelector(
-            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-          ) as HTMLElement;
-          if (focusable) {
-            this.firstMenuItem = focusable;
-            this.firstMenuItem.focus();
-          }
-        }
-      }, 100);
-    });
   }
 
   isActive(link: string, activeLink: string): boolean {
-    return activeLink.startsWith(link);
+    const normalizedLink = link.replace(/\/$/, '') || '/';
+    const normalizedActive = activeLink.replace(/\/$/, '') || '/';
+    return (
+      normalizedActive === normalizedLink ||
+      normalizedActive.startsWith(`${normalizedLink}/`)
+    );
+  }
+
+  initials(user: any | null): string {
+    const value = user?.username || user?.name || '';
+    return (
+      value
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part: string) => part[0])
+        .join('')
+        .toUpperCase() || '?'
+    );
   }
 }
