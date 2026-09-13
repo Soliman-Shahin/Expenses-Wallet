@@ -1,5 +1,7 @@
 import {
-  Component, ChangeDetectionStrategy, Input,
+  Component,
+  ChangeDetectionStrategy,
+  Input,
   OnInit,
   inject,
   OnChanges,
@@ -9,7 +11,7 @@ import {
   ElementRef,
   ViewChild,
   OnDestroy,
-  DOCUMENT
+  DOCUMENT,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
@@ -36,7 +38,7 @@ interface ChartData {
   imports: [CommonModule, ChartTooltipComponent, TranslateModule],
   templateUrl: './line-chart.component.html',
   styleUrls: ['./line-chart.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LineChartComponent
   extends BaseComponent
@@ -132,6 +134,10 @@ export class LineChartComponent
   }
 
   private generateChart(progress = 1): void {
+    const isMobile = window.innerWidth < 768;
+    this.padding = isMobile
+      ? { top: 36, right: 40, bottom: 64, left: 52 }
+      : { top: 50, right: 80, bottom: 80, left: 80 };
     this.chartHeight = this.chartWidth * 0.6; // Make height responsive to width
     if (this.chartData.length === 0) {
       this.linePath = '';
@@ -140,7 +146,7 @@ export class LineChartComponent
       return;
     }
 
-    const minPointSpacing = 50;
+    const minPointSpacing = isMobile ? 0 : 50;
     const requiredWidth =
       this.padding.left +
       this.padding.right +
@@ -149,14 +155,12 @@ export class LineChartComponent
     this.chartWidth = Math.max(clientWidth, requiredWidth);
 
     // Dynamically adjust font size to counteract SVG scaling
-    const scale =
-      clientWidth < this.chartWidth ? clientWidth / this.chartWidth : 1;
-    this.dynamicAxisLabelFontSize = 12 / scale;
-    this.dynamicValueLabelFontSize = 14 / scale;
+    this.dynamicAxisLabelFontSize = isMobile ? 13 : 12;
+    this.dynamicValueLabelFontSize = isMobile ? 14 : 14;
 
     const values = this.chartData.map((d) => d.value);
     const yMin = 0; // Start y-axis at 0 for better context
-    const yMax = Math.max(...values) * 1.1; // Add 10% padding to max value
+    const yMax = this.getNiceYAxisMaximum(Math.max(...values));
 
     const yRange = yMax - yMin || 1;
     const xRange = this.chartWidth - this.padding.left - this.padding.right;
@@ -195,23 +199,25 @@ export class LineChartComponent
 
   private generateLabelsAndGrid(yMin: number, yMax: number): void {
     const isMobile = window.innerWidth < 768;
-    const maxLabels = isMobile ? 4 : 12; // Max number of labels to show
+    const maxLabels = isMobile ? 3 : 12; // Max number of labels to show
     const totalPoints = this.chartData.length;
-    let labelDensity = 1;
-    if (totalPoints > maxLabels) {
-      labelDensity = Math.ceil(totalPoints / maxLabels);
+    const labelIndexes = new Set<number>();
+    const labelCount = Math.min(totalPoints, maxLabels);
+    for (let i = 0; i < labelCount; i++) {
+      labelIndexes.add(
+        labelCount === 1
+          ? 0
+          : Math.round((i * (totalPoints - 1)) / (labelCount - 1))
+      );
     }
-
     this.xAxisLabels = this.chartData
       .map((item, index) => ({
         x: this.padding.left + index * this.pointXStep,
         value: item.name,
+        index,
       }))
-      .filter((_, index) => {
-        // Always show the first label, then apply density
-        if (index === 0) return true;
-        return index % labelDensity === 0;
-      });
+      .filter((label) => labelIndexes.has(label.index))
+      .map(({ index, ...label }) => label);
 
     this.yAxisLabels = [];
     this.gridLines = [];
@@ -315,13 +321,33 @@ export class LineChartComponent
   }
 
   private formatYAxisLabel(value: number): string {
+    const rounded = Math.round(value);
+    if (rounded === 0) return '0';
     if (value >= 1000000) {
-      return `${(value / 1000000).toFixed(1)}M`;
+      return `${(rounded / 1000000).toFixed(1)}M`;
     }
     if (value >= 1000) {
-      return `${(value / 1000).toFixed(1)}k`;
+      return `${(rounded / 1000).toFixed(1)}k`;
     }
-    return value.toString();
+    return rounded.toLocaleString();
+  }
+
+  private getNiceYAxisMaximum(maxValue: number): number {
+    if (!Number.isFinite(maxValue) || maxValue <= 0) return 1;
+    const targetIntervals = 4;
+    const roughStep = maxValue / targetIntervals;
+    const magnitude = 10 ** Math.floor(Math.log10(roughStep));
+    const normalizedStep = roughStep / magnitude;
+    const niceMultiplier =
+      normalizedStep <= 1
+        ? 1
+        : normalizedStep <= 2
+        ? 2
+        : normalizedStep <= 5
+        ? 5
+        : 10;
+    const step = niceMultiplier * magnitude;
+    return Math.ceil(maxValue / step) * step;
   }
 
   private createSmoothedLine(points: { x: number; y: number }[]): string {

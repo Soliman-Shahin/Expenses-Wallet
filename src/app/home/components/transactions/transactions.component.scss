@@ -163,9 +163,7 @@
   }
 
   .amount-expense {
-    color: var(
-      --ion-text-color
-    ) !important; // More subtle for expenses, letting minus sign do the work
+    color: var(--ion-color-danger) !important;
   }
 }
 

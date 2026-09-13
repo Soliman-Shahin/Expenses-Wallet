@@ -112,6 +112,47 @@ export class DashboardFacade {
     return this.totalsForRange(startDate, endDate);
   }
 
+  incomeTransactionsForRange(
+    startDate: Date,
+    endDate: Date
+  ): Observable<{ count: number; sum: number }> {
+    const startInclusive = startDate.getTime();
+    const endExclusive = endDate.getTime();
+    return this.expenses.getExpenses().pipe(
+      map((resp) => {
+        const expenses: Expense[] = Array.isArray(resp)
+          ? (resp as Expense[])
+          : (resp as any)?.data?.data || (resp as any)?.data || [];
+        let count = 0;
+        let sum = 0;
+        for (const expense of expenses) {
+          const rawDate = expense?.date || expense?.createdAt;
+          const timestamp = rawDate ? new Date(rawDate).getTime() : NaN;
+          if (
+            !Number.isFinite(timestamp) ||
+            timestamp < startInclusive ||
+            timestamp >= endExclusive
+          ) {
+            continue;
+          }
+          const categoryType =
+            expense?.category && typeof expense.category === 'object'
+              ? (expense.category as any).type
+              : undefined;
+          const transactionType =
+            (expense as any)?.type || categoryType || 'outcome';
+          if (String(transactionType).toLowerCase() !== 'income') continue;
+
+          const amount = Number(expense.amount);
+          if (!Number.isFinite(amount)) continue;
+          count++;
+          sum += amount;
+        }
+        return { count, sum };
+      })
+    );
+  }
+
   // Compute expense distribution by category for a custom date range
   expenseByCategoryForRange(
     startDate: Date,
@@ -307,10 +348,7 @@ export class DashboardFacade {
           const date = new Date(startInclusive + i * 24 * 60 * 60 * 1000);
           return { name: `${date.getDate()}/${date.getMonth() + 1}`, value: v };
         });
-      }),
-      switchMap((arr) =>
-        arr && arr.length > 0 ? of(arr) : this.charts.getMonthlyExpenses()
-      )
+      })
     );
   }
 
@@ -352,10 +390,7 @@ export class DashboardFacade {
             if (idx >= 0 && idx < daysInMonth) daily[idx] += amt;
           });
         return daily.map((v, i) => ({ name: String(i + 1), value: v }));
-      }),
-      switchMap((arr) =>
-        arr && arr.length > 0 ? of(arr) : this.charts.getMonthlyExpenses()
-      )
+      })
     );
   }
 

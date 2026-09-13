@@ -21,6 +21,7 @@ import {
   BehaviorSubject,
   catchError,
   combineLatest,
+  forkJoin,
   map,
   of,
   shareReplay,
@@ -128,6 +129,7 @@ export class HomePageComponent
 
   // UI state
   activeTab: 'charts' | 'summary' = 'summary';
+  isChartsScrolling = false;
 
   // Scroll position state
   isScrolledToStart = true;
@@ -163,12 +165,7 @@ export class HomePageComponent
   // Reactive month selection for Charts tab (supports custom date ranges)
   private readonly chartsMonthSelection$ = new BehaviorSubject<MonthYear>({
     ...this.selectedMonth,
-    startDate: new Date(
-      new Date().getFullYear(),
-      new Date().getMonth() - 6,
-      new Date().getDate()
-    ).toISOString(),
-    endDate: new Date().toISOString(),
+    ...this.getChartsDateRange(this.selectedMonth, this.selectedRange),
   });
 
   private readonly dashboard = inject(DashboardFacade);
@@ -236,17 +233,25 @@ export class HomePageComponent
       }
 
       // Use custom date range if provided, otherwise use month/year
-      const totals$ =
+      const startDate =
         month.startDate && month.endDate
-          ? this.dashboard.totalsForRange(
-              new Date(month.startDate),
-              new Date(month.endDate)
-            )
-          : this.dashboard.totalsForMonth(month.month, month.year);
+          ? new Date(month.startDate)
+          : new Date(month.year, month.month - 1, 1);
+      const endDate =
+        month.startDate && month.endDate
+          ? new Date(month.endDate)
+          : new Date(month.year, month.month, 1);
 
-      return totals$.pipe(
-        map((totals) => {
-          const base = totals ?? { income: 0, expenses: 0, balance: 0 };
+      return forkJoin({
+        totals: this.dashboard.totalsForRange(startDate, endDate),
+        income: this.dashboard.incomeTransactionsForRange(startDate, endDate),
+      }).pipe(
+        map(({ totals, income }) => {
+          const base = {
+            income: income.sum,
+            expenses: Number(totals?.expenses ?? 0),
+            balance: income.sum - Number(totals?.expenses ?? 0),
+          };
           return this.dashboard.withProfileIncome(base, profile);
         })
       );
@@ -422,6 +427,10 @@ export class HomePageComponent
     this.selectedMonth = monthYear;
     // Notify Summary tab stream only
     this.summaryMonthSelection$.next(monthYear);
+    this.chartsMonthSelection$.next({
+      ...monthYear,
+      ...this.getChartsDateRange(monthYear, this.selectedRange),
+    });
   }
 
   /**
@@ -440,49 +449,10 @@ export class HomePageComponent
     // Save the selected range so it persists when switching tabs
     this.selectedRange = range;
 
-    // Calculate date range based on selection
-    const now = new Date();
-    let startDate: Date;
-
-    switch (range) {
-      case '1m':
-        // Last 1 month
-        startDate = new Date(
-          now.getFullYear(),
-          now.getMonth() - 1,
-          now.getDate()
-        );
-        break;
-      case '6m':
-        // Last 6 months
-        startDate = new Date(
-          now.getFullYear(),
-          now.getMonth() - 6,
-          now.getDate()
-        );
-        break;
-      case '1y':
-        // Last 1 year
-        startDate = new Date(
-          now.getFullYear() - 1,
-          now.getMonth(),
-          now.getDate()
-        );
-        break;
-      case 'all':
-      default:
-        // All time - use a very old date
-        startDate = new Date(2020, 0, 1);
-        break;
-    }
-
-    // Update the Charts tab selection to trigger data refresh
-    // This will cause the charts to update with the new date range
+    const rangeDates = this.getChartsDateRange(this.selectedMonth, range);
     this.chartsMonthSelection$.next({
-      month: now.getMonth() + 1,
-      year: now.getFullYear(),
-      startDate: startDate.toISOString(),
-      endDate: now.toISOString(),
+      ...this.selectedMonth,
+      ...rangeDates,
     });
 
     this.cdr.markForCheck();
@@ -591,6 +561,33 @@ export class HomePageComponent
     this.cdr.markForCheck();
   }
 
+  onHomeContentScroll(): void {
+    if (this.activeTab === 'charts') {
+      this.isChartsScrolling = true;
+    }
+  }
+
+  onHomeContentScrollEnd(): void {
+    this.isChartsScrolling = false;
+  }
+
+  private getChartsDateRange(
+    anchor: MonthYear,
+    range: DateRange
+  ): { startDate: string; endDate: string } {
+    const endDate = new Date(anchor.year, anchor.month, 0, 23, 59, 59, 999);
+    const monthCount =
+      range === '1m' ? 1 : range === '6m' ? 6 : range === '1y' ? 12 : 0;
+    const startDate =
+      monthCount > 0
+        ? new Date(anchor.year, anchor.month - monthCount, 1, 0, 0, 0, 0)
+        : new Date(0);
+    return {
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+    };
+  }
+
   refreshSummaryTotals(): void {
     this.summaryRefresh$.next(this.summaryRefresh$.value + 1);
     this.cdr.markForCheck();
@@ -598,6 +595,8 @@ export class HomePageComponent
 
   onTransactionsDataChanged(): void {
     this.refreshSummaryTotals();
+    const currentCharts = this.chartsMonthSelection$.getValue();
+    this.chartsMonthSelection$.next({ ...currentCharts });
   }
 
   // Toggle language between Arabic and English

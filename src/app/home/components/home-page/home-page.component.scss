@@ -606,7 +606,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: var(--ew-space-3) 0;
+        padding: var(--ew-space-3) 1rem;
         border-bottom: 1px solid rgba(var(--ion-color-primary-rgb), 0.06);
 
         &:last-child {
@@ -676,6 +676,44 @@
       }
     }
   }
+}
+
+.charts-card {
+  padding: var(--ew-space-4);
+  margin-bottom: var(--ew-core-bottom-clearance);
+
+  app-bar-chart,
+  app-pie-chart,
+  app-line-chart {
+    margin-block: var(--ew-space-4);
+    padding-block: var(--ew-space-2);
+
+    & + app-bar-chart,
+    & + app-pie-chart,
+    & + app-line-chart {
+      border-top: 1px solid rgba(var(--ion-text-color-rgb), 0.08);
+      padding-top: var(--ew-space-5);
+    }
+  }
+}
+
+.charts-empty-state {
+  min-height: 120px;
+  display: grid;
+  place-items: center;
+  padding: var(--ew-space-6);
+  color: var(--ew-color-gray-500);
+  font-size: var(--ew-font-size-sm);
+  text-align: center;
+  border: 1px dashed rgba(var(--ion-text-color-rgb), 0.12);
+  border-radius: var(--ew-radius-md);
+  background: rgba(var(--ion-text-color-rgb), 0.02);
+}
+
+app-add-fab-button.fab-hidden-during-chart-scroll .fab-add {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(12px);
 }
 
 // Charts

@@ -3,7 +3,10 @@
   [dir]="currentLang === 'ar' ? 'rtl' : 'ltr'"
   [scrollY]="!(vm$ | async)?.loading"
   [scrollX]="false"
+  [scrollEvents]="true"
   [fullscreen]="true"
+  (ionScroll)="onHomeContentScroll()"
+  (ionScrollEnd)="onHomeContentScrollEnd()"
 >
   @if (vm$ | async; as vm) { @if (vm.loading && !hasRenderedHomeContent) {
   <div
@@ -184,7 +187,7 @@
           icon="analytics-outline"
           [title]="'HOME.CHARTS' | translate"
         ></app-section-header>
-        @if (!vm.loading) {
+        @if (!vm.loading || hasRenderedHomeContent) {
         <div (click)="$event.stopPropagation()">
           @if (vm.incomeVsExpense.length > 0) { @if (barChartComponent | async;
           as BarChartComponent) {
@@ -192,8 +195,14 @@
             *ngComponentOutlet="BarChartComponent; injector: barChartInjector"
           ></ng-container>
           } @else {
-          <app-skeleton-block variant="chart"></app-skeleton-block>
-          } }
+          <div class="charts-empty-state" role="status">
+            {{ "NO_DATA" | translate }}
+          </div>
+          } } @else {
+          <div class="charts-empty-state" role="status">
+            {{ "NO_DATA" | translate }}
+          </div>
+          }
         </div>
         <div (click)="$event.stopPropagation()">
           @if (vm.expenseByCategory.length > 0) { @if (pieChartComponent |
@@ -202,8 +211,14 @@
             *ngComponentOutlet="PieChartComponent; injector: pieChartInjector"
           ></ng-container>
           } @else {
-          <app-skeleton-block variant="chart"></app-skeleton-block>
-          } }
+          <div class="charts-empty-state" role="status">
+            {{ "NO_DATA" | translate }}
+          </div>
+          } } @else {
+          <div class="charts-empty-state" role="status">
+            {{ "NO_DATA" | translate }}
+          </div>
+          }
         </div>
         <div (click)="$event.stopPropagation()">
           @if (vm.monthlyExpenses.length > 0) { @if (lineChartComponent | async;
@@ -212,8 +227,14 @@
             *ngComponentOutlet="LineChartComponent; injector: lineChartInjector"
           ></ng-container>
           } @else {
-          <app-skeleton-block variant="chart"></app-skeleton-block>
-          } }
+          <div class="charts-empty-state" role="status">
+            {{ "NO_DATA" | translate }}
+          </div>
+          } } @else {
+          <div class="charts-empty-state" role="status">
+            {{ "NO_DATA" | translate }}
+          </div>
+          }
         </div>
         <div (click)="$event.stopPropagation()">
           @if (vm.totalSalary > 0) {
@@ -331,5 +352,10 @@
 </ion-content>
 
 @if ((vm$ | async)?.profile) {
-<app-add-fab-button (fabClick)="openExpenseModal()"></app-add-fab-button>
+<app-add-fab-button
+  [class.fab-hidden-during-chart-scroll]="
+    activeTab === 'charts' && isChartsScrolling
+  "
+  (fabClick)="openExpenseModal()"
+></app-add-fab-button>
 }

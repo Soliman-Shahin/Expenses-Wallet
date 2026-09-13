@@ -34,6 +34,12 @@
   font-weight: var(--ew-font-weight-bold);
 }
 
+.bar-value {
+  font-weight: var(--ew-font-weight-bold);
+  color: var(--ew-text-color-primary);
+  font-variant-numeric: tabular-nums;
+}
+
 .chart-wrapper {
   display: flex;
   height: 220px;
