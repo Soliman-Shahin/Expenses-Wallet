@@ -19,11 +19,10 @@
     <div class="user-info" (click)="navigateFromMenu('/profile')" role="link">
       <div class="avatar">
         <div class="avatar-circle">
-          @if ((vm.storedProfile?.avatarUrl || vm.profile.user?.image) &&
-          !avatarFailed) {
+          @if (vm.storedProfile?.avatarUrl && !avatarFailed) {
           <img
             #img
-            [src]="vm.storedProfile?.avatarUrl || vm.profile.user?.image"
+            [src]="vm.storedProfile?.avatarUrl"
             (error)="onAvatarError()"
             (load)="onAvatarLoad()"
             [alt]="'USER_AVATAR' | translate"

@@ -70,6 +70,7 @@ export class AuthService {
       try {
         await this.tokenService.initialize();
         await this.renewIfNeeded();
+        this.profileService.hydrateForSession();
       } catch {
         /* Offline or protected storage unavailable: retain recoverable credentials. */
       }

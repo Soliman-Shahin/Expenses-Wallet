@@ -5,9 +5,11 @@ import { ApiService } from 'src/app/core/services/api.service';
 import { catchError, map, tap, shareReplay, takeUntil } from 'rxjs/operators';
 import { TokenService } from 'src/app/modules/auth/services/token.service';
 import { StorageService } from 'src/app/modules/auth/services/storage.service';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 // Deprecated old storage key - kept for cleanup only
 const LEGACY_STORAGE_KEY = 'ew_user_profile_v1';
+const PROFILE_CACHE_KEY = 'profile';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileService {
@@ -24,6 +26,7 @@ export class ProfileService {
   private storage = inject(StorageService);
   private api = inject(ApiService);
   private tokens = inject(TokenService);
+  private profileOwnerId: string | null = null;
 
   constructor() {
     // Initialize stream with current value from storage
@@ -31,8 +34,30 @@ export class ProfileService {
     try {
       localStorage.removeItem(LEGACY_STORAGE_KEY);
     } catch {}
+    const storedProfile = this.storage.get<any>(PROFILE_CACHE_KEY);
+    const storedUser = this.storage.get<any>('user');
+    this.profileOwnerId = storedProfile?.ownerId || (storedUser?._id ? String(storedUser._id) : null);
     const existing = this.getProfile();
     this.profileSubject.next(existing);
+    toObservable(this.tokens.user).subscribe((user) => {
+      if (!user) return;
+      const ownerId = user._id ? String(user._id) : null;
+      const sameOwner = !!ownerId && ownerId === this.profileOwnerId;
+      if (ownerId && this.profileOwnerId && !sameOwner)
+        this.profileSubject.next(null);
+      // Storage may already have been overwritten by TokenService with the
+      // incomplete auth user. The subject is the last canonical profile.
+      const current = sameOwner ? this.profileSubject.value : null;
+      const normalized = this.normalizeProfile({
+        ...user,
+        ...(current ?? {}),
+        avatarUrl: current?.avatarUrl || user.image || undefined,
+      });
+      if (normalized) {
+        this.profileOwnerId = ownerId;
+        this.saveProfile(normalized);
+      }
+    });
   }
 
   /**
@@ -42,6 +67,7 @@ export class ProfileService {
   clearProfile(): void {
     try {
       this.storage.remove('user');
+      this.storage.remove(PROFILE_CACHE_KEY);
       // Cleanup legacy key as well just in case
       try {
         localStorage.removeItem(LEGACY_STORAGE_KEY);
@@ -50,6 +76,7 @@ export class ProfileService {
       console.error('Failed to clear profile from storage', e);
     }
     this.profileSubject.next(null);
+    this.profileOwnerId = null;
   }
 
   private normalizeProfile(raw: any | null): UserProfile | null {
@@ -87,7 +114,8 @@ export class ProfileService {
   getProfile(): UserProfile | null {
     try {
       // Read unified user object stored under key 'ewallet_user'
-      const raw = this.storage.get<any>('user');
+      const cached = this.storage.get<any>(PROFILE_CACHE_KEY);
+      const raw = cached?.profile ?? cached ?? this.storage.get<any>('user');
       // raw might already be a normalized UserProfile or a backend User; normalize either
       return this.normalizeProfile(raw);
     } catch (e) {
@@ -99,7 +127,7 @@ export class ProfileService {
   saveProfile(profile: UserProfile): boolean {
     try {
       // Persist using shared storage => key becomes 'ewallet_user'
-      this.storage.set<UserProfile>('user', profile);
+      this.storage.set(PROFILE_CACHE_KEY, { ownerId: this.profileOwnerId || this.tokens.getUserId(), profile });
       this.profileSubject.next(profile);
       return true;
     } catch (e) {
@@ -161,6 +189,14 @@ export class ProfileService {
       }),
       shareReplay({ bufferSize: 1, refCount: true })
     );
+  }
+
+  hydrateForSession(): void {
+    if (this.tokens.getAccessToken()) {
+      this.fetchProfile().subscribe({
+        error: () => undefined,
+      });
+    }
   }
 
   /**

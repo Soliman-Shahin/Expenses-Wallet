@@ -16,8 +16,14 @@
         lines="none"
       >
         <ion-avatar slot="start" class="profile-avatar">
-          @if (currentUser?.image) { <img [src]="currentUser?.image" alt="" /> }
-          @else {
+          @if (profile?.avatarUrl && !avatarFailed) {
+          <img
+            [src]="profile?.avatarUrl"
+            (error)="onAvatarError()"
+            (load)="onAvatarLoad()"
+            alt=""
+          />
+          } @else {
           <ion-icon name="person-outline" aria-hidden="true"></ion-icon> }
         </ion-avatar>
         <ion-label>

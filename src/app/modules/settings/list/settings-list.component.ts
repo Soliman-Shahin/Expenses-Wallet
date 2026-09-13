@@ -11,6 +11,8 @@ import { BackupService } from 'src/app/core/services/backup.service';
 import { CacheService } from 'src/app/core/services/cache.service';
 import { takeUntil } from 'rxjs/operators';
 import { clearHttpCache } from 'src/app/core/interceptors/cache.interceptor';
+import { ProfileService } from 'src/app/modules/profile/services/profile.service';
+import { UserProfile } from 'src/app/modules/profile/models/profile.model';
 
 @Component({
   selector: 'app-settings-list',
@@ -32,6 +34,8 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
   autoBackupEnabled = false;
 
   currentUser: User | null = null;
+  profile: UserProfile | null = null;
+  avatarFailed = false;
 
   languages = [
     { code: 'en', name: 'English', flag: '🇺🇸' },
@@ -47,6 +51,7 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
   private biometricService = inject(BiometricService);
   private biometricSignInService = inject(BiometricSignInService);
   private pushNotificationService = inject(PushNotificationService);
+  private profileService = inject(ProfileService);
 
   constructor() {
     super();
@@ -60,8 +65,23 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
       this.currentUser = user;
       this.cdr.markForCheck();
     });
+    this.profileService.profile$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((profile) => {
+        this.profile = profile;
+        this.avatarFailed = false;
+        this.cdr.markForCheck();
+      });
 
     await this.loadSettings();
+  }
+
+  onAvatarError(): void {
+    this.avatarFailed = true;
+  }
+
+  onAvatarLoad(): void {
+    this.avatarFailed = false;
   }
 
   async loadSettings() {
