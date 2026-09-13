@@ -200,9 +200,6 @@ ion-reorder {
 .category-item.reorder-selected {
   --background: var(--ion-item-background);
 }
-:host ::ng-deep app-add-fab-button ion-fab {
-  bottom: calc(81px + env(safe-area-inset-bottom, 0px));
-}
 .error-message {
   display: block;
   padding: 16px;

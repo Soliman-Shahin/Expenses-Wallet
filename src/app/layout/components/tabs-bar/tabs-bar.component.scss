@@ -1,15 +1,32 @@
 ion-tab-bar {
+  --tabs-dock-height: 50px;
+  --tabs-dock-radius: 24px;
+  --tabs-icon-size: 22px;
+  --tabs-active-size: 44px;
+  --tabs-dock-horizontal-inset: 18px;
+  --tabs-dock-horizontal-padding: 12px;
+  --tabs-dock-vertical-padding: 10px;
+  --tabs-dock-bottom-offset: 10px;
   --background: var(--ion-item-background);
   --border: 0;
   position: absolute;
-  inset-inline: 0;
-  bottom: 0;
-  width: 100%;
-  height: calc(64px + env(safe-area-inset-bottom));
-  padding: 4px 8px env(safe-area-inset-bottom);
-  border-top: 1px solid var(--ew-wallet-line);
-  box-shadow: none;
-  border-radius: 0;
+  inset-inline-start: var(--tabs-dock-horizontal-inset);
+  inset-inline-end: var(--tabs-dock-horizontal-inset);
+  bottom: max(
+    var(--tabs-dock-bottom-offset),
+    calc(env(safe-area-inset-bottom) + var(--tabs-dock-bottom-offset))
+  );
+  width: auto;
+  border: 1px solid var(--ew-wallet-line);
+  border-radius: var(--tabs-dock-radius);
+  background: color-mix(
+    in srgb,
+    var(--ion-item-background) 94%,
+    var(--ion-background-color)
+  ) !important;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.14),
+    0 2px 8px rgba(15, 23, 42, 0.06) !important;
+  overflow: visible;
 }
 ion-tab-button {
   --color: var(--ew-wallet-muted);
@@ -18,30 +35,62 @@ ion-tab-button {
   min-width: 0;
   max-width: none;
   min-height: 48px;
+  position: relative;
+  padding: 0;
+  --ripple-color: var(--ion-color-primary);
+  --indicator-color: transparent;
   flex: 1;
-  ion-icon {
-    font-size: 23px;
-    margin-bottom: 4px;
+  background: transparent !important;
+  border-radius: 16px;
+  .tab-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    max-width: 100%;
+    min-height: 52px;
+    width: 52px;
+    height: 52px;
+    padding: 0;
+    border-radius: 12px;
+    transition: background-color 160ms ease, color 160ms ease,
+      border-color 160ms ease;
   }
-  ion-label {
-    font-size: 11px;
-    line-height: 1.8;
-    white-space: nowrap;
-    text-overflow: clip;
-    overflow: visible;
-    font-weight: 500;
+  ion-icon {
+    flex: 0 0 auto;
+    width: var(--tabs-icon-size);
+    height: var(--tabs-icon-size);
+    font-size: var(--tabs-icon-size);
     margin: 0;
   }
   &.tab-selected {
     --color: var(--ion-color-primary);
-    ion-label {
-      font-weight: 700;
+    .tab-content {
+      background: transparent;
+      border: 0;
     }
     ion-icon {
-      background: var(--ew-wallet-inset);
-      border-radius: 8px;
-      padding: 3px 12px;
-      margin-bottom: 1px;
+      padding: 15px;
+      border-radius: 50%;
+      background: color-mix(in srgb, var(--ion-color-primary) 12%, transparent);
     }
+  }
+}
+
+:host-context(.dark) ion-tab-bar {
+  background: color-mix(in srgb, var(--ion-item-background) 96%, #0b1220);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.3), 0 1px 8px rgba(0, 0, 0, 0.18);
+}
+
+// The receipt glyph has a denser silhouette; keep its optical footprint aligned.
+ion-tab-button ion-icon[name="receipt"] {
+  font-size: var(--tabs-icon-size);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ion-tab-bar,
+  ion-tab-button,
+  ion-tab-button::after {
+    transition: none !important;
   }
 }

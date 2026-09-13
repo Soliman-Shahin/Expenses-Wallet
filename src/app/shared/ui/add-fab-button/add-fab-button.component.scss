@@ -69,10 +69,13 @@ ion-fab {
 }
 
 :host-context(app-home-page),
-:host-context(app-transactions-list) {
+:host-context(app-transactions-list),
+:host-context(app-categories) {
   ion-fab {
-    // 69px rendered navigation (including padding/border) + 12px separation; the scroll clearance also reserves the 52px FAB.
-    bottom: calc(81px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(
+      var(--tabs-dock-height, 50px) + var(--tabs-dock-bottom-offset, 10px) +
+        var(--tabs-fab-gap, 18px) + env(safe-area-inset-bottom, 0px)
+    );
     margin-bottom: 0;
     inset-inline-end: max(16px, env(safe-area-inset-right, 0px));
   }

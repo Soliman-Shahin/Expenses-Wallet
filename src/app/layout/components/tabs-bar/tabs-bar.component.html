@@ -6,15 +6,15 @@
   @for (tab of tabs; track tab) { @if (tab.visible) {
   <ion-tab-button
     (click)="navigateTab(tab.routerLink, $event)"
-    [class.tab-selected]="
-      vm.activeRoute === tab.routerLink ||
-      (tab.routerLink !== '/' && vm.activeRoute.startsWith(tab.routerLink))
+    [class.tab-selected]="isActiveTab(tab.routerLink, vm.activeRoute)"
+    [attr.aria-current]="
+      isActiveTab(tab.routerLink, vm.activeRoute) ? 'page' : null
     "
+    [attr.aria-label]="tab.label ?? '' | translate"
   >
-    <ion-icon [name]="tab.icon"></ion-icon>
-    @if (tab.show_label) {
-    <ion-label>{{ tab.label ?? "" | translate }}</ion-label>
-    }
+    <span class="tab-content">
+      <ion-icon [name]="tab.icon"></ion-icon>
+    </span>
   </ion-tab-button>
   } }
 </ion-tab-bar>
