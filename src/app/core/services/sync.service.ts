@@ -1,5 +1,13 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, BehaviorSubject, from, of, interval } from 'rxjs';
+import {
+  Observable,
+  BehaviorSubject,
+  from,
+  of,
+  interval,
+  throwError,
+  Subscription,
+} from 'rxjs';
 import {
   map,
   switchMap,
@@ -50,7 +58,7 @@ export class SyncService {
   // ==================== OBSERVABLES ====================
 
   private syncMetadataSubject = new BehaviorSubject<SyncMetadata>({
-    lastSyncTime: new Date(),
+    lastSyncTime: null,
     totalEntities: 0,
     pendingCount: 0,
     conflictCount: 0,
@@ -75,6 +83,7 @@ export class SyncService {
 
   private isOnline = false;
   private syncInProgress = false;
+  private autoSyncSubscription?: Subscription;
 
   /** Key used to persist lastSyncTime in localStorage as fallback */
   private readonly LAST_SYNC_KEY = 'sync_lastSyncTime';
@@ -92,29 +101,43 @@ export class SyncService {
   private initializeQueueMonitoring(): void {
     // Monitor offline queue and update metadata
     this.offlineStorage.syncQueue$.subscribe((queue) => {
-      const pendingCount = queue.operations.filter(op => op.status === SyncStatus.PENDING).length;
-      const errorCount = queue.operations.filter(op => op.status === SyncStatus.ERROR).length;
-      
+      const pendingCount = queue.operations.filter(
+        (op) => op.status === SyncStatus.PENDING
+      ).length;
+      const errorCount = queue.operations.filter(
+        (op) => op.status === SyncStatus.ERROR
+      ).length;
+
       this.updateSyncMetadata({
         pendingCount,
         errorCount,
       });
-      
+
       // Also update total entities count occasionally
-      this.offlineStorage.getStorageSize().subscribe(totalEntities => {
+      this.offlineStorage.getStorageSize().subscribe((totalEntities) => {
         this.updateSyncMetadata({ totalEntities });
       });
     });
   }
 
-  private async loadConfig() {
+  private loadConfig(): void {
     try {
       const stored = localStorage.getItem('sync_config');
       if (stored) {
         this.syncConfig = { ...this.syncConfig, ...JSON.parse(stored) };
-        if (this.syncConfig.syncInterval < 60000) {
-          this.syncConfig.syncInterval = 300000; // Reset to 5 mins if too low
-        }
+        this.syncConfig.syncInterval = [60000, 300000, 900000].includes(
+          this.syncConfig.syncInterval
+        )
+          ? this.syncConfig.syncInterval
+          : 300000;
+        this.syncConfig.maxRetries = Math.min(
+          10,
+          Math.max(1, this.syncConfig.maxRetries || 3)
+        );
+        this.syncConfig.batchSize = Math.min(
+          100,
+          Math.max(1, this.syncConfig.batchSize || 50)
+        );
         console.log('⚙️ Loaded sync config:', this.syncConfig);
       }
     } catch (e) {
@@ -164,8 +187,10 @@ export class SyncService {
    * تفعيل المزامنة التلقائية
    */
   private initializeAutoSync(): void {
+    this.autoSyncSubscription?.unsubscribe();
+    this.autoSyncSubscription = undefined;
     if (this.syncConfig.autoSync && this.syncConfig.syncInterval > 0) {
-      interval(this.syncConfig.syncInterval)
+      this.autoSyncSubscription = interval(this.syncConfig.syncInterval)
         .pipe(
           filter(() => this.isOnline && !this.syncInProgress),
           switchMap(() => {
@@ -227,7 +252,8 @@ export class SyncService {
           currentOperation: 'Pushing local changes...',
         });
       }),
-      switchMap(() => {
+      switchMap((pushSucceeded) => {
+        if (!pushSucceeded) return of(false);
         // Step 2: Pull latest data from server
         return this.pullDataFromServer().pipe(
           tap(() => {
@@ -239,7 +265,9 @@ export class SyncService {
           }),
           switchMap((pullResult) => {
             console.log(
-              `✅ Pulled ${pullResult.entities?.length || 0} entities from server`
+              `✅ Pulled ${
+                pullResult.entities?.length || 0
+              } entities from server`
             );
 
             // Step 3: Merge with local data
@@ -271,7 +299,6 @@ export class SyncService {
           errors: [error.message || 'Unknown sync error'],
           isComplete: true,
         });
-        this.completeSync();
         return of(false);
       }),
       finalize(() => {
@@ -308,12 +335,7 @@ export class SyncService {
         }),
         catchError((error) => {
           console.error('❌ Pull error:', error);
-          return of({
-            entities: [],
-            conflicts: [],
-            totalCount: 0,
-            hasMore: false,
-          });
+          return throwError(() => error);
         })
       );
   }
@@ -372,7 +394,7 @@ export class SyncService {
       }),
       catchError((error) => {
         console.error('❌ Merge error:', error);
-        return of(false);
+        return throwError(() => error);
       })
     );
   }
@@ -408,8 +430,10 @@ export class SyncService {
         // This ensures the backend resolves offline category IDs and puts them in idMap
         // BEFORE it processes expenses that depend on those categories.
         entities.sort((a, b) => {
-          if (a._entityType === 'category' && b._entityType !== 'category') return -1;
-          if (a._entityType !== 'category' && b._entityType === 'category') return 1;
+          if (a._entityType === 'category' && b._entityType !== 'category')
+            return -1;
+          if (a._entityType !== 'category' && b._entityType === 'category')
+            return 1;
           return 0;
         });
 
@@ -437,7 +461,7 @@ export class SyncService {
             this.updateSyncProgress({
               errors: [error.message || 'Push failed'],
             });
-            return of(false);
+            return throwError(() => error);
           })
         );
       })
@@ -568,7 +592,21 @@ export class SyncService {
 
   updateConfig(config: Partial<SyncConfig>): void {
     this.syncConfig = { ...this.syncConfig, ...config };
+    this.syncConfig.syncInterval = [60000, 300000, 900000].includes(
+      this.syncConfig.syncInterval
+    )
+      ? this.syncConfig.syncInterval
+      : 300000;
+    this.syncConfig.maxRetries = Math.min(
+      10,
+      Math.max(1, this.syncConfig.maxRetries || 3)
+    );
+    this.syncConfig.batchSize = Math.min(
+      100,
+      Math.max(1, this.syncConfig.batchSize || 50)
+    );
     localStorage.setItem('sync_config', JSON.stringify(this.syncConfig));
+    this.initializeAutoSync();
     console.log('⚙️ Sync config updated:', this.syncConfig);
   }
 

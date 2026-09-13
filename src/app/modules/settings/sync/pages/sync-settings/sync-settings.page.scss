@@ -1,2 +1,102 @@
 @use "src/theme/mobile-secondary" as secondary;
 @include secondary.settings;
+
+.action-buttons-container {
+  gap: 12px;
+}
+
+// The global form submit rule gives every submit button a 60px height and top
+// margin. Settings actions are a compact, shared action family instead.
+.action-buttons-container ion-button.action-button.save-action,
+.action-buttons-container ion-button.action-button.sync-now-action {
+  height: 48px;
+  min-height: 48px;
+  margin: 0;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --border-radius: 16px;
+  font-size: 14px;
+}
+
+.action-text {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  text-align: start;
+  white-space: normal;
+}
+
+.action-text > span {
+  display: block;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.action-text small {
+  display: block;
+  color: var(--ew-wallet-muted);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.35;
+  white-space: normal;
+}
+
+.sync-now-action .action-text small {
+  color: rgba(var(--ion-color-primary-contrast-rgb), 0.78);
+}
+
+.sync-now-action {
+  --background: var(--ion-color-primary);
+  --color: var(--ion-color-primary-contrast);
+  --border-radius: 16px;
+  min-height: 48px;
+  font-weight: 700;
+}
+
+.save-action {
+  --background: var(--ion-color-primary);
+  --color: var(--ion-color-primary-contrast);
+  --border-radius: 16px;
+  min-height: 48px;
+  font-weight: 700;
+}
+
+.save-action.button-disabled {
+  --background: var(--ew-wallet-inset);
+  --color: var(--ew-wallet-muted);
+  opacity: 1;
+}
+
+.backup-action,
+.destructive-action {
+  min-height: 46px;
+}
+
+.backup-action {
+  --background: var(--ew-wallet-inset);
+  --color: var(--ion-text-color);
+  --border-color: var(--ew-wallet-line);
+  --border-width: 1px;
+  --border-style: solid;
+  --border-radius: 14px;
+}
+
+.destructive-action {
+  --background: rgba(var(--ion-color-danger-rgb), 0.08);
+  --color: var(--ion-color-danger);
+  --border-color: rgba(var(--ion-color-danger-rgb), 0.35);
+  --border-width: 1px;
+  --border-style: solid;
+  --border-radius: 14px;
+}
+
+.sync-now-action.button-disabled {
+  --background: var(--ew-wallet-inset);
+  --color: var(--ew-wallet-muted);
+  opacity: 1;
+}

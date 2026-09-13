@@ -12,7 +12,8 @@ import { SyncService } from 'src/app/core/services/sync.service';
 import { OfflineStorageService } from 'src/app/core/services/offline-storage.service';
 import { SyncConfig } from 'src/app/shared/models/sync.model';
 import { BaseComponent } from 'src/app/shared/base';
-import { AsyncPipe, DecimalPipe } from '@angular/common';
+import { AsyncPipe, DatePipe, DecimalPipe } from '@angular/common';
+import { firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 import { RouterModule } from '@angular/router';
 
@@ -93,72 +94,29 @@ import { RouterModule } from '@angular/router';
             <div slot="start" class="icon-wrapper color-red">
               <ion-icon name="git-compare"></ion-icon>
             </div>
-            <ion-label>{{ 'SYNC.CONFLICT_STRATEGY' | translate }}</ion-label>
-            <ion-select
-              [attr.aria-label]="'SYNC.CONFLICT_STRATEGY' | translate"
-              formControlName="conflictResolution"
-              interface="popover"
-              slot="end"
-              class="modern-select"
-            >
-              <ion-select-option value="prompt">{{
-                'SYNC.ASK_ME' | translate
-              }}</ion-select-option>
-              <ion-select-option value="local">{{
-                'SYNC.USE_LOCAL' | translate
-              }}</ion-select-option>
-              <ion-select-option value="server">{{
-                'SYNC.USE_SERVER' | translate
-              }}</ion-select-option>
-            </ion-select>
-          </ion-item>
-
-          <ion-item lines="none">
-            <div slot="start" class="icon-wrapper color-purple">
-              <ion-icon name="cloud-offline"></ion-icon>
-            </div>
             <ion-label>
-              <h3>{{ 'SYNC.OFFLINE_MODE' | translate }}</h3>
-              <p>{{ 'SYNC.OFFLINE_MODE_DESC' | translate }}</p>
+              <h3>{{ 'SYNC.CONFLICT_STRATEGY' | translate }}</h3>
+              <p>{{ 'SYNC.CONFLICT_INFO' | translate }}</p>
             </ion-label>
-            <ion-toggle
-              [attr.aria-label]="'SYNC.OFFLINE_MODE' | translate"
-              formControlName="enableOfflineMode"
-              slot="end"
-              color="primary"
-            ></ion-toggle>
           </ion-item>
         </ion-list>
 
         <div class="section-label">{{ 'SYNC.ADVANCED' | translate }}</div>
         <ion-list inset="true" class="premium-list">
           <ion-item lines="none">
-            <div slot="start" class="icon-wrapper color-orange">
-              <ion-icon name="refresh-circle"></ion-icon>
-            </div>
-            <ion-label>{{ 'SYNC.MAX_RETRIES' | translate }}</ion-label>
-            <ion-input
-              type="number"
-              [attr.aria-label]="'SYNC.MAX_RETRIES' | translate"
-              formControlName="maxRetries"
-              min="1"
-              max="10"
-              slot="end"
-              class="right-align-input"
-            ></ion-input>
-          </ion-item>
-
-          <ion-item lines="none">
             <div slot="start" class="icon-wrapper color-green">
               <ion-icon name="layers"></ion-icon>
             </div>
-            <ion-label>{{ 'SYNC.BATCH_SIZE' | translate }}</ion-label>
+            <ion-label>
+              <h3>{{ 'SYNC.BATCH_SIZE' | translate }}</h3>
+              <p>{{ 'SYNC.BATCH_SIZE_DESC' | translate }}</p>
+            </ion-label>
             <ion-input
               type="number"
               [attr.aria-label]="'SYNC.BATCH_SIZE' | translate"
               formControlName="batchSize"
               min="1"
-              max="50"
+              max="100"
               slot="end"
               class="right-align-input"
             ></ion-input>
@@ -172,8 +130,24 @@ import { RouterModule } from '@angular/router';
               <ion-icon name="folder"></ion-icon>
             </div>
             <ion-label>
-              <h3>{{ 'SYNC.LOCAL_STORAGE' | translate }}</h3>
+              <h3>{{ 'SYNC.OFFLINE_STORAGE' | translate }}</h3>
               <p>{{ storageSize | async | number : '1.2-2' }} KB</p>
+            </ion-label>
+          </ion-item>
+
+          <ion-item lines="none">
+            <div slot="start" class="icon-wrapper color-blue">
+              <ion-icon name="time"></ion-icon>
+            </div>
+            <ion-label>
+              <h3>{{ 'SYNC.LAST_SUCCESSFUL_SYNC' | translate }}</h3>
+              <p>
+                {{
+                  (syncMetadata$ | async)?.lastSyncTime
+                    ? ((syncMetadata$ | async)?.lastSyncTime | date : 'medium')
+                    : ('SYNC.NEVER' | translate)
+                }}
+              </p>
             </ion-label>
           </ion-item>
 
@@ -192,37 +166,63 @@ import { RouterModule } from '@angular/router';
           <ion-button
             expand="block"
             type="submit"
-            class="action-button btn-primary"
+            class="action-button save-action"
+            [disabled]="!hasUnsavedChanges"
+            [attr.aria-disabled]="!hasUnsavedChanges"
           >
             <ion-icon name="save-outline" slot="start"></ion-icon>
-            {{ 'COMMON.SAVE' | translate }}
+            <span class="action-text">
+              <span>{{ 'COMMON.SAVE' | translate }}</span>
+            </span>
           </ion-button>
 
           <ion-button
             expand="block"
-            class="action-button btn-outline btn-outline-primary"
+            type="button"
+            class="action-button sync-now-action"
             (click)="forceSync()"
+            [disabled]="
+              !syncService.isOnlineStatus() || syncService.isSyncInProgress()
+            "
+            [attr.aria-busy]="syncService.isSyncInProgress()"
           >
+            @if (syncService.isSyncInProgress()) {
+            <ion-spinner name="crescent" slot="start"></ion-spinner>
+            <span class="action-text"
+              ><span>{{ 'SYNC.SYNCING' | translate }}</span></span
+            >
+            } @else {
             <ion-icon name="sync-outline" slot="start"></ion-icon>
-            {{ 'SYNC.SYNC_NOW' | translate }}
+            <span class="action-text"
+              ><span>{{ 'SYNC.SYNC_NOW' | translate }}</span></span
+            >
+            }
           </ion-button>
 
           <ion-button
             expand="block"
-            class="action-button btn-outline btn-outline-warning"
+            type="button"
+            class="action-button backup-action"
             (click)="createBackup()"
           >
             <ion-icon name="download-outline" slot="start"></ion-icon>
-            {{ 'SYNC.CREATE_BACKUP' | translate }}
+            <span class="action-text">
+              <span>{{ 'SYNC.CREATE_BACKUP' | translate }}</span>
+              <small>{{ 'SYNC.CREATE_BACKUP_DESC' | translate }}</small>
+            </span>
           </ion-button>
 
           <ion-button
             expand="block"
-            class="action-button btn-outline btn-outline-danger"
+            type="button"
+            class="action-button destructive-action"
             (click)="clearOfflineData()"
           >
             <ion-icon name="trash-outline" slot="start"></ion-icon>
-            {{ 'SYNC.CLEAR_OFFLINE_DATA' | translate }}
+            <span class="action-text">
+              <span>{{ 'SYNC.CLEAR_OFFLINE_DATA' | translate }}</span>
+              <small>{{ 'SYNC.CLEAR_OFFLINE_DATA_DESC' | translate }}</small>
+            </span>
           </ion-button>
         </div>
       </form>
@@ -235,13 +235,14 @@ import { RouterModule } from '@angular/router';
     FormsModule,
     ReactiveFormsModule,
     AsyncPipe,
+    DatePipe,
     DecimalPipe,
     TranslateModule,
     RouterModule,
   ],
 })
 export class SyncSettingsPage extends BaseComponent implements OnInit {
-  private syncService = inject(SyncService);
+  public syncService = inject(SyncService);
   private offlineStorage = inject(OfflineStorageService);
   private formBuilder = inject(FormBuilder);
   private loadingController = inject(LoadingController);
@@ -249,6 +250,10 @@ export class SyncSettingsPage extends BaseComponent implements OnInit {
   syncForm!: FormGroup;
   storageSize = this.offlineStorage.getStorageSize();
   pendingCount = this.syncService.getPendingCount();
+  syncMetadata$ = this.syncService.syncMetadata$;
+  private clearingOfflineData = false;
+  hasUnsavedChanges = false;
+  private savedFormValue = '';
 
   override ngOnInit() {
     super.ngOnInit();
@@ -256,16 +261,14 @@ export class SyncSettingsPage extends BaseComponent implements OnInit {
     this.syncForm = this.formBuilder.group({
       autoSync: [config.autoSync ?? true],
       syncInterval: [config.syncInterval?.toString() ?? '300000'],
-      conflictResolution: [config.conflictResolution ?? 'prompt'],
-      enableOfflineMode: [config.enableOfflineMode ?? false],
-      maxRetries: [
-        config.maxRetries ?? 3,
-        [Validators.required, Validators.min(1), Validators.max(10)],
-      ],
       batchSize: [
         config.batchSize ?? 50,
         [Validators.required, Validators.min(1), Validators.max(100)],
       ],
+    });
+    this.savedFormValue = this.formValueKey();
+    this.syncForm.valueChanges.subscribe(() => {
+      this.hasUnsavedChanges = this.formValueKey() !== this.savedFormValue;
     });
   }
 
@@ -280,27 +283,34 @@ export class SyncSettingsPage extends BaseComponent implements OnInit {
       const config: Partial<SyncConfig> = {
         autoSync: formValue.autoSync,
         syncInterval: parseInt(formValue.syncInterval),
-        conflictResolution: formValue.conflictResolution,
-        enableOfflineMode: formValue.enableOfflineMode,
-        maxRetries: formValue.maxRetries,
         batchSize: formValue.batchSize,
       };
 
       this.syncService.updateConfig(config);
+      this.savedFormValue = this.formValueKey();
+      this.hasUnsavedChanges = false;
       this.toastService.presentSuccessToast('bottom', 'SYNC.SETTINGS_SAVED');
     }
   }
 
-  async forceSync(): Promise<void> {
-    const loading = await this.loadingController.create({
-      message: this.translateService.instant('SYNC.SYNCING') || 'Syncing...',
-      spinner: 'circles',
+  private formValueKey(): string {
+    const value = this.syncForm?.getRawValue();
+    return JSON.stringify({
+      autoSync: value?.autoSync,
+      syncInterval: value?.syncInterval,
+      batchSize: Number(value?.batchSize),
     });
-    await loading.present();
+  }
 
+  async forceSync(): Promise<void> {
+    if (
+      !this.syncService.isOnlineStatus() ||
+      this.syncService.isSyncInProgress()
+    ) {
+      return;
+    }
     this.syncService.forceSync().subscribe({
       next: (success) => {
-        loading.dismiss();
         if (success) {
           this.toastService.presentSuccessToast('bottom', 'SYNC.SYNC_SUCCESS');
         } else {
@@ -308,7 +318,6 @@ export class SyncSettingsPage extends BaseComponent implements OnInit {
         }
       },
       error: (error) => {
-        loading.dismiss();
         console.error('Sync error:', error);
         this.toastService.presentErrorToast('bottom', 'SYNC.SYNC_ERROR');
       },
@@ -316,6 +325,19 @@ export class SyncSettingsPage extends BaseComponent implements OnInit {
   }
 
   async clearOfflineData(): Promise<void> {
+    if (this.clearingOfflineData) return;
+    const operations = await firstValueFrom(
+      this.offlineStorage.getPendingOperations()
+    );
+    if (
+      operations.some(
+        (operation) =>
+          operation.status === 'pending' || operation.status === 'error'
+      )
+    ) {
+      this.toastService.presentErrorToast('bottom', 'SYNC.CLEAR_DATA_BLOCKED');
+      return;
+    }
     const confirmed = await this.alertService.showConfirm({
       title: this.translateService.instant('SYNC.CLEAR_DATA_TITLE'),
       message: this.translateService.instant('SYNC.CLEAR_DATA_MESSAGE'),
@@ -324,6 +346,7 @@ export class SyncSettingsPage extends BaseComponent implements OnInit {
     });
 
     if (confirmed) {
+      this.clearingOfflineData = true;
       const loading = await this.loadingController.create({
         message:
           this.translateService.instant('COMMON.LOADING') || 'Clearing...',
@@ -334,6 +357,7 @@ export class SyncSettingsPage extends BaseComponent implements OnInit {
       this.offlineStorage.clearOfflineData().subscribe({
         next: (success) => {
           loading.dismiss();
+          this.clearingOfflineData = false;
           if (success) {
             this.toastService.presentSuccessToast(
               'bottom',
@@ -345,6 +369,7 @@ export class SyncSettingsPage extends BaseComponent implements OnInit {
         },
         error: (error) => {
           loading.dismiss();
+          this.clearingOfflineData = false;
           console.error('Clear data error:', error);
           this.toastService.presentErrorToast('bottom', 'SYNC.CLEAR_ERROR');
         },

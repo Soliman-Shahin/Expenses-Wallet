@@ -13,11 +13,11 @@ export enum SyncStatus {
   PENDING = 'pending',
   CONFLICT = 'conflict',
   ERROR = 'error',
-  OFFLINE = 'offline'
+  OFFLINE = 'offline',
 }
 
 export interface SyncMetadata {
-  lastSyncTime: Date;
+  lastSyncTime: Date | null;
   totalEntities: number;
   pendingCount: number;
   conflictCount: number;
