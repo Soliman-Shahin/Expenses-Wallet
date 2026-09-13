@@ -1,13 +1,16 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { BaseComponent } from 'src/app/shared/base/base.component';
-import { Subscription } from 'rxjs';
 import { BiometricService } from 'src/app/core/services/biometric.service';
 import { BiometricSignInService } from 'src/app/modules/auth/services/biometric-signin.service';
-import { ModalController, IonicModule } from '@ionic/angular';
+import { IonicModule } from '@ionic/angular';
 import { AuthService } from 'src/app/modules/auth/services/auth.service';
 import { User } from 'src/app/modules/auth/models';
 import { TranslateModule } from '@ngx-translate/core';
 import { PushNotificationService } from 'src/app/core/services/push-notification.service';
+import { BackupService } from 'src/app/core/services/backup.service';
+import { CacheService } from 'src/app/core/services/cache.service';
+import { takeUntil } from 'rxjs/operators';
+import { clearHttpCache } from 'src/app/core/interceptors/cache.interceptor';
 
 @Component({
   selector: 'app-settings-list',
@@ -18,12 +21,14 @@ import { PushNotificationService } from 'src/app/core/services/push-notification
 })
 export class SettingsListComponent extends BaseComponent implements OnInit {
   biometricAvailable = false;
+  biometricSignInAvailable = false;
   biometricEnabled = false;
   biometricSignInEnabled = false;
 
   currentLanguage = 'en';
   selectedTheme = 'auto';
   notificationsEnabled = true;
+  notificationStatus = 'SETTINGS.NOTIFICATIONS_UNAVAILABLE';
   autoBackupEnabled = false;
 
   currentUser: User | null = null;
@@ -51,7 +56,7 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
     super.ngOnInit();
 
     // Subscribe to current user changes
-    this.authService.user$.subscribe((user) => {
+    this.authService.user$.pipe(takeUntil(this.destroy$)).subscribe((user) => {
       this.currentUser = user;
       this.cdr.markForCheck();
     });
@@ -61,9 +66,12 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
 
   async loadSettings() {
     this.biometricAvailable = await this.biometricService.isAvailable();
+    this.biometricSignInAvailable =
+      await this.biometricSignInService.isAvailable();
     this.biometricEnabled = this.biometricService.isEnabled;
-    this.biometricSignInEnabled =
-      await this.biometricSignInService.hasEnrollment();
+    this.biometricSignInEnabled = this.biometricSignInAvailable
+      ? await this.biometricSignInService.hasEnrollment()
+      : false;
     this.currentLanguage = this.currentLang;
     this.selectedTheme = this.themeService.getPreference();
     const notificationPermission =
@@ -71,7 +79,15 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
     this.notificationsEnabled =
       localStorage.getItem('notifications') !== 'false' &&
       notificationPermission === 'granted';
-    this.autoBackupEnabled = localStorage.getItem('autoBackup') === 'true';
+    this.notificationStatus =
+      notificationPermission === 'unavailable'
+        ? 'SETTINGS.NOTIFICATIONS_UNAVAILABLE'
+        : notificationPermission === 'denied'
+        ? 'SETTINGS.NOTIFICATIONS_PERMISSION_DENIED_SHORT'
+        : this.notificationsEnabled
+        ? 'SETTINGS.NOTIFICATIONS_ENABLED'
+        : 'SETTINGS.NOTIFICATIONS_DISABLED';
+    this.autoBackupEnabled = this.backupService.getAutoBackupSettings().enabled;
     this.cdr.markForCheck();
   }
 
@@ -124,23 +140,24 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
 
   async toggleNotifications(event: any) {
     const requestedEnabled = !!event.detail.checked;
-
-    if (requestedEnabled) {
-      const permission = await this.pushNotificationService.enable();
-      this.notificationsEnabled = permission === 'granted';
-      if (!this.notificationsEnabled) {
-        event.target.checked = false;
-        this.toastService.presentErrorToast(
-          'bottom',
-          this.translateService.instant(
-            'SETTINGS.NOTIFICATIONS_PERMISSION_DENIED'
-          )
-        );
+    try {
+      if (requestedEnabled) {
+        const permission = await this.pushNotificationService.enable();
+        this.notificationsEnabled = permission === 'granted';
+        if (!this.notificationsEnabled) throw new Error('permission');
       } else {
+        await this.pushNotificationService.disable();
+        this.notificationsEnabled = false;
       }
-    } else {
-      await this.pushNotificationService.disable();
+    } catch {
       this.notificationsEnabled = false;
+      event.target.checked = false;
+      this.toastService.presentErrorToast(
+        'bottom',
+        this.translateService.instant(
+          'SETTINGS.NOTIFICATIONS_PERMISSION_DENIED'
+        )
+      );
     }
     this.cdr.markForCheck();
   }
@@ -148,7 +165,7 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
   async toggleBiometricSignIn(event: any) {
     const enabled = !!event.detail.checked;
     if (enabled) {
-      if (!this.authService.isLoggedIn || !this.biometricAvailable) {
+      if (!this.authService.isLoggedIn || !this.biometricSignInAvailable) {
         event.target.checked = false;
         return;
       }
@@ -186,7 +203,7 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
 
   toggleAutoBackup(event: any) {
     this.autoBackupEnabled = event.detail.checked;
-    localStorage.setItem('autoBackup', this.autoBackupEnabled.toString());
+    this.backupService.setAutoBackupEnabled(this.autoBackupEnabled);
     this.cdr.markForCheck();
   }
 
@@ -215,20 +232,8 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
     });
 
     if (confirmed) {
-      // Clear only cache, not all localStorage
-      const keysToKeep = ['language', 'theme', 'notifications', 'autoBackup'];
-      const tempStorage: any = {};
-
-      keysToKeep.forEach((key) => {
-        const value = localStorage.getItem(key);
-        if (value) tempStorage[key] = value;
-      });
-
-      localStorage.clear();
-
-      Object.keys(tempStorage).forEach((key) => {
-        localStorage.setItem(key, tempStorage[key]);
-      });
+      this.cacheService.clear();
+      clearHttpCache();
 
       this.toastService.presentSuccessToast(
         'bottom',
@@ -237,4 +242,7 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
       this.cdr.markForCheck();
     }
   }
+
+  private backupService = inject(BackupService);
+  private cacheService = inject(CacheService);
 }

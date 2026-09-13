@@ -30,6 +30,13 @@ export function invalidateHttpCache(path: string): number {
   return removed;
 }
 
+/** Clear the interceptor's transient GET response cache without touching storage. */
+export function clearHttpCache(): number {
+  const size = cache.size;
+  cache.clear();
+  return size;
+}
+
 function isExpired(entry: CacheEntry): boolean {
   return Date.now() - entry.timestamp > CACHE_TTL;
 }

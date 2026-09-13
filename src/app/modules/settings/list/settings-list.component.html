@@ -100,7 +100,7 @@
         </div>
         <ion-label>
           <h3>{{ "SETTINGS.NOTIFICATIONS" | translate }}</h3>
-          <p>{{ "SETTINGS.NOTIFICATIONS_DESC" | translate }}</p>
+          <p>{{ notificationStatus | translate }}</p>
         </ion-label>
         <ion-toggle
           slot="end"
@@ -129,6 +129,7 @@
           color="primary"
         ></ion-toggle>
       </ion-item>
+      @if (biometricSignInAvailable) {
       <ion-item lines="none">
         <div slot="start" class="icon-wrapper color-green">
           <ion-icon name="finger-print"></ion-icon>
@@ -145,7 +146,7 @@
           color="primary"
         ></ion-toggle>
       </ion-item>
-      }
+      } }
     </ion-list>
 
     <!-- Data & Backup Section -->
@@ -193,7 +194,7 @@
     <div class="section-label">{{ "SETTINGS.ADVANCED" | translate }}</div>
     <ion-list inset="true" class="premium-list">
       <!-- Clear Cache Button -->
-      <ion-item button detail="true" (click)="clearCache()" lines="none">
+      <ion-item button detail="false" (click)="clearCache()" lines="none">
         <div slot="start" class="icon-wrapper color-dark">
           <ion-icon name="trash"></ion-icon>
         </div>
