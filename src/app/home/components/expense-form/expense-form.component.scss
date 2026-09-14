@@ -175,6 +175,15 @@ ion-title {
   max-height: 320px;
   overflow-y: auto;
 }
+.category-section-label {
+  margin: 0;
+  padding: 10px 16px 6px;
+  color: var(--ew-wallet-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
 .popover-item {
   display: flex;
   align-items: center;
@@ -187,6 +196,11 @@ ion-title {
   font: inherit;
   color: inherit;
   background: transparent;
+  cursor: pointer;
+}
+.popover-item:focus-visible {
+  outline: 2px solid var(--ion-color-primary);
+  outline-offset: -2px;
 }
 .popover-item.selected {
   background: var(--ew-wallet-inset);
@@ -209,6 +223,18 @@ ion-title {
 }
 .check-icon {
   color: var(--ion-color-primary);
+}
+.favorite-button {
+  flex: 0 0 40px;
+  min-width: 40px;
+  min-height: 40px;
+  margin: 0;
+  --padding-start: 8px;
+  --padding-end: 8px;
+  --color: var(--ew-wallet-muted);
+}
+.favorite-button ion-icon {
+  font-size: 18px;
 }
 @media (max-height: 560px) {
   .hero-body {

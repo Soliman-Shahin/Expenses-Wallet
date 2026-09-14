@@ -30,7 +30,12 @@ import { Expense, Category } from 'src/app/shared/models';
 import { ProfileService } from 'src/app/modules/profile/services/profile.service';
 import { trapFocus, releaseFocus } from 'src/app/shared/utils/focus-trap';
 import { IonicModule } from '@ionic/angular';
-import { NgClass, AsyncPipe, DatePipe } from '@angular/common';
+import {
+  NgClass,
+  AsyncPipe,
+  DatePipe,
+  NgTemplateOutlet,
+} from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { ExpenseDraftService } from 'src/app/core/services/expense-draft.service';
 
@@ -47,6 +52,7 @@ import { ExpenseDraftService } from 'src/app/core/services/expense-draft.service
     NgClass,
     AsyncPipe,
     DatePipe,
+    NgTemplateOutlet,
     TranslateModule,
   ],
 })
@@ -68,14 +74,23 @@ export class ExpenseFormComponent
 
   allCategories: Category[] = [];
   filteredCategories: Category[] = [];
+  favoriteCategories: Category[] = [];
+  recentCategories: Category[] = [];
+  remainingCategories: Category[] = [];
   showCategoryPopover = false;
   private typeSubject$ = new BehaviorSubject<'income' | 'outcome'>('outcome');
   private categoriesLoaded = false;
+  private categoriesResolved = false;
   private initialized = false;
   private initialFormValue: Record<string, unknown> | null = null;
   isDeleteSubmitting = false;
   hasDraft = false;
   private readonly ownerId = this.tokenService.getUserId();
+  private readonly shortcutStoragePrefix =
+    'ewallet.transaction-category-shortcuts.v1.';
+  private readonly recentCategoryCap = 5;
+  private recentCategoryIds: string[] = [];
+  private favoriteCategoryIds: string[] = [];
 
   vm$ = combineLatest([toObservable(this.state.loading)]).pipe(
     map(([isLoading]) => ({ isLoading }))
@@ -97,6 +112,7 @@ export class ExpenseFormComponent
     super.ngOnInit();
     this.isEditMode = !!this.expense;
     this.userCurrency = this.profileService.getProfile()?.currency || '';
+    this.loadCategoryShortcuts();
     this.initForm();
     if (!this.isEditMode) this.restoreDraft();
     this.watchDraft();
@@ -201,6 +217,7 @@ export class ExpenseFormComponent
       this.filteredCategories = this.allCategories.filter(
         (c) => c.type === t || (!c.type && t === 'outcome')
       );
+      this.refreshCategoryShortcuts();
 
       // Reset category if current selection doesn't match new type
       const currentCategoryId = this.expenseForm.get('category')?.value;
@@ -230,6 +247,7 @@ export class ExpenseFormComponent
       )
       .subscribe((categories) => {
         this.allCategories = categories;
+        this.categoriesResolved = true;
         if (!this.isEditMode) {
           const category = this.expenseForm.get('category');
           if (
@@ -326,6 +344,7 @@ export class ExpenseFormComponent
       .subscribe({
         next: (response) => {
           if (!this.isEditMode) this.draftService.clear(this.ownerId);
+          this.recordRecentCategory(String(payloadData.category));
           const message = this.isEditMode
             ? this.translateService.instant('EXPENSE.UPDATE_SUCCESS')
             : this.translateService.instant('EXPENSE.CREATE_SUCCESS');
@@ -387,6 +406,116 @@ export class ExpenseFormComponent
     this.expenseForm.get('category')?.setValue(id);
     this.expenseForm.get('category')?.markAsDirty();
     this.closeCategoryPopover();
+  }
+
+  isFavoriteCategory(id: string): boolean {
+    return this.favoriteCategoryIds.includes(id);
+  }
+
+  toggleFavoriteCategory(id: string, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.favoriteCategoryIds = this.isFavoriteCategory(id)
+      ? this.favoriteCategoryIds.filter((categoryId) => categoryId !== id)
+      : [...this.favoriteCategoryIds, id];
+    this.persistCategoryShortcuts();
+    this.refreshCategoryShortcuts();
+  }
+
+  private categoryShortcutKey(): string | null {
+    return this.ownerId ? `${this.shortcutStoragePrefix}${this.ownerId}` : null;
+  }
+
+  private loadCategoryShortcuts(): void {
+    const key = this.categoryShortcutKey();
+    if (!key) return;
+    try {
+      const stored = JSON.parse(localStorage.getItem(key) || '{}');
+      this.recentCategoryIds = Array.isArray(stored.recentCategoryIds)
+        ? stored.recentCategoryIds.filter(
+            (id: unknown) => typeof id === 'string'
+          ).slice(0, this.recentCategoryCap)
+        : [];
+      this.favoriteCategoryIds = Array.isArray(stored.favoriteCategoryIds)
+        ? stored.favoriteCategoryIds.filter(
+            (id: unknown) => typeof id === 'string'
+          )
+        : [];
+    } catch {
+      this.recentCategoryIds = [];
+      this.favoriteCategoryIds = [];
+    }
+    this.persistCategoryShortcuts();
+  }
+
+  private persistCategoryShortcuts(): void {
+    const key = this.categoryShortcutKey();
+    if (!key) return;
+    try {
+      localStorage.setItem(
+        key,
+        JSON.stringify({
+          recentCategoryIds: this.recentCategoryIds.slice(
+            0,
+            this.recentCategoryCap
+          ),
+          favoriteCategoryIds: this.favoriteCategoryIds,
+        })
+      );
+    } catch {
+      // Local preferences are optional and must not affect transaction saves.
+    }
+  }
+
+  private recordRecentCategory(id: string): void {
+    if (!id || !this.allCategories.some((category) => category._id === id)) {
+      return;
+    }
+    this.recentCategoryIds = [
+      id,
+      ...this.recentCategoryIds.filter((categoryId) => categoryId !== id),
+    ].slice(0, this.recentCategoryCap);
+    this.persistCategoryShortcuts();
+    this.refreshCategoryShortcuts();
+  }
+
+  private refreshCategoryShortcuts(): void {
+    const canonicalIds = new Set(
+      this.allCategories.map((category) => category._id).filter(Boolean)
+    );
+    const validFavorites = this.categoriesResolved
+      ? this.favoriteCategoryIds.filter((id) => canonicalIds.has(id))
+      : this.favoriteCategoryIds;
+    const validRecents = this.categoriesResolved
+      ? this.recentCategoryIds.filter((id) => canonicalIds.has(id))
+      : this.recentCategoryIds;
+    if (
+      this.categoriesResolved &&
+      (validFavorites.length !== this.favoriteCategoryIds.length ||
+        validRecents.length !== this.recentCategoryIds.length)
+    ) {
+      this.favoriteCategoryIds = validFavorites;
+      this.recentCategoryIds = validRecents;
+      this.persistCategoryShortcuts();
+    }
+
+    const byId = new Map(
+      this.filteredCategories.map((category) => [category._id, category])
+    );
+    const favoriteIds = new Set(validFavorites);
+    const recentIds = new Set(validRecents);
+    this.favoriteCategories = validFavorites
+      .map((id) => byId.get(id))
+      .filter((category): category is Category => !!category);
+    this.recentCategories = validRecents
+      .filter((id) => !favoriteIds.has(id))
+      .map((id) => byId.get(id))
+      .filter((category): category is Category => !!category);
+    this.remainingCategories = this.filteredCategories.filter(
+      (category) =>
+        !favoriteIds.has(category._id || '') &&
+        !recentIds.has(category._id || '')
+    );
   }
 
   getSelectedCategoryText(): string {
