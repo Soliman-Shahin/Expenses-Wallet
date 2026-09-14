@@ -499,6 +499,14 @@
     "EDIT_AVATAR": "Edit photo",
     "AVATAR_ACTIONS_TITLE": "Profile photo actions",
     "CHANGE_AVATAR": "Change photo",
+    "AVATAR_CROP": {
+      "TITLE": "Preview profile photo",
+      "SUBTITLE": "Your photo will be cropped square and compressed before upload.",
+      "USE_PHOTO": "Use photo",
+      "PREVIEW": "Selected profile photo crop",
+      "ZOOM": "Zoom",
+      "PREPARING": "Preparing photo…"
+    },
     "AUTH": {
       "TITLE": "Account details",
       "PROVIDER_LABEL": "Sign-in method",
@@ -563,6 +571,7 @@
       "AVATAR_REMOVED": "Profile photo removed",
       "AVATAR_FAILED": "Failed to update profile photo",
       "AVATAR_REMOVE_FAILED": "Failed to remove profile photo",
+      "AVATAR_PROCESSING_FAILED": "We couldn't prepare that photo. Please choose another image.",
       "INVALID_FILE_TYPE": "Please select a valid image file (JPEG, PNG, GIF, or WebP)",
       "FILE_TOO_LARGE": "File size exceeds 5MB limit. Please select a smaller image."
     },

@@ -11,9 +11,19 @@
       <app-skeleton-block variant="detail"></app-skeleton-block>
     </div>
     } @if (vm.errorMessage && !vm.isLoadingProfile) {
-    <ion-note color="danger" role="alert">{{
-      "MOBILE_UI.PROFILE_ERROR" | translate
-    }}</ion-note>
+    <div class="profile-load-error" role="alert">
+      <ion-note color="danger">{{
+        "MOBILE_UI.PROFILE_ERROR" | translate
+      }}</ion-note>
+      <ion-button
+        fill="clear"
+        size="small"
+        type="button"
+        (click)="loadProfile()"
+      >
+        {{ "COMMON.RETRY" | translate }}
+      </ion-button>
+    </div>
     }
     <!-- ── Avatar Section (Overlapping Hero) ── -->
     <div class="avatar-section profile-identity">
@@ -22,6 +32,11 @@
         [class.loading]="vm.isLoadingAvatar"
         [attr.aria-busy]="vm.isLoadingAvatar"
       >
+        @if (vm.isPreparingAvatar) {
+        <span class="avatar-preparing" role="status" aria-live="polite">
+          {{ "PROFILE.AVATAR_CROP.PREPARING" | translate }}
+        </span>
+        }
         @if (vm.isLoadingAvatar) {
         <span class="avatar-loading" role="status">{{
           "COMMON.LOADING" | translate
@@ -52,7 +67,73 @@
           (change)="onAvatarSelected($event)"
         />
       </div>
-      @if (personalForm.get('username')?.value ||
+      @if (cropEditorOpen) {
+      <ion-modal
+        [isOpen]="true"
+        [backdropDismiss]="false"
+        (didPresent)="renderCrop()"
+      >
+        <ng-template>
+          <ion-header>
+            <ion-toolbar>
+              <ion-title>{{
+                "PROFILE.AVATAR_CROP.TITLE" | translate
+              }}</ion-title>
+            </ion-toolbar>
+          </ion-header>
+          <ion-content class="avatar-crop-content">
+            <p>{{ "PROFILE.AVATAR_CROP.SUBTITLE" | translate }}</p>
+            <div class="avatar-crop-viewport">
+              <canvas
+                #cropCanvas
+                width="280"
+                height="280"
+                role="img"
+                [attr.aria-label]="'PROFILE.AVATAR_CROP.PREVIEW' | translate"
+                (pointerdown)="onCropPointerDown($event)"
+                (pointermove)="onCropPointerMove($event)"
+                (pointerup)="onCropPointerUp($event)"
+                (pointercancel)="onCropPointerUp($event)"
+              ></canvas>
+            </div>
+            <label class="avatar-zoom-control">
+              <span>{{ "PROFILE.AVATAR_CROP.ZOOM" | translate }}</span>
+              <input
+                type="range"
+                min="1"
+                max="3"
+                step="0.01"
+                [value]="cropZoom"
+                [attr.aria-label]="'PROFILE.AVATAR_CROP.ZOOM' | translate"
+                [attr.aria-valuetext]="
+                  (cropZoom * 100 | number : '1.0-0') + '%'
+                "
+                (input)="onCropZoom($event)"
+              />
+              <span class="avatar-zoom-value"
+                >{{ cropZoom * 100 | number : "1.0-0" }}%</span
+              >
+            </label>
+          </ion-content>
+          <ion-footer>
+            <ion-toolbar>
+              <ion-buttons class="avatar-crop-actions">
+                <ion-button
+                  fill="clear"
+                  type="button"
+                  (click)="cancelAvatarCrop()"
+                >
+                  {{ "COMMON.CANCEL" | translate }}
+                </ion-button>
+                <ion-button type="button" (click)="confirmAvatarCrop()">
+                  {{ "PROFILE.AVATAR_CROP.USE_PHOTO" | translate }}
+                </ion-button>
+              </ion-buttons>
+            </ion-toolbar>
+          </ion-footer>
+        </ng-template>
+      </ion-modal>
+      } @if (personalForm.get('username')?.value ||
       personalForm.get('email')?.value || getMemberSince()) {
       <div class="identity-text">
         <h2 class="user-name">

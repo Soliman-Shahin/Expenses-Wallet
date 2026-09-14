@@ -153,26 +153,6 @@ export class ProfileService {
     return this.saveProfile(merged);
   }
 
-  async setAvatar(file: File): Promise<boolean> {
-    if (!file) return false;
-    try {
-      const dataUrl = await this.readFileAsDataURL(file);
-      return this.saveProfilePart({ avatarUrl: dataUrl });
-    } catch (e) {
-      console.error('Failed to set avatar', e);
-      return false;
-    }
-  }
-
-  private readFileAsDataURL(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = (err) => reject(err);
-      reader.readAsDataURL(file);
-    });
-  }
-
   /**
    * Fetch profile from backend and propagate to local cache and stream.
    * Uses shareReplay to cache the result and share it among multiple subscribers.
@@ -210,6 +190,14 @@ export class ProfileService {
    */
   updateProfile(partial: Partial<UserProfile>): Observable<UserProfile | null> {
     const current = this.getProfile();
+    const previous = current
+      ? ({
+          ...current,
+          salary: Array.isArray(current.salary)
+            ? current.salary.map((detail) => ({ ...detail }))
+            : [],
+        } as UserProfile)
+      : null;
     // Ensure salary is in array shape when sending
     let merged: any = { ...(current ?? {}), ...partial } as UserProfile & any;
     if (merged.salary !== undefined) {
@@ -245,6 +233,7 @@ export class ProfileService {
       }),
       catchError((err) => {
         console.error('Failed to update profile', err);
+        if (previous) this.saveProfile(previous);
         return of(null);
       })
     );
@@ -278,7 +267,7 @@ export class ProfileService {
           this.saveProfile(normalized);
           return normalized;
         }
-        return this.getProfile();
+        return null;
       }),
       catchError((err) => {
         console.error('Failed to upload avatar', err);

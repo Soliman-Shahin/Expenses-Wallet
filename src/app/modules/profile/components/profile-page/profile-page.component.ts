@@ -59,6 +59,7 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
   personalForm!: FormGroup;
   salaryForm!: FormGroup;
   @ViewChild('avatarInput') avatarInputRef!: ElementRef<HTMLInputElement>;
+  @ViewChild('cropCanvas') cropCanvasRef?: ElementRef<HTMLCanvasElement>;
   avatarUrl: string | null = null;
   isPersonalFormDirty = false;
   isSalaryFormDirty = false;
@@ -68,11 +69,32 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
   private isLoadingPersonal$ = new BehaviorSubject<boolean>(false);
   private isLoadingSalary$ = new BehaviorSubject<boolean>(false);
   private isLoadingAvatar$ = new BehaviorSubject<boolean>(false);
+  private isPreparingAvatar$ = new BehaviorSubject<boolean>(false);
   private errorMessage$ = new BehaviorSubject<string | null>(null);
 
   private readonly profileService = inject(ProfileService);
   private readonly translate = inject(TranslateService);
   private readonly actionSheetController = inject(ActionSheetController);
+  cropEditorOpen = false;
+  cropZoom = 1;
+  private cropSourceUrl: string | null = null;
+  private cropImage: HTMLImageElement | null = null;
+  private cropBaseScale = 1;
+  private cropPanX = 0;
+  private cropPanY = 0;
+  private cropDrag:
+    | {
+        pointerId: number;
+        startX: number;
+        startY: number;
+        panX: number;
+        panY: number;
+      }
+    | undefined;
+  private pendingAvatarFile: File | null = null;
+  private readonly cropViewportSize = 280;
+  private readonly avatarMaxSourceBytes = 5 * 1024 * 1024;
+  private readonly avatarOutputSize = 512;
 
   readonly authMetadata$ = this.authService.user$.pipe(
     map((user): ProfileAuthMetadata => {
@@ -100,6 +122,7 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
     isLoadingPersonal: this.isLoadingPersonal$.asObservable(),
     isLoadingSalary: this.isLoadingSalary$.asObservable(),
     isLoadingAvatar: this.isLoadingAvatar$.asObservable(),
+    isPreparingAvatar: this.isPreparingAvatar$.asObservable(),
     errorMessage: this.errorMessage$.asObservable(),
     authMetadata: this.authMetadata$,
   });
@@ -125,9 +148,16 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
   override ngOnInit(): void {
     super.ngOnInit();
     this.personalForm = this.fb.group({
-      username: ['', [Validators.required, Validators.minLength(2)]],
+      username: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(2),
+          Validators.maxLength(50),
+        ],
+      ],
       email: ['', [Validators.required, Validators.email]],
-      phone: [''],
+      phone: ['', [Validators.maxLength(20)]],
     });
 
     this.salaryForm = this.fb.group({
@@ -140,29 +170,24 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
       this.patchFromProfile(existing);
     }
 
-    // Fetch latest profile from backend
-    this.isLoadingProfile$.next(true);
-    this.setLoading(true);
-    this.profileService
-      .fetchProfile()
-      .pipe(
-        finalize(() => {
-          this.isLoadingProfile$.next(false);
-          this.setLoading(false);
-        }),
-        takeUntil(this.destroy$),
-        catchError((err) => {
-          this.errorMessage$.next('MOBILE_UI.PROFILE_ERROR');
-          return [];
-        })
-      )
-      .subscribe();
+    this.loadProfile();
 
     // Subscribe to changes for reactive UI (e.g., avatar preview updates)
     this.profileService.profile$
       .pipe(takeUntil(this.destroy$))
       .subscribe((profile) => {
-        if (!profile) return;
+        if (!profile) {
+          this.avatarUrl = null;
+          this.personalForm.reset({}, { emitEvent: false });
+          while (this.details.length) this.details.removeAt(0);
+          this.details.push(this.createDetailGroup('Salary', 0));
+          this.salaryForm.patchValue({ currency: 'USD' }, { emitEvent: false });
+          this.personalForm.markAsPristine();
+          this.salaryForm.markAsPristine();
+          this.isPersonalFormDirty = false;
+          this.isSalaryFormDirty = false;
+          return;
+        }
         // Do not overwrite user's edits while forms are dirty
         const isEditing = this.personalForm.dirty || this.salaryForm.dirty;
         if (isEditing) return;
@@ -178,6 +203,26 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
       .subscribe(() => (this.isSalaryFormDirty = true));
 
     this.personalForm.get('email')?.disable();
+  }
+
+  loadProfile(): void {
+    this.isLoadingProfile$.next(true);
+    this.setLoading(true);
+    this.errorMessage$.next(null);
+    this.profileService
+      .fetchProfile()
+      .pipe(
+        finalize(() => {
+          this.isLoadingProfile$.next(false);
+          this.setLoading(false);
+        }),
+        takeUntil(this.destroy$),
+        catchError(() => {
+          this.errorMessage$.next('MOBILE_UI.PROFILE_ERROR');
+          return [];
+        })
+      )
+      .subscribe();
   }
 
   private patchFromProfile(profile: UserProfile): void {
@@ -274,7 +319,10 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
     const group = this.fb.group({
       id: [`detail-${this.nextDetailId++}`],
       label: [label, [Validators.required, Validators.maxLength(50)]],
-      amount: [amount, [Validators.required, Validators.min(0)]],
+      amount: [
+        amount,
+        [Validators.required, Validators.min(0), this.finiteAmountValidator],
+      ],
     });
     // Re-run duplicate validation on label change
     group.get('label')?.valueChanges.subscribe(() => {
@@ -286,6 +334,17 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
       this.salaryForm.markAsDirty();
     });
     return group;
+  }
+
+  private finiteAmountValidator(
+    control: AbstractControl
+  ): ValidationErrors | null {
+    const value = control.value;
+    if (value === null || value === '') return null;
+    const amount = Number(value);
+    return Number.isFinite(amount) && amount >= 0
+      ? null
+      : { invalidAmount: true };
   }
 
   addDetail(): void {
@@ -436,8 +495,13 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
     this.isLoadingPersonal$.next(true);
     this.setLoading(true);
     this.errorMessage$.next(null);
+    const personalValue = this.personalForm.getRawValue();
     this.profileService
-      .updateProfile({ ...(this.personalForm.value as Partial<UserProfile>) })
+      .updateProfile({
+        username: String(personalValue.username ?? '').trim(),
+        email: String(personalValue.email ?? '').trim(),
+        phone: String(personalValue.phone ?? '').trim(),
+      })
       .pipe(
         finalize(() => {
           this.isLoadingPersonal$.next(false);
@@ -446,6 +510,15 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
         takeUntil(this.destroy$),
         tap((updated) => {
           if (updated) {
+            const value = this.personalForm.getRawValue();
+            this.personalForm.patchValue(
+              {
+                username: String(value.username ?? '').trim(),
+                email: String(value.email ?? '').trim(),
+                phone: String(value.phone ?? '').trim(),
+              },
+              { emitEvent: false }
+            );
             this.personalForm.markAsPristine();
             this.isPersonalFormDirty = false;
             this.toastService.presentSuccessToast(
@@ -480,10 +553,26 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
     const detailsRaw = this.details.getRawValue() || [];
     const salaryPayload = detailsRaw.map(
       (d: { label?: unknown; amount?: unknown }) => ({
-        label: String(d?.label ?? 'Salary'),
-        amount: Number(d?.amount ?? 0),
+        label: String(d?.label ?? '').trim(),
+        amount: Number(d?.amount),
       })
     );
+    if (
+      salaryPayload.some(
+        (detail) =>
+          !detail.label ||
+          detail.label.length > 50 ||
+          !Number.isFinite(detail.amount) ||
+          detail.amount < 0
+      )
+    ) {
+      this.salaryForm.markAllAsTouched();
+      this.toastService.presentErrorToast(
+        'top',
+        'PROFILE.TOASTS.SALARY_INVALID'
+      );
+      return;
+    }
     const currency = this.salaryForm.get('currency')?.getRawValue();
     const payload: Partial<UserProfile> = {
       salary: salaryPayload,
@@ -500,6 +589,11 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
         takeUntil(this.destroy$),
         tap((updated) => {
           if (updated) {
+            this.details.controls.forEach((control) => {
+              const label = String(control.get('label')?.value ?? '').trim();
+              const amount = Number(control.get('amount')?.value);
+              control.patchValue({ label, amount }, { emitEvent: false });
+            });
             this.salaryForm.markAsPristine();
             this.isSalaryFormDirty = false;
             this.toastService.presentSuccessToast(
@@ -607,8 +701,7 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
       return;
     }
 
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
+    if (file.size > this.avatarMaxSourceBytes) {
       this.toastService.presentErrorToast(
         'top',
         'PROFILE.TOASTS.FILE_TOO_LARGE'
@@ -617,8 +710,44 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
       return;
     }
 
-    // Show the selected image immediately while the existing upload flow completes.
-    this.avatarUrl = URL.createObjectURL(file);
+    this.isPreparingAvatar$.next(true);
+    try {
+      await this.openCropEditor(file);
+    } catch {
+      this.cleanupCropEditor();
+      this.toastService.presentErrorToast(
+        'top',
+        'PROFILE.TOASTS.AVATAR_PROCESSING_FAILED'
+      );
+    } finally {
+      this.isPreparingAvatar$.next(false);
+      input.value = '';
+    }
+  }
+
+  cancelAvatarCrop(): void {
+    this.cleanupCropEditor();
+  }
+
+  async confirmAvatarCrop(): Promise<void> {
+    if (
+      !this.cropImage ||
+      !this.pendingAvatarFile ||
+      this.isLoadingAvatar$.value
+    )
+      return;
+
+    let file: File;
+    try {
+      file = await this.createCroppedAvatar();
+    } catch {
+      this.toastService.presentErrorToast(
+        'top',
+        'PROFILE.TOASTS.AVATAR_PROCESSING_FAILED'
+      );
+      return;
+    }
+    this.cleanupCropEditor();
 
     this.isLoadingAvatar$.next(true);
     this.setLoading(true);
@@ -631,17 +760,12 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
           this.setLoading(false);
         }),
         takeUntil(this.destroy$),
-        tap(async (res) => {
+        tap((res) => {
           if (res) {
+            this.avatarUrl = res.avatarUrl ?? this.avatarUrl;
             this.showAvatarSuccess();
           } else {
-            // fallback to local store if backend fails
-            const ok = await this.profileService.setAvatar(file);
-            if (ok) {
-              this.showAvatarSuccess();
-            } else {
-              this.errorMessage$.next('PROFILE.TOASTS.AVATAR_FAILED');
-            }
+            this.errorMessage$.next('PROFILE.TOASTS.AVATAR_FAILED');
           }
         }),
         catchError((err) => {
@@ -650,21 +774,156 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
         })
       )
       .subscribe();
-    // clear selection
-    input.value = '';
+  }
+
+  private openCropEditor(file: File): Promise<void> {
+    const sourceUrl = URL.createObjectURL(file);
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => {
+        try {
+          if (!image.naturalWidth || !image.naturalHeight)
+            throw new Error('Unreadable image');
+          this.cropImage = image;
+          this.cropSourceUrl = sourceUrl;
+          this.pendingAvatarFile = file;
+          this.cropBaseScale =
+            this.cropViewportSize /
+            Math.min(image.naturalWidth, image.naturalHeight);
+          this.cropZoom = 1;
+          this.cropPanX = 0;
+          this.cropPanY = 0;
+          this.cropEditorOpen = true;
+          resolve();
+        } catch (error) {
+          URL.revokeObjectURL(sourceUrl);
+          reject(error);
+        }
+      };
+      image.onerror = () => {
+        URL.revokeObjectURL(sourceUrl);
+        reject(new Error('Unreadable image'));
+      };
+      image.src = sourceUrl;
+    });
+  }
+
+  onCropZoom(event: Event): void {
+    const value = Number((event.target as HTMLInputElement).value);
+    this.cropZoom = Math.min(3, Math.max(1, value));
+    this.clampCropPan();
+    this.renderCrop();
+  }
+
+  onCropPointerDown(event: PointerEvent): void {
+    if (!this.cropImage) return;
+    const canvas = event.currentTarget as HTMLCanvasElement;
+    canvas.setPointerCapture(event.pointerId);
+    this.cropDrag = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      panX: this.cropPanX,
+      panY: this.cropPanY,
+    };
+  }
+
+  onCropPointerMove(event: PointerEvent): void {
+    if (!this.cropDrag || this.cropDrag.pointerId !== event.pointerId) return;
+    const canvas = event.currentTarget as HTMLCanvasElement;
+    const rect = canvas.getBoundingClientRect();
+    const factor = this.cropViewportSize / rect.width;
+    this.cropPanX =
+      this.cropDrag.panX + (event.clientX - this.cropDrag.startX) * factor;
+    this.cropPanY =
+      this.cropDrag.panY + (event.clientY - this.cropDrag.startY) * factor;
+    this.clampCropPan();
+    this.renderCrop();
+  }
+
+  onCropPointerUp(event: PointerEvent): void {
+    const canvas = event.currentTarget as HTMLCanvasElement;
+    if (canvas.hasPointerCapture(event.pointerId)) {
+      canvas.releasePointerCapture(event.pointerId);
+    }
+    this.cropDrag = undefined;
+  }
+
+  private clampCropPan(): void {
+    if (!this.cropImage) return;
+    const scale = this.cropBaseScale * this.cropZoom;
+    const width = this.cropImage.naturalWidth * scale;
+    const height = this.cropImage.naturalHeight * scale;
+    const maxX = Math.max(0, (width - this.cropViewportSize) / 2);
+    const maxY = Math.max(0, (height - this.cropViewportSize) / 2);
+    this.cropPanX = Math.min(maxX, Math.max(-maxX, this.cropPanX));
+    this.cropPanY = Math.min(maxY, Math.max(-maxY, this.cropPanY));
+  }
+
+  renderCrop(): void {
+    const canvas = this.cropCanvasRef?.nativeElement;
+    if (!canvas || !this.cropImage) return;
+    const context = canvas.getContext('2d');
+    if (!context) return;
+    this.clampCropPan();
+    const scale = this.cropBaseScale * this.cropZoom;
+    const width = this.cropImage.naturalWidth * scale;
+    const height = this.cropImage.naturalHeight * scale;
+    const left = (this.cropViewportSize - width) / 2 + this.cropPanX;
+    const top = (this.cropViewportSize - height) / 2 + this.cropPanY;
+    context.clearRect(0, 0, this.cropViewportSize, this.cropViewportSize);
+    context.drawImage(this.cropImage, left, top, width, height);
+  }
+
+  private createCroppedAvatar(): Promise<File> {
+    const canvas = document.createElement('canvas');
+    canvas.width = this.avatarOutputSize;
+    canvas.height = this.avatarOutputSize;
+    const context = canvas.getContext('2d');
+    if (!context || !this.cropImage)
+      return Promise.reject(new Error('Crop unavailable'));
+    this.clampCropPan();
+    const outputScale = this.avatarOutputSize / this.cropViewportSize;
+    const scale = this.cropBaseScale * this.cropZoom * outputScale;
+    const width = this.cropImage.naturalWidth * scale;
+    const height = this.cropImage.naturalHeight * scale;
+    const left =
+      ((this.cropViewportSize -
+        this.cropImage.naturalWidth * this.cropBaseScale * this.cropZoom) /
+        2 +
+        this.cropPanX) *
+      outputScale;
+    const top =
+      ((this.cropViewportSize -
+        this.cropImage.naturalHeight * this.cropBaseScale * this.cropZoom) /
+        2 +
+        this.cropPanY) *
+      outputScale;
+    context.drawImage(this.cropImage, left, top, width, height);
+    return new Promise((resolve, reject) => {
+      canvas.toBlob(
+        (blob) =>
+          blob
+            ? resolve(
+                new File([blob], 'profile-avatar.jpg', { type: 'image/jpeg' })
+              )
+            : reject(new Error('Image compression failed')),
+        'image/jpeg',
+        0.82
+      );
+    });
+  }
+
+  private cleanupCropEditor(): void {
+    if (this.cropSourceUrl) URL.revokeObjectURL(this.cropSourceUrl);
+    this.cropSourceUrl = null;
+    this.cropImage = null;
+    this.pendingAvatarFile = null;
+    this.cropDrag = undefined;
+    this.cropEditorOpen = false;
   }
 
   private showAvatarSuccess(): void {
     this.toastService.presentSuccessToast('top', 'PROFILE.TOASTS.AVATAR_SAVED');
-    // Add a small delay to allow the UI to update before showing the animation
-    setTimeout(() => {
-      const avatarElement = document.querySelector('.avatar');
-      if (avatarElement) {
-        avatarElement.classList.add('pulse-on-change');
-        setTimeout(() => {
-          avatarElement.classList.remove('pulse-on-change');
-        }, 300);
-      }
-    }, 100);
   }
 }
