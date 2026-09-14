@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
-import { Observable, throwError, from, of } from 'rxjs';
+import { Observable, Subject, throwError, from, of } from 'rxjs';
 import { catchError, shareReplay, tap, switchMap, map } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { Expense } from 'src/app/shared/models/expense.model';
@@ -9,11 +9,21 @@ import { OfflineStorageService } from './offline-storage.service';
 import { ConnectionService } from './connection.service';
 import { SyncStatus } from 'src/app/shared/models/sync.model';
 import { invalidateHttpCache } from '../interceptors/cache.interceptor';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ExpenseService {
+  private readonly expenseReconciledSubject = new Subject<void>();
+  readonly expenseReconciled$ = this.expenseReconciledSubject.asObservable();
+
+  private traceList(source: string, rows: any[]): Expense[] {
+    const logical = rows.filter((row) =>
+      String(row._clientId || '').startsWith('offline_')
+    );
+    return rows as Expense[];
+  }
   private readonly endpoint = '/expenses';
   // Cache the expenses list to prevent duplicate network calls across widgets
   private expensesCache$: Observable<Expense[]> | null = null;
@@ -34,6 +44,12 @@ export class ExpenseService {
       this.expensesCache$ = null;
       this.totalsCache.clear();
     });
+  }
+
+  notifyExpenseReconciled(): void {
+    this.expensesCache$ = null;
+    this.totalsCache.clear();
+    this.expenseReconciledSubject.next();
   }
 
   getExpenses(params?: any, forceRefresh = false): Observable<Expense[]> {
@@ -131,7 +147,9 @@ export class ExpenseService {
               .subscribe();
           }
         }),
-        map(({ mergedExpenses }) => mergedExpenses),
+        map(({ mergedExpenses }) =>
+          this.traceList('merged API + local', mergedExpenses)
+        ),
         catchError(() => {
           // 🔌 Offline fallback: return local data when API call fails
           console.warn(
@@ -234,7 +252,9 @@ export class ExpenseService {
               .subscribe();
           }
         }),
-        map(({ mergedExpenses }) => mergedExpenses),
+        map(({ mergedExpenses }) =>
+          this.traceList('merged API + local', mergedExpenses)
+        ),
         catchError(() => {
           // 🔌 Offline fallback: return local IndexedDB data
           console.warn(
@@ -427,7 +447,8 @@ export class ExpenseService {
       _isDeleted: false,
     };
 
-    return this.offlineStorage.saveEntity('expense', offlineEntity).pipe(
+    offlineEntity._clientId = offlineEntity._clientId || offlineEntity._id;
+    return this.offlineStorage.saveEntity('expense', offlineEntity, type).pipe(
       tap(() => {
         this.expensesCache$ = null;
         this.totalsCache.clear();

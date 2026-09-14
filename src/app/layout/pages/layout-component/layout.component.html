@@ -31,6 +31,7 @@
 
     <!-- Tabs Bar (only when logged in) -->
     @if (isLoggedIn$ | async) {
+    <app-sync-indicator></app-sync-indicator>
     <app-tabs-bar></app-tabs-bar>
     }
   </div>

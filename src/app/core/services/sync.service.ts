@@ -7,6 +7,7 @@ import {
   interval,
   throwError,
   Subscription,
+  firstValueFrom,
 } from 'rxjs';
 import {
   map,
@@ -20,11 +21,13 @@ import {
 import { ApiService } from './api.service';
 import { OfflineStorageService } from './offline-storage.service';
 import { ConnectionService } from './connection.service';
+import { ExpenseService } from './expense.service';
 import {
   SyncStatus,
   SyncMetadata,
   SyncConfig,
   SyncProgress,
+  SyncIndicatorState,
 } from 'src/app/shared/models/sync.model';
 
 /**
@@ -43,6 +46,7 @@ export class SyncService {
   private apiService = inject(ApiService);
   private offlineStorage = inject(OfflineStorageService);
   private connectionService = inject(ConnectionService);
+  private expenseService = inject(ExpenseService);
 
   // ==================== CONFIGURATION ====================
 
@@ -78,6 +82,24 @@ export class SyncService {
 
   public syncMetadata$ = this.syncMetadataSubject.asObservable();
   public syncProgress$ = this.syncProgressSubject.asObservable();
+  public readonly syncIndicatorState$: Observable<SyncIndicatorState> =
+    this.syncMetadata$.pipe(
+      map((metadata) => ({
+        pendingCount: metadata.pendingCount,
+        errorCount: metadata.errorCount,
+        isSyncing: metadata.isSyncing,
+        isOffline: !metadata.isOnline,
+        hasPendingChanges: metadata.pendingCount > 0 || metadata.errorCount > 0,
+        hasSyncErrors: metadata.errorCount > 0,
+      })),
+      distinctUntilChanged(
+        (a, b) =>
+          a.pendingCount === b.pendingCount &&
+          a.errorCount === b.errorCount &&
+          a.isSyncing === b.isSyncing &&
+          a.isOffline === b.isOffline
+      )
+    );
 
   // ==================== STATE ====================
 
@@ -423,8 +445,10 @@ export class SyncService {
           _lastModified: op.timestamp,
           _version: 1,
           _isDeleted: op.type === 'DELETE',
+          _operationId: op.id,
           ...op.data,
         }));
+        operations.forEach((op, index) => {});
 
         // CRITICAL: Sort entities so that categories come first.
         // This ensures the backend resolves offline category IDs and puts them in idMap
@@ -438,12 +462,60 @@ export class SyncService {
         });
 
         return this.apiService.post<any>('/sync/push', { entities }).pipe(
+          switchMap((result) =>
+            from(
+              Promise.all(
+                result?.success
+                  ? operations.map(async (op) => {
+                      const serverId = result?.idMap?.[op.entityId];
+                      if (serverId) {
+                        const reconciled = await firstValueFrom(
+                          this.offlineStorage.reconcileServerId(
+                            op.entityType,
+                            op.entityId,
+                            serverId
+                          )
+                        );
+                        if (op.entityType === 'expense') {
+                          this.expenseService.notifyExpenseReconciled();
+                        }
+                      }
+                    })
+                  : []
+              )
+            ).pipe(map(() => result))
+          ),
           tap((result) => {
             console.log('✅ Push result:', result);
 
             // Remove successful operations from queue
             if (result?.success) {
+              const failed = new Map(
+                (result?.errors || []).map((error: any) => [
+                  error.operationId,
+                  error.reason,
+                ])
+              );
               operations.forEach((op) => {
+                const mappedServerId = result?.idMap?.[op.entityId];
+                if (
+                  op.type === 'CREATE' &&
+                  !mappedServerId &&
+                  !failed.has(op.id)
+                ) {
+                  this.offlineStorage.updateSyncOperation(op.id, {
+                    status: SyncStatus.ERROR,
+                    error: 'CREATE_CORRELATION_MISSING',
+                  });
+                  return;
+                }
+                if (failed.has(op.id)) {
+                  this.offlineStorage.updateSyncOperation(op.id, {
+                    status: SyncStatus.ERROR,
+                    error: String(failed.get(op.id)),
+                  });
+                  return;
+                }
                 this.offlineStorage.removeFromSyncQueue(op.id);
               });
             }

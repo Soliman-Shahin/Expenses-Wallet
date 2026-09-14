@@ -6,6 +6,7 @@ export interface SyncEntity {
   _isDeleted?: boolean;
   _clientId?: string;
   _conflictData?: any;
+  ownerUserId?: string;
 }
 
 export enum SyncStatus {
@@ -26,6 +27,15 @@ export interface SyncMetadata {
   isSyncing: boolean;
 }
 
+export interface SyncIndicatorState {
+  pendingCount: number;
+  errorCount: number;
+  isSyncing: boolean;
+  isOffline: boolean;
+  hasPendingChanges: boolean;
+  hasSyncErrors: boolean;
+}
+
 export interface SyncOperation {
   id: string;
   type: 'CREATE' | 'UPDATE' | 'DELETE';
@@ -37,6 +47,7 @@ export interface SyncOperation {
   maxRetries: number;
   status: SyncStatus;
   error?: string;
+  ownerUserId?: string;
 }
 
 export interface ConflictResolution {

@@ -118,6 +118,12 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
         this.searchTerm.set(term);
         this.loadTransactions();
       });
+    this.expenseService.expenseReconciled$
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => {
+        this.loadTransactions();
+        this.cdr.markForCheck();
+      });
   }
 
   override ngOnInit() {

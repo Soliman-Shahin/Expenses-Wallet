@@ -7,6 +7,7 @@ import { SideMenuComponent } from '../../components/side-menu/side-menu.componen
 import { TabsBarComponent } from '../../components/tabs-bar/tabs-bar.component';
 import { AsyncPipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
+import { SyncIndicatorComponent } from 'src/app/shared/components/sync-indicator/sync-indicator.component';
 
 @Component({
   selector: 'app-layout',
@@ -20,6 +21,7 @@ import { TranslateModule } from '@ngx-translate/core';
     TabsBarComponent,
     AsyncPipe,
     TranslateModule,
+    SyncIndicatorComponent,
   ],
 })
 export class LayoutComponent extends BaseComponent implements OnInit {

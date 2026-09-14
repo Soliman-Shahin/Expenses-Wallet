@@ -1,0 +1,22 @@
+@if (state$ | async; as state) { @if (state.hasPendingChanges) {
+<button
+  class="sync-indicator"
+  [class.syncing]="state.isSyncing"
+  [class.error]="state.hasSyncErrors"
+  [class.offline]="state.isOffline && !state.isSyncing"
+  (click)="navigate()"
+  [attr.aria-label]="label(state) | translate"
+  type="button"
+>
+  <ion-icon
+    [name]="icon(state)"
+    [class.spin]="state.isSyncing"
+    aria-hidden="true"
+  ></ion-icon>
+  <span>{{
+    label(state)
+      | translate
+        : { count: state.hasSyncErrors ? state.errorCount : state.pendingCount }
+  }}</span>
+</button>
+} }

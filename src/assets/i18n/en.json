@@ -533,6 +533,10 @@
     "DELETE_SUCCESS": "Item deleted successfully."
   },
   "SYNC": {
+    "INDICATOR_PENDING": "{{count}} pending",
+    "INDICATOR_SYNCING": "Syncing",
+    "INDICATOR_WAITING": "{{count}} waiting",
+    "INDICATOR_ISSUES": "{{count}} sync issue",
     "TITLE": "Data Sync",
     "SETTINGS_TITLE": "Sync Settings",
     "DETAILS": "Sync Details",

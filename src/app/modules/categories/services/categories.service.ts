@@ -6,6 +6,7 @@ import { Category, SyncStatus } from 'src/app/shared/models';
 import { CategoryParams } from '../models';
 import { ApiService, ConnectionService } from 'src/app/core/services';
 import { OfflineStorageService } from 'src/app/core/services/offline-storage.service';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -273,7 +274,14 @@ export class CategoryService {
       _lastModified: new Date(),
     };
     return this.offlineStorage
-      .saveEntity('category', offlineEntity)
+      .saveEntity(
+        'category',
+        {
+          ...offlineEntity,
+          _clientId: offlineEntity._clientId || offlineEntity._id,
+        },
+        type
+      )
       .pipe(map((saved) => saved as unknown as Category));
   }
 

@@ -119,7 +119,8 @@ export class EncryptionAdvancedService {
       const encryptedBase64 = this.arrayBufferToBase64(encrypted);
 
       // Return in format: iv:authTag:encrypted
-      return `${ivBase64}:${authTagBase64}:${encryptedBase64}`;
+      const result = `${ivBase64}:${authTagBase64}:${encryptedBase64}`;
+      return result;
     } catch (error) {
       console.error('❌ Encryption failed:', error);
       throw new Error('Encryption failed');

@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, effect } from '@angular/core';
 import {
   SyncEntity,
   SyncStatus,
@@ -9,12 +9,22 @@ import {
 import { Observable, BehaviorSubject, from, of } from 'rxjs';
 import { map, catchError, tap, take } from 'rxjs/operators';
 import { DatabaseService } from './database.service';
+import { TokenService } from 'src/app/modules/auth/services/token.service';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class OfflineStorageService {
   private db = inject(DatabaseService);
+  private tokenService = inject(TokenService);
+
+  private currentOwnerId(): string {
+    const ownerId = this.tokenService.getUserId();
+    if (!ownerId)
+      throw new Error('Authenticated user is required for offline data');
+    return String(ownerId);
+  }
 
   private syncQueueSubject = new BehaviorSubject<SyncQueue>({
     operations: [],
@@ -28,15 +38,20 @@ export class OfflineStorageService {
 
   constructor() {
     this.loadSyncQueue();
+    effect(() => {
+      this.tokenService.user();
+      void this.loadSyncQueue();
+    });
   }
 
   // ==================== ENTITY MANAGEMENT ====================
 
   saveEntity<T extends SyncEntity>(
     entityType: string,
-    entity: T
+    entity: T,
+    operationType: 'CREATE' | 'UPDATE' = 'UPDATE'
   ): Observable<T> {
-    return from(this.saveEntityAsync(entityType, entity)).pipe(
+    return from(this.saveEntityAsync(entityType, entity, operationType)).pipe(
       catchError((error) => {
         console.error(`Error saving ${entityType}:`, error);
         return of(entity);
@@ -49,12 +64,28 @@ export class OfflineStorageService {
     entityType: string,
     entity: T
   ): Observable<T> {
+    const ownerUserId = this.currentOwnerId();
     return from(
-      this.db.getTable(entityType).put({
-        ...entity,
-        _syncStatus: SyncStatus.SYNCED,
-        _lastModified: entity._lastModified || new Date(),
-      })
+      (async () => {
+        const table = this.db.getTable(entityType);
+        const local = entity._clientId
+          ? await table
+              .where('[_clientId+ownerUserId]')
+              .equals([entity._clientId, ownerUserId])
+              .first()
+          : null;
+        await this.db.transaction('rw', table, async () => {
+          if (local && local._id !== entity._id) await table.delete(local._id);
+          await table.put({
+            ...local,
+            ...entity,
+            ownerUserId,
+            _syncStatus: SyncStatus.SYNCED,
+            _lastModified: entity._lastModified || new Date(),
+          });
+        });
+        return entity;
+      })()
     ).pipe(
       map(() => entity),
       catchError((error) => {
@@ -66,22 +97,30 @@ export class OfflineStorageService {
 
   private async saveEntityAsync<T extends SyncEntity>(
     entityType: string,
-    entity: T
+    entity: T,
+    operationType: 'CREATE' | 'UPDATE'
   ): Promise<T> {
+    const ownerUserId = this.currentOwnerId();
+    if (!entity._clientId && String(entity._id).startsWith('offline_'))
+      entity = { ...entity, _clientId: entity._id };
     const table = this.db.getTable(entityType);
     const existing = await table.get(entity._id);
+    if (existing?.ownerUserId && String(existing.ownerUserId) !== ownerUserId)
+      throw new Error('Offline entity belongs to another user');
 
     let updatedEntity: T;
     if (existing) {
       updatedEntity = {
         ...existing,
         ...entity,
+        ownerUserId,
         _lastModified: new Date(),
         _version: (existing._version || 0) + 1,
       };
     } else {
       updatedEntity = {
         ...entity,
+        ownerUserId,
         _lastModified: new Date(),
         _version: 1,
         _syncStatus: SyncStatus.PENDING,
@@ -90,7 +129,7 @@ export class OfflineStorageService {
 
     await table.put(updatedEntity);
     await this.addToSyncQueueAsync(
-      'UPDATE',
+      operationType,
       entityType,
       entity._id,
       updatedEntity
@@ -102,18 +141,31 @@ export class OfflineStorageService {
     entityType: string,
     id: string
   ): Observable<T | null> {
+    const ownerUserId = this.tokenService.getUserId();
+    if (!ownerUserId) return of(null);
     return from(this.db.getTable(entityType).get(id)).pipe(
-      map((res) => (res as T) || null)
+      map((res) =>
+        res && String(res.ownerUserId) === String(ownerUserId)
+          ? (res as T)
+          : null
+      )
     );
   }
 
   getEntities<T extends SyncEntity>(entityType: string): Observable<T[]> {
+    const ownerUserId = this.tokenService.getUserId();
+    if (!ownerUserId) return of([]);
     return from(
       this.db
         .getTable(entityType)
-        .filter((e: any) => !e._isDeleted)
+        .where('ownerUserId')
+        .equals(String(ownerUserId))
         .toArray()
     ).pipe(
+      tap((rows: any[]) => {
+        if (entityType.toLowerCase().startsWith('categor')) {
+        }
+      }),
       map((res) => {
         const seen = new Set<string>();
         return (res as T[]).filter((entity: any) => {
@@ -129,9 +181,19 @@ export class OfflineStorageService {
   getAllEntitiesForBackup<T extends SyncEntity>(
     entityType: string
   ): Observable<T[]> {
-    return from(this.db.getTable(entityType).toArray()).pipe(
-      map((res) => res as T[])
-    );
+    const ownerUserId = this.tokenService.getUserId();
+    if (!ownerUserId) return of([]);
+    if (entityType.toLowerCase() === 'user') {
+      const user = this.tokenService.getUser();
+      return of(user ? [user as unknown as T] : []);
+    }
+    return from(
+      this.db
+        .getTable(entityType)
+        .where('ownerUserId')
+        .equals(String(ownerUserId))
+        .toArray()
+    ).pipe(map((res) => res as T[]));
   }
 
   replaceEntities<T extends SyncEntity>(
@@ -148,7 +210,11 @@ export class OfflineStorageService {
   }
 
   async hasUnsyncedChanges(): Promise<boolean> {
-    const operations = await this.db.syncOperations.toArray();
+    const ownerUserId = this.currentOwnerId();
+    const operations = await this.db.syncOperations
+      .where('ownerUserId')
+      .equals(ownerUserId)
+      .toArray();
     return operations.some(
       (operation) =>
         operation.status === SyncStatus.PENDING ||
@@ -194,18 +260,23 @@ export class OfflineStorageService {
     entityType: string,
     serverEntities: T[]
   ): Promise<boolean> {
+    const ownerUserId = this.currentOwnerId();
     const table = this.db.getTable(entityType);
-    const localEntities = await table.toArray();
+    const localEntities = await table
+      .where('ownerUserId')
+      .equals(ownerUserId)
+      .toArray();
 
     for (const serverEntity of serverEntities) {
       // Find local entity by _id OR by _clientId
-      const localEntity = localEntities.find(
+      const matchingRows = localEntities.filter(
         (e: any) =>
           e._id === serverEntity._id ||
           (serverEntity._clientId &&
             (e._id === serverEntity._clientId ||
               e._clientId === serverEntity._clientId))
       );
+      const localEntity = matchingRows[0];
 
       if (serverEntity._isDeleted) {
         if (localEntity) {
@@ -217,8 +288,8 @@ export class OfflineStorageService {
       if (localEntity) {
         // If we found it by _clientId (i.e. the local item is an offline item),
         // we MUST delete the old offline ID record because its primary key will change.
-        if (localEntity._id !== serverEntity._id) {
-          await table.delete(localEntity._id);
+        for (const row of matchingRows) {
+          if (row._id !== serverEntity._id) await table.delete(row._id);
         }
 
         const serverTime = new Date(serverEntity._lastModified).getTime();
@@ -226,10 +297,32 @@ export class OfflineStorageService {
 
         // Overwrite if server is newer, OR if the ID changed (we always want the real ID)
         if (serverTime >= localTime || localEntity._id !== serverEntity._id) {
-          await table.put({ ...serverEntity, _syncStatus: SyncStatus.SYNCED });
+          await table.put({
+            ...serverEntity,
+            ownerUserId,
+            _syncStatus: SyncStatus.SYNCED,
+          });
         }
       } else {
-        await table.put({ ...serverEntity, _syncStatus: SyncStatus.SYNCED });
+        await table.put({
+          ...serverEntity,
+          ownerUserId,
+          _syncStatus: SyncStatus.SYNCED,
+        });
+      }
+      if (
+        serverEntity._clientId ||
+        String(serverEntity._id || '').startsWith('offline_')
+      ) {
+        const afterPull = await table
+          .where('ownerUserId')
+          .equals(ownerUserId)
+          .toArray();
+        const pullRows = afterPull.filter(
+          (row: any) =>
+            row._clientId === serverEntity._clientId ||
+            row._id === serverEntity._id
+        );
       }
     }
     return true;
@@ -251,7 +344,7 @@ export class OfflineStorageService {
     const table = this.db.getTable(entityType);
     const entity = await table.get(id);
 
-    if (entity) {
+    if (entity && String(entity.ownerUserId) === this.currentOwnerId()) {
       entity._isDeleted = true;
       entity._lastModified = new Date();
       entity._syncStatus = SyncStatus.PENDING;
@@ -289,6 +382,7 @@ export class OfflineStorageService {
     entityId: string,
     data: any
   ): Promise<void> {
+    const ownerUserId = this.currentOwnerId();
     const operation: SyncOperation = {
       id: this.generateId(),
       type,
@@ -299,6 +393,7 @@ export class OfflineStorageService {
       retryCount: 0,
       maxRetries: 3,
       status: SyncStatus.PENDING,
+      ownerUserId,
     };
 
     await this.db.syncOperations.put(operation);
@@ -323,17 +418,84 @@ export class OfflineStorageService {
   }
 
   getPendingOperations(): Observable<SyncOperation[]> {
+    const ownerUserId = this.tokenService.getUserId();
+    if (!ownerUserId) return of([]);
     return this.syncQueue$.pipe(
       take(1),
       map((queue) =>
-        queue.operations.filter((op) => op.status === SyncStatus.PENDING)
+        queue.operations.filter(
+          (op) =>
+            op.ownerUserId === String(ownerUserId) &&
+            op.status === SyncStatus.PENDING
+        )
       )
+    );
+  }
+
+  reconcileServerId(
+    entityType: string,
+    localId: string,
+    serverId: string
+  ): Observable<boolean> {
+    return from(
+      (async () => {
+        const ownerUserId = this.currentOwnerId();
+        const table = this.db.getTable(entityType);
+        const localRows = await table
+          .where('ownerUserId')
+          .equals(ownerUserId)
+          .toArray();
+        const local = localRows.find(
+          (row: any) => row._id === localId || row._clientId === localId
+        );
+        const logicalId = local?._clientId || localId;
+        const matchingRows = localRows.filter(
+          (row: any) =>
+            row._clientId === logicalId ||
+            row._id === logicalId ||
+            row._id === serverId
+        );
+        if (!local && matchingRows.length === 0) return false;
+        await this.db.transaction('rw', table, async () => {
+          for (const row of matchingRows) {
+            if (row._id !== serverId) {
+              await table.delete(row._id);
+            }
+          }
+          const authoritative =
+            matchingRows.find((row: any) => row._id === serverId) || local;
+          await table.put({
+            ...authoritative,
+            _id: serverId,
+            _clientId: logicalId,
+            ownerUserId,
+            _syncStatus: SyncStatus.SYNCED,
+          });
+        });
+        const after = await table
+          .where('ownerUserId')
+          .equals(ownerUserId)
+          .toArray();
+        const rows = after.filter(
+          (row: any) =>
+            row._clientId === logicalId ||
+            row._id === logicalId ||
+            row._id === serverId
+        );
+        return true;
+      })()
     );
   }
 
   private async loadSyncQueue() {
     try {
-      const ops = await this.db.syncOperations.toArray();
+      const ownerUserId = this.tokenService.getUserId();
+      const ops = ownerUserId
+        ? await this.db.syncOperations
+            .where('ownerUserId')
+            .equals(String(ownerUserId))
+            .toArray()
+        : [];
       const currentQueue = this.syncQueueSubject.value;
       this.syncQueueSubject.next({
         ...currentQueue,
@@ -395,12 +557,22 @@ export class OfflineStorageService {
   // ==================== CLEANUP ====================
 
   clearOfflineData(): Observable<boolean> {
+    const ownerUserId = this.tokenService.getUserId();
+    if (!ownerUserId) return of(false);
     return from(
       Promise.all([
-        this.db.expenses.clear(),
-        this.db.categories.clear(),
-        this.db.users.clear(),
-        this.db.syncOperations.clear(),
+        this.db.expenses
+          .where('ownerUserId')
+          .equals(String(ownerUserId))
+          .delete(),
+        this.db.categories
+          .where('ownerUserId')
+          .equals(String(ownerUserId))
+          .delete(),
+        this.db.syncOperations
+          .where('ownerUserId')
+          .equals(String(ownerUserId))
+          .delete(),
       ])
     ).pipe(
       tap(() => this.loadSyncQueue()),
@@ -422,11 +594,22 @@ export class OfflineStorageService {
   }
 
   getStorageSize(): Observable<number> {
+    const ownerUserId = this.tokenService.getUserId();
+    if (!ownerUserId) return of(0);
     return from(
       Promise.all([
-        this.db.expenses.count(),
-        this.db.categories.count(),
-        this.db.syncOperations.count(),
+        this.db.expenses
+          .where('ownerUserId')
+          .equals(String(ownerUserId))
+          .count(),
+        this.db.categories
+          .where('ownerUserId')
+          .equals(String(ownerUserId))
+          .count(),
+        this.db.syncOperations
+          .where('ownerUserId')
+          .equals(String(ownerUserId))
+          .count(),
       ])
     ).pipe(map(([expenses, categories, ops]) => expenses + categories + ops));
   }

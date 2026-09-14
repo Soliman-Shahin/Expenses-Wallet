@@ -3,7 +3,7 @@ import Dexie, { Table } from 'dexie';
 import { SyncOperation } from 'src/app/shared/models/sync.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DatabaseService extends Dexie {
   // Define tables
@@ -14,13 +14,22 @@ export class DatabaseService extends Dexie {
 
   constructor() {
     super('ExpensesWalletDB');
-    
+
     // Define database schema
     this.version(1).stores({
       expenses: '_id, _syncStatus, _lastModified, category, user, _isDeleted',
       categories: '_id, _syncStatus, _lastModified, type, user, _isDeleted',
       users: '_id, _syncStatus, _lastModified',
-      syncOperations: 'id, entityType, timestamp, status'
+      syncOperations: 'id, entityType, timestamp, status',
+    });
+    this.version(2).stores({
+      expenses:
+        '_id, ownerUserId, [_clientId+ownerUserId], [ownerUserId+_syncStatus], _syncStatus, _lastModified, category, user, _isDeleted',
+      categories:
+        '_id, ownerUserId, [_clientId+ownerUserId], [ownerUserId+_syncStatus], _syncStatus, _lastModified, type, user, _isDeleted',
+      users: '_id, _syncStatus, _lastModified',
+      syncOperations:
+        'id, ownerUserId, [ownerUserId+status], entityType, timestamp, status',
     });
   }
 

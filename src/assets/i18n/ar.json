@@ -513,6 +513,10 @@
     }
   },
   "SYNC": {
+    "INDICATOR_PENDING": "{{count}} معلقة للمزامنة",
+    "INDICATOR_SYNCING": "جارٍ المزامنة",
+    "INDICATOR_WAITING": "{{count}} في الانتظار",
+    "INDICATOR_ISSUES": "{{count}} مشكلة مزامنة",
     "TITLE": "مزامنة البيانات",
     "SETTINGS_TITLE": "إعدادات المزامنة",
     "DETAILS": "تفاصيل المزامنة",
