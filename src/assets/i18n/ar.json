@@ -82,7 +82,16 @@
     "RECENT_TRANSACTIONS": "أحدث المعاملات",
     "MONTHLY_SUMMARY_DESC": "ملخص لنشاطك المالي للشهر المحدد.",
     "INCOME": "الدخل",
-    "EXPENSES": "المصروفات"
+    "EXPENSES": "المصروفات",
+    "EXPENSES_LESS": "أقل {{value}}٪ عن الشهر الماضي",
+    "EXPENSES_MORE": "أكثر {{value}}٪ عن الشهر الماضي",
+    "EXPENSES_NEW": "جديد مقارنة بالشهر الماضي",
+    "EXPENSES_SAME": "مثل الشهر الماضي",
+    "EXPENSES_COMPARISON_UNAVAILABLE": "المقارنة غير متاحة",
+    "EXPENSES_LESS_ARIA": "المصروفات أقل بنسبة {{value}} بالمئة من الشهر الماضي",
+    "EXPENSES_MORE_ARIA": "المصروفات أكثر بنسبة {{value}} بالمئة من الشهر الماضي",
+    "EXPENSES_NEW_ARIA": "توجد مصروفات جديدة مقارنة بالشهر الماضي",
+    "EXPENSES_SAME_ARIA": "المصروفات مثل الشهر الماضي"
   },
   "SIDEBAR": {
     "HOME": "الرئيسية",

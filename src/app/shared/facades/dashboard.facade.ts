@@ -112,6 +112,78 @@ export class DashboardFacade {
     return this.totalsForRange(startDate, endDate);
   }
 
+  expenseComparisonForMonth(
+    month: number,
+    year: number
+  ): Observable<{
+    current: number;
+    previous: number;
+    direction: 'less' | 'more' | 'same' | 'new' | 'none';
+    percentage: number | null;
+  }> {
+    const currentStart = new Date(year, month - 1, 1, 0, 0, 0, 0);
+    const nextMonthStart = new Date(year, month, 1, 0, 0, 0, 0);
+    const previousStart = new Date(year, month - 2, 1, 0, 0, 0, 0);
+
+    return this.expenses.getExpenses().pipe(
+      map((expenses) => {
+        let current = 0;
+        let previous = 0;
+        for (const expense of expenses) {
+          if ((expense as any)._isDeleted) continue;
+          const rawDate = (expense as any)?.date;
+          if (!rawDate) continue;
+          const date = new Date(rawDate);
+          if (!Number.isFinite(date.getTime())) continue;
+          const categoryType =
+            expense.category && typeof expense.category === 'object'
+              ? (expense.category as any).type
+              : undefined;
+          const type = String(
+            (expense as any)?.type || categoryType || 'outcome'
+          ).toLowerCase();
+          if (type === 'income') continue;
+          const amount = Number(expense.amount);
+          if (!Number.isFinite(amount)) continue;
+          if (date >= currentStart && date < nextMonthStart) current += amount;
+          else if (date >= previousStart && date < currentStart)
+            previous += amount;
+        }
+        if (current === 0 && previous === 0) {
+          return {
+            current,
+            previous,
+            direction: 'none' as const,
+            percentage: null,
+          };
+        }
+        if (previous === 0) {
+          return {
+            current,
+            previous,
+            direction: 'new' as const,
+            percentage: null,
+          };
+        }
+        if (current === previous) {
+          return {
+            current,
+            previous,
+            direction: 'same' as const,
+            percentage: 0,
+          };
+        }
+        const delta = current - previous;
+        return {
+          current,
+          previous,
+          direction: delta < 0 ? ('less' as const) : ('more' as const),
+          percentage: Math.abs((delta / previous) * 100),
+        };
+      })
+    );
+  }
+
   incomeTransactionsForRange(
     startDate: Date,
     endDate: Date

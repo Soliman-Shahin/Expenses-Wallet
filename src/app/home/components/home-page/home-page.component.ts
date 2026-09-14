@@ -50,6 +50,7 @@ import { DashboardFacade } from 'src/app/shared/facades';
 import { Expense } from 'src/app/shared/models';
 import { BalanceCardComponent } from 'src/app/shared/components/balance-card/balance-card.component';
 import { MonthsScrollHeaderComponent } from 'src/app/shared/components/months-scroll-header/months-scroll-header.component';
+import { ExpenseService } from 'src/app/core/services/expense.service';
 
 @Component({
   standalone: true,
@@ -171,6 +172,7 @@ export class HomePageComponent
   });
 
   private readonly dashboard = inject(DashboardFacade);
+  private readonly homeExpenseService = inject(ExpenseService);
 
   createInjectors = createInjectors;
 
@@ -229,6 +231,24 @@ export class HomePageComponent
       this.summaryError = 'HOME.WIDGET_UNAVAILABLE';
       return of(null);
     }),
+    shareReplay(1)
+  );
+
+  private readonly expenseComparisonByMonth$ = combineLatest([
+    this.summaryMonthSelection$,
+    this.dashboardProfile$,
+    this.summaryRefresh$,
+  ]).pipe(
+    switchMap(([month, profile]) => {
+      if (!profile) return of({ status: 'unavailable' as const });
+      return this.dashboard
+        .expenseComparisonForMonth(month.month, month.year)
+        .pipe(
+          map((comparison) => ({ status: 'ready' as const, ...comparison })),
+          catchError(() => of({ status: 'unavailable' as const }))
+        );
+    }),
+    startWith({ status: 'loading' as const }),
     shareReplay(1)
   );
 
@@ -348,6 +368,7 @@ export class HomePageComponent
     loading: toObservable(this.state.loading),
     profile: this.dashboardProfile$.pipe(startWith(null)),
     totals: this.totalsByMonth$,
+    expenseComparison: this.expenseComparisonByMonth$,
     incomeVsExpense: this.incomeVsExpenseByMonth$,
     expenseByCategory: this.expenseByCategoryByMonth$,
     monthlyExpenses: this.monthlyExpensesByMonth$,
@@ -428,6 +449,12 @@ export class HomePageComponent
       }
     } catch {}
     this.setupRouteDataSubscription();
+    this.homeExpenseService.expenseReconciled$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.summaryRefresh$.next(this.summaryRefresh$.value + 1);
+        this.cdr.markForCheck();
+      });
   }
 
   private hasEntered = false;

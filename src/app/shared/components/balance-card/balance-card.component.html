@@ -87,6 +87,47 @@
         <span class="amount text-danger-color font-semibold">{{
           formattedExpenses()
         }}</span>
+        <div
+          class="expense-comparison"
+          role="status"
+          [attr.aria-live]="
+            expenseComparison?.status === 'ready' ? 'polite' : null
+          "
+        >
+          @if (expenseComparison?.status === 'ready') {
+          <span
+            [class.expense-comparison--favorable]="
+              expenseComparison?.direction === 'less'
+            "
+            [class.expense-comparison--unfavorable]="
+              expenseComparison?.direction === 'more'
+            "
+          >
+            @if (expenseComparison?.direction === 'less') {
+            <ion-icon
+              name="trending-down-outline"
+              aria-hidden="true"
+            ></ion-icon>
+            <span [attr.aria-label]="'HOME.EXPENSES_LESS_ARIA' | translate : { value: (expenseComparison?.percentage | number : '1.0-0') }">
+              {{ "HOME.EXPENSES_LESS" | translate : { value: (expenseComparison?.percentage | number : "1.0-0") } }}
+            </span>
+            } @else if (expenseComparison?.direction === 'more') {
+            <ion-icon name="trending-up-outline" aria-hidden="true"></ion-icon>
+            <span [attr.aria-label]="'HOME.EXPENSES_MORE_ARIA' | translate : { value: (expenseComparison?.percentage | number : '1.0-0') }">
+              {{ "HOME.EXPENSES_MORE" | translate : { value: (expenseComparison?.percentage | number : "1.0-0") } }}
+            </span>
+            } @else if (expenseComparison?.direction === 'new') {
+            <span [attr.aria-label]="'HOME.EXPENSES_NEW_ARIA' | translate">{{ "HOME.EXPENSES_NEW" | translate }}</span>
+            } @else {
+            <span [attr.aria-label]="'HOME.EXPENSES_SAME_ARIA' | translate">{{ "HOME.EXPENSES_SAME" | translate }}</span>
+            }
+          </span>
+          } @else if (expenseComparison?.status === 'unavailable') {
+          <span class="expense-comparison--unavailable">{{
+            "HOME.EXPENSES_COMPARISON_UNAVAILABLE" | translate
+          }}</span>
+          }
+        </div>
       </div>
     </div>
   </div>

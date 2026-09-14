@@ -19,6 +19,12 @@ export interface BalanceCardData {
   percentageChange: number | null;
 }
 
+export interface ExpenseComparison {
+  status: 'loading' | 'ready' | 'unavailable';
+  direction?: 'less' | 'more' | 'same' | 'new' | 'none';
+  percentage?: number | null;
+}
+
 @Component({
   selector: 'app-balance-card',
   templateUrl: './balance-card.component.html',
@@ -40,6 +46,7 @@ export class BalanceCardComponent {
     this._expensesSignal.set(value);
   }
   @Input() percentageChange: number | null = null;
+  @Input() expenseComparison: ExpenseComparison | null = null;
   @Input() isLoading = false;
   @Input() currency: string = 'EGP';
   @Input() animationEnabled = true;

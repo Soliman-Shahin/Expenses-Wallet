@@ -81,7 +81,16 @@
     "RECENT_TRANSACTIONS": "Recent Transactions",
     "MONTHLY_SUMMARY_DESC": "Summary of your financial activity for the selected month.",
     "INCOME": "Income",
-    "EXPENSES": "Expenses"
+    "EXPENSES": "Expenses",
+    "EXPENSES_LESS": "{{value}}% vs last month",
+    "EXPENSES_MORE": "{{value}}% vs last month",
+    "EXPENSES_NEW": "New vs last month",
+    "EXPENSES_SAME": "Same as last month",
+    "EXPENSES_COMPARISON_UNAVAILABLE": "Comparison unavailable",
+    "EXPENSES_LESS_ARIA": "Expenses are {{value}} percent lower than last month",
+    "EXPENSES_MORE_ARIA": "Expenses are {{value}} percent higher than last month",
+    "EXPENSES_NEW_ARIA": "There is new spending compared with last month",
+    "EXPENSES_SAME_ARIA": "Expenses are the same as last month"
   },
   "SIDEBAR": {
     "HOME": "Home",
