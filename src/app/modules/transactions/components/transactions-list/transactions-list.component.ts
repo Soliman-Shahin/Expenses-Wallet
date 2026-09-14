@@ -47,6 +47,12 @@ interface TransactionItem {
   formattedDate: string;
 }
 
+interface TransactionGroup {
+  key: string;
+  label: string;
+  items: TransactionItem[];
+}
+
 @Component({
   selector: 'app-transactions-list',
   templateUrl: './transactions-list.component.html',
@@ -75,6 +81,21 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
     const raw = this.rawTransactions();
     const items = raw.map((e) => this.mapToViewModel(e));
     return items.sort((a, b) => b.date.getTime() - a.date.getTime());
+  });
+  private readonly languageVersion = signal(0);
+  transactionGroups = computed<TransactionGroup[]>(() => {
+    this.languageVersion();
+    const groups = new Map<string, TransactionGroup>();
+    for (const item of this.transactions()) {
+      const key = this.localDateKey(item.date);
+      let group = groups.get(key);
+      if (!group) {
+        group = { key, label: this.getDateGroupLabel(item.date), items: [] };
+        groups.set(key, group);
+      }
+      group.items.push(item);
+    }
+    return Array.from(groups.values());
   });
   categories = signal<Category[]>([]);
   userCurrency = signal<string>('');
@@ -133,6 +154,39 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
     this.loadCategories();
     this.loadTransactions();
     this.checkPlanLimits();
+  }
+
+  protected override onLanguageChanged(): void {
+    this.languageVersion.update((version) => version + 1);
+    this.cdr.markForCheck();
+  }
+
+  private localDateKey(date: Date): string {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+      2,
+      '0'
+    )}-${String(date.getDate()).padStart(2, '0')}`;
+  }
+
+  private getDateGroupLabel(date: Date): string {
+    const today = new Date();
+    const yesterday = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate() - 1
+    );
+    const dateKey = this.localDateKey(date);
+    if (dateKey === this.localDateKey(today)) {
+      return this.translateService.instant('TRANSACTIONS.DATE_GROUP_TODAY');
+    }
+    if (dateKey === this.localDateKey(yesterday)) {
+      return this.translateService.instant('TRANSACTIONS.DATE_GROUP_YESTERDAY');
+    }
+    return new Intl.DateTimeFormat(this.currentLang || 'en', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    }).format(date);
   }
 
   private hasEntered = false;

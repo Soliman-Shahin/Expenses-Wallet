@@ -256,7 +256,11 @@
   <!-- Content after loading -->
   @if (!contentLoading() && !state.error()) { @if (transactions().length > 0) {
   <ion-list class="transactions-list">
-    @for (t of transactions(); track trackById(i, t); let i = $index) {
+    @for (group of transactionGroups(); track group.key) {
+    <h2 class="transaction-date-group" [attr.aria-label]="group.label">
+      {{ group.label }}
+    </h2>
+    @for (t of group.items; track trackById(i, t); let i = $index) {
     <ion-item-sliding class="transaction-sliding" [style.--animation-order]="i">
       <ion-item
         class="transaction-item item-card"
@@ -328,6 +332,7 @@
         </ion-item-option>
       </ion-item-options>
     </ion-item-sliding>
+    }
     }
   </ion-list>
   } @if (transactions().length === 0 && hasActiveFilters()) {

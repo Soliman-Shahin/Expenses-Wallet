@@ -122,7 +122,9 @@
     "DELETE": "Delete",
     "FROM": "From",
     "UNTIL": "Until",
-    "TO": "to"
+    "TO": "to",
+    "DATE_GROUP_TODAY": "Today",
+    "DATE_GROUP_YESTERDAY": "Yesterday"
   },
   "ABOUT": "About",
   "LOGIN": "Login",

@@ -101,6 +101,19 @@
   padding: 0; // Content clearance belongs to ion-content, outside the list surface.
 }
 
+.transaction-date-group {
+  margin: 18px 4px 8px;
+  color: var(--ew-text-color-muted);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.02em;
+}
+
+.transactions-list > .transaction-date-group:first-child {
+  margin-top: 4px;
+}
+
 /* Spacing and margins for the sliding wrapper */
 .transaction-sliding {
   margin: 0 0 14px 0 !important;

@@ -122,7 +122,9 @@
     "DELETE": "حذف",
     "FROM": "من",
     "UNTIL": "حتى",
-    "TO": "إلى"
+    "TO": "إلى",
+    "DATE_GROUP_TODAY": "اليوم",
+    "DATE_GROUP_YESTERDAY": "أمس"
   },
   "ABOUT": "حول التطبيق",
   "LOGIN": "تسجيل الدخول",
