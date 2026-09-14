@@ -393,6 +393,10 @@ export class HomePageComponent
         totalSalary,
         salaryBreakdown,
         currency: data.profile?.currency || 'USD',
+        chartSummaries: this.buildChartSummaries(
+          { ...data, salaryBreakdown },
+          data.profile?.currency || 'USD'
+        ),
       };
     }),
     shareReplay(1)
@@ -405,6 +409,115 @@ export class HomePageComponent
 
   formatAmount(amount: number | null | undefined): string {
     return formatCurrency(amount ?? 0, this.currency);
+  }
+
+  private buildChartSummaries(data: any, currency: string) {
+    const format = (value: number) =>
+      formatCurrency(value, currency, this.currentLang);
+    const incomeExpense = (data.incomeVsExpense || []) as Array<{
+      name: string;
+      value: number;
+    }>;
+    const income =
+      incomeExpense.find((item) => item.name === 'HOME.INCOME')?.value ?? 0;
+    const expenses =
+      incomeExpense.find((item) => item.name === 'HOME.EXPENSES')?.value ?? 0;
+    const categoryData = (data.expenseByCategory || []) as Array<{
+      name: string;
+      value: number;
+    }>;
+    const categoryTotal = categoryData.reduce(
+      (sum, item) => sum + Number(item.value || 0),
+      0
+    );
+    const topCategory = categoryData.reduce<{
+      name: string;
+      value: number;
+    } | null>(
+      (top, item) =>
+        top === null || Number(item.value) > top.value ? item : top,
+      null
+    );
+    const trendData = (data.monthlyExpenses || []) as Array<{
+      name: string;
+      value: number;
+    }>;
+    const highestPoint = trendData.reduce<{
+      name: string;
+      value: number;
+    } | null>(
+      (highest, item) =>
+        highest === null || Number(item.value) > highest.value ? item : highest,
+      null
+    );
+    const lowestPoint = trendData.reduce<{
+      name: string;
+      value: number;
+    } | null>(
+      (lowest, item) =>
+        lowest === null || Number(item.value) < lowest.value ? item : lowest,
+      null
+    );
+    const firstPoint = trendData[0];
+    const lastPoint = trendData[trendData.length - 1];
+    const trendDirection =
+      trendData.length < 2 || !firstPoint || !lastPoint
+        ? 'single'
+        : lastPoint.value > firstPoint.value
+        ? 'increase'
+        : lastPoint.value < firstPoint.value
+        ? 'decrease'
+        : 'same';
+    const salaryData = (data.salaryBreakdown || []) as Array<{
+      name: string;
+      value: number;
+    }>;
+    const salaryTotal = salaryData.reduce(
+      (sum, item) => sum + Number(item.value || 0),
+      0
+    );
+    const topSalary = salaryData.reduce<{ name: string; value: number } | null>(
+      (top, item) =>
+        top === null || Number(item.value) > top.value ? item : top,
+      null
+    );
+    return {
+      incomeExpense: incomeExpense.length
+        ? { income: format(income), expenses: format(expenses) }
+        : null,
+      category: topCategory
+        ? {
+            total: format(categoryTotal),
+            topName: topCategory.name,
+            topAmount: format(topCategory.value),
+            topShare:
+              categoryTotal > 0
+                ? String(Math.round((topCategory.value / categoryTotal) * 100))
+                : '0',
+          }
+        : null,
+      trend:
+        highestPoint && lowestPoint
+          ? {
+              kind: trendDirection,
+              highestName: highestPoint.name,
+              highestValue: format(highestPoint.value),
+              lowestName: lowestPoint.name,
+              lowestValue: format(lowestPoint.value),
+            }
+          : null,
+      salary: topSalary
+        ? {
+            total: format(salaryTotal),
+            topName: topSalary.name,
+            topAmount: format(topSalary.value),
+            topShare:
+              salaryTotal > 0
+                ? String(Math.round((topSalary.value / salaryTotal) * 100))
+                : '0',
+          }
+        : null,
+    };
   }
 
   // Switch between Charts and Summary tabs

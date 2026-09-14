@@ -196,7 +196,17 @@
           }}</ion-button>
         </div>
         } @else {
-        <div (click)="$event.stopPropagation()">
+        <div
+          id="chart-income-expenses-region"
+          class="chart-accessible-block"
+          role="region"
+          [attr.aria-describedby]="
+            vm.chartSummaries.incomeExpense
+              ? 'chart-income-expenses-description'
+              : null
+          "
+          (click)="$event.stopPropagation()"
+        >
           @if (vm.incomeVsExpense.length > 0) { @if (barChartComponent | async;
           as BarChartComponent) {
           <ng-container
@@ -210,9 +220,24 @@
           <div class="charts-empty-state" role="status">
             {{ "NO_DATA" | translate }}
           </div>
+          } @if (vm.chartSummaries.incomeExpense; as summary) {
+          <p class="chart-summary">
+            {{ "HOME.CHART_SUMMARY_INCOME_EXPENSES" | translate : summary }}
+          </p>
+          <span id="chart-income-expenses-description" class="visually-hidden">
+            {{ "HOME.CHART_DESCRIPTION_INCOME_EXPENSES" | translate : summary }}
+          </span>
           }
         </div>
-        <div (click)="$event.stopPropagation()">
+        <div
+          id="chart-category-region"
+          class="chart-accessible-block"
+          role="region"
+          [attr.aria-describedby]="
+            vm.chartSummaries.category ? 'chart-category-description' : null
+          "
+          (click)="$event.stopPropagation()"
+        >
           @if (vm.expenseByCategory.length > 0) { @if (pieChartComponent |
           async; as PieChartComponent) {
           <ng-container
@@ -226,9 +251,24 @@
           <div class="charts-empty-state" role="status">
             {{ "NO_DATA" | translate }}
           </div>
+          } @if (vm.chartSummaries.category; as summary) {
+          <p class="chart-summary">
+            {{ "HOME.CHART_SUMMARY_CATEGORY" | translate : summary }}
+          </p>
+          <span id="chart-category-description" class="visually-hidden">
+            {{ "HOME.CHART_DESCRIPTION_CATEGORY" | translate : summary }}
+          </span>
           }
         </div>
-        <div (click)="$event.stopPropagation()">
+        <div
+          id="chart-trend-region"
+          class="chart-accessible-block"
+          role="region"
+          [attr.aria-describedby]="
+            vm.chartSummaries.trend ? 'chart-trend-description' : null
+          "
+          (click)="$event.stopPropagation()"
+        >
           @if (vm.monthlyExpenses.length > 0) { @if (lineChartComponent | async;
           as LineChartComponent) {
           <ng-container
@@ -242,9 +282,24 @@
           <div class="charts-empty-state" role="status">
             {{ "NO_DATA" | translate }}
           </div>
+          } @if (vm.chartSummaries.trend; as summary) {
+          <p class="chart-summary">
+            {{ "HOME.CHART_SUMMARY_TREND" | translate : summary }}
+          </p>
+          <span id="chart-trend-description" class="visually-hidden">
+            {{ "HOME.CHART_DESCRIPTION_TREND" | translate : summary }}
+          </span>
           }
         </div>
-        <div (click)="$event.stopPropagation()">
+        <div
+          id="chart-salary-region"
+          class="chart-accessible-block"
+          role="region"
+          [attr.aria-describedby]="
+            vm.chartSummaries.salary ? 'chart-salary-description' : null
+          "
+          (click)="$event.stopPropagation()"
+        >
           @if (vm.totalSalary > 0) {
           <div class="salary-chart-container">
             @if (pieChartComponent | async; as PieChartComponent) {
@@ -289,6 +344,14 @@
               </div>
               }
             </div>
+            @if (vm.chartSummaries.salary; as summary) {
+            <p class="chart-summary">
+              {{ "HOME.CHART_SUMMARY_SALARY" | translate : summary }}
+            </p>
+            <span id="chart-salary-description" class="visually-hidden">
+              {{ "HOME.CHART_DESCRIPTION_SALARY" | translate : summary }}
+            </span>
+            }
           </div>
           }
         </div>

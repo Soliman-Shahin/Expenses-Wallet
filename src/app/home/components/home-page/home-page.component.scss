@@ -710,6 +710,18 @@
   background: rgba(var(--ion-text-color-rgb), 0.02);
 }
 
+.chart-accessible-block {
+  min-width: 0;
+}
+
+.chart-summary {
+  margin: 6px 0 0;
+  color: var(--ew-text-color-muted);
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: start;
+}
+
 app-add-fab-button.fab-hidden-during-chart-scroll .fab-add {
   opacity: 0;
   pointer-events: none;
