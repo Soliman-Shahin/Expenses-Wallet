@@ -1,15 +1,21 @@
-import { expenseSyncLabel } from 'src/app/shared/utils/expense-presentation';
-
 import {
   Component,
   Input,
   inject,
   ChangeDetectionStrategy,
+  DestroyRef,
+  OnInit,
+  signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, ModalController } from '@ionic/angular';
 import { TranslateModule } from '@ngx-translate/core';
 import { Expense } from 'src/app/shared/models/expense.model';
+import { OfflineStorageService } from 'src/app/core/services/offline-storage.service';
+import { ExpenseService } from 'src/app/core/services/expense.service';
+import { SyncStatus } from 'src/app/shared/models/sync.model';
+import { merge, startWith, switchMap, tap } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-expense-detail',
@@ -51,7 +57,7 @@ import { Expense } from 'src/app/shared/models/expense.model';
                   categoryName || ('EXPENSE.CATEGORY' | translate)
                 }}</bdi>
               </p>
-              <h1 dir="auto">{{ expense.description }}</h1>
+              <h1 dir="auto">{{ detailExpense().description }}</h1>
             </div>
           </div>
           <p class="amount-caption">{{ 'EXPENSE.AMOUNT' | translate }}</p>
@@ -90,16 +96,26 @@ import { Expense } from 'src/app/shared/models/expense.model';
                 <p class="date-value">
                   <bdi>{{
                     isValidDate
-                      ? (expense.date | date : 'medium' : undefined : locale)
+                      ? (detailExpense().date | date : 'medium' : undefined : locale)
                       : ('EXPENSE.DATE' | translate)
                   }}</bdi>
                 </p>
               </div>
             </div>
           </section>
-          @if (syncLabel(expense); as status) {
-          <p class="record-status" role="status">{{ status | translate }}</p>
-          }
+          <div
+            class="record-sync-status"
+            [class]="'record-sync-status state-' + syncState"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            <ion-icon [name]="syncIcon" aria-hidden="true"></ion-icon>
+            <div>
+              <strong>{{ syncLabelKey | translate }}</strong>
+              <span>{{ syncDescriptionKey | translate }}</span>
+            </div>
+          </div>
         </section>
       </article>
     </ion-content>
@@ -240,11 +256,37 @@ import { Expense } from 'src/app/shared/models/expense.model';
       .record-type.outcome {
         color: var(--ion-color-danger);
       }
-      .record-status {
+      .record-sync-status {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
         margin: 12px 0 0;
         color: var(--ew-wallet-muted);
         font-size: 12px;
         line-height: 1.5;
+      }
+      .record-sync-status ion-icon {
+        flex: 0 0 auto;
+        margin-top: 2px;
+        font-size: 16px;
+      }
+      .record-sync-status > div {
+        display: grid;
+        gap: 1px;
+        min-width: 0;
+      }
+      .record-sync-status strong {
+        color: var(--ion-text-color);
+        font-weight: 650;
+      }
+      .record-sync-status span {
+        color: var(--ew-wallet-muted);
+      }
+      .record-sync-status.state-pending ion-icon {
+        color: var(--ion-color-warning);
+      }
+      .record-sync-status.state-issue ion-icon {
+        color: var(--ion-color-danger);
       }
       .record-context {
         padding-top: 20px;
@@ -293,11 +335,17 @@ import { Expense } from 'src/app/shared/models/expense.model';
     `,
   ],
 })
-export class ExpenseDetailComponent {
-  readonly syncLabel = expenseSyncLabel;
-  get categoryVisual() {
-    return typeof this.expense.category === 'object'
-      ? this.expense.category
+export class ExpenseDetailComponent implements OnInit {
+  private readonly offlineStorage = inject(OfflineStorageService);
+  private readonly expenseService = inject(ExpenseService);
+  private readonly destroyRef = inject(DestroyRef);
+  readonly detailExpense = signal<Expense>(null as unknown as Expense);
+  private logicalId = '';
+  private syncOperations: any[] = [];
+  syncState: 'synced' | 'pending' | 'issue' = 'synced';
+  get categoryVisual(): any {
+    return typeof this.detailExpense().category === 'object'
+      ? this.detailExpense().category
       : null;
   }
   @Input({ required: true }) expense!: Expense;
@@ -305,6 +353,81 @@ export class ExpenseDetailComponent {
   @Input() categoryName = '';
   @Input() locale = 'en';
   private readonly modal = inject(ModalController);
+
+  ngOnInit(): void {
+    this.detailExpense.set(this.expense);
+    this.logicalId =
+      (this.expense as Expense & { _clientId?: string })._clientId ||
+      this.expense._id;
+
+    merge(
+      this.offlineStorage.syncQueue$,
+      this.expenseService.expenseReconciled$
+    )
+      .pipe(
+        startWith(null),
+        tap((event: any) => {
+          if (event?.operations) this.syncOperations = event.operations;
+        }),
+        switchMap(() => this.offlineStorage.getEntities<any>('expense')),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe((entities) =>
+        this.updateFromAuthoritativeLocalState(entities)
+      );
+  }
+
+  get syncLabelKey(): string {
+    return `SYNC.DETAIL_${this.syncState.toUpperCase()}`;
+  }
+
+  get syncDescriptionKey(): string {
+    return `SYNC.DETAIL_${this.syncState.toUpperCase()}_DESCRIPTION`;
+  }
+
+  get syncIcon(): string {
+    if (this.syncState === 'pending') return 'time-outline';
+    if (this.syncState === 'issue') return 'alert-circle-outline';
+    return 'checkmark-circle-outline';
+  }
+
+  private updateFromAuthoritativeLocalState(entities: any[]): void {
+    if (!Array.isArray(entities)) return;
+    const currentId = this.detailExpense()?._id;
+    const entity = entities.find(
+      (candidate) =>
+        candidate._id === currentId ||
+        candidate._id === this.logicalId ||
+        candidate._clientId === this.logicalId
+    );
+
+    if (!entity) return;
+    if (entity._isDeleted) {
+      void this.modal.dismiss(null, 'deleted');
+      return;
+    }
+
+    this.detailExpense.set(entity as Expense);
+    const operations = this.syncOperations.filter(
+      (operation) =>
+        operation.entityType === 'expense' &&
+        [this.logicalId, entity._id, entity._clientId].includes(
+          operation.entityId
+        )
+    );
+    const status = entity._syncStatus;
+    this.syncState =
+      operations.some((operation) => operation.status === SyncStatus.ERROR) ||
+      [SyncStatus.ERROR, SyncStatus.CONFLICT].includes(status)
+        ? 'issue'
+        : status === SyncStatus.PENDING ||
+          (status !== SyncStatus.SYNCED &&
+            operations.some(
+              (operation) => operation.status === SyncStatus.PENDING
+            ))
+        ? 'pending'
+        : 'synced';
+  }
   close() {
     return this.modal.dismiss();
   }
@@ -313,19 +436,20 @@ export class ExpenseDetailComponent {
   }
 
   get isIncome(): boolean {
-    const categoryType = this.categoryVisual?.type;
+    const categoryType = (this.categoryVisual as any)?.type;
     return (
-      categoryType === 'income' || (this.expense as any)?.type === 'income'
+      categoryType === 'income' ||
+      (this.detailExpense() as any)?.type === 'income'
     );
   }
 
   get absoluteAmount(): number | null {
-    const amount = Number(this.expense?.amount);
+    const amount = Number(this.detailExpense()?.amount);
     return Number.isFinite(amount) ? Math.abs(amount) : null;
   }
 
   get isValidDate(): boolean {
-    const timestamp = new Date(this.expense?.date).getTime();
+    const timestamp = new Date(this.detailExpense()?.date).getTime();
     return Number.isFinite(timestamp);
   }
 }
