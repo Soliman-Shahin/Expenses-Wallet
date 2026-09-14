@@ -28,7 +28,7 @@ import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { BaseListComponent } from 'src/app/shared/base';
 import { Category, CategoryParams } from '../../models';
 import { SkeletonBlockComponent } from '../../../../shared/ui/skeleton-block/skeleton-block.component';
-import { NgClass, AsyncPipe, LowerCasePipe } from '@angular/common';
+import { NgClass, AsyncPipe } from '@angular/common';
 import { AddFabButtonComponent } from '../../../../shared/ui/add-fab-button/add-fab-button.component';
 import { PlanService } from '../../../../core/services/plan.service';
 import { PlanLimitBannerComponent } from '../../../../shared/components/plan-limit-banner/plan-limit-banner.component';
@@ -46,7 +46,6 @@ import { ExpenseService } from 'src/app/core/services/expense.service';
     NgClass,
     AddFabButtonComponent,
     AsyncPipe,
-    LowerCasePipe,
     TranslateModule,
     PlanLimitBannerComponent,
   ],

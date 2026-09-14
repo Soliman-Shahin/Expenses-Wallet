@@ -1,12 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { map, tap, catchError, switchMap, take } from 'rxjs/operators';
 import { Category, SyncStatus } from 'src/app/shared/models';
 import { CategoryParams } from '../models';
 import { ApiService, ConnectionService } from 'src/app/core/services';
 import { OfflineStorageService } from 'src/app/core/services/offline-storage.service';
-import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -15,6 +14,10 @@ export class CategoryService {
   private apiService = inject(ApiService);
   private offlineStorage = inject(OfflineStorageService);
   private connectionService = inject(ConnectionService);
+
+  private shouldQueueOffline(error: any): boolean {
+    return !this.connectionService.isOnline() || error?.status === 0;
+  }
 
   private sortCategories(categories: Category[]): Category[] {
     return [...categories].sort((a, b) => {
@@ -71,7 +74,7 @@ export class CategoryService {
               const pendingDeletes = new Set(
                 pendingLocal
                   .filter((c: any) => c._isDeleted)
-                  .map((c: any) => c._id)
+                  .flatMap((c: any) => [c._id, c._clientId].filter(Boolean))
               );
 
               const apiCategories = response.data || [];
@@ -141,7 +144,9 @@ export class CategoryService {
           );
           return this.offlineStorage.getEntities<any>('category').pipe(
             map((categories) => {
-              let filtered = categories;
+              let filtered = categories.filter(
+                (category: any) => !category._isDeleted
+              );
               if (params.type) {
                 filtered = filtered.filter((c) => c.type === params.type);
               }
@@ -204,6 +209,10 @@ export class CategoryService {
   private createCategoryWithPayload(
     categoryData: Partial<Category>
   ): Observable<Category> {
+    if (!this.connectionService.isOnline()) {
+      return this._saveOffline('CREATE', categoryData);
+    }
+
     return this.apiService
       .post<Category>('/categories/create', categoryData)
       .pipe(
@@ -212,9 +221,10 @@ export class CategoryService {
             .saveSyncedEntity('category', category as any)
             .subscribe();
         }),
-        catchError(() => {
-          console.warn('⚠️ [CategoryService] API failed, saving offline');
-          return this._saveOffline('CREATE', categoryData);
+        catchError((error) => {
+          return this.shouldQueueOffline(error)
+            ? this._saveOffline('CREATE', categoryData)
+            : throwError(() => error);
         })
       );
   }
@@ -226,9 +236,6 @@ export class CategoryService {
     const isOnline = this.connectionService?.isOnline?.() ?? true;
 
     if (!isOnline || id.startsWith('offline_')) {
-      console.warn(
-        '⚠️ [CategoryService] Offline or offline ID, updating offline'
-      );
       return this._saveOffline('UPDATE', {
         ...categoryData,
         _id: id,
@@ -243,12 +250,13 @@ export class CategoryService {
             .saveSyncedEntity('category', category as any)
             .subscribe();
         }),
-        catchError(() => {
-          console.warn('⚠️ [CategoryService] API failed, updating offline');
-          return this._saveOffline('UPDATE', {
-            ...categoryData,
-            _id: id,
-          } as Partial<Category>);
+        catchError((error) => {
+          return this.shouldQueueOffline(error)
+            ? this._saveOffline('UPDATE', {
+                ...categoryData,
+                _id: id,
+              } as Partial<Category>)
+            : throwError(() => error);
         })
       );
   }
@@ -257,22 +265,19 @@ export class CategoryService {
     const isOnline = this.connectionService?.isOnline?.() ?? true;
 
     if (!isOnline || id.startsWith('offline_')) {
-      console.warn(
-        '⚠️ [CategoryService] Offline or offline ID, deleting offline'
-      );
       return this.offlineStorage
         .deleteEntity('category', id)
         .pipe(map(() => void 0));
     }
 
     return this.apiService.delete<void>(`/categories/delete/${id}`).pipe(
-      catchError(() => {
-        console.warn(
-          '⚠️ [CategoryService] API failed, marking as deleted offline'
-        );
-        return this.offlineStorage
-          .deleteEntity('category', id)
-          .pipe(map(() => void 0));
+      tap(() => this.offlineStorage.removeEntityHard('category', id)),
+      catchError((error) => {
+        return this.shouldQueueOffline(error)
+          ? this.offlineStorage
+              .deleteEntity('category', id)
+              .pipe(map(() => void 0))
+          : throwError(() => error);
       })
     );
   }
