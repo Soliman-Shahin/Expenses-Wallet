@@ -497,6 +497,12 @@
     "AVATAR_TITLE": "Profile photo",
     "AVATAR_SUBTITLE": "Upload or change your profile picture",
     "EDIT_AVATAR": "Edit photo",
+    "AVATAR_ACTIONS_TITLE": "Profile photo actions",
+    "CHANGE_AVATAR": "Change photo",
+    "REMOVE_AVATAR": "Remove photo",
+    "REMOVE_AVATAR_TITLE": "Remove profile photo",
+    "REMOVE_AVATAR_MESSAGE": "Your profile will use the default avatar.",
+    "REMOVE_AVATAR_CONFIRM": "Remove",
     "PERSONAL_INFO": {
       "TITLE": "Personal information",
       "SUBTITLE": "Edit your name and phone number",
@@ -544,7 +550,9 @@
       "SALARY_SAVED": "Salary and currency saved",
       "SALARY_FAILED": "Failed to save salary",
       "AVATAR_SAVED": "Profile photo updated",
+      "AVATAR_REMOVED": "Profile photo removed",
       "AVATAR_FAILED": "Failed to update profile photo",
+      "AVATAR_REMOVE_FAILED": "Failed to remove profile photo",
       "INVALID_FILE_TYPE": "Please select a valid image file (JPEG, PNG, GIF, or WebP)",
       "FILE_TOO_LARGE": "File size exceeds 5MB limit. Please select a smaller image."
     },

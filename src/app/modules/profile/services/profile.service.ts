@@ -36,7 +36,9 @@ export class ProfileService {
     } catch {}
     const storedProfile = this.storage.get<any>(PROFILE_CACHE_KEY);
     const storedUser = this.storage.get<any>('user');
-    this.profileOwnerId = storedProfile?.ownerId || (storedUser?._id ? String(storedUser._id) : null);
+    this.profileOwnerId =
+      storedProfile?.ownerId ||
+      (storedUser?._id ? String(storedUser._id) : null);
     const existing = this.getProfile();
     this.profileSubject.next(existing);
     toObservable(this.tokens.user).subscribe((user) => {
@@ -51,7 +53,7 @@ export class ProfileService {
       const normalized = this.normalizeProfile({
         ...user,
         ...(current ?? {}),
-        avatarUrl: current?.avatarUrl || user.image || undefined,
+        avatarUrl: sameOwner ? current?.avatarUrl : user.image || undefined,
       });
       if (normalized) {
         this.profileOwnerId = ownerId;
@@ -127,7 +129,10 @@ export class ProfileService {
   saveProfile(profile: UserProfile): boolean {
     try {
       // Persist using shared storage => key becomes 'ewallet_user'
-      this.storage.set(PROFILE_CACHE_KEY, { ownerId: this.profileOwnerId || this.tokens.getUserId(), profile });
+      this.storage.set(PROFILE_CACHE_KEY, {
+        ownerId: this.profileOwnerId || this.tokens.getUserId(),
+        profile,
+      });
       this.profileSubject.next(profile);
       return true;
     } catch (e) {
@@ -277,6 +282,25 @@ export class ProfileService {
       }),
       catchError((err) => {
         console.error('Failed to upload avatar', err);
+        return of(null);
+      })
+    );
+  }
+
+  /** Clear the persisted avatar using the existing profile update contract. */
+  removeAvatar(): Observable<UserProfile | null> {
+    return this.api.put<any>(this.PROFILE_ME_ENDPOINT, { image: null }).pipe(
+      map((res) => this.normalizeProfile(res)),
+      tap((updated) => {
+        const cleared: UserProfile = {
+          ...(this.getProfile() ?? {}),
+          ...(updated ?? {}),
+          avatarUrl: undefined,
+        } as UserProfile;
+        this.saveProfile(cleared);
+      }),
+      catchError((err) => {
+        console.error('Failed to remove avatar', err);
         return of(null);
       })
     );

@@ -489,6 +489,12 @@
     "AVATAR_TITLE": "الصورة الشخصية",
     "AVATAR_SUBTITLE": "قم برفع أو تغيير صورتك الشخصية",
     "EDIT_AVATAR": "تعديل الصورة",
+    "AVATAR_ACTIONS_TITLE": "إجراءات الصورة الشخصية",
+    "CHANGE_AVATAR": "تغيير الصورة",
+    "REMOVE_AVATAR": "إزالة الصورة",
+    "REMOVE_AVATAR_TITLE": "إزالة صورة الملف الشخصي؟",
+    "REMOVE_AVATAR_MESSAGE": "سيتم استخدام الصورة الافتراضية لملفك الشخصي.",
+    "REMOVE_AVATAR_CONFIRM": "إزالة",
     "PERSONAL_INFO": {
       "TITLE": "البيانات الشخصية",
       "SUBTITLE": "قم بتعديل الاسم ورقم الهاتف",
@@ -536,7 +542,9 @@
       "SALARY_SAVED": "تم حفظ الراتب والعملة",
       "SALARY_FAILED": "فشل حفظ الراتب",
       "AVATAR_SAVED": "تم تحديث الصورة الشخصية",
+      "AVATAR_REMOVED": "تمت إزالة الصورة الشخصية",
       "AVATAR_FAILED": "فشل تحديث الصورة الشخصية",
+      "AVATAR_REMOVE_FAILED": "فشل إزالة الصورة الشخصية",
       "INVALID_FILE_TYPE": "يرجى اختيار ملف صورة صحيح (JPEG، PNG، GIF، أو WebP)",
       "FILE_TOO_LARGE": "حجم الملف يتجاوز الحد المسموح به 5 ميغابايت. يرجى اختيار صورة أصغر."
     },

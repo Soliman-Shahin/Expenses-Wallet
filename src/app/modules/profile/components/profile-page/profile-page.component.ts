@@ -22,7 +22,11 @@ import { ProfileService } from '../../services/profile.service';
 import { UserProfile } from '../../models/profile.model';
 import { BehaviorSubject, combineLatest, takeUntil } from 'rxjs';
 import { catchError, finalize, tap } from 'rxjs/operators';
-import { ItemReorderEventDetail, IonicModule } from '@ionic/angular';
+import {
+  ActionSheetController,
+  ItemReorderEventDetail,
+  IonicModule,
+} from '@ionic/angular';
 import { UiInputComponent } from '../../../../shared/ui/ui-input/ui-input.component';
 import { AsyncPipe, DecimalPipe } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -63,6 +67,7 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
 
   private readonly profileService = inject(ProfileService);
   private readonly translate = inject(TranslateService);
+  private readonly actionSheetController = inject(ActionSheetController);
 
   vm$ = combineLatest({
     profile: this.profileService.profile$,
@@ -384,8 +389,12 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
 
     const date = new Date(profile.createdAt);
     if (Number.isNaN(date.getTime())) return '';
-    const language = this.translate.currentLang || this.translate.getDefaultLang() || 'en';
-    return date.toLocaleDateString(language.startsWith('ar') ? 'ar' : 'en', { month: 'short', year: 'numeric' });
+    const language =
+      this.translate.currentLang || this.translate.getDefaultLang() || 'en';
+    return date.toLocaleDateString(language.startsWith('ar') ? 'ar' : 'en', {
+      month: 'short',
+      year: 'numeric',
+    });
   }
 
   savePersonal(): void {
@@ -443,10 +452,12 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
     this.setLoading(true);
     this.errorMessage$.next(null);
     const detailsRaw = this.details.getRawValue() || [];
-    const salaryPayload = detailsRaw.map((d: { label?: unknown; amount?: unknown }) => ({
-      label: String(d?.label ?? 'Salary'),
-      amount: Number(d?.amount ?? 0),
-    }));
+    const salaryPayload = detailsRaw.map(
+      (d: { label?: unknown; amount?: unknown }) => ({
+        label: String(d?.label ?? 'Salary'),
+        amount: Number(d?.amount ?? 0),
+      })
+    );
     const currency = this.salaryForm.get('currency')?.getRawValue();
     const payload: Partial<UserProfile> = {
       salary: salaryPayload,
@@ -483,6 +494,75 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
 
   triggerAvatarFile(): void {
     this.avatarInputRef?.nativeElement?.click();
+  }
+
+  async openAvatarActions(): Promise<void> {
+    if (this.isLoadingAvatar$.value) return;
+
+    const buttons = [
+      {
+        text: this.translate.instant('PROFILE.CHANGE_AVATAR'),
+        icon: 'camera-outline',
+        handler: () => this.triggerAvatarFile(),
+      },
+      ...(this.avatarUrl
+        ? [
+            {
+              text: this.translate.instant('PROFILE.REMOVE_AVATAR'),
+              icon: 'trash-outline',
+              role: 'destructive' as const,
+              handler: () => void this.removeAvatar(),
+            },
+          ]
+        : []),
+      {
+        text: this.translate.instant('COMMON.CANCEL'),
+        role: 'cancel' as const,
+      },
+    ];
+
+    const actionSheet = await this.actionSheetController.create({
+      header: this.translate.instant('PROFILE.AVATAR_ACTIONS_TITLE'),
+      buttons,
+    });
+
+    await actionSheet.present();
+  }
+
+  async removeAvatar(): Promise<void> {
+    if (this.isLoadingAvatar$.value || !this.avatarUrl) return;
+    const confirmed = await this.alertService.showConfirm({
+      title: this.translate.instant('PROFILE.REMOVE_AVATAR_TITLE'),
+      message: this.translate.instant('PROFILE.REMOVE_AVATAR_MESSAGE'),
+      confirmText: this.translate.instant('PROFILE.REMOVE_AVATAR_CONFIRM'),
+      cancelText: this.translate.instant('COMMON.CANCEL'),
+      cssClass: 'alert-destructive',
+    });
+    if (!confirmed) return;
+
+    this.isLoadingAvatar$.next(true);
+    this.setLoading(true);
+    this.errorMessage$.next(null);
+    this.profileService
+      .removeAvatar()
+      .pipe(
+        finalize(() => {
+          this.isLoadingAvatar$.next(false);
+          this.setLoading(false);
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((updated) => {
+        if (!updated) {
+          this.errorMessage$.next('PROFILE.TOASTS.AVATAR_REMOVE_FAILED');
+          return;
+        }
+        this.avatarUrl = null;
+        this.toastService.presentSuccessToast(
+          'top',
+          'PROFILE.TOASTS.AVATAR_REMOVED'
+        );
+      });
   }
 
   async onAvatarSelected(event: Event): Promise<void> {
