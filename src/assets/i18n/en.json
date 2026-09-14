@@ -499,6 +499,16 @@
     "EDIT_AVATAR": "Edit photo",
     "AVATAR_ACTIONS_TITLE": "Profile photo actions",
     "CHANGE_AVATAR": "Change photo",
+    "AUTH": {
+      "TITLE": "Account details",
+      "PROVIDER_LABEL": "Sign-in method",
+      "STATUS_LABEL": "Account status",
+      "PROVIDER_GOOGLE": "Google",
+      "PROVIDER_FACEBOOK": "Facebook",
+      "PROVIDER_EMAIL": "Email & password",
+      "STATUS_VERIFIED": "Email verified",
+      "STATUS_UNVERIFIED": "Verification required"
+    },
     "REMOVE_AVATAR": "Remove photo",
     "REMOVE_AVATAR_TITLE": "Remove profile photo",
     "REMOVE_AVATAR_MESSAGE": "Your profile will use the default avatar.",

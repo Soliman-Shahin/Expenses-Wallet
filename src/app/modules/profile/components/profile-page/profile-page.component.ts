@@ -21,7 +21,7 @@ import { BaseComponent } from 'src/app/shared/base/base.component';
 import { ProfileService } from '../../services/profile.service';
 import { UserProfile } from '../../models/profile.model';
 import { BehaviorSubject, combineLatest, takeUntil } from 'rxjs';
-import { catchError, finalize, tap } from 'rxjs/operators';
+import { catchError, finalize, map, tap } from 'rxjs/operators';
 import {
   ActionSheetController,
   ItemReorderEventDetail,
@@ -32,6 +32,11 @@ import { AsyncPipe, DecimalPipe } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { SkeletonBlockComponent } from '../../../../shared/ui/skeleton-block/skeleton-block.component';
 import { AlertService } from 'src/app/shared/services/alert.service';
+
+interface ProfileAuthMetadata {
+  providerLabelKey: string | null;
+  statusLabelKey: string | null;
+}
 
 @Component({
   selector: 'app-profile-page',
@@ -69,6 +74,26 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
   private readonly translate = inject(TranslateService);
   private readonly actionSheetController = inject(ActionSheetController);
 
+  readonly authMetadata$ = this.authService.user$.pipe(
+    map((user): ProfileAuthMetadata => {
+      const providerLabelKey =
+        user?.signupType === 'google'
+          ? 'PROFILE.AUTH.PROVIDER_GOOGLE'
+          : user?.signupType === 'facebook'
+          ? 'PROFILE.AUTH.PROVIDER_FACEBOOK'
+          : user?.signupType === 'normal'
+          ? 'PROFILE.AUTH.PROVIDER_EMAIL'
+          : null;
+      const statusLabelKey =
+        typeof user?.emailVerified === 'boolean'
+          ? user.emailVerified
+            ? 'PROFILE.AUTH.STATUS_VERIFIED'
+            : 'PROFILE.AUTH.STATUS_UNVERIFIED'
+          : null;
+      return { providerLabelKey, statusLabelKey };
+    })
+  );
+
   vm$ = combineLatest({
     profile: this.profileService.profile$,
     isLoadingProfile: this.isLoadingProfile$.asObservable(),
@@ -76,6 +101,7 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
     isLoadingSalary: this.isLoadingSalary$.asObservable(),
     isLoadingAvatar: this.isLoadingAvatar$.asObservable(),
     errorMessage: this.errorMessage$.asObservable(),
+    authMetadata: this.authMetadata$,
   });
 
   currencies: string[] = [

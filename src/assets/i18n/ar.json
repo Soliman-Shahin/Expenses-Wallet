@@ -491,6 +491,16 @@
     "EDIT_AVATAR": "تعديل الصورة",
     "AVATAR_ACTIONS_TITLE": "إجراءات الصورة الشخصية",
     "CHANGE_AVATAR": "تغيير الصورة",
+    "AUTH": {
+      "TITLE": "تفاصيل الحساب",
+      "PROVIDER_LABEL": "طريقة تسجيل الدخول",
+      "STATUS_LABEL": "حالة الحساب",
+      "PROVIDER_GOOGLE": "Google",
+      "PROVIDER_FACEBOOK": "Facebook",
+      "PROVIDER_EMAIL": "البريد الإلكتروني وكلمة المرور",
+      "STATUS_VERIFIED": "البريد الإلكتروني موثق",
+      "STATUS_UNVERIFIED": "يتطلب التحقق"
+    },
     "REMOVE_AVATAR": "إزالة الصورة",
     "REMOVE_AVATAR_TITLE": "إزالة صورة الملف الشخصي؟",
     "REMOVE_AVATAR_MESSAGE": "سيتم استخدام الصورة الافتراضية لملفك الشخصي.",

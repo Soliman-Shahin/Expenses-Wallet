@@ -132,6 +132,35 @@
       </div>
     </div>
     <!-- ── Forms Layout ── -->
+    @if (vm.authMetadata.providerLabelKey || vm.authMetadata.statusLabelKey) {
+    <section class="account-meta" aria-labelledby="account-meta-title">
+      <h2 id="account-meta-title" class="sr-only">
+        {{ "PROFILE.AUTH.TITLE" | translate }}
+      </h2>
+      @if (vm.authMetadata.providerLabelKey; as providerLabelKey) {
+      <div class="account-meta-row">
+        <div class="account-meta-label">
+          <ion-icon name="key-outline" aria-hidden="true"></ion-icon>
+          <span>{{ "PROFILE.AUTH.PROVIDER_LABEL" | translate }}</span>
+        </div>
+        <span class="account-meta-value">{{
+          providerLabelKey | translate
+        }}</span>
+      </div>
+      } @if (vm.authMetadata.statusLabelKey; as statusLabelKey) {
+      <div class="account-meta-row">
+        <div class="account-meta-label">
+          <ion-icon
+            name="shield-checkmark-outline"
+            aria-hidden="true"
+          ></ion-icon>
+          <span>{{ "PROFILE.AUTH.STATUS_LABEL" | translate }}</span>
+        </div>
+        <span class="account-meta-value">{{ statusLabelKey | translate }}</span>
+      </div>
+      }
+    </section>
+    }
     <div class="forms-layout">
       <!-- Left: Personal Info -->
       <div class="form-column">
