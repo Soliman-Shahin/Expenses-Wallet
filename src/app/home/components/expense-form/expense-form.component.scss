@@ -238,6 +238,12 @@ ion-title {
 .field-error {
   padding-inline: 20px;
 }
+.discard-draft-btn {
+  min-height: 48px;
+  margin: 0;
+  color: var(--ew-wallet-muted);
+  white-space: nowrap;
+}
 .inline-field-error {
   margin: -8px 0 8px;
   color: var(--ion-color-danger);

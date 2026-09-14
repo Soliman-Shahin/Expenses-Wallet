@@ -17,7 +17,13 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { Observable, combineLatest, BehaviorSubject } from 'rxjs';
-import { map, startWith, finalize, takeUntil, tap } from 'rxjs/operators';
+import {
+  map,
+  debounceTime,
+  distinctUntilChanged,
+  finalize,
+  takeUntil,
+} from 'rxjs/operators';
 
 import { BaseComponent } from 'src/app/shared/base/base.component';
 import { Expense, Category } from 'src/app/shared/models';
@@ -26,6 +32,7 @@ import { trapFocus, releaseFocus } from 'src/app/shared/utils/focus-trap';
 import { IonicModule } from '@ionic/angular';
 import { NgClass, AsyncPipe, DatePipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
+import { ExpenseDraftService } from 'src/app/core/services/expense-draft.service';
 
 @Component({
   selector: 'app-expense-form',
@@ -67,12 +74,17 @@ export class ExpenseFormComponent
   private initialized = false;
   private initialFormValue: Record<string, unknown> | null = null;
   isDeleteSubmitting = false;
+  hasDraft = false;
+  private readonly ownerId = this.tokenService.getUserId();
 
   vm$ = combineLatest([toObservable(this.state.loading)]).pipe(
     map(([isLoading]) => ({ isLoading }))
   );
 
-  constructor(private profileService: ProfileService) {
+  constructor(
+    private profileService: ProfileService,
+    private draftService: ExpenseDraftService
+  ) {
     super();
   }
 
@@ -86,9 +98,52 @@ export class ExpenseFormComponent
     this.isEditMode = !!this.expense;
     this.userCurrency = this.profileService.getProfile()?.currency || '';
     this.initForm();
+    if (!this.isEditMode) this.restoreDraft();
+    this.watchDraft();
     if (!this.categoriesLoaded) {
       this.loadCategories();
     }
+  }
+
+  private restoreDraft(): void {
+    const draft = this.draftService.get(this.ownerId);
+    if (!draft) return;
+    this.expenseForm.patchValue(draft, { emitEvent: false });
+    this.typeSubject$.next(draft.type);
+    this.hasDraft = true;
+    this.cdr.markForCheck();
+  }
+
+  private watchDraft(): void {
+    if (this.isEditMode) return;
+    this.expenseForm.valueChanges
+      .pipe(
+        debounceTime(250),
+        distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((value) => {
+        const meaningful =
+          !!String(value.amount ?? '').trim() ||
+          !!String(value.category ?? '').trim() ||
+          !!String(value.description ?? '').trim();
+        if (!meaningful) {
+          this.draftService.clear(this.ownerId);
+          this.hasDraft = false;
+          return;
+        }
+        this.draftService.save(this.ownerId, {
+          type: value.type === 'income' ? 'income' : 'outcome',
+          amount:
+            value.amount === '' || value.amount == null
+              ? null
+              : Number(value.amount),
+          category: value.category || null,
+          description: String(value.description || ''),
+          date: new Date(value.date).toISOString(),
+        });
+        this.hasDraft = true;
+      });
   }
 
   override ngOnDestroy() {
@@ -175,6 +230,15 @@ export class ExpenseFormComponent
       )
       .subscribe((categories) => {
         this.allCategories = categories;
+        if (!this.isEditMode) {
+          const category = this.expenseForm.get('category');
+          if (
+            category?.value &&
+            !categories.some((c) => c._id === category.value)
+          ) {
+            category.setValue('', { emitEvent: false });
+          }
+        }
         this.typeSubject$.next(this.typeSubject$.value); // Trigger filtering again now that we have data
         this.cdr.markForCheck();
       });
@@ -261,6 +325,7 @@ export class ExpenseFormComponent
       )
       .subscribe({
         next: (response) => {
+          if (!this.isEditMode) this.draftService.clear(this.ownerId);
           const message = this.isEditMode
             ? this.translateService.instant('EXPENSE.UPDATE_SUCCESS')
             : this.translateService.instant('EXPENSE.CREATE_SUCCESS');
@@ -274,6 +339,24 @@ export class ExpenseFormComponent
           this.handleError(message, error, true);
         },
       });
+  }
+
+  discardDraft(): void {
+    if (this.isEditMode) return;
+    this.draftService.clear(this.ownerId);
+    this.expenseForm.reset({
+      type: 'outcome',
+      amount: null,
+      category: '',
+      description: '',
+      date: new Date().toISOString(),
+    });
+    this.expenseForm.markAsPristine();
+    this.hasDraft = false;
+    this.toastService.presentSuccessToast(
+      'bottom',
+      this.translateService.instant('EXPENSE.DRAFT_DISCARDED')
+    );
   }
 
   hasFormChanges(): boolean {

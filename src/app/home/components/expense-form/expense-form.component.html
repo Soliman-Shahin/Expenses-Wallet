@@ -183,7 +183,16 @@
       }
       <!-- Action Buttons -->
       <div class="form-actions-row">
-        @if (isEditMode) {
+        @if (!isEditMode && hasDraft) {
+        <ion-button
+          fill="clear"
+          class="discard-draft-btn"
+          type="button"
+          (click)="discardDraft()"
+        >
+          {{ "EXPENSE.DISCARD_DRAFT" | translate }}
+        </ion-button>
+        } @if (isEditMode) {
         <ion-button
           fill="clear"
           color="danger"
@@ -208,7 +217,9 @@
         >
           @if ((vm$ | async)?.isLoading) {
           <ion-spinner name="crescent" aria-hidden="true"></ion-spinner>
-          <span class="visually-hidden">{{ "COMMON.LOADING" | translate }}</span>
+          <span class="visually-hidden">{{
+            "COMMON.LOADING" | translate
+          }}</span>
           } @else {
           <span>
             {{ (isEditMode ? "COMMON.SAVE" : "COMMON.CREATE") | translate }}
