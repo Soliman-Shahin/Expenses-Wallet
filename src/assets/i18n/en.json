@@ -269,6 +269,8 @@
     "AMOUNT": "Amount",
     "AMOUNT_PLACEHOLDER": "Enter amount",
     "CATEGORY": "Category",
+    "UNAVAILABLE_TITLE": "Transaction unavailable",
+    "UNAVAILABLE_DESCRIPTION": "This transaction may have been deleted or is no longer available.",
     "SELECT_CATEGORY": "Select category",
     "FAVORITE_CATEGORIES": "Favorites",
     "RECENT_CATEGORIES": "Recent",

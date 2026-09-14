@@ -13,8 +13,9 @@ import { TranslateModule } from '@ngx-translate/core';
 import { Expense } from 'src/app/shared/models/expense.model';
 import { OfflineStorageService } from 'src/app/core/services/offline-storage.service';
 import { ExpenseService } from 'src/app/core/services/expense.service';
+import { AuthService } from 'src/app/modules/auth/services/auth.service';
 import { SyncStatus } from 'src/app/shared/models/sync.model';
-import { merge, startWith, switchMap, tap } from 'rxjs';
+import { merge, skip, startWith, switchMap, tap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
@@ -38,6 +39,13 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     ></ion-header>
     <ion-content [dir]="locale === 'ar' ? 'rtl' : 'ltr'">
       <article [dir]="locale === 'ar' ? 'rtl' : 'ltr'">
+        @if (isUnavailable()) {
+        <section class="record-unavailable" role="status" aria-live="polite">
+          <ion-icon name="document-text-outline" aria-hidden="true"></ion-icon>
+          <h1>{{ 'EXPENSE.UNAVAILABLE_TITLE' | translate }}</h1>
+          <p>{{ 'EXPENSE.UNAVAILABLE_DESCRIPTION' | translate }}</p>
+        </section>
+        } @else {
         <section class="record-hero">
           <div class="record-identity">
             <div
@@ -96,7 +104,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
                 <p class="date-value">
                   <bdi>{{
                     isValidDate
-                      ? (detailExpense().date | date : 'medium' : undefined : locale)
+                      ? (detailExpense().date
+                        | date : 'medium' : undefined : locale)
                       : ('EXPENSE.DATE' | translate)
                   }}</bdi>
                 </p>
@@ -117,13 +126,15 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
             </div>
           </div>
         </section>
+        }
       </article>
     </ion-content>
     <ion-footer class="ion-no-border"
       ><ion-toolbar
-        ><ion-button expand="block" (click)="edit()">{{
+        >@if (!isUnavailable()) {<ion-button expand="block" (click)="edit()">{{
           'MOBILE.EDIT' | translate
-        }}</ion-button></ion-toolbar
+        }}</ion-button
+        >}</ion-toolbar
       ></ion-footer
     >
   `,
@@ -156,6 +167,31 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
         background: var(--ion-item-background);
         box-shadow: var(--ew-bold-shadow);
         border: 1px solid var(--ew-wallet-line);
+      }
+      .record-unavailable {
+        display: grid;
+        justify-items: start;
+        gap: 10px;
+        padding: 28px 20px;
+        border-radius: 20px 20px 20px 6px;
+        background: var(--ion-item-background);
+        box-shadow: var(--ew-bold-shadow);
+        border: 1px solid var(--ew-wallet-line);
+      }
+      [dir='rtl'] .record-unavailable {
+        border-radius: 20px 20px 6px 20px;
+      }
+      .record-unavailable > ion-icon {
+        font-size: 28px;
+        color: var(--ew-wallet-muted);
+      }
+      .record-unavailable h1 {
+        margin: 0;
+      }
+      .record-unavailable p {
+        margin: 0;
+        color: var(--ew-wallet-muted);
+        line-height: 1.5;
       }
       [dir='rtl'] .record-hero {
         border-radius: 20px 20px 6px 20px;
@@ -338,10 +374,14 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 export class ExpenseDetailComponent implements OnInit {
   private readonly offlineStorage = inject(OfflineStorageService);
   private readonly expenseService = inject(ExpenseService);
+  private readonly authService = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly ownerId = this.authService.getUserId();
   readonly detailExpense = signal<Expense>(null as unknown as Expense);
+  readonly isUnavailable = signal(false);
   private logicalId = '';
   private syncOperations: any[] = [];
+  private hasSeenCanonicalEntity = false;
   syncState: 'synced' | 'pending' | 'issue' = 'synced';
   get categoryVisual(): any {
     return typeof this.detailExpense().category === 'object'
@@ -360,8 +400,16 @@ export class ExpenseDetailComponent implements OnInit {
       (this.expense as Expense & { _clientId?: string })._clientId ||
       this.expense._id;
 
+    this.authService.userChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((user) => {
+        if (!user || String(user._id) !== String(this.ownerId)) {
+          this.markUnavailable();
+        }
+      });
+
     merge(
-      this.offlineStorage.syncQueue$,
+      this.offlineStorage.syncQueue$.pipe(skip(1)),
       this.expenseService.expenseReconciled$
     )
       .pipe(
@@ -401,12 +449,17 @@ export class ExpenseDetailComponent implements OnInit {
         candidate._clientId === this.logicalId
     );
 
-    if (!entity) return;
+    if (!entity) {
+      if (this.hasSeenCanonicalEntity) this.markUnavailable();
+      return;
+    }
     if (entity._isDeleted) {
       void this.modal.dismiss(null, 'deleted');
       return;
     }
 
+    this.hasSeenCanonicalEntity = true;
+    this.isUnavailable.set(false);
     this.detailExpense.set(entity as Expense);
     const operations = this.syncOperations.filter(
       (operation) =>
@@ -427,6 +480,10 @@ export class ExpenseDetailComponent implements OnInit {
             ))
         ? 'pending'
         : 'synced';
+  }
+
+  private markUnavailable(): void {
+    this.isUnavailable.set(true);
   }
   close() {
     return this.modal.dismiss();

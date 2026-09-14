@@ -241,6 +241,8 @@
     "AMOUNT": "المبلغ",
     "AMOUNT_PLACEHOLDER": "أدخل المبلغ",
     "CATEGORY": "الفئة",
+    "UNAVAILABLE_TITLE": "المعاملة غير متاحة",
+    "UNAVAILABLE_DESCRIPTION": "قد تكون هذه المعاملة قد حُذفت أو لم تعد متاحة.",
     "SELECT_CATEGORY": "اختر الفئة",
     "FAVORITE_CATEGORIES": "المفضلة",
     "RECENT_CATEGORIES": "الأخيرة",
