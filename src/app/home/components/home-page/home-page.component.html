@@ -187,7 +187,15 @@
           icon="analytics-outline"
           [title]="'HOME.CHARTS' | translate"
         ></app-section-header>
-        @if (!vm.loading || hasRenderedHomeContent) {
+        @if (!vm.loading || hasRenderedHomeContent) { @if (chartsError) {
+        <div class="widget-error" role="status">
+          <ion-icon name="warning-outline"></ion-icon
+          ><span>{{ chartsError | translate }}</span
+          ><ion-button fill="clear" (click)="retryCharts()">{{
+            "COMMON.RETRY" | translate
+          }}</ion-button>
+        </div>
+        } @else {
         <div (click)="$event.stopPropagation()">
           @if (vm.incomeVsExpense.length > 0) { @if (barChartComponent | async;
           as BarChartComponent) {
@@ -284,7 +292,7 @@
           </div>
           }
         </div>
-        }
+        } }
       </section>
     </div>
     }
@@ -309,14 +317,23 @@
               "-01" | date : "MMMM yyyy" : undefined : currentLang
           }}</span>
         </div>
-        <app-balance-card
+        @if (vm.totals; as totals) {<app-balance-card
           [isLoading]="vm.loading"
-          [balance]="vm.totals.balance"
-          [income]="vm.totals.income"
-          [expenses]="vm.totals.expenses"
+          [balance]="totals.balance"
+          [income]="totals.income"
+          [expenses]="totals.expenses"
           [percentageChange]="percentageChange"
           [currency]="vm.currency"
-        ></app-balance-card>
+        ></app-balance-card
+        >} @else {
+        <div class="widget-error" role="status">
+          <ion-icon name="cloud-offline-outline"></ion-icon
+          ><span>{{ "HOME.WIDGET_UNAVAILABLE" | translate }}</span
+          ><ion-button fill="clear" (click)="retrySummary()">{{
+            "COMMON.RETRY" | translate
+          }}</ion-button>
+        </div>
+        }
       </section>
       <section
         class="card-section transactions-card"

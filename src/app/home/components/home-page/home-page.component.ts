@@ -161,6 +161,8 @@ export class HomePageComponent
     this.selectedMonth
   );
   private readonly summaryRefresh$ = new BehaviorSubject<number>(0);
+  summaryError: string | null = null;
+  chartsError: string | null = null;
 
   // Reactive month selection for Charts tab (supports custom date ranges)
   private readonly chartsMonthSelection$ = new BehaviorSubject<MonthYear>({
@@ -215,10 +217,18 @@ export class HomePageComponent
           const base = totals ?? { income: 0, expenses: 0, balance: 0 };
           const result = this.dashboard.withProfileIncome(base, profile);
           return result;
+        }),
+        tap(() => (this.summaryError = null)),
+        catchError(() => {
+          this.summaryError = 'HOME.WIDGET_UNAVAILABLE';
+          return of(null);
         })
       );
     }),
-    catchError(() => of({ income: 0, expenses: 0, balance: 0 })),
+    catchError(() => {
+      this.summaryError = 'HOME.WIDGET_UNAVAILABLE';
+      return of(null);
+    }),
     shareReplay(1)
   );
 
@@ -245,18 +255,29 @@ export class HomePageComponent
       return forkJoin({
         totals: this.dashboard.totalsForRange(startDate, endDate),
         income: this.dashboard.incomeTransactionsForRange(startDate, endDate),
-      }).pipe(
-        map(({ totals, income }) => {
-          const base = {
-            income: income.sum,
-            expenses: Number(totals?.expenses ?? 0),
-            balance: income.sum - Number(totals?.expenses ?? 0),
-          };
-          return this.dashboard.withProfileIncome(base, profile);
-        })
-      );
+      })
+        .pipe(
+          map(({ totals, income }) => {
+            const base = {
+              income: income.sum,
+              expenses: Number(totals?.expenses ?? 0),
+              balance: income.sum - Number(totals?.expenses ?? 0),
+            };
+            return this.dashboard.withProfileIncome(base, profile);
+          })
+        )
+        .pipe(
+          tap(() => (this.chartsError = null)),
+          catchError(() => {
+            this.chartsError = 'HOME.WIDGET_UNAVAILABLE';
+            return of(null);
+          })
+        );
     }),
-    catchError(() => of({ income: 0, expenses: 0, balance: 0 })),
+    catchError(() => {
+      this.chartsError = 'HOME.WIDGET_UNAVAILABLE';
+      return of(null);
+    }),
     shareReplay(1)
   );
 
@@ -309,6 +330,7 @@ export class HomePageComponent
     ),
   ]).pipe(
     map(([t, langEvent]) => {
+      if (!t) return [];
       return [
         {
           name: 'HOME.INCOME',
@@ -512,10 +534,21 @@ export class HomePageComponent
 
   // Retry handler from template: re-emit current month to refresh streams
   retry(): void {
+    this.retrySummary();
+    this.retryCharts();
+  }
+
+  retrySummary(): void {
+    this.summaryError = null;
     this.summaryMonthSelection$.next({ ...this.selectedMonth });
-    // Also refresh charts with current selection
-    const currentCharts = this.chartsMonthSelection$.getValue();
-    this.chartsMonthSelection$.next({ ...currentCharts });
+    this.cdr.markForCheck();
+  }
+  retryCharts(): void {
+    this.chartsError = null;
+    this.chartsMonthSelection$.next({
+      ...this.chartsMonthSelection$.getValue(),
+    });
+    this.cdr.markForCheck();
   }
 
   private isOpeningModal = false;

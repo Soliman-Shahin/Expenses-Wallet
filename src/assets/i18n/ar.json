@@ -236,6 +236,7 @@
     "EDIT": "تعديل المصروف",
     "DELETE": "حذف المصروف",
     "CREATE_TITLE": "إنشاء معاملة",
+    "WIDGET_UNAVAILABLE": "هذا القسم غير متاح مؤقتًا.",
     "DISCARD_DRAFT": "تجاهل المسودة",
     "DRAFT_DISCARDED": "تم تجاهل المسودة",
     "UPDATE_TITLE": "تعديل معاملة",

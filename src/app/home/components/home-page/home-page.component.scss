@@ -852,3 +852,21 @@ app-line-chart {
     font-weight: 600;
   }
 }
+
+.widget-error {
+  min-height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  color: var(--ew-wallet-muted);
+  text-align: center;
+}
+.widget-error ion-icon {
+  font-size: 20px;
+  color: var(--ion-color-warning);
+}
+.widget-error ion-button {
+  margin: 0;
+}

@@ -264,6 +264,7 @@
     "EDIT": "Edit expense",
     "DELETE": "Delete expense",
     "CREATE_TITLE": "Create Transaction",
+    "WIDGET_UNAVAILABLE": "This section is temporarily unavailable.",
     "DISCARD_DRAFT": "Discard draft",
     "DRAFT_DISCARDED": "Draft discarded",
     "UPDATE_TITLE": "Update Transaction",

@@ -16,11 +16,15 @@
       style="font-size: 28px; opacity: 0.6"
     ></ion-icon>
     <p class="ion-margin-top">{{ "COMMON.ERRORS.LOAD_DATA" | translate }}</p>
+    <ion-button fill="clear" (click)="refreshTransactions()">{{
+      "COMMON.RETRY" | translate
+    }}</ion-button>
   </div>
   }
 
   <!-- Content after loading -->
-  @if (!txLoading && !loadError) { @if (transactions.length > 0) {
+  @if (!txLoading && (!loadError || transactions.length > 0)) { @if
+  (transactions.length > 0) {
   <ion-list class="transactions-list list-fade-in">
     @for (t of transactions; track trackById(i, t); let i = $index) {
     <ion-item-sliding class="transaction-sliding" [style.--animation-order]="i">
