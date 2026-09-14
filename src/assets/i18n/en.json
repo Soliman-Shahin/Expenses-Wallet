@@ -457,6 +457,12 @@
     "PASSWORD_MISMATCH": "Passwords do not match"
   },
   "PROFILE": {
+    "UNSAVED": {
+      "TITLE": "Unsaved changes",
+      "MESSAGE": "You have unsaved profile changes. Leave without saving?",
+      "STAY": "Continue editing",
+      "DISCARD": "Discard changes"
+    },
     "TITLE": "Profile",
     "AVATAR": "Profile photo",
     "AVATAR_TITLE": "Profile photo",

@@ -27,6 +27,7 @@ import { UiInputComponent } from '../../../../shared/ui/ui-input/ui-input.compon
 import { AsyncPipe, DecimalPipe } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { SkeletonBlockComponent } from '../../../../shared/ui/skeleton-block/skeleton-block.component';
+import { AlertService } from 'src/app/shared/services/alert.service';
 
 @Component({
   selector: 'app-profile-page',
@@ -88,6 +89,7 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
     'TND',
   ];
   private nextDetailId = 0;
+  private leaveConfirmationOpen = false;
 
   override ngOnInit(): void {
     super.ngOnInit();
@@ -176,6 +178,60 @@ export class ProfilePageComponent extends BaseComponent implements OnInit {
     this.salaryForm.markAsPristine();
     this.isPersonalFormDirty = false;
     this.isSalaryFormDirty = false;
+  }
+
+  hasUnsavedChanges(): boolean {
+    const profile = this.profileService.getProfile();
+    if (!profile || !this.personalForm || !this.salaryForm) return false;
+    const currentPersonal = this.personalForm.getRawValue();
+    const normalizePersonal = (value: any) => ({
+      username: String(value?.username ?? '').trim(),
+      email: String(value?.email ?? '').trim(),
+      phone: String(value?.phone ?? '').trim(),
+    });
+    let currentSalary = this.details.getRawValue().map((d: any) => ({
+      label: String(d?.label ?? '').trim(),
+      amount: Number(d?.amount ?? 0),
+    }));
+    const savedSalary = (
+      Array.isArray(profile.salary) ? profile.salary : []
+    ).map((d) => ({
+      label: String(d.label ?? '').trim(),
+      amount: Number(d.amount ?? 0),
+    }));
+    if (
+      !savedSalary.length &&
+      currentSalary.length === 1 &&
+      currentSalary[0].label === 'Salary' &&
+      currentSalary[0].amount === 0
+    )
+      currentSalary = [];
+    return (
+      JSON.stringify(normalizePersonal(currentPersonal)) !==
+        JSON.stringify(normalizePersonal(profile)) ||
+      JSON.stringify(currentSalary) !== JSON.stringify(savedSalary) ||
+      String(this.salaryForm.get('currency')?.getRawValue() ?? '') !==
+        String(profile.currency ?? '')
+    );
+  }
+
+  async confirmLeave(alertService: AlertService): Promise<boolean> {
+    if (!this.hasUnsavedChanges()) return true;
+    if (this.leaveConfirmationOpen) return false;
+    this.leaveConfirmationOpen = true;
+    try {
+      const discard = await alertService.showConfirm({
+        title: this.translate.instant('PROFILE.UNSAVED.TITLE'),
+        message: this.translate.instant('PROFILE.UNSAVED.MESSAGE'),
+        cancelText: this.translate.instant('PROFILE.UNSAVED.STAY'),
+        confirmText: this.translate.instant('PROFILE.UNSAVED.DISCARD'),
+        cssClass: 'alert-delete',
+      });
+      if (discard) this.patchFromProfile(this.profileService.getProfile()!);
+      return discard;
+    } finally {
+      this.leaveConfirmationOpen = false;
+    }
   }
 
   // Salary details helpers
