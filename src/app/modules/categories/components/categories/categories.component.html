@@ -115,6 +115,10 @@
                   | translate
               }}
             </span>
+            <span class="usage-count">
+              {{ usageCount(item._id) }}
+              {{ usageLabelKey(usageCount(item._id)) | translate }}
+            </span>
           </p>
         </ion-label>
         <ion-buttons slot="end">

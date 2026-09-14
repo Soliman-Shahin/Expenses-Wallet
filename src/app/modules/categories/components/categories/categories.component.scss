@@ -187,6 +187,11 @@ ion-segment-button {
 .type-indicator.outcome {
   color: var(--ion-color-danger);
 }
+.usage-count {
+  color: var(--ew-wallet-muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
 ion-buttons {
   margin: 0;
 }

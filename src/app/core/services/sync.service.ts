@@ -22,6 +22,7 @@ import { ApiService } from './api.service';
 import { OfflineStorageService } from './offline-storage.service';
 import { ConnectionService } from './connection.service';
 import { ExpenseService } from './expense.service';
+import { environment } from 'src/environments/environment';
 import {
   SyncStatus,
   SyncMetadata,
@@ -448,8 +449,6 @@ export class SyncService {
           _operationId: op.id,
           ...op.data,
         }));
-        operations.forEach((op, index) => {});
-
         // CRITICAL: Sort entities so that categories come first.
         // This ensures the backend resolves offline category IDs and puts them in idMap
         // BEFORE it processes expenses that depend on those categories.

@@ -19,6 +19,7 @@ import {
   combineLatest,
   finalize,
   of,
+  merge,
   switchMap,
   takeUntil,
   tap,
@@ -31,6 +32,7 @@ import { NgClass, AsyncPipe, LowerCasePipe } from '@angular/common';
 import { AddFabButtonComponent } from '../../../../shared/ui/add-fab-button/add-fab-button.component';
 import { PlanService } from '../../../../core/services/plan.service';
 import { PlanLimitBannerComponent } from '../../../../shared/components/plan-limit-banner/plan-limit-banner.component';
+import { ExpenseService } from 'src/app/core/services/expense.service';
 
 @Component({
   selector: 'app-categories',
@@ -56,9 +58,12 @@ export class CategoriesComponent
   private actionSheetController = inject(ActionSheetController);
   private translate = inject(TranslateService);
   private planService = inject(PlanService);
+  private categoryExpenseService = inject(ExpenseService);
 
   private readonly loading = new BehaviorSubject<boolean>(false);
   private readonly errorMessage = new BehaviorSubject<string>('');
+  private readonly usageRefresh = new BehaviorSubject<void>(undefined);
+  readonly usageCounts$ = new BehaviorSubject<Record<string, number>>({});
 
   readonly vm$ = combineLatest({
     response: this.response$,
@@ -106,6 +111,7 @@ export class CategoriesComponent
 
   override ngOnInit() {
     this.setupSubscription();
+    this.setupUsageCounts();
     this.checkPlanLimits();
   }
 
@@ -117,8 +123,37 @@ export class CategoriesComponent
       // Force a refresh by re-emitting the current params
       const currentParams = this.#paramsSub.getValue();
       this.#paramsSub.next({ ...currentParams });
+      this.usageRefresh.next();
     }
     this.hasEntered = true;
+  }
+
+  private setupUsageCounts(): void {
+    merge(this.usageRefresh, this.categoryExpenseService.expenseReconciled$)
+      .pipe(
+        takeUntil(this.destroy$),
+        switchMap(() =>
+          this.categoryExpenseService
+            .getCategoryUsageCounts()
+            .pipe(catchError(() => of({} as Record<string, number>)))
+        )
+      )
+      .subscribe((counts) => {
+        this.usageCounts$.next(counts);
+        this.cdr.markForCheck();
+      });
+  }
+
+  usageCount(categoryId: string | undefined): number {
+    return this.usageCounts$.value[String(categoryId ?? '')] || 0;
+  }
+
+  usageLabelKey(count: number): string {
+    return count === 1
+      ? 'CATEGORIES.USAGE_ONE'
+      : count === 2
+      ? 'CATEGORIES.USAGE_TWO'
+      : 'CATEGORIES.USAGE_OTHER';
   }
 
   private checkPlanLimits() {

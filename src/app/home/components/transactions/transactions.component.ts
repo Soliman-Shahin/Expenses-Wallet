@@ -153,6 +153,10 @@ export class TransactionsComponent implements OnChanges, OnDestroy {
           this.cdr.markForCheck();
         },
       });
+
+    this.expenseSvc.expenseReconciled$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.refreshTransactions());
   }
 
   get locale(): string {

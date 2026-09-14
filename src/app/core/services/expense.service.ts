@@ -43,6 +43,7 @@ export class ExpenseService {
     this.auth.userChanges.subscribe(() => {
       this.expensesCache$ = null;
       this.totalsCache.clear();
+      this.expenseReconciledSubject.next();
     });
   }
 
@@ -50,6 +51,24 @@ export class ExpenseService {
     this.expensesCache$ = null;
     this.totalsCache.clear();
     this.expenseReconciledSubject.next();
+  }
+
+  /** Returns counts over the owner's full merged expense dataset, not a filtered page. */
+  getCategoryUsageCounts(): Observable<Record<string, number>> {
+    return this.getExpenses().pipe(
+      map((expenses) => {
+        const counts: Record<string, number> = {};
+        for (const expense of expenses) {
+          if ((expense as any)._isDeleted) continue;
+          const category = expense.category as any;
+          const categoryId =
+            typeof category === 'object' ? category?._id : category;
+          if (categoryId)
+            counts[String(categoryId)] = (counts[String(categoryId)] || 0) + 1;
+        }
+        return counts;
+      })
+    );
   }
 
   getExpenses(params?: any, forceRefresh = false): Observable<Expense[]> {
@@ -80,7 +99,9 @@ export class ExpenseService {
               );
               const pendingActive = pendingLocal.filter((e) => !e._isDeleted);
               const pendingDeletes = new Set(
-                pendingLocal.filter((e) => e._isDeleted).map((e) => e._id)
+                pendingLocal
+                  .filter((e) => e._isDeleted)
+                  .flatMap((e) => [e._id, e._clientId].filter(Boolean))
               );
 
               const apiIds = new Set(expenses.map((e) => e._id));
@@ -157,7 +178,9 @@ export class ExpenseService {
           );
           return this.offlineStorage.getEntities<any>('expense').pipe(
             map((localExpenses) => {
-              let filtered = localExpenses as Expense[];
+              let filtered = (localExpenses as Expense[]).filter(
+                (e: any) => !e._isDeleted
+              );
               if (params?.startDate && params?.endDate) {
                 const start = new Date(params.startDate).getTime();
                 const end = new Date(params.endDate).getTime();
@@ -200,7 +223,9 @@ export class ExpenseService {
               const pendingActive = pendingLocal.filter((e) => !e._isDeleted);
               // Find pending deletes
               const pendingDeletes = new Set(
-                pendingLocal.filter((e) => e._isDeleted).map((e) => e._id)
+                pendingLocal
+                  .filter((e) => e._isDeleted)
+                  .flatMap((e) => [e._id, e._clientId].filter(Boolean))
               );
 
               // Filter out API items that were deleted locally but not yet synced
@@ -263,7 +288,13 @@ export class ExpenseService {
           this.expensesCache$ = null; // clear cache so next online call refetches
           return this.offlineStorage
             .getEntities<any>('expense')
-            .pipe(map((localExpenses) => localExpenses as Expense[]));
+            .pipe(
+              map((localExpenses) =>
+                (localExpenses as Expense[]).filter(
+                  (expense: any) => !expense._isDeleted
+                )
+              )
+            );
         }),
         // Do not cache error emissions
         shareReplay({ bufferSize: 1, refCount: true })
@@ -316,6 +347,7 @@ export class ExpenseService {
             _syncStatus: SyncStatus.SYNCED,
           } as any)
           .subscribe();
+        this.expenseReconciledSubject.next();
       }),
       catchError(() => {
         // 🔌 API failed while trying (might have gone offline mid-request)
@@ -351,6 +383,7 @@ export class ExpenseService {
             _syncStatus: SyncStatus.SYNCED,
           } as any)
           .subscribe();
+        this.expenseReconciledSubject.next();
       }),
       catchError(() => {
         console.warn(
@@ -371,6 +404,7 @@ export class ExpenseService {
           this.expensesCache$ = null;
           this.totalsCache.clear();
           invalidateHttpCache('/expenses');
+          this.expenseReconciledSubject.next();
         }),
         map(() => ({ success: true, offline: true }))
       );
@@ -383,6 +417,7 @@ export class ExpenseService {
         invalidateHttpCache('/expenses');
         // Also mark as deleted in local storage
         this.offlineStorage.deleteEntity('expense', id).subscribe();
+        this.expenseReconciledSubject.next();
       }),
       catchError(() => {
         console.warn(
@@ -393,6 +428,7 @@ export class ExpenseService {
             this.expensesCache$ = null;
             this.totalsCache.clear();
             invalidateHttpCache('/expenses');
+            this.expenseReconciledSubject.next();
           }),
           map(() => ({ success: true, offline: true }))
         );
@@ -453,6 +489,7 @@ export class ExpenseService {
         this.expensesCache$ = null;
         this.totalsCache.clear();
         invalidateHttpCache('/expenses');
+        this.expenseReconciledSubject.next();
         console.log(
           `📴 [ExpenseService] Saved offline (${type}):`,
           offlineEntity._id

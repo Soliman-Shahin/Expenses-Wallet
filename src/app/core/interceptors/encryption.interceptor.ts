@@ -13,7 +13,16 @@ import { environment } from 'src/environments/environment';
 
 const SENSITIVE_FIELDS = ['id', '_id'];
 
-function shouldEncrypt(request: HttpRequest<unknown>, encryptionService: EncryptionAdvancedService): boolean {
+function shouldEncrypt(
+  request: HttpRequest<unknown>,
+  encryptionService: EncryptionAdvancedService
+): boolean {
+  // Sync uses HTTPS plus JWT/owner-scoped authorization as its transport
+  // boundary. Its durable queue contains plaintext domain entities; do not
+  // pass their identities through the browser-embedded temporary key.
+  if (request.url.includes('/sync/')) {
+    return false;
+  }
   if (!encryptionService.isEncryptionEnabled()) {
     return false;
   }

@@ -16,6 +16,25 @@ export class CategoryService {
   private offlineStorage = inject(OfflineStorageService);
   private connectionService = inject(ConnectionService);
 
+  private sortCategories(categories: Category[]): Category[] {
+    return [...categories].sort((a, b) => {
+      const orderA = Number(a.order);
+      const orderB = Number(b.order);
+      const hasOrderA = Number.isFinite(orderA);
+      const hasOrderB = Number.isFinite(orderB);
+      if (hasOrderA && hasOrderB && orderA !== orderB) return orderA - orderB;
+      if (hasOrderA !== hasOrderB) return hasOrderA ? -1 : 1;
+      const titleCompare = String(a.title ?? '').localeCompare(
+        String(b.title ?? ''),
+        undefined,
+        { sensitivity: 'base' }
+      );
+      return (
+        titleCompare || String(a._id ?? '').localeCompare(String(b._id ?? ''))
+      );
+    });
+  }
+
   getCategories(
     params: CategoryParams,
     forceRefresh = false
@@ -95,7 +114,10 @@ export class CategoryService {
                   return c;
                 });
 
-              const merged = [...uniquePending, ...filteredApi] as Category[];
+              const merged = this.sortCategories([
+                ...uniquePending,
+                ...filteredApi,
+              ] as Category[]);
 
               return {
                 data: merged,
@@ -129,7 +151,8 @@ export class CategoryService {
                   c.title?.toLowerCase().includes(q)
                 );
               }
-              return { data: filtered, total: filtered.length };
+              const sorted = this.sortCategories(filtered as Category[]);
+              return { data: sorted, total: sorted.length };
             })
           );
         })
