@@ -138,10 +138,10 @@ export class CategoryService {
           }
         }),
         map((result: any) => ({ data: result.data, total: result.total })),
-        catchError(() => {
-          console.warn(
-            '⚠️ [CategoryService] API failed, loading from offline storage'
-          );
+        catchError((error) => {
+          if (!this.shouldQueueOffline(error)) {
+            return throwError(() => error);
+          }
           return this.offlineStorage.getEntities<any>('category').pipe(
             map((categories) => {
               let filtered = categories.filter(
@@ -180,7 +180,13 @@ export class CategoryService {
 
     return this.apiService
       .get<Category>(`/categories/${id}`)
-      .pipe(catchError(() => offlineFetch$));
+      .pipe(
+        catchError((error) =>
+          this.shouldQueueOffline(error)
+            ? offlineFetch$
+            : throwError(() => error)
+        )
+      );
   }
 
   createCategory(categoryData: Partial<Category>): Observable<Category> {
