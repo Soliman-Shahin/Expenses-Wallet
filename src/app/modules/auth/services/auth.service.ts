@@ -383,7 +383,9 @@ export class AuthService {
     }
   }
   handleOAuthCallback(payload: any): Observable<void> {
-    const user = payload?.user;
+    const user = payload?.user
+      ? { ...payload.user, ...(String(payload.user.image || '').startsWith('data:') ? { image: undefined } : {}) }
+      : null;
     const accessToken = payload?.tokens?.accessToken || payload?.accessToken;
     const refreshToken = payload?.tokens?.refreshToken || payload?.refreshToken;
     if (!user || !accessToken || !refreshToken)

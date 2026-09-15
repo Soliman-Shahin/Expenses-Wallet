@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-auth-callback',
@@ -23,6 +24,7 @@ import { AuthService } from '../../services/auth.service';
   standalone: true
 })
 export class AuthCallbackComponent implements OnInit {
+  private completed = false;
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -30,26 +32,42 @@ export class AuthCallbackComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.route.queryParams.subscribe(params => {
-      const data = params['data'];
+    this.route.queryParams.pipe(take(1)).subscribe(params => {
+      const data = this.readCallbackData(params['data']);
       if (data) {
         try {
-          const payload = JSON.parse(atob(decodeURIComponent(data)));
+          const payload = JSON.parse(atob(data));
           
           this.authService.handleOAuthCallback(payload).subscribe({
             next: () => {
-              this.router.navigateByUrl('/home');
+              this.completed = true;
+              void this.router.navigateByUrl('/home', { replaceUrl: true });
             },
             error: () => {
-              this.router.navigateByUrl('/auth/login?error=auth_failed');
+              this.fail('auth_failed');
             }
           });
         } catch (e) {
-          this.router.navigateByUrl('/auth/login?error=invalid_data');
+          this.fail('invalid_data');
         }
       } else {
-        this.router.navigateByUrl('/auth/login');
+        this.fail('auth_failed');
       }
     });
+  }
+
+  private readCallbackData(queryData: unknown): string | null {
+    if (typeof queryData === 'string' && queryData) return queryData;
+    const searchData = new URLSearchParams(window.location.search).get('data');
+    if (searchData) return searchData;
+    const marker = '/auth/callbackdata=';
+    const index = window.location.href.indexOf(marker);
+    return index >= 0 ? window.location.href.slice(index + marker.length) : null;
+  }
+
+  private fail(error: string): void {
+    if (this.completed) return;
+    this.completed = true;
+    void this.router.navigate(['/auth/login'], { queryParams: { error }, replaceUrl: true });
   }
 }
