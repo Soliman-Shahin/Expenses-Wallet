@@ -51,12 +51,7 @@ export class OfflineStorageService {
     entity: T,
     operationType: 'CREATE' | 'UPDATE' = 'UPDATE'
   ): Observable<T> {
-    return from(this.saveEntityAsync(entityType, entity, operationType)).pipe(
-      catchError((error) => {
-        console.error(`Error saving ${entityType}:`, error);
-        return of(entity);
-      })
-    );
+    return from(this.saveEntityAsync(entityType, entity, operationType));
   }
 
   /** Persist a server-confirmed entity without creating a new sync operation. */
@@ -127,13 +122,16 @@ export class OfflineStorageService {
       };
     }
 
-    await table.put(updatedEntity);
-    await this.addToSyncQueueAsync(
-      operationType,
-      entityType,
-      entity._id,
-      updatedEntity
-    );
+    await this.db.transaction('rw', table, this.db.syncOperations, async () => {
+      await table.put(updatedEntity);
+      await this.addToSyncQueueAsync(
+        operationType,
+        entityType,
+        entity._id,
+        updatedEntity
+      );
+    });
+    await this.loadSyncQueue();
     return updatedEntity;
   }
 
@@ -200,7 +198,12 @@ export class OfflineStorageService {
     entityType: string,
     entities: T[]
   ): Observable<boolean> {
-    return from(this.db.getTable(entityType).bulkPut(entities)).pipe(
+    const ownerUserId = this.currentOwnerId();
+    return from(
+      this.db
+        .getTable(entityType)
+        .bulkPut(entities.map((e) => ({ ...e, ownerUserId })))
+    ).pipe(
       map(() => true),
       catchError((error) => {
         console.error(`Error replacing ${entityType} entities:`, error);
@@ -280,7 +283,13 @@ export class OfflineStorageService {
 
       if (serverEntity._isDeleted) {
         if (localEntity) {
-          await table.delete(localEntity._id);
+          // Keep a durable tombstone so stale pull/cache data cannot resurrect it.
+          await table.put({
+            ...localEntity,
+            _isDeleted: true,
+            _syncStatus: SyncStatus.SYNCED,
+            ownerUserId,
+          });
         }
         continue;
       }
@@ -401,8 +410,16 @@ export class OfflineStorageService {
   }
 
   removeFromSyncQueue(operationId: string): void {
+    const ownerUserId = this.tokenService.getUserId();
+    if (!ownerUserId) return;
     this.db.syncOperations
-      .delete(operationId)
+      .where('[ownerUserId+status]')
+      .anyOf([
+        [String(ownerUserId), SyncStatus.PENDING],
+        [String(ownerUserId), SyncStatus.ERROR],
+      ])
+      .filter((op) => op.id === operationId)
+      .delete()
       .then(() => this.loadSyncQueue())
       .catch(console.error);
   }
@@ -411,8 +428,13 @@ export class OfflineStorageService {
     operationId: string,
     updates: Partial<SyncOperation>
   ): void {
+    const ownerUserId = this.tokenService.getUserId();
+    if (!ownerUserId) return;
     this.db.syncOperations
-      .update(operationId, updates)
+      .where('ownerUserId')
+      .equals(String(ownerUserId))
+      .filter((op) => op.id === operationId)
+      .modify(updates)
       .then(() => this.loadSyncQueue())
       .catch(console.error);
   }
@@ -509,11 +531,12 @@ export class OfflineStorageService {
   // ==================== BACKUP & RESTORE ====================
 
   createBackup(): Observable<OfflineData> {
+    const ownerUserId = this.currentOwnerId();
     return from(
       Promise.all([
-        this.db.expenses.toArray(),
-        this.db.categories.toArray(),
-        this.db.users.toArray(),
+        this.db.expenses.where('ownerUserId').equals(ownerUserId).toArray(),
+        this.db.categories.where('ownerUserId').equals(ownerUserId).toArray(),
+        this.db.users.where('_id').equals(ownerUserId).toArray(),
       ])
     ).pipe(
       map(([expenses, categories, users]) => {
@@ -529,22 +552,27 @@ export class OfflineStorageService {
   }
 
   restoreBackup(backup: OfflineData): Observable<boolean> {
+    const ownerUserId = this.currentOwnerId();
+    const expenses = backup.expenses.map((e) => ({ ...e, ownerUserId }));
+    const categories = backup.categories.map((c) => ({ ...c, ownerUserId }));
     return from(
-      Promise.all([
-        this.db.expenses
-          .clear()
-          .then(() => this.db.expenses.bulkPut(backup.expenses)),
-        this.db.categories
-          .clear()
-          .then(() => this.db.categories.bulkPut(backup.categories)),
-        this.db.users
-          .clear()
-          .then(() =>
-            backup.user
-              ? this.db.users.put(backup.user).then(() => {})
-              : Promise.resolve()
-          ),
-      ])
+      this.db.transaction(
+        'rw',
+        this.db.expenses,
+        this.db.categories,
+        async () => {
+          await this.db.expenses
+            .where('ownerUserId')
+            .equals(ownerUserId)
+            .delete();
+          await this.db.categories
+            .where('ownerUserId')
+            .equals(ownerUserId)
+            .delete();
+          await this.db.expenses.bulkPut(expenses);
+          await this.db.categories.bulkPut(categories);
+        }
+      )
     ).pipe(
       map(() => true),
       catchError((error) => {

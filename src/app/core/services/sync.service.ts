@@ -23,6 +23,7 @@ import { OfflineStorageService } from './offline-storage.service';
 import { ConnectionService } from './connection.service';
 import { ExpenseService } from './expense.service';
 import { environment } from 'src/environments/environment';
+import { TokenService } from 'src/app/modules/auth/services/token.service';
 import {
   SyncStatus,
   SyncMetadata,
@@ -48,6 +49,7 @@ export class SyncService {
   private offlineStorage = inject(OfflineStorageService);
   private connectionService = inject(ConnectionService);
   private expenseService = inject(ExpenseService);
+  private tokenService = inject(TokenService);
 
   // ==================== CONFIGURATION ====================
 
@@ -106,6 +108,7 @@ export class SyncService {
 
   private isOnline = false;
   private syncInProgress = false;
+  private syncOwnerId: string | null = null;
   private autoSyncSubscription?: Subscription;
 
   /** Key used to persist lastSyncTime in localStorage as fallback */
@@ -254,6 +257,11 @@ export class SyncService {
 
     // Start sync
     this.syncInProgress = true;
+    this.syncOwnerId = String(this.tokenService.getUserId() || '');
+    if (!this.syncOwnerId) {
+      this.syncInProgress = false;
+      return of(false);
+    }
     this.updateSyncMetadata({ isSyncing: true });
     this.updateSyncProgress({
       current: 0,
@@ -269,6 +277,9 @@ export class SyncService {
     // Step 1: Push local pending changes to server
     return this.pushLocalChanges().pipe(
       tap(() => {
+        if (this.syncOwnerId !== String(this.tokenService.getUserId() || '')) {
+          throw new Error('SYNC_OWNER_CHANGED');
+        }
         this.updateSyncProgress({
           current: 33,
           percentage: 33,
@@ -325,8 +336,12 @@ export class SyncService {
         return of(false);
       }),
       finalize(() => {
+        const ownerStillActive =
+          !!this.syncOwnerId &&
+          this.syncOwnerId === String(this.tokenService.getUserId() || '');
         this.syncInProgress = false;
-        this.updateSyncMetadata({ isSyncing: false });
+        this.syncOwnerId = null;
+        if (ownerStillActive) this.updateSyncMetadata({ isSyncing: false });
         console.log('🏁 Sync process finished');
       })
     );
@@ -437,10 +452,16 @@ export class SyncService {
           return of(true);
         }
 
-        console.log(`📤 Pushing ${operations.length} pending operations...`);
+        const batch = operations
+          .sort(
+            (a, b) =>
+              new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+          )
+          .slice(0, this.syncConfig.batchSize);
+        console.log(`📤 Pushing ${batch.length} pending operations...`);
 
         // Convert operations to entities format
-        const entities = operations.map((op) => ({
+        const entities = batch.map((op) => ({
           _id: op.entityId,
           _entityType: op.entityType,
           _lastModified: op.timestamp,
@@ -465,7 +486,13 @@ export class SyncService {
             from(
               Promise.all(
                 result?.success
-                  ? operations.map(async (op) => {
+                  ? batch.map(async (op) => {
+                      if (
+                        this.syncOwnerId !==
+                        String(this.tokenService.getUserId() || '')
+                      ) {
+                        throw new Error('SYNC_OWNER_CHANGED');
+                      }
                       const serverId = result?.idMap?.[op.entityId];
                       if (serverId) {
                         const reconciled = await firstValueFrom(
@@ -495,7 +522,7 @@ export class SyncService {
                   error.reason,
                 ])
               );
-              operations.forEach((op) => {
+              batch.forEach((op) => {
                 const mappedServerId = result?.idMap?.[op.entityId];
                 if (
                   op.type === 'CREATE' &&
@@ -526,7 +553,14 @@ export class SyncService {
               });
             }
           }),
-          map((result) => !!result?.success),
+          switchMap((result) => {
+            if (!result?.success) return of(false);
+            // Continue until the owner-scoped queue is drained; a single configured
+            // batch must never make later operations wait for a future scheduler tick.
+            return batch.length < operations.length
+              ? this.pushLocalChanges()
+              : of(true);
+          }),
           catchError((error) => {
             console.error('❌ Push error:', error);
             this.updateSyncProgress({
