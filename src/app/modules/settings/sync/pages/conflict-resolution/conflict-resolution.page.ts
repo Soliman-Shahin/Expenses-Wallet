@@ -1,11 +1,11 @@
 import { Component, OnInit, inject } from '@angular/core';
 
 import { SyncService } from 'src/app/core/services/sync.service';
-import { OfflineStorageService } from 'src/app/core/services/offline-storage.service';
 import { ConflictResolution } from 'src/app/shared/models/sync.model';
 import { BaseComponent } from 'src/app/shared/base';
 import { IonicModule } from '@ionic/angular';
 import { TranslateModule } from '@ngx-translate/core';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-conflict-resolution',
@@ -16,7 +16,6 @@ import { TranslateModule } from '@ngx-translate/core';
 })
 export class ConflictResolutionPage extends BaseComponent implements OnInit {
   private syncService = inject(SyncService);
-  private offlineStorage = inject(OfflineStorageService);
 
   conflicts: ConflictResolution[] = [];
 
@@ -25,28 +24,18 @@ export class ConflictResolutionPage extends BaseComponent implements OnInit {
   }
 
   private loadConflicts(): void {
-    // In a real implementation, you would get conflicts from the sync service
-    // For now, we'll simulate some conflicts
-    this.conflicts = [
-      {
-        entityId: '1',
-        entityType: 'expense',
-        localData: {
-          description: 'Coffee',
-          amount: 5.5,
-          date: '2024-01-15',
-          category: 'Food',
+    this.syncService
+      .getConflicts()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (conflicts) => {
+          this.conflicts = conflicts as ConflictResolution[];
+          this.cdr.markForCheck();
         },
-        serverData: {
-          description: 'Coffee Shop',
-          amount: 5.5,
-          date: '2024-01-15',
-          category: 'Food & Drinks',
+        error: () => {
+          this.toastService.presentErrorToast('bottom', 'SYNC.RESOLVE_ERROR');
         },
-        resolution: 'local',
-        timestamp: new Date(),
-      },
-    ];
+      });
   }
 
   trackByConflictId(index: number, conflict: ConflictResolution): string {
@@ -99,8 +88,8 @@ export class ConflictResolutionPage extends BaseComponent implements OnInit {
     conflict: ConflictResolution,
     resolution: 'local' | 'server'
   ): void {
-    // Highlight the selected resolution
-    console.log(`Selected ${resolution} for conflict ${conflict.entityId}`);
+    conflict.resolution = resolution;
+    this.cdr.markForCheck();
   }
 
   async showMergeDialog(conflict: ConflictResolution): Promise<void> {
@@ -155,8 +144,7 @@ export class ConflictResolutionPage extends BaseComponent implements OnInit {
           this.toastService.presentErrorToast('bottom', 'SYNC.RESOLVE_FAILED');
         }
       },
-      error: (error: any) => {
-        console.error('Conflict resolution error:', error);
+      error: () => {
         this.toastService.presentErrorToast('bottom', 'SYNC.RESOLVE_ERROR');
       },
     });

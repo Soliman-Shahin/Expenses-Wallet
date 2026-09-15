@@ -14,6 +14,7 @@ import { SyncConfig } from 'src/app/shared/models/sync.model';
 import { BaseComponent } from 'src/app/shared/base';
 import { AsyncPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { TranslateModule } from '@ngx-translate/core';
 import { RouterModule } from '@angular/router';
 
@@ -267,14 +268,9 @@ export class SyncSettingsPage extends BaseComponent implements OnInit {
       ],
     });
     this.savedFormValue = this.formValueKey();
-    this.syncForm.valueChanges.subscribe(() => {
+    this.syncForm.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.hasUnsavedChanges = this.formValueKey() !== this.savedFormValue;
     });
-  }
-
-  private loadCurrentSettings(): void {
-    const config = this.syncService.getConfig();
-    this.syncForm.patchValue(config);
   }
 
   saveSettings(): void {
@@ -317,8 +313,7 @@ export class SyncSettingsPage extends BaseComponent implements OnInit {
           this.toastService.presentErrorToast('bottom', 'SYNC.SYNC_FAILED');
         }
       },
-      error: (error) => {
-        console.error('Sync error:', error);
+      error: () => {
         this.toastService.presentErrorToast('bottom', 'SYNC.SYNC_ERROR');
       },
     });
@@ -367,10 +362,9 @@ export class SyncSettingsPage extends BaseComponent implements OnInit {
             this.toastService.presentErrorToast('bottom', 'SYNC.CLEAR_FAILED');
           }
         },
-        error: (error) => {
+        error: () => {
           loading.dismiss();
           this.clearingOfflineData = false;
-          console.error('Clear data error:', error);
           this.toastService.presentErrorToast('bottom', 'SYNC.CLEAR_ERROR');
         },
       });
@@ -407,17 +401,15 @@ export class SyncSettingsPage extends BaseComponent implements OnInit {
               'bottom',
               'SYNC.BACKUP_CREATED'
             );
-          } catch (e) {
-            console.error('Error downloading backup:', e);
+          } catch {
             this.toastService.presentErrorToast('bottom', 'SYNC.BACKUP_ERROR');
           }
         } else {
           this.toastService.presentErrorToast('bottom', 'SYNC.BACKUP_FAILED');
         }
       },
-      error: (error) => {
+      error: () => {
         loading.dismiss();
-        console.error('Backup error:', error);
         this.toastService.presentErrorToast('bottom', 'SYNC.BACKUP_ERROR');
       },
     });
