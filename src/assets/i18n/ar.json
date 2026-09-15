@@ -79,6 +79,7 @@
     "INCOME_VS_EXPENSES_CHART": "مخطط شريطي يوضح الدخل مقابل المصروفات",
     "INCOME_VS_EXPENSES_DESC": "مقارنة بين إجمالي الدخل والمصروفات للفترة المحددة",
     "EXPENSE_BY_CATEGORY": "المصروفات حسب الفئة",
+    "WIDGET_UNAVAILABLE": "هذا القسم غير متاح مؤقتًا.",
     "EXPENSE_BY_CATEGORY_CHART": "مخطط دائري يوضح توزيع المصروفات حسب الفئة",
     "MONTHLY_EXPENSES": "اتجاه المصروفات الشهرية",
     "MONTHLY_EXPENSES_CHART": "مخطط خطي يوضح اتجاه المصروفات الشهرية",

@@ -566,6 +566,9 @@ export class HomePageComponent
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
         this.summaryRefresh$.next(this.summaryRefresh$.value + 1);
+        this.chartsMonthSelection$.next({
+          ...this.chartsMonthSelection$.value,
+        });
         this.cdr.markForCheck();
       });
   }

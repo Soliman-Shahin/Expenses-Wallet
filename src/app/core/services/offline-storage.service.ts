@@ -122,15 +122,24 @@ export class OfflineStorageService {
       };
     }
 
-    await this.db.transaction('rw', table, this.db.syncOperations, async () => {
-      await table.put(updatedEntity);
-      await this.addToSyncQueueAsync(
-        operationType,
-        entityType,
-        entity._id,
-        updatedEntity
+    try {
+      await this.db.transaction(
+        'rw',
+        table,
+        this.db.syncOperations,
+        async () => {
+          await table.put(updatedEntity);
+          await this.addToSyncQueueAsync(
+            operationType,
+            entityType,
+            entity._id,
+            updatedEntity
+          );
+        }
       );
-    });
+    } catch (error: any) {
+      throw error;
+    }
     await this.loadSyncQueue();
     return updatedEntity;
   }
@@ -153,12 +162,9 @@ export class OfflineStorageService {
   getEntities<T extends SyncEntity>(entityType: string): Observable<T[]> {
     const ownerUserId = this.tokenService.getUserId();
     if (!ownerUserId) return of([]);
+    const table = this.db.getTable(entityType);
     return from(
-      this.db
-        .getTable(entityType)
-        .where('ownerUserId')
-        .equals(String(ownerUserId))
-        .toArray()
+      table.where('ownerUserId').equals(String(ownerUserId)).toArray()
     ).pipe(
       tap((rows: any[]) => {
         if (entityType.toLowerCase().startsWith('categor')) {
@@ -359,6 +365,7 @@ export class OfflineStorageService {
       entity._syncStatus = SyncStatus.PENDING;
       await table.put(entity);
       await this.addToSyncQueueAsync('DELETE', entityType, id, entity);
+      await this.loadSyncQueue();
       return true;
     }
     return false;
@@ -380,9 +387,9 @@ export class OfflineStorageService {
     entityId: string,
     data: any
   ): void {
-    this.addToSyncQueueAsync(type, entityType, entityId, data).catch(
-      console.error
-    );
+    this.addToSyncQueueAsync(type, entityType, entityId, data)
+      .catch(console.error)
+      .finally(() => this.loadSyncQueue());
   }
 
   private async addToSyncQueueAsync(
@@ -406,7 +413,6 @@ export class OfflineStorageService {
     };
 
     await this.db.syncOperations.put(operation);
-    await this.loadSyncQueue();
   }
 
   removeFromSyncQueue(operationId: string): void {

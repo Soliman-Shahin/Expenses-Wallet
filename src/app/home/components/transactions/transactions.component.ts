@@ -22,6 +22,8 @@ import {
   switchMap,
   takeUntil,
   debounceTime,
+  catchError,
+  EMPTY,
 } from 'rxjs';
 import { Expense } from 'src/app/shared/models/expense.model';
 import { ProfileService } from 'src/app/modules/profile/services/profile.service';
@@ -117,7 +119,14 @@ export class TransactionsComponent implements OnChanges, OnDestroy {
               }
               if (params.limit) queryParams.limit = params.limit;
 
-              return this.expenseSvc.getExpenses(queryParams, true); // forceRefresh = true
+              return this.expenseSvc.getExpenses(queryParams, true).pipe(
+                catchError(() => {
+                  this.loadError = 'Failed to load transactions';
+                  this.txLoading = false;
+                  this.cdr.markForCheck();
+                  return EMPTY;
+                })
+              );
             })
           )
         ),

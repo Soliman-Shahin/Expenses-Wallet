@@ -78,6 +78,7 @@
     "INCOME_VS_EXPENSES_CHART": "Bar chart showing income versus expenses",
     "INCOME_VS_EXPENSES_DESC": "Comparison of total income and expenses for the selected period",
     "EXPENSE_BY_CATEGORY": "Expenses by category",
+    "WIDGET_UNAVAILABLE": "This section is temporarily unavailable.",
     "EXPENSE_BY_CATEGORY_CHART": "Pie chart showing expense distribution by category",
     "MONTHLY_EXPENSES": "Monthly expenses trend",
     "MONTHLY_EXPENSES_CHART": "Line chart showing monthly expense trends",

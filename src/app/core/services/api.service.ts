@@ -39,10 +39,6 @@ export class ApiService {
 
     // Do not send user id as a custom header; JWT already carries the subject
 
-    if (!environment.production) {
-      console.log('Request headers:', headers);
-    }
-
     return headers;
   }
 
@@ -238,7 +234,18 @@ export class ApiService {
     } else if (error.message) {
       message = error.message;
     }
-    // Optionally log or display error here
-    return throwError(() => new Error(message));
+    // Preserve the transport status used by offline-aware services while
+    // keeping the normalized error free of response bodies or credentials.
+    const normalizedError = new Error(message);
+    const status =
+      typeof error?.status === 'number'
+        ? error.status
+        : error?.name === 'TimeoutError'
+        ? 0
+        : undefined;
+    if (typeof status === 'number') {
+      (normalizedError as Error & { status?: number }).status = status;
+    }
+    return throwError(() => normalizedError);
   }
 }
