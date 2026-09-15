@@ -9,9 +9,13 @@ import {
 import { ActivatedRoute } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { finalize } from 'rxjs';
-import { AppNotification } from 'src/app/core/models/app-notification.model';
+import {
+  AppNotification,
+  notificationTypePresentation,
+} from 'src/app/core/models/app-notification.model';
 import { ApiService } from 'src/app/core/services/api.service';
 import { SkeletonBlockComponent } from 'src/app/shared/ui/skeleton-block/skeleton-block.component';
+import { NotificationService } from 'src/app/core/services/notification.service';
 
 @Component({
   selector: 'app-notification-detail',
@@ -26,7 +30,7 @@ import { SkeletonBlockComponent } from 'src/app/shared/ui/skeleton-block/skeleto
         <ion-title>{{ 'MOBILE_UI.NOTIFICATION' | translate }}</ion-title>
       </ion-toolbar>
     </ion-header>
-    <ion-content class="ion-padding">
+    <ion-content class="ion-padding notification-detail-content">
       <div
         *ngIf="loading"
         role="status"
@@ -36,16 +40,28 @@ import { SkeletonBlockComponent } from 'src/app/shared/ui/skeleton-block/skeleto
       >
         <app-skeleton-block variant="detail"></app-skeleton-block>
       </div>
-      <ion-card *ngIf="notification as item">
+      <ion-card class="notification-detail-card" *ngIf="notification as item">
         <ion-card-header>
-          <ion-card-title>{{ item.title }}</ion-card-title>
+          <div
+            class="detail-type"
+            [class]="'detail-type tone-' + typePresentation(item.type).tone"
+          >
+            <ion-icon
+              [name]="typePresentation(item.type).icon"
+              aria-hidden="true"
+            ></ion-icon
+            ><span>{{ typePresentation(item.type).labelKey | translate }}</span>
+          </div>
+          <ion-card-title dir="auto">{{ item.title }}</ion-card-title>
           <ion-card-subtitle
             ><bdi>{{
               item.createdAt | date : 'medium'
             }}</bdi></ion-card-subtitle
           >
         </ion-card-header>
-        <ion-card-content>{{ item.message }}</ion-card-content>
+        <ion-card-content
+          ><p dir="auto">{{ item.message }}</p></ion-card-content
+        >
       </ion-card>
       <ion-text color="danger" role="alert" *ngIf="error">{{
         error | translate
@@ -59,10 +75,12 @@ export class NotificationDetailComponent implements OnInit {
   notification: AppNotification | null = null;
   loading = true;
   error = '';
+  typePresentation = notificationTypePresentation;
 
   constructor(
     private route: ActivatedRoute,
     private apiService: ApiService,
+    private notificationService: NotificationService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -72,6 +90,13 @@ export class NotificationDetailComponent implements OnInit {
       this.loading = false;
       this.error = 'MOBILE_UI.NOT_FOUND';
       return;
+    }
+
+    const cached = this.notificationService.getCached(id);
+    if (cached) {
+      this.notification = cached;
+      this.loading = false;
+      this.cdr.markForCheck();
     }
 
     this.apiService
@@ -88,6 +113,9 @@ export class NotificationDetailComponent implements OnInit {
       .subscribe({
         next: (notification) => {
           this.notification = notification;
+          this.notificationService
+            .markRead(id)
+            .subscribe({ error: () => undefined });
           this.apiService
             .patch(`/notifications/${id}/read`, {})
             .subscribe({ error: () => undefined });

@@ -70,6 +70,16 @@
       >
         <ion-icon [name]="item.icon" slot="start"></ion-icon>
         <ion-label>{{ item.title | translate }}</ion-label>
+        @if (item.link === '/notifications' && (notificationUnreadCount$ |
+        async); as unread) {
+        <ion-badge
+          slot="end"
+          [attr.aria-label]="
+            ('SETTINGS.NOTIFICATIONS' | translate) + ': ' + unread
+          "
+          >{{ unread > 99 ? "99+" : unread }}</ion-badge
+        >
+        }
       </ion-item>
       }
     </ion-list>

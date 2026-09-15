@@ -1,5 +1,11 @@
 {
   "MOBILE_UI": {
+    "MARK_ALL_READ": "Mark all as read",
+    "MARK_ALL_READ_FAILED": "Could not mark notifications as read. Try again.",
+    "TODAY": "Today",
+    "YESTERDAY": "Yesterday",
+    "EARLIER": "Earlier",
+    "LOADING_OLDER": "Loading older notifications…",
     "NO_PLANS": "No subscription plans available at the moment.",
     "USAGE_UNAVAILABLE": "Unable to load usage statistics.",
     "PROFILE_ERROR": "Could not refresh your profile. Please try again later.",
@@ -319,6 +325,11 @@
     "THEME_AUTO": "Auto",
     "THEME_CHANGED": "Theme changed successfully",
     "NOTIFICATIONS": "Notifications",
+    "NOTIFICATION_TYPE_INFO": "Info",
+    "NOTIFICATION_TYPE_SUCCESS": "Success",
+    "NOTIFICATION_TYPE_WARNING": "Warning",
+    "NOTIFICATION_TYPE_ERROR": "Error",
+    "NOTIFICATION_TYPE_UNKNOWN": "Notification",
     "NOTIFICATIONS_DESC": "Enable push notifications",
     "NOTIFICATIONS_PERMISSION_DENIED_SHORT": "Permission denied in device settings",
     "NOTIFICATIONS_UNAVAILABLE": "Unavailable on this platform",

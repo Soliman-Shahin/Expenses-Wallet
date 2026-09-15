@@ -17,6 +17,7 @@ import { AsyncPipe } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { SyncStatusComponent } from '../../../shared/components/sync-status/sync-status.component';
 import { ProfileService } from '../../../modules/profile/services/profile.service';
+import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
   selector: 'app-side-menu',
@@ -42,6 +43,7 @@ export class SideMenuComponent
   private logoutInProgress = false;
   avatarFailed = false;
   private readonly profileService = inject(ProfileService);
+  readonly notificationUnreadCount$ = inject(NotificationService).unreadCount$;
 
   private readonly activeLink$ = this.router.events.pipe(
     filter((event): event is NavigationEnd => event instanceof NavigationEnd),

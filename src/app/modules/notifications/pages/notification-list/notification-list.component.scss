@@ -1,0 +1,110 @@
+@use "src/theme/mobile-secondary" as secondary;
+@include secondary.page;
+ion-content {
+  --background: var(--ion-background-color);
+}
+ion-refresher {
+  padding: 1rem;
+}
+ion-list {
+  background: transparent;
+  padding: 1rem;
+}
+ion-item {
+  --background: var(--ion-item-background);
+  --border-color: var(--ew-wallet-line);
+  margin: 0 0 10px;
+  border: 1px solid color-mix(in srgb, var(--ion-text-color) 9%, transparent);
+  border-radius: 16px;
+  --padding-start: 14px;
+  --inner-padding-end: 12px;
+  min-height: 78px;
+  box-shadow: var(--ew-bold-shadow, 0 4px 14px rgba(0, 0, 0, 0.04));
+}
+ion-item.unread {
+  --background: color-mix(
+    in srgb,
+    var(--ion-color-primary) 8%,
+    var(--ion-item-background)
+  );
+}
+.notification-row.unread {
+  border-inline-start: 3px solid var(--ion-color-primary);
+}
+ion-label h2 {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+ion-item > ion-icon {
+  width: 32px;
+  height: 32px;
+  padding: 7px;
+  border-radius: 11px 11px 11px 4px;
+  color: var(--ion-color-primary);
+  background: var(--ew-wallet-inset);
+}
+.tone-success > ion-icon {
+  color: var(--ion-color-success);
+}
+.tone-warning > ion-icon {
+  color: var(--ion-color-warning);
+}
+.tone-error > ion-icon {
+  color: var(--ion-color-danger);
+}
+.inbox-action-row {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 1rem;
+}
+.inbox-action-row ion-button {
+  --border-radius: 12px;
+  font-weight: 600;
+}
+.inbox-actions ion-button {
+  --border-radius: 12px;
+  font-weight: 600;
+}
+ion-label p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  margin: 4px 0;
+}
+ion-label time {
+  color: var(--ew-wallet-muted);
+  font-size: 0.78rem;
+}
+ion-badge {
+  width: 9px;
+  height: 9px;
+  min-width: 9px;
+  border-radius: 50%;
+  padding: 0;
+}
+.state {
+  min-height: 45vh;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 12px;
+  padding: 32px;
+  color: var(--ew-wallet-muted);
+  text-align: center;
+}
+.notification-skeleton { display: grid; gap: 10px; padding: 0; }
+.notification-skeleton app-skeleton-block { display: block; }
+.group-heading {
+  padding: 0 1rem;
+  color: var(--ew-text-color-secondary);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+section:first-of-type .group-heading {
+  padding-top: 4px;
+}

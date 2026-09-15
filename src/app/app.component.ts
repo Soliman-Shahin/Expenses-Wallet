@@ -23,6 +23,7 @@ import { takeUntil } from 'rxjs/operators';
 import { PushNotificationService } from './core/services/push-notification.service';
 import { ConnectionService } from './core/services/connection.service';
 import { DeviceLockService } from './core/services/device-lock.service';
+import { NotificationService } from './core/services/notification.service';
 
 @Component({
   selector: 'app-root',
@@ -47,7 +48,8 @@ export class AppComponent extends BaseComponent implements OnInit {
     private backupService: BackupService,
     private pushNotificationService: PushNotificationService,
     private connectionService: ConnectionService,
-    private deviceLockService: DeviceLockService
+    private deviceLockService: DeviceLockService,
+    private notificationService: NotificationService
   ) {
     super();
     this.translate.setDefaultLang('en');
@@ -56,6 +58,10 @@ export class AppComponent extends BaseComponent implements OnInit {
   override ngOnInit(): void {
     super.ngOnInit();
     this.connectionService.initialize();
+    this.authService.user$.pipe(takeUntil(this.destroy$)).subscribe((user) => {
+      if (user) this.notificationService.startRealtime();
+      else this.notificationService.clearForOwner();
+    });
     if (Capacitor.isNativePlatform()) {
       StatusBar.setOverlaysWebView({ overlay: true }).catch(console.warn);
     }
@@ -69,13 +75,20 @@ export class AppComponent extends BaseComponent implements OnInit {
     // Check biometric on startup
     this.checkBiometric();
     if (Capacitor.isNativePlatform()) {
-      void this.deviceLockService.listen(() => {
-        if (this.tokenService.hasRestoredSession() || this.authService.isLoggedIn) {
-          this.isLocked = true;
-          this.tokenService.requireBiometricUnlock();
-          this.cdr.markForCheck();
-        }
-      }).then((unsubscribe) => { this.deviceLockUnsubscribe = unsubscribe; });
+      void this.deviceLockService
+        .listen(() => {
+          if (
+            this.tokenService.hasRestoredSession() ||
+            this.authService.isLoggedIn
+          ) {
+            this.isLocked = true;
+            this.tokenService.requireBiometricUnlock();
+            this.cdr.markForCheck();
+          }
+        })
+        .then((unsubscribe) => {
+          this.deviceLockUnsubscribe = unsubscribe;
+        });
     }
 
     // Handle web OAuth callback after redirect

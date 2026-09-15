@@ -1,5 +1,11 @@
 {
   "MOBILE_UI": {
+    "MARK_ALL_READ": "تعليم الكل كمقروء",
+    "MARK_ALL_READ_FAILED": "تعذر تحديد الإشعارات كمقروءة. حاول مرة أخرى.",
+    "TODAY": "اليوم",
+    "YESTERDAY": "أمس",
+    "EARLIER": "سابقاً",
+    "LOADING_OLDER": "جارٍ تحميل الإشعارات الأقدم…",
     "NO_PLANS": "لا توجد خطط اشتراك متاحة حاليًا.",
     "USAGE_UNAVAILABLE": "تعذر تحميل إحصاءات الاستخدام.",
     "PROFILE_ERROR": "تعذّر تحديث الملف الشخصي. يرجى المحاولة لاحقًا.",
@@ -291,6 +297,11 @@
     "THEME_AUTO": "تلقائي",
     "THEME_CHANGED": "تم تغيير المظهر بنجاح",
     "NOTIFICATIONS": "الإشعارات",
+    "NOTIFICATION_TYPE_INFO": "معلومات",
+    "NOTIFICATION_TYPE_SUCCESS": "نجاح",
+    "NOTIFICATION_TYPE_WARNING": "تحذير",
+    "NOTIFICATION_TYPE_ERROR": "خطأ",
+    "NOTIFICATION_TYPE_UNKNOWN": "إشعار",
     "NOTIFICATIONS_DESC": "تفعيل الإشعارات الفورية",
     "NOTIFICATIONS_PERMISSION_DENIED_SHORT": "تم رفض الإذن في إعدادات الجهاز",
     "NOTIFICATIONS_UNAVAILABLE": "غير متاح على هذه المنصة",
