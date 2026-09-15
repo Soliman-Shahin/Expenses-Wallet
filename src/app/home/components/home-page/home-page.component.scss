@@ -461,11 +461,14 @@
 //  AUTHENTICATED STATE — Financial Dashboard
 // ══════════════════════════════════════════════════════════════════
 
+ion-content {
+  --padding-bottom: var(--ew-core-bottom-clearance, var(--tabs-height, 84px));
+}
+
 .dashboard {
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  padding-bottom: var(--ew-core-bottom-clearance);
 }
 
 // ── Header Bar ───────────────────────────────────────────────────
@@ -680,7 +683,6 @@
 
 .charts-card {
   padding: var(--ew-space-4);
-  margin-bottom: var(--ew-core-bottom-clearance);
 
   app-bar-chart,
   app-pie-chart,
@@ -699,6 +701,7 @@
 
 .charts-empty-state {
   min-height: 120px;
+  margin-top: 2rem;
   display: grid;
   place-items: center;
   padding: var(--ew-space-6);
