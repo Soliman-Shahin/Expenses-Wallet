@@ -18,12 +18,6 @@ export class ExpenseService {
   private readonly expenseReconciledSubject = new Subject<void>();
   readonly expenseReconciled$ = this.expenseReconciledSubject.asObservable();
 
-  private traceList(source: string, rows: any[]): Expense[] {
-    const logical = rows.filter((row) =>
-      String(row._clientId || '').startsWith('offline_')
-    );
-    return rows as Expense[];
-  }
   private readonly endpoint = '/expenses';
   // Cache the expenses list to prevent duplicate network calls across widgets
   private expensesCache$: Observable<Expense[]> | null = null;
@@ -37,6 +31,21 @@ export class ExpenseService {
   private auth = inject(AuthService);
   private offlineStorage = inject(OfflineStorageService);
   private connectionService = inject(ConnectionService);
+
+  private shouldFallbackOffline(error: any): boolean {
+    // Angular HttpErrorResponse uses status 0 for transport failures
+    // (offline, refused connection, timeout, or another network error).
+    // A server response must remain a server/UI error even if connectivity
+    // state is stale.
+    return error?.status === 0;
+  }
+
+  private normalizeExpenseResponse(response: any): Expense[] {
+    if (Array.isArray(response)) return response as Expense[];
+    if (Array.isArray(response?.data)) return response.data as Expense[];
+    if (Array.isArray(response?.expenses)) return response.expenses as Expense[];
+    return [];
+  }
 
   constructor() {
     // Clear caches when auth user changes (login/logout) to avoid stale/unauthenticated results
@@ -90,7 +99,8 @@ export class ExpenseService {
         httpParams = httpParams.set('_t', Date.now().toString());
       }
 
-      return this.apiService.get<Expense[]>(this.endpoint, httpParams).pipe(
+      return this.apiService.get<any>(this.endpoint, httpParams).pipe(
+        map((response) => this.normalizeExpenseResponse(response)),
         switchMap((expenses) => {
           return this.offlineStorage.getEntities<any>('expense').pipe(
             map((localExpenses) => {
@@ -168,14 +178,11 @@ export class ExpenseService {
               .subscribe();
           }
         }),
-        map(({ mergedExpenses }) =>
-          this.traceList('merged API + local', mergedExpenses)
-        ),
-        catchError(() => {
-          // 🔌 Offline fallback: return local data when API call fails
-          console.warn(
-            '⚠️ [ExpenseService] API failed for filtered expenses, falling back to offline storage'
-          );
+        map(({ mergedExpenses }) => mergedExpenses),
+        catchError((error) => {
+          if (!this.shouldFallbackOffline(error)) {
+            return throwError(() => error);
+          }
           return this.offlineStorage.getEntities<any>('expense').pipe(
             map((localExpenses) => {
               let filtered = (localExpenses as Expense[]).filter(
@@ -211,7 +218,8 @@ export class ExpenseService {
 
     // Use cache for regular requests without filters
     if (!this.expensesCache$ || forceRefresh) {
-      this.expensesCache$ = this.apiService.get<Expense[]>(this.endpoint).pipe(
+      this.expensesCache$ = this.apiService.get<any>(this.endpoint).pipe(
+        map((response) => this.normalizeExpenseResponse(response)),
         switchMap((expenses) => {
           return this.offlineStorage.getEntities<any>('expense').pipe(
             map((localExpenses) => {
@@ -277,14 +285,11 @@ export class ExpenseService {
               .subscribe();
           }
         }),
-        map(({ mergedExpenses }) =>
-          this.traceList('merged API + local', mergedExpenses)
-        ),
-        catchError(() => {
-          // 🔌 Offline fallback: return local IndexedDB data
-          console.warn(
-            '⚠️ [ExpenseService] API failed, falling back to offline storage'
-          );
+        map(({ mergedExpenses }) => mergedExpenses),
+        catchError((error) => {
+          if (!this.shouldFallbackOffline(error)) {
+            return throwError(() => error);
+          }
           this.expensesCache$ = null; // clear cache so next online call refetches
           return this.offlineStorage
             .getEntities<any>('expense')
@@ -319,7 +324,13 @@ export class ExpenseService {
 
     return this.apiService
       .get<Expense>(`${this.endpoint}/${id}`)
-      .pipe(catchError(() => offlineFetch$));
+      .pipe(
+        catchError((error) =>
+          this.shouldFallbackOffline(error)
+            ? offlineFetch$
+            : throwError(() => error)
+        )
+      );
   }
 
   createExpense(expense: Partial<Expense>): Observable<Expense> {
@@ -349,12 +360,10 @@ export class ExpenseService {
           .subscribe();
         this.expenseReconciledSubject.next();
       }),
-      catchError(() => {
-        // 🔌 API failed while trying (might have gone offline mid-request)
-        console.warn(
-          '⚠️ [ExpenseService] createExpense API failed, saving offline'
-        );
-        return this._saveOffline('CREATE', expense);
+      catchError((error) => {
+        return this.shouldFallbackOffline(error)
+          ? this._saveOffline('CREATE', expense)
+          : throwError(() => error);
       })
     );
   }
@@ -385,11 +394,10 @@ export class ExpenseService {
           .subscribe();
         this.expenseReconciledSubject.next();
       }),
-      catchError(() => {
-        console.warn(
-          '⚠️ [ExpenseService] updateExpense API failed, saving offline'
-        );
-        return this._saveOffline('UPDATE', { ...expense, _id: id });
+      catchError((error) => {
+        return this.shouldFallbackOffline(error)
+          ? this._saveOffline('UPDATE', { ...expense, _id: id })
+          : throwError(() => error);
       })
     );
   }
@@ -419,10 +427,10 @@ export class ExpenseService {
         this.offlineStorage.deleteEntity('expense', id).subscribe();
         this.expenseReconciledSubject.next();
       }),
-      catchError(() => {
-        console.warn(
-          '⚠️ [ExpenseService] deleteExpense API failed, deleting offline'
-        );
+      catchError((error) => {
+        if (!this.shouldFallbackOffline(error)) {
+          return throwError(() => error);
+        }
         return this.offlineStorage.deleteEntity('expense', id).pipe(
           tap(() => {
             this.expensesCache$ = null;
@@ -454,9 +462,10 @@ export class ExpenseService {
         params
       )
       .pipe(
-        catchError(() => {
-          // 🔌 Offline fallback: compute totals from IndexedDB
-          return this._computeOfflineTotals(startDate, endDate);
+        catchError((error) => {
+          return this.shouldFallbackOffline(error)
+            ? this._computeOfflineTotals(startDate, endDate)
+            : throwError(() => error);
         }),
         // Do not cache error emissions
         shareReplay({ bufferSize: 1, refCount: true })
@@ -490,10 +499,6 @@ export class ExpenseService {
         this.totalsCache.clear();
         invalidateHttpCache('/expenses');
         this.expenseReconciledSubject.next();
-        console.log(
-          `📴 [ExpenseService] Saved offline (${type}):`,
-          offlineEntity._id
-        );
       }),
       map((saved) => saved as unknown as Expense)
     );

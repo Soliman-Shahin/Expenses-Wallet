@@ -66,7 +66,6 @@ interface TransactionGroup {
     SkeletonBlockComponent,
     NgClass,
     AddFabButtonComponent,
-    LowerCasePipe,
     DecimalPipe,
     DatePipe,
     TranslateModule,
@@ -258,7 +257,7 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
             : (response as any)?.data?.data || (response as any)?.data || [];
           this.categories.set(arr);
         },
-        error: (err: any) => console.error('Error loading categories:', err),
+        error: () => undefined,
       });
   }
 
@@ -331,8 +330,7 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
               this.rawTransactions.set(rawExpenses);
               this.hasLoadedTransactions = true;
             }
-          } catch (err) {
-            console.error('Error processing transactions:', err);
+          } catch {
             this.setError('Failed to process data');
           }
         },
@@ -741,12 +739,11 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
             );
             this.loadTransactions();
           },
-          error: async (err) => {
+          error: async () => {
             await this.toastService.presentErrorToast(
               'bottom',
               this.translateService.instant('EXPENSE.DELETE_ERROR_TOAST')
             );
-            console.error(err);
           },
         });
       });

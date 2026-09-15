@@ -146,8 +146,7 @@ export class TransactionsComponent implements OnChanges, OnDestroy {
           this.txLoading = false;
           this.cdr.markForCheck();
         },
-        error: (err) => {
-          console.error('Failed to load transactions:', err);
+        error: () => {
           this.loadError = 'Failed to load transactions';
           this.txLoading = false;
           this.cdr.markForCheck();
@@ -179,7 +178,7 @@ export class TransactionsComponent implements OnChanges, OnDestroy {
           this.categories = arr;
           this.cdr.markForCheck();
         },
-        error: (err: any) => console.error('Error loading categories:', err),
+        error: () => undefined,
       });
   }
 
@@ -316,12 +315,11 @@ export class TransactionsComponent implements OnChanges, OnDestroy {
           this.refreshTransactions();
           this.dataChanged.emit();
         },
-        error: (err) => {
+        error: () => {
           this.toastService.presentErrorToast(
             'bottom',
             this.translateService.instant('EXPENSE.DELETE_ERROR')
           );
-          console.error(err);
         },
       });
     });
