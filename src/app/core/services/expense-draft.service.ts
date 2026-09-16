@@ -31,7 +31,7 @@ export class ExpenseDraftService {
         typeof draft.description !== 'string' ||
         (draft.amount !== null &&
           draft.amount !== undefined &&
-          (!Number.isFinite(Number(draft.amount)) || Number(draft.amount) < 0))
+          (!Number.isFinite(Number(draft.amount)) || Number(draft.amount) <= 0))
       )
         return null;
       return {

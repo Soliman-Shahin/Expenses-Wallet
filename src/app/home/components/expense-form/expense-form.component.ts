@@ -12,6 +12,9 @@ import {
 import { toObservable } from '@angular/core/rxjs-interop';
 import {
   FormGroup,
+  AbstractControl,
+  ValidationErrors,
+  ValidatorFn,
   Validators,
   FormsModule,
   ReactiveFormsModule,
@@ -69,7 +72,9 @@ export class ExpenseFormComponent
 
   expenseForm!: FormGroup;
   isEditMode = false;
-  maxDate = new Date().toISOString();
+  // ion-datetime is date-based here. Use local noon so the calendar cannot
+  // cross a UTC midnight and display/save the adjacent day.
+  maxDate = this.localCalendarIso(new Date());
   userCurrency = '';
 
   allCategories: Category[] = [];
@@ -194,12 +199,16 @@ export class ExpenseFormComponent
       type: [type],
       amount: [
         this.expense?.amount,
-        [Validators.required, Validators.min(0.01)],
+        [Validators.required, this.amountValidator()],
       ],
       category: [categoryId, Validators.required],
       description: [
         this.expense?.description,
-        [Validators.required, Validators.pattern(/\S/)],
+        [
+          Validators.required,
+          Validators.pattern(/\S/),
+          Validators.maxLength(500),
+        ],
       ],
       date: [
         this.expense?.date || new Date().toISOString(),
@@ -257,6 +266,7 @@ export class ExpenseFormComponent
             category.setValue('', { emitEvent: false });
           }
         }
+        this.validateSelectedCategory();
         this.typeSubject$.next(this.typeSubject$.value); // Trigger filtering again now that we have data
         this.cdr.markForCheck();
       });
@@ -309,6 +319,17 @@ export class ExpenseFormComponent
       event.stopPropagation();
     }
 
+    this.expenseForm
+      .get('description')
+      ?.setValue(
+        String(this.expenseForm.get('description')?.value ?? '').trim(),
+        { emitEvent: false }
+      );
+    this.validateSelectedCategory();
+    this.expenseForm.updateValueAndValidity();
+    // Do not submit an ID before the authoritative owner-scoped category
+    // snapshot has arrived; a required-looking stale ID is not sufficient.
+    if (!this.categoriesResolved) return;
     if (
       this.expenseForm.invalid ||
       this.isSubmitting ||
@@ -323,10 +344,12 @@ export class ExpenseFormComponent
     // Remove 'type' from payload - backend determines type from category
     const { type, ...payloadData } = formValue;
 
+    const amount = this.normalizeAmount(payloadData.amount);
     const payload: Partial<Expense> = {
       ...payloadData,
-      amount: Number(payloadData.amount),
-      date: new Date(payloadData.date).toISOString(),
+      amount,
+      description: String(payloadData.description ?? '').trim(),
+      date: this.localCalendarIso(new Date(payloadData.date)),
     };
 
     const action$ = this.isEditMode
@@ -540,7 +563,11 @@ export class ExpenseFormComponent
   onDateChange(event: any): void {
     const value = event.detail?.value;
     if (value) {
-      this.expenseForm.get('date')?.setValue(value, { emitEvent: false });
+      this.expenseForm
+        .get('date')
+        ?.setValue(this.localCalendarIso(new Date(value)), {
+          emitEvent: false,
+        });
       this.cdr.markForCheck();
     }
   }
@@ -551,5 +578,46 @@ export class ExpenseFormComponent
     // Emit the new type to trigger filtering
     this.typeSubject$.next(type);
     this.cdr.markForCheck();
+  }
+
+  private amountValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const raw = control.value;
+      if (raw === null || raw === undefined || String(raw).trim() === '') {
+        return { required: true };
+      }
+      const text = String(raw).trim();
+      if (!/^(?:\d+(?:[.,]\d*)?|[.,]\d+)$/.test(text)) return { amount: true };
+      if (text.includes(',') && text.includes('.')) return { amount: true };
+      const normalized = text.replace(',', '.');
+      const value = Number(normalized);
+      return Number.isFinite(value) && value > 0 ? null : { amount: true };
+    };
+  }
+
+  private normalizeAmount(value: unknown): number {
+    const normalized = String(value ?? '')
+      .trim()
+      .replace(',', '.');
+    return Number(normalized);
+  }
+
+  private validateSelectedCategory(): void {
+    const control = this.expenseForm?.get('category');
+    if (!control || !this.categoriesResolved) return;
+    const category = this.allCategories.find((c) => c._id === control.value);
+    const valid =
+      !!category && (category.type || 'outcome') === this.typeSubject$.value;
+    control.setErrors(valid ? null : { category: true });
+  }
+
+  private localCalendarIso(date: Date): string {
+    if (Number.isNaN(date.getTime())) return '';
+    return new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      12
+    ).toISOString();
   }
 }
