@@ -194,9 +194,42 @@ export class BackupService {
           throw new Error('Invalid backup file format');
         if (entity._clientId && clientIds.has(String(entity._clientId)))
           throw new Error('Invalid backup file format');
+        if (entities === backup.data.expenses) {
+          if (
+            typeof entity.amount !== 'number' ||
+            !Number.isFinite(entity.amount) ||
+            entity.amount <= 0 ||
+            !(
+              (typeof entity.category === 'string' && entity.category.trim()) ||
+              (entity.category &&
+                typeof entity.category === 'object' &&
+                typeof entity.category._id === 'string' &&
+                entity.category._id.trim())
+            ) ||
+            typeof entity.description !== 'string' ||
+            typeof entity.date !== 'string' ||
+            Number.isNaN(new Date(entity.date).getTime())
+          )
+            throw new Error('Invalid backup file format');
+        } else if (typeof entity.title !== 'string' || !entity.title.trim()) {
+          throw new Error('Invalid backup file format');
+        }
         if (entity._id) ids.add(String(entity._id));
         if (entity._clientId) clientIds.add(String(entity._clientId));
       }
+    }
+    const categoryIds = new Set(
+      backup.data.categories.map((category) =>
+        String(category._id || category._clientId)
+      )
+    );
+    for (const expense of backup.data.expenses) {
+      const categoryId =
+        typeof expense.category === 'object'
+          ? expense.category._id
+          : expense.category;
+      if (!categoryIds.has(String(categoryId)))
+        throw new Error('Invalid backup file format');
     }
     if (
       backup.data.user !== null &&

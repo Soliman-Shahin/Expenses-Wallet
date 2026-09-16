@@ -235,16 +235,75 @@ export class OfflineStorageService {
     expenses: any[],
     categories: any[]
   ): Observable<boolean> {
+    const ownerUserId = this.currentOwnerId();
     return from(
       this.db.transaction(
         'rw',
         this.db.expenses,
         this.db.categories,
+        this.db.syncOperations,
         async () => {
-          await this.db.expenses.clear();
-          await this.db.categories.clear();
-          await this.db.expenses.bulkPut(expenses);
-          await this.db.categories.bulkPut(categories);
+          const [currentExpenses, currentCategories] = await Promise.all([
+            this.db.expenses.where('ownerUserId').equals(ownerUserId).toArray(),
+            this.db.categories
+              .where('ownerUserId')
+              .equals(ownerUserId)
+              .toArray(),
+          ]);
+          const logicalMatch = (current: any[], incoming: any) =>
+            current.find(
+              (row) =>
+                (incoming._id && row._id === incoming._id) ||
+                (incoming._clientId &&
+                  (row._id === incoming._clientId ||
+                    row._clientId === incoming._clientId))
+            );
+          const missing = (incoming: any, current: any[]) =>
+            !logicalMatch(current, incoming);
+          const restoredExpenses = expenses
+            .filter((entity) => missing(entity, currentExpenses))
+            .map((entity) => ({
+              ...entity,
+              ownerUserId,
+              _syncStatus: String(entity._id || '').startsWith('offline_')
+                ? SyncStatus.PENDING
+                : SyncStatus.SYNCED,
+            }));
+          const restoredCategories = categories
+            .filter((entity) => missing(entity, currentCategories))
+            .map((entity) => ({
+              ...entity,
+              ownerUserId,
+              _syncStatus: String(entity._id || '').startsWith('offline_')
+                ? SyncStatus.PENDING
+                : SyncStatus.SYNCED,
+            }));
+          await this.db.expenses
+            .where('ownerUserId')
+            .equals(ownerUserId)
+            .delete();
+          // Reinsert the complete current owner set plus only missing backup
+          // rows. Existing rows and durable tombstones always win.
+          await this.db.expenses.bulkPut([
+            ...currentExpenses,
+            ...restoredExpenses,
+          ]);
+          await this.db.categories.bulkPut([
+            ...currentCategories,
+            ...restoredCategories,
+          ]);
+          for (const entity of [...restoredCategories, ...restoredExpenses]) {
+            if (entity._syncStatus !== SyncStatus.PENDING) continue;
+            const entityType = restoredCategories.includes(entity)
+              ? 'category'
+              : 'expense';
+            await this.addToSyncQueueAsync(
+              'CREATE',
+              entityType,
+              entity._id,
+              entity
+            );
+          }
         }
       )
     ).pipe(

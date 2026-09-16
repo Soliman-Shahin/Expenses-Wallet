@@ -772,7 +772,7 @@
     "DECRYPT_ALERT_TITLE": "Backup password",
     "DECRYPT_ALERT_MSG": "Enter the password used when this backup file was created.",
     "RESTORE_CONFIRM_TITLE": "Confirm Restore",
-    "RESTORE_CONFIRM_MSG": "Current offline records will be replaced by this backup. Server data and your account will not be changed. Continue?",
+    "RESTORE_CONFIRM_MSG": "Compatible missing records from this backup will be recovered while current data is preserved. Continue?",
     "RESTORE_BLOCKED_UNSYNCED": "Restore is blocked while unsynced changes remain. Sync them first.",
     "OWNER_MISMATCH": "This backup belongs to a different account and cannot be restored here.",
     "OWNER_UNKNOWN": "This backup cannot be verified for the signed-in account.",

@@ -168,23 +168,6 @@
         </ion-label>
       </ion-item>
 
-      <!-- Auto Backup Setting -->
-      <ion-item lines="none">
-        <div slot="start" class="icon-wrapper color-orange">
-          <ion-icon name="cloud-done"></ion-icon>
-        </div>
-        <ion-label>
-          <h3>{{ "SETTINGS.AUTO_BACKUP" | translate }}</h3>
-        </ion-label>
-        <ion-toggle
-          slot="end"
-          [attr.aria-label]="'SETTINGS.AUTO_BACKUP' | translate"
-          [checked]="autoBackupEnabled"
-          (ionChange)="toggleAutoBackup($event)"
-          color="primary"
-        ></ion-toggle>
-      </ion-item>
-
       <!-- Backup & Restore Button -->
       <ion-item button detail="true" (click)="navigateToBackup()" lines="none">
         <div slot="start" class="icon-wrapper color-indigo">

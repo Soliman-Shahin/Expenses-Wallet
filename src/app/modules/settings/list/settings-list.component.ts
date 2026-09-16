@@ -7,7 +7,6 @@ import { AuthService } from 'src/app/modules/auth/services/auth.service';
 import { User } from 'src/app/modules/auth/models';
 import { TranslateModule } from '@ngx-translate/core';
 import { PushNotificationService } from 'src/app/core/services/push-notification.service';
-import { BackupService } from 'src/app/core/services/backup.service';
 import { CacheService } from 'src/app/core/services/cache.service';
 import { takeUntil } from 'rxjs/operators';
 import { clearHttpCache } from 'src/app/core/interceptors/cache.interceptor';
@@ -31,7 +30,6 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
   selectedTheme = 'auto';
   notificationsEnabled = true;
   notificationStatus = 'SETTINGS.NOTIFICATIONS_UNAVAILABLE';
-  autoBackupEnabled = false;
 
   currentUser: User | null = null;
   profile: UserProfile | null = null;
@@ -107,7 +105,6 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
         : this.notificationsEnabled
         ? 'SETTINGS.NOTIFICATIONS_ENABLED'
         : 'SETTINGS.NOTIFICATIONS_DISABLED';
-    this.autoBackupEnabled = this.backupService.getAutoBackupSettings().enabled;
     this.cdr.markForCheck();
   }
 
@@ -221,12 +218,6 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
     this.cdr.markForCheck();
   }
 
-  toggleAutoBackup(event: any) {
-    this.autoBackupEnabled = event.detail.checked;
-    this.backupService.setAutoBackupEnabled(this.autoBackupEnabled);
-    this.cdr.markForCheck();
-  }
-
   navigateToBackup() {
     this.router.navigate(['/settings/backup']);
   }
@@ -263,6 +254,5 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
     }
   }
 
-  private backupService = inject(BackupService);
   private cacheService = inject(CacheService);
 }
