@@ -601,11 +601,6 @@
     "DELETE_HEADER": "Are you sure you want to delete this item?",
     "DELETE_MESSAGE": "This action cannot be undone."
   },
-  "LEGAL": {
-    "DRAFT_LABEL": "Draft content",
-    "DRAFT_BODY": "This page contains the current product draft describing how Expenses Wallet is intended to be used and how account and wallet data is handled.",
-    "REPLACEMENT_NOTE": "The final text is pending owner and legal approval and will be replaced centrally before release."
-  },
   "TOAST": {
     "DELETE_SUCCESS": "Item deleted successfully."
   },
@@ -800,6 +795,35 @@
     "GOOGLE_DRIVE_DISCONNECTED": "Disconnected from Google Drive",
     "GOOGLE_DRIVE_FAILED": "Failed to connect to Google Drive",
     "GDRIVE_LOCKED_MSG": "Google Drive backup is available in the Pro plan and above. Upgrade to secure your data in the cloud."
+  },
+  "LEGAL": {
+    "TERMS_TITLE": "Terms & Conditions",
+    "PRIVACY_TITLE": "Privacy Policy",
+    "LAST_UPDATED": "Last updated: September 16, 2026",
+    "TERMS_SERVICE_TITLE": "The service",
+    "TERMS_SERVICE_BODY": "Expenses Wallet helps you record transactions, organize categories, review summaries, and manage your personal financial records.",
+    "TERMS_FINANCIAL_BODY": "The app is a record-management tool. It does not provide financial, investment, tax, legal, or other professional advice.",
+    "TERMS_ACCOUNT_TITLE": "Accounts and security",
+    "TERMS_ACCOUNT_BODY": "You are responsible for providing accurate account information and for protecting access to your account and device.",
+    "TERMS_SECURITY_BODY": "Do not share passwords, reset links, backup passwords, or device authentication with others. Use of biometric features depends on your device and enabled enrollment.",
+    "TERMS_OFFLINE_TITLE": "Offline use and synchronization",
+    "TERMS_OFFLINE_BODY": "The app can retain records on your device while offline and synchronize them when connectivity returns. You remain responsible for resolving any displayed sync conflicts.",
+    "TERMS_BACKUP_BODY": "Backups are your responsibility. Exported backups may be plaintext unless you choose optional password encryption, and you must protect backup files and passwords.",
+    "TERMS_SERVICES_TITLE": "Plans and third-party services",
+    "TERMS_SERVICES_BODY": "Some features may depend on your subscription plan and on services such as Google authentication, Google Drive, Firebase notifications, and email delivery for password recovery.",
+    "TERMS_CHANGES_BODY": "Features and these terms may change as the service evolves. Continued use after an update means you have had an opportunity to review the updated terms.",
+    "PRIVACY_DATA_TITLE": "Information used by the app",
+    "PRIVACY_DATA_BODY": "The app handles account details, authentication-related information, profile information, transaction and category records, subscription information, profile images, and support interactions when you provide them.",
+    "PRIVACY_ACCOUNT_BODY": "Transactions and categories are associated with the signed-in account. The application uses account ownership boundaries when reading local records and synchronizing data.",
+    "PRIVACY_STORAGE_TITLE": "On-device storage and backups",
+    "PRIVACY_STORAGE_BODY": "Offline records and some preferences are stored on your device using browser storage or the app's local database. Native session data uses protected device storage; browser storage is not equivalent to native protected storage.",
+    "PRIVACY_BACKUP_BODY": "Backups can contain financial records, categories, and optional profile imagery. Backups are plaintext unless optional password encryption is selected. Backup files are not automatically uploaded unless an optional Google Drive feature is enabled.",
+    "PRIVACY_SERVICES_TITLE": "Connected services",
+    "PRIVACY_SERVICES_BODY": "Google services may be used for authentication or optional Drive backup. Firebase services may deliver device notifications. Password recovery may use the application's email-delivery service. Their own terms and privacy practices may also apply.",
+    "PRIVACY_BIOMETRIC_BODY": "Biometric features use the device's biometric prompt and protected native credentials where supported. The app does not store a plaintext account password for biometric sign-in.",
+    "PRIVACY_CONTROLS_TITLE": "Your controls",
+    "PRIVACY_CONTROLS_BODY": "You can edit records, export backups, restore compatible records, manage profile information, sign out, and disable optional notification, Drive, and biometric features where those controls are available.",
+    "PRIVACY_CHANGES_BODY": "This policy may be updated when the product or its data handling changes. The displayed last-updated date identifies this version of the policy."
   },
   "SUBSCRIPTION": {
     "TITLE": "Subscription Plans",
