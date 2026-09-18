@@ -317,6 +317,16 @@
       transform: translateY(-2px);
       --box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
     }
+
+    &:disabled,
+    &.button-disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+      transform: none;
+      --background-hover: transparent;
+      --border-color: rgba(var(--ion-color-secondary-rgb), 0.14);
+      --color: var(--ion-color-medium);
+    }
   }
 }
 
