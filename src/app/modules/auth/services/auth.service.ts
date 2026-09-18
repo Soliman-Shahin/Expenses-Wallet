@@ -375,25 +375,32 @@ export class AuthService {
     return from(task);
   }
 
-  handleOAuthDeepLink(payloadB64: string): Observable<void> {
-    try {
-      return this.handleOAuthCallback(JSON.parse(atob(payloadB64)));
-    } catch {
-      return throwError(() => new Error('Invalid OAuth payload'));
+  exchangeGoogleCode(code: string): Observable<void> {
+    if (!/^[a-f0-9]{64}$/.test(code)) {
+      return throwError(() => new Error('Invalid OAuth exchange code'));
     }
-  }
-  handleOAuthCallback(payload: any): Observable<void> {
-    const user = payload?.user
-      ? { ...payload.user, ...(String(payload.user.image || '').startsWith('data:') ? { image: undefined } : {}) }
-      : null;
-    const accessToken = payload?.tokens?.accessToken || payload?.accessToken;
-    const refreshToken = payload?.tokens?.refreshToken || payload?.refreshToken;
-    if (!user || !accessToken || !refreshToken)
-      return throwError(() => new Error('Invalid OAuth payload'));
-    sessionStorage.removeItem('ewallet_oauth_persistent');
-    this.loggingOut = false;
-    return from(
-      this.tokenService.saveSession(user, accessToken, refreshToken, true)
-    );
+    return new HttpClient(this.httpBackend)
+      .post<any>(environment.apiUrl + '/user/auth/google/exchange', { code })
+      .pipe(
+        timeout(15000),
+        switchMap((raw) =>
+          from(
+            (async () => {
+              const data = this.unwrap(raw)?.data;
+              const accessToken = data?.tokens?.accessToken;
+              const refreshToken = data?.tokens?.refreshToken;
+              if (!data?.user || !accessToken || !refreshToken)
+                throw new Error('Invalid OAuth exchange response');
+              this.loggingOut = false;
+              await this.tokenService.saveSession(
+                data.user,
+                accessToken,
+                refreshToken,
+                true
+              );
+            })()
+          )
+        )
+      );
   }
 }

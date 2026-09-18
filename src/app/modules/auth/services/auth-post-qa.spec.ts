@@ -329,7 +329,11 @@ describe('AUTH.1 post-QA regressions', () => {
       'Google callback persists despite password Remember Me = ' + remember,
       fakeAsync(() => {
         sessionStorage.setItem('ewallet_oauth_persistent', String(remember));
-        auth.handleOAuthCallback(payload()).subscribe();
+        auth.exchangeGoogleCode('a'.repeat(64)).subscribe();
+        flushMicrotasks();
+        const exchange = requests.expectOne(url('/user/auth/google/exchange'));
+        expect(exchange.request.body).toEqual({ code: 'a'.repeat(64) });
+        exchange.flush({ data: payload() });
         flushMicrotasks();
         expect(coldSession().getRefreshToken()).toBe('synthetic-refresh');
       })
