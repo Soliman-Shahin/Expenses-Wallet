@@ -4,6 +4,9 @@ export interface AppNotification {
   message: string;
   type: 'info' | 'success' | 'warn' | 'error';
   routeKey: 'notification-detail';
+  event?: string;
+  category?: string;
+  metadata?: Record<string, unknown>;
   isRead: boolean;
   createdAt: string;
 }

@@ -6,7 +6,7 @@ import {
   Component,
   OnInit,
 } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { finalize } from 'rxjs';
 import {
@@ -16,6 +16,17 @@ import {
 import { ApiService } from 'src/app/core/services/api.service';
 import { SkeletonBlockComponent } from 'src/app/shared/ui/skeleton-block/skeleton-block.component';
 import { NotificationService } from 'src/app/core/services/notification.service';
+
+export function shouldOpenSyncConflict(notification: AppNotification): boolean {
+  const conflictId = notification.metadata?.['conflictId'];
+  const entityType = notification.metadata?.['entityType'];
+  return (
+    notification.event === 'sync.conflict' &&
+    typeof conflictId === 'string' &&
+    conflictId.trim().length > 0 &&
+    ['expense', 'outcome', 'category'].includes(String(entityType))
+  );
+}
 
 @Component({
   selector: 'app-notification-detail',
@@ -59,9 +70,17 @@ import { NotificationService } from 'src/app/core/services/notification.service'
             }}</bdi></ion-card-subtitle
           >
         </ion-card-header>
-        <ion-card-content
-          ><p dir="auto">{{ item.message }}</p></ion-card-content
+        <ion-card-content>
+          <p dir="auto">{{ item.message }}</p>
+        </ion-card-content>
+        <ion-button
+          *ngIf="canReviewSyncConflict(item)"
+          expand="block"
+          fill="solid"
+          (click)="reviewSyncConflict(item)"
         >
+          {{ 'SYNC.REVIEW_CONFLICT' | translate }}
+        </ion-button>
       </ion-card>
       <ion-text color="danger" role="alert" *ngIf="error">{{
         error | translate
@@ -79,6 +98,7 @@ export class NotificationDetailComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private apiService: ApiService,
     private notificationService: NotificationService,
     private cdr: ChangeDetectorRef
@@ -124,5 +144,14 @@ export class NotificationDetailComponent implements OnInit {
           this.error = 'MOBILE_UI.UNAVAILABLE';
         },
       });
+  }
+
+  canReviewSyncConflict(notification: AppNotification): boolean {
+    return shouldOpenSyncConflict(notification);
+  }
+
+  reviewSyncConflict(notification: AppNotification): void {
+    if (!shouldOpenSyncConflict(notification)) return;
+    void this.router.navigate(['/settings/conflicts']);
   }
 }

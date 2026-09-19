@@ -3,6 +3,7 @@ export interface SyncEntity {
   _syncStatus: SyncStatus;
   _lastModified: Date | string;
   _version?: number;
+  _serverVersion?: number;
   _isDeleted?: boolean;
   _clientId?: string;
   _conflictData?: any;
@@ -42,15 +43,18 @@ export interface SyncOperation {
   entityType: 'expense' | 'category' | 'user';
   entityId: string;
   data: any;
-  timestamp: Date;
+  timestamp: Date | string;
   retryCount: number;
   maxRetries: number;
   status: SyncStatus;
   error?: string;
+  conflictId?: string;
   ownerUserId?: string;
+  baseServerVersion?: number;
 }
 
 export interface ConflictResolution {
+  conflictId?: string;
   entityId: string;
   entityType: string;
   localData: any;

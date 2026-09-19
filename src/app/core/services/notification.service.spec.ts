@@ -56,4 +56,19 @@ describe('NotificationService realtime state', () => {
     service.notifications$.subscribe((items) => (values = items));
     expect(values.map((entry) => entry.id)).toEqual([item.id]);
   });
+
+  it('parses sync conflict metadata without exposing payload details', () => {
+    const item = (service as any).normalizeRealtime({
+      id: '507f1f77bcf86cd799439011',
+      title: 'Sync conflict',
+      message: 'Review the affected item.',
+      type: 'warn',
+      event: 'sync.conflict',
+      category: 'sync',
+      metadata: { conflictId: 'owner:expense:item:1:2', entityType: 'expense' },
+    });
+    expect(item.event).toBe('sync.conflict');
+    expect(item.category).toBe('sync');
+    expect(item.metadata.entityType).toBe('expense');
+  });
 });

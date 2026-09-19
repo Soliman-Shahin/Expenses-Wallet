@@ -466,6 +466,7 @@ export class SyncService {
           _entityType: op.entityType,
           _lastModified: op.timestamp,
           _version: 1,
+          _baseVersion: op.baseServerVersion ?? op.data?._serverVersion,
           _isDeleted: op.type === 'DELETE',
           _operationId: op.id,
           ...op.data,
@@ -516,6 +517,11 @@ export class SyncService {
 
             // Remove successful operations from queue
             if (result?.success) {
+              const conflictedIds = new Set(
+                (result?.conflicts || []).map((conflict: any) =>
+                  String(conflict._id)
+                )
+              );
               const failed = new Map(
                 (result?.errors || []).map((error: any) => [
                   error.operationId,
@@ -523,6 +529,17 @@ export class SyncService {
                 ])
               );
               batch.forEach((op) => {
+                if (conflictedIds.has(String(op.entityId))) {
+                  const conflict = (result?.conflicts || []).find(
+                    (item: any) => String(item._id) === String(op.entityId)
+                  );
+                  this.offlineStorage.blockSyncOperation(
+                    op.id,
+                    String(conflict?.conflictId || conflict?.dedupeKey || '')
+                  );
+                  this.offlineStorage.markConflict(op.entityType, op.entityId);
+                  return;
+                }
                 const mappedServerId = result?.idMap?.[op.entityId];
                 if (
                   op.type === 'CREATE' &&
@@ -543,6 +560,24 @@ export class SyncService {
                   return;
                 }
                 this.offlineStorage.removeFromSyncQueue(op.id);
+                const serverVersion =
+                  op.type === 'CREATE'
+                    ? 1
+                    : (op.baseServerVersion ?? op.data?._serverVersion ?? 0) +
+                      1;
+                if (mappedServerId) {
+                  this.offlineStorage.markSynced(
+                    op.entityType,
+                    mappedServerId,
+                    serverVersion
+                  );
+                } else {
+                  this.offlineStorage.markSynced(
+                    op.entityType,
+                    op.entityId,
+                    serverVersion
+                  );
+                }
               });
             }
 
@@ -651,19 +686,37 @@ export class SyncService {
 
     return this.apiService
       .post<any>('/sync/conflicts/resolve', {
+        conflictId: resolution.conflictId,
         entityId: resolution.entityId,
         entityType: resolution.entityType,
         resolution: resolution.resolution,
         mergedData: resolution.mergedData,
       })
       .pipe(
-        tap((result) => {
+        switchMap((result) => {
           console.log('✅ Conflict resolved:', result);
+          const resolved = result?.data || result?.result || result;
+          if (!resolved?.entity || !resolved?.conflictId)
+            throw new Error('SYNC_RESOLUTION_MISSING_RESULT');
+          return this.offlineStorage
+            .finalizeConflictResolution(
+              resolution.entityType,
+              resolution.entityId,
+              resolved.conflictId,
+              resolved.entity
+            )
+            .pipe(
+              tap((finalized) => {
+                if (!finalized)
+                  throw new Error('SYNC_LOCAL_FINALIZATION_FAILED');
+                const currentConflicts =
+                  this.syncMetadataSubject.value.conflictCount;
+                this.updateSyncMetadata({
+                  conflictCount: Math.max(0, currentConflicts - 1),
+                });
+              })
+            );
           // Update conflict count
-          const currentConflicts = this.syncMetadataSubject.value.conflictCount;
-          this.updateSyncMetadata({
-            conflictCount: Math.max(0, currentConflicts - 1),
-          });
         }),
         map(() => true),
         catchError((error) => {

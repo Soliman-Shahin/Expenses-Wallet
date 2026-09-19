@@ -17,6 +17,7 @@ import { firstValueFrom } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { TranslateModule } from '@ngx-translate/core';
 import { RouterModule } from '@angular/router';
+import { APP_ROUTES } from 'src/app/core/constants';
 
 @Component({
   selector: 'app-sync-settings',
@@ -91,7 +92,14 @@ import { RouterModule } from '@angular/router';
           {{ 'SYNC.CONFLICT_RESOLUTION' | translate }}
         </div>
         <ion-list inset="true" class="premium-list">
-          <ion-item lines="none">
+          <ion-item
+            lines="none"
+            button="true"
+            detail="true"
+            (click)="openConflicts($event)"
+            [attr.aria-label]="'SYNC.CONFLICT_STRATEGY' | translate"
+            class="conflict-navigation-row"
+          >
             <div slot="start" class="icon-wrapper color-red">
               <ion-icon name="git-compare"></ion-icon>
             </div>
@@ -243,6 +251,7 @@ import { RouterModule } from '@angular/router';
   ],
 })
 export class SyncSettingsPage extends BaseComponent implements OnInit {
+  readonly conflictRoute = `/${APP_ROUTES.SETTINGS.INDEX}/${APP_ROUTES.SETTINGS.CONFLICTS}`;
   public syncService = inject(SyncService);
   private offlineStorage = inject(OfflineStorageService);
   private formBuilder = inject(FormBuilder);
@@ -252,6 +261,14 @@ export class SyncSettingsPage extends BaseComponent implements OnInit {
   storageSize = this.offlineStorage.getStorageSize();
   pendingCount = this.syncService.getPendingCount();
   syncMetadata$ = this.syncService.syncMetadata$;
+
+  openConflicts(event?: Event): void {
+    event?.preventDefault();
+    event?.stopPropagation();
+    void this.router.navigate([
+      `/${APP_ROUTES.SETTINGS.INDEX}/${APP_ROUTES.SETTINGS.CONFLICTS}`,
+    ]);
+  }
   private clearingOfflineData = false;
   hasUnsavedChanges = false;
   private savedFormValue = '';

@@ -27,7 +27,9 @@ export class NotificationService {
   readonly unreadCount$ = this.items.pipe(
     map((items) => items.filter((item) => !item.isRead).length)
   );
-  getCached(id: string): AppNotification | undefined { return this.items.value.find((item) => item.id === id); }
+  getCached(id: string): AppNotification | undefined {
+    return this.items.value.find((item) => item.id === id);
+  }
   constructor(
     private api: ApiService,
     private token: TokenService,
@@ -191,6 +193,13 @@ export class NotificationService {
       message: String(value['message']),
       type: type as AppNotification['type'],
       routeKey: 'notification-detail',
+      event: typeof value?.['event'] === 'string' ? value['event'] : undefined,
+      category:
+        typeof value?.['category'] === 'string' ? value['category'] : undefined,
+      metadata:
+        value?.['metadata'] && typeof value['metadata'] === 'object'
+          ? (value['metadata'] as Record<string, unknown>)
+          : undefined,
       isRead: false,
       createdAt: String(value['createdAt'] || new Date().toISOString()),
     };

@@ -1,158 +1,172 @@
 <ion-header>
   <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-back-button defaultHref="/settings/sync"></ion-back-button>
-    </ion-buttons>
+    <ion-buttons slot="start"
+      ><ion-back-button defaultHref="/settings"></ion-back-button
+    ></ion-buttons>
     <ion-title>{{ 'SYNC.CONFLICT_RESOLUTION' | translate }}</ion-title>
   </ion-toolbar>
 </ion-header>
-
 <ion-content>
-  <!-- No Conflicts Message -->
+  <section class="conflict-intro" aria-labelledby="conflict-heading">
+    <div class="intro-icon">
+      <ion-icon name="git-compare-outline" aria-hidden="true"></ion-icon>
+    </div>
+    <div>
+      <h1 id="conflict-heading">{{ 'SYNC.REVIEW_TITLE' | translate }}</h1>
+      <p>{{ 'SYNC.REVIEW_DESCRIPTION' | translate }}</p>
+    </div>
+  </section>
   @if (conflicts.length === 0) {
-  <div class="no-conflicts">
-    <ion-icon name="checkmark-circle" color="success"></ion-icon>
-    <h2>{{ 'SYNC.NO_CONFLICTS' | translate }}</h2>
+  <div class="no-conflicts" role="status">
+    <ion-icon
+      name="checkmark-circle"
+      color="success"
+      aria-hidden="true"
+    ></ion-icon>
+    <h2>{{ 'SYNC.ALL_CAUGHT_UP' | translate }}</h2>
     <p>{{ 'SYNC.NO_CONFLICTS_DESC' | translate }}</p>
   </div>
-  }
-
-  <!-- Conflicts List -->
-  @if (conflicts.length > 0) {
-  <div>
+  } @if (conflicts.length > 0) {
+  <div class="conflict-list">
     @for (conflict of conflicts; track trackByConflictId($index, conflict)) {
     <ion-card class="conflict-card">
       <ion-card-header>
-        <ion-card-title>
-          <ion-icon
-            [name]="getEntityIcon(conflict.entityType)"
-            color="warning"
-          ></ion-icon>
-          {{ getEntityTitle(conflict) | translate }}
-        </ion-card-title>
-        <ion-card-subtitle>
-          {{ 'SYNC.CONFLICT_DETECTED' | translate }}: {{
-          formatDate(conflict.timestamp) }}
-        </ion-card-subtitle>
-      </ion-card-header>
-      <ion-card-content>
-        <!-- Conflict Details -->
-        <div class="conflict-details">
-          <div class="data-comparison">
-            <!-- Local Data -->
-            <div class="data-section local-data">
-              <h4>
-                <ion-icon name="phone-portrait" color="primary"></ion-icon>
-                {{ 'SYNC.LOCAL_VERSION' | translate }}
-              </h4>
-              <div class="data-content">
-                <pre>{{ formatData(conflict.localData) }}</pre>
-              </div>
-              <ion-button
-                fill="outline"
-                color="primary"
-                size="small"
-                (click)="selectResolution(conflict, 'local')"
-              >
-                {{ 'SYNC.USE_THIS' | translate }}
-              </ion-button>
+        <div class="conflict-heading-row">
+          <div class="entity-heading">
+            <div class="entity-icon">
+              <ion-icon
+                [name]="getEntityIcon(conflict.entityType)"
+                aria-hidden="true"
+              ></ion-icon>
             </div>
-            <!-- Server Data -->
-            <div class="data-section server-data">
-              <h4>
-                <ion-icon name="cloud" color="primary"></ion-icon>
-                {{ 'SYNC.SERVER_VERSION' | translate }}
-              </h4>
-              <div class="data-content">
-                <pre>{{ formatData(conflict.serverData) }}</pre>
-              </div>
-              <ion-button
-                fill="outline"
-                color="primary"
-                size="small"
-                (click)="selectResolution(conflict, 'server')"
+            <div>
+              <ion-card-title
+                >{{ getEntityTitle(conflict) | translate }}</ion-card-title
               >
-                {{ 'SYNC.USE_THIS' | translate }}
-              </ion-button>
+              @if (getConflictIdentity(conflict)) {
+              <p class="entity-identity" dir="auto">
+                {{ getConflictIdentity(conflict) }}
+              </p>
+              }
+              <ion-card-subtitle
+                >{{ formatDate(conflict.timestamp) }}</ion-card-subtitle
+              >
             </div>
           </div>
-          <!-- Merge Option -->
-          @if (canMerge(conflict)) {
-          <div class="merge-option">
-            <h4>
-              <ion-icon name="git-merge" color="primary"></ion-icon>
-              {{ 'SYNC.MERGE_OPTION' | translate }}
-            </h4>
-            <p>{{ 'SYNC.MERGE_DESC' | translate }}</p>
-            <ion-button
-              fill="outline"
-              color="primary"
-              size="small"
-              (click)="showMergeDialog(conflict)"
-            >
-              {{ 'SYNC.MERGE_DATA' | translate }}
-            </ion-button>
+          <span class="status-chip" role="status">
+            <ion-icon name="alert-circle-outline" aria-hidden="true"></ion-icon>
+            <span>{{ 'SYNC.NEEDS_REVIEW' | translate }}</span>
+          </span>
+        </div>
+        <p class="difference-summary">{{ getDifferenceLabel(conflict) }}</p>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="comparison-labels">
+          <span>{{ 'SYNC.YOUR_VERSION' | translate }}</span
+          ><span>{{ 'SYNC.CURRENT_VERSION' | translate }}</span>
+        </div>
+        <div class="field-list">
+          @for (field of getConflictFields(conflict); track field.key) {
+          <div class="field-comparison">
+            <h3>{{ field.label | translate }}</h3>
+            <div class="value-grid">
+              <div class="value-panel yours">
+                <span>{{ 'SYNC.YOUR_VERSION' | translate }}</span
+                ><strong dir="auto">{{ field.local }}</strong>
+              </div>
+              <div class="value-panel current">
+                <span>{{ 'SYNC.CURRENT_VERSION' | translate }}</span
+                ><strong dir="auto">{{ field.current }}</strong>
+              </div>
+            </div>
           </div>
           }
         </div>
-        <!-- Resolution Actions -->
+        @if (mergeConflict === conflict) {
+        <div class="merge-panel">
+          <h3>{{ 'SYNC.REVIEW_MERGE' | translate }}</h3>
+          <p>{{ 'SYNC.MERGE_CHOOSE_FIELDS' | translate }}</p>
+          @for (field of getConflictFields(conflict); track 'merge-' +
+          field.key) {
+          <div class="merge-field">
+            <strong>{{ field.label | translate }}</strong
+            ><ion-segment
+              [value]="mergeSelection[field.key]"
+              (ionChange)="selectMergeValue(field.key, $event.detail.value)"
+              ><ion-segment-button value="local"
+                ><ion-label
+                  >{{ 'SYNC.YOUR_VERSION' | translate }}</ion-label
+                ></ion-segment-button
+              ><ion-segment-button value="current"
+                ><ion-label
+                  >{{ 'SYNC.CURRENT_VERSION' | translate }}</ion-label
+                ></ion-segment-button
+              ></ion-segment
+            >
+          </div>
+          }
+          <ion-button expand="block" (click)="applyMerge()"
+            >{{ 'SYNC.APPLY_MERGED_VERSION' | translate }}</ion-button
+          >
+        </div>
+        }
         <div class="resolution-actions">
           <ion-button
-            fill="solid"
-            color="success"
+            fill="outline"
             (click)="resolveConflict(conflict, 'local')"
-          >
-            <ion-icon name="checkmark" slot="start"></ion-icon>
-            {{ 'SYNC.RESOLVE_LOCAL' | translate }}
-          </ion-button>
-          <ion-button
-            fill="solid"
-            color="primary"
+            ><ion-icon
+              name="phone-portrait-outline"
+              slot="start"
+              aria-hidden="true"
+            ></ion-icon
+            ><span class="action-copy"
+              ><strong>{{ 'SYNC.KEEP_MINE' | translate }}</strong
+              ><small>{{ 'SYNC.KEEP_MINE_HINT' | translate }}</small></span
+            ></ion-button
+          ><ion-button
+            fill="outline"
             (click)="resolveConflict(conflict, 'server')"
-          >
-            <ion-icon name="cloud-done" slot="start"></ion-icon>
-            {{ 'SYNC.RESOLVE_SERVER' | translate }}
-          </ion-button>
-          @if (canMerge(conflict)) {
-          <ion-button
-            fill="solid"
-            color="primary"
-            (click)="resolveConflict(conflict, 'merge')"
-          >
-            <ion-icon name="git-merge" slot="start"></ion-icon>
-            {{ 'SYNC.RESOLVE_MERGE' | translate }}
-          </ion-button>
-          }
+            ><ion-icon
+              name="cloud-outline"
+              slot="start"
+              aria-hidden="true"
+            ></ion-icon
+            ><span class="action-copy"
+              ><strong>{{ 'SYNC.KEEP_CURRENT' | translate }}</strong
+              ><small>{{ 'SYNC.KEEP_CURRENT_HINT' | translate }}</small></span
+            ></ion-button
+          >@if (canMerge(conflict)) {<ion-button
+            fill="outline"
+            (click)="showMergeDialog(conflict)"
+            ><ion-icon
+              name="git-merge-outline"
+              slot="start"
+              aria-hidden="true"
+            ></ion-icon
+            ><span class="action-copy"
+              ><strong>{{ 'SYNC.REVIEW_MERGE' | translate }}</strong
+              ><small>{{ 'SYNC.REVIEW_MERGE_HINT' | translate }}</small></span
+            ></ion-button
+          >}
         </div>
       </ion-card-content>
     </ion-card>
     }
-    <!-- Bulk Actions -->
-    <ion-card class="bulk-actions">
-      <ion-card-header>
-        <ion-card-title>{{ 'SYNC.BULK_ACTIONS' | translate }}</ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <div class="bulk-buttons">
-          <ion-button
-            fill="outline"
-            color="primary"
-            (click)="resolveAllConflicts('local')"
-          >
-            <ion-icon name="phone-portrait" slot="start"></ion-icon>
-            {{ 'SYNC.USE_ALL_LOCAL' | translate }}
-          </ion-button>
-          <ion-button
-            fill="outline"
-            color="primary"
-            (click)="resolveAllConflicts('server')"
-          >
-            <ion-icon name="cloud" slot="start"></ion-icon>
-            {{ 'SYNC.USE_ALL_SERVER' | translate }}
-          </ion-button>
-        </div>
-      </ion-card-content>
-    </ion-card>
   </div>
-  }
+  } @if (conflicts.length > 1) {<ion-card class="bulk-actions"
+    ><ion-card-header
+      ><ion-card-title
+        >{{ 'SYNC.RESOLVE_MULTIPLE' | translate }}</ion-card-title
+      ></ion-card-header
+    ><ion-card-content
+      ><p>{{ 'SYNC.RESOLVE_MULTIPLE_DESC' | translate }}</p>
+      <div class="bulk-buttons">
+        <ion-button fill="outline" (click)="resolveAllConflicts('local')"
+          >{{ 'SYNC.KEEP_MINE_FOR_ALL' | translate }}</ion-button
+        ><ion-button fill="outline" (click)="resolveAllConflicts('server')"
+          >{{ 'SYNC.KEEP_CURRENT_FOR_ALL' | translate }}</ion-button
+        >
+      </div></ion-card-content
+    ></ion-card
+  >}
 </ion-content>

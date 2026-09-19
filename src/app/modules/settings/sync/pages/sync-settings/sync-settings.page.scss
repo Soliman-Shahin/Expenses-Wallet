@@ -5,6 +5,17 @@
   gap: 12px;
 }
 
+.conflict-navigation-row {
+  --detail-icon-color: var(--ew-wallet-muted);
+  --detail-icon-opacity: 0.8;
+  min-height: 72px;
+}
+
+.conflict-navigation-row:focus-visible {
+  outline: 2px solid var(--ion-color-primary);
+  outline-offset: -2px;
+}
+
 // The global form submit rule gives every submit button a 60px height and top
 // margin. Settings actions are a compact, shared action family instead.
 .action-buttons-container ion-button.action-button.save-action,

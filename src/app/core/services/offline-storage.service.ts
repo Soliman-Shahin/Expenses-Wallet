@@ -77,6 +77,7 @@ export class OfflineStorageService {
             ownerUserId,
             _syncStatus: SyncStatus.SYNCED,
             _lastModified: entity._lastModified || new Date(),
+            _serverVersion: entity._version,
           });
         });
         return entity;
@@ -111,6 +112,7 @@ export class OfflineStorageService {
         ownerUserId,
         _lastModified: new Date(),
         _version: (existing._version || 0) + 1,
+        _serverVersion: existing._serverVersion ?? existing._version,
       };
     } else {
       updatedEntity = {
@@ -118,6 +120,7 @@ export class OfflineStorageService {
         ownerUserId,
         _lastModified: new Date(),
         _version: 1,
+        _serverVersion: undefined,
         _syncStatus: SyncStatus.PENDING,
       };
     }
@@ -373,6 +376,7 @@ export class OfflineStorageService {
         if (serverTime >= localTime || localEntity._id !== serverEntity._id) {
           await table.put({
             ...serverEntity,
+            _serverVersion: serverEntity._version,
             ownerUserId,
             _syncStatus: SyncStatus.SYNCED,
           });
@@ -380,6 +384,7 @@ export class OfflineStorageService {
       } else {
         await table.put({
           ...serverEntity,
+          _serverVersion: serverEntity._version,
           ownerUserId,
           _syncStatus: SyncStatus.SYNCED,
         });
@@ -458,6 +463,26 @@ export class OfflineStorageService {
     data: any
   ): Promise<void> {
     const ownerUserId = this.currentOwnerId();
+    if (type === 'UPDATE') {
+      const existing = await this.db.syncOperations
+        .where('ownerUserId')
+        .equals(ownerUserId)
+        .filter(
+          (operation) =>
+            operation.entityType === entityType &&
+            operation.entityId === entityId &&
+            operation.status === SyncStatus.PENDING
+        )
+        .first();
+      if (existing) {
+        await this.db.syncOperations.update(existing.id, {
+          data,
+          timestamp: new Date(),
+          baseServerVersion: existing.baseServerVersion ?? data._serverVersion,
+        });
+        return;
+      }
+    }
     const operation: SyncOperation = {
       id: this.generateId(),
       type,
@@ -469,6 +494,7 @@ export class OfflineStorageService {
       maxRetries: 3,
       status: SyncStatus.PENDING,
       ownerUserId,
+      baseServerVersion: type === 'CREATE' ? undefined : data._serverVersion,
     };
 
     await this.db.syncOperations.put(operation);
@@ -487,6 +513,88 @@ export class OfflineStorageService {
       .delete()
       .then(() => this.loadSyncQueue())
       .catch(console.error);
+  }
+
+  markSynced(
+    entityType: string,
+    entityId: string,
+    serverVersion: number
+  ): void {
+    const ownerUserId = this.currentOwnerId();
+    if (!ownerUserId) return;
+    void this.db.getTable(entityType).update(entityId, {
+      _serverVersion: serverVersion,
+      _version: serverVersion,
+      _syncStatus: SyncStatus.SYNCED,
+      ownerUserId,
+    });
+  }
+
+  markConflict(entityType: string, entityId: string): void {
+    const ownerUserId = this.currentOwnerId();
+    if (!ownerUserId) return;
+    void this.db.getTable(entityType).update(entityId, {
+      _syncStatus: SyncStatus.CONFLICT,
+      ownerUserId,
+    });
+  }
+
+  blockSyncOperation(operationId: string, conflictId: string): void {
+    const ownerUserId = this.tokenService.getUserId();
+    if (!ownerUserId) return;
+    void this.db.syncOperations
+      .where('ownerUserId')
+      .equals(String(ownerUserId))
+      .filter((op) => op.id === operationId)
+      .modify({ status: SyncStatus.CONFLICT, conflictId })
+      .then(() => this.loadSyncQueue());
+  }
+
+  finalizeConflictResolution(
+    entityType: string,
+    entityId: string,
+    conflictId: string,
+    entity: any
+  ): Observable<boolean> {
+    const ownerUserId = this.currentOwnerId();
+    const table = this.db.getTable(entityType);
+    return from(
+      (async () => {
+        const finalized = await this.db.transaction(
+          'rw',
+          table,
+          this.db.syncOperations,
+          async () => {
+        const local = await table.get(entityId);
+        if (local && String(local.ownerUserId) !== ownerUserId)
+          throw new Error('Offline entity belongs to another user');
+        await table.put({
+          ...local,
+          ...entity,
+          _id: entityId,
+          ownerUserId,
+          _syncStatus: SyncStatus.SYNCED,
+          _serverVersion: entity._version,
+        });
+        await this.db.syncOperations
+          .where('ownerUserId')
+          .equals(ownerUserId)
+          .filter(
+            (op) => op.entityId === entityId && op.conflictId === conflictId
+          )
+          .delete();
+        return true;
+          }
+        );
+        await this.loadSyncQueue();
+        return finalized;
+      })()
+    ).pipe(
+      catchError((error) => {
+        console.error('Error finalizing conflict resolution:', error);
+        return of(false);
+      })
+    );
   }
 
   updateSyncOperation(
