@@ -479,6 +479,7 @@ export class OfflineStorageService {
           data,
           timestamp: new Date(),
           baseServerVersion: existing.baseServerVersion ?? data._serverVersion,
+          receiptId: undefined,
         });
         return;
       }
@@ -610,6 +611,47 @@ export class OfflineStorageService {
       .modify(updates)
       .then(() => this.loadSyncQueue())
       .catch(console.error);
+  }
+
+  async recordSyncFailure(
+    operationId: string,
+    safeError = 'SYNC_OPERATION_FAILED'
+  ): Promise<SyncOperation | null> {
+    const ownerUserId = this.tokenService.getUserId();
+    if (!ownerUserId) return null;
+    const operation = await this.db.syncOperations
+      .where('ownerUserId')
+      .equals(String(ownerUserId))
+      .filter((op) => op.id === operationId)
+      .first();
+    if (!operation) return null;
+    if (operation.status !== SyncStatus.PENDING) return operation;
+
+    const retryCount = Math.max(0, Number(operation.retryCount || 0)) + 1;
+    const maxRetries = Math.max(1, Number(operation.maxRetries || 3));
+    const status =
+      retryCount >= maxRetries ? SyncStatus.ERROR : SyncStatus.PENDING;
+    const error =
+      safeError === 'SYNC_OPERATION_FAILED'
+        ? safeError
+        : 'SYNC_OPERATION_FAILED';
+    await this.db.syncOperations.update(operation.id, {
+      retryCount,
+      maxRetries,
+      status,
+      error,
+    });
+    await this.loadSyncQueue();
+    return { ...operation, retryCount, maxRetries, status, error };
+  }
+
+  async persistSyncReceipt(operationId: string, receiptId: string): Promise<void> {
+    const ownerUserId = this.tokenService.getUserId();
+    if (!ownerUserId || !receiptId) return;
+    const operation = await this.db.syncOperations
+      .where('ownerUserId').equals(String(ownerUserId))
+      .filter((op) => op.id === operationId).first();
+    if (operation) await this.db.syncOperations.update(operation.id, { receiptId });
   }
 
   getPendingOperations(): Observable<SyncOperation[]> {

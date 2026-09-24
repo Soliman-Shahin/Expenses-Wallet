@@ -462,6 +462,7 @@ export class SyncService {
 
         // Convert operations to entities format
         const entities = batch.map((op) => ({
+          ...op.data,
           _id: op.entityId,
           _entityType: op.entityType,
           _lastModified: op.timestamp,
@@ -469,7 +470,8 @@ export class SyncService {
           _baseVersion: op.baseServerVersion ?? op.data?._serverVersion,
           _isDeleted: op.type === 'DELETE',
           _operationId: op.id,
-          ...op.data,
+          _operationType: op.type,
+          _receiptId: op.receiptId,
         }));
         // CRITICAL: Sort entities so that categories come first.
         // This ensures the backend resolves offline category IDs and puts them in idMap
@@ -482,7 +484,15 @@ export class SyncService {
           return 0;
         });
 
+        const failureUpdates: Promise<unknown>[] = [];
+
         return this.apiService.post<any>('/sync/push', { entities }).pipe(
+          switchMap((result) =>
+            from(Promise.all(batch.map((op) => {
+              const receipt = result?.receipts?.[op.id];
+              return receipt ? this.offlineStorage.persistSyncReceipt(op.id, receipt) : Promise.resolve();
+            }))).pipe(map(() => result))
+          ),
           switchMap((result) =>
             from(
               Promise.all(
@@ -546,17 +556,18 @@ export class SyncService {
                   !mappedServerId &&
                   !failed.has(op.id)
                 ) {
-                  this.offlineStorage.updateSyncOperation(op.id, {
-                    status: SyncStatus.ERROR,
-                    error: 'CREATE_CORRELATION_MISSING',
-                  });
+                  failureUpdates.push(
+                    this.offlineStorage.recordSyncFailure(
+                      op.id,
+                      'CREATE_CORRELATION_MISSING'
+                    )
+                  );
                   return;
                 }
                 if (failed.has(op.id)) {
-                  this.offlineStorage.updateSyncOperation(op.id, {
-                    status: SyncStatus.ERROR,
-                    error: String(failed.get(op.id)),
-                  });
+                  failureUpdates.push(
+                    this.offlineStorage.recordSyncFailure(op.id)
+                  );
                   return;
                 }
                 this.offlineStorage.removeFromSyncQueue(op.id);
@@ -588,6 +599,9 @@ export class SyncService {
               });
             }
           }),
+          switchMap((result) =>
+            from(Promise.all(failureUpdates)).pipe(map(() => result))
+          ),
           switchMap((result) => {
             if (!result?.success) return of(false);
             // Continue until the owner-scoped queue is drained; a single configured

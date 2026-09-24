@@ -51,6 +51,7 @@ export interface SyncOperation {
   conflictId?: string;
   ownerUserId?: string;
   baseServerVersion?: number;
+  receiptId?: string;
 }
 
 export interface ConflictResolution {
