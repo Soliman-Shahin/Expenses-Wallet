@@ -96,4 +96,51 @@ describe('sync.conflict notification action', () => {
     });
     expect(navigate).not.toHaveBeenCalled();
   });
+
+  it('renders ordinary security.new_login notifications without a special action route', () => {
+    const notification = {
+      ...base,
+      event: 'security.new_login',
+      category: 'security',
+      metadata: {
+        authenticationMethod: 'password',
+        occurredAt: '2026-09-24T12:00:00.000Z',
+      },
+    };
+    const component = Object.create(
+      NotificationDetailComponent.prototype
+    ) as any;
+    component.notification = notification;
+    expect(component.canReviewSyncConflict(notification)).toBe(false);
+    expect(component.notification.metadata.authenticationMethod).toBe('password');
+    expect(component.notification.metadata.occurredAt).toBe(
+      '2026-09-24T12:00:00.000Z'
+    );
+  });
+
+  it('accepts security metadata variants and missing metadata safely', () => {
+    const component = Object.create(
+      NotificationDetailComponent.prototype
+    ) as any;
+    for (const authenticationMethod of [
+      'google_web',
+      'google_native',
+      'biometric',
+    ]) {
+      const notification = {
+        ...base,
+        event: 'security.new_login',
+        category: 'security',
+        metadata: { authenticationMethod },
+      };
+      expect(component.canReviewSyncConflict(notification)).toBe(false);
+    }
+    expect(
+      component.canReviewSyncConflict({
+        ...base,
+        event: 'security.new_login',
+        category: 'security',
+      })
+    ).toBe(false);
+  });
 });

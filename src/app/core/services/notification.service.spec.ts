@@ -71,4 +71,95 @@ describe('NotificationService realtime state', () => {
     expect(item.category).toBe('sync');
     expect(item.metadata.entityType).toBe('expense');
   });
+
+  it('accepts every security.new_login authentication method and preserves safe metadata', () => {
+    for (const authenticationMethod of [
+      'password',
+      'google_web',
+      'google_native',
+      'biometric',
+    ]) {
+      const item = (service as any).normalizeRealtime({
+        id: '507f1f77bcf86cd799439011',
+        title: 'New login',
+        message: 'A new authenticated session was created.',
+        type: 'warn',
+        event: 'security.new_login',
+        category: 'security',
+        metadata: {
+          authenticationMethod,
+          occurredAt: '2026-09-24T12:00:00.000Z',
+        },
+      });
+      expect(item.event).toBe('security.new_login');
+      expect(item.category).toBe('security');
+      expect(item.metadata.authenticationMethod).toBe(authenticationMethod);
+      expect(item.metadata.occurredAt).toBe('2026-09-24T12:00:00.000Z');
+    }
+  });
+
+  it('handles missing security metadata without breaking notification normalization', () => {
+    const item = (service as any).normalizeRealtime({
+      id: '507f1f77bcf86cd799439011',
+      title: 'New login',
+      message: 'A new authenticated session was created.',
+      type: 'warn',
+      event: 'security.new_login',
+      category: 'security',
+    });
+    expect(item.event).toBe('security.new_login');
+    expect(item.category).toBe('security');
+    expect(item.metadata).toBeUndefined();
+  });
+
+  it('loads security notifications for the current owner and preserves read state', () => {
+    api.get.and.returnValue(
+      of({
+        data: [
+          {
+            id: '507f1f77bcf86cd799439011',
+            title: 'New login',
+            message: 'A new authenticated session was created.',
+            type: 'warn',
+            routeKey: 'notification-detail',
+            event: 'security.new_login',
+            category: 'security',
+            metadata: { authenticationMethod: 'password' },
+            isRead: false,
+            createdAt: new Date().toISOString(),
+          },
+        ],
+        hasMore: false,
+        unreadCount: 1,
+        total: 1,
+      })
+    );
+    service.load(true).subscribe();
+    expect(service.getCached('507f1f77bcf86cd799439011')?.event).toBe(
+      'security.new_login'
+    );
+    expect(service.getCached('507f1f77bcf86cd799439011')?.isRead).toBe(false);
+
+    api.patch.and.returnValue(of({}));
+    service.markRead('507f1f77bcf86cd799439011').subscribe();
+    expect(service.getCached('507f1f77bcf86cd799439011')?.isRead).toBe(true);
+  });
+
+  it('clears the current owner notification state on logout or account switch', () => {
+    const item = {
+      id: '507f1f77bcf86cd799439011',
+      title: 'New login',
+      message: 'A new authenticated session was created.',
+      type: 'warn',
+      routeKey: 'notification-detail',
+      event: 'security.new_login',
+      category: 'security',
+      isRead: false,
+      createdAt: new Date().toISOString(),
+    } as any;
+    (service as any).receiveRealtime(item);
+    expect(service.getCached(item.id)).toBeTruthy();
+    service.clearForOwner();
+    expect(service.getCached(item.id)).toBeUndefined();
+  });
 });
