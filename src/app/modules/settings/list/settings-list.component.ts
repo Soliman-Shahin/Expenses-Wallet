@@ -6,6 +6,7 @@ import { IonicModule } from '@ionic/angular';
 import { AuthService } from 'src/app/modules/auth/services/auth.service';
 import { User } from 'src/app/modules/auth/models';
 import { TranslateModule } from '@ngx-translate/core';
+import { RouterModule } from '@angular/router';
 import { PushNotificationService } from 'src/app/core/services/push-notification.service';
 import { CacheService } from 'src/app/core/services/cache.service';
 import { takeUntil } from 'rxjs/operators';
@@ -18,7 +19,7 @@ import { UserProfile } from 'src/app/modules/profile/models/profile.model';
   templateUrl: './settings-list.component.html',
   styleUrls: ['./settings-list.component.scss'],
   standalone: true,
-  imports: [IonicModule, TranslateModule],
+  imports: [IonicModule, TranslateModule, RouterModule],
 })
 export class SettingsListComponent extends BaseComponent implements OnInit {
   biometricAvailable = false;
@@ -51,9 +52,7 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
   private pushNotificationService = inject(PushNotificationService);
   private profileService = inject(ProfileService);
 
-  constructor() {
-    super();
-  }
+  constructor() { super(); }
 
   override async ngOnInit() {
     super.ngOnInit();

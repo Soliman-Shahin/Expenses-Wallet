@@ -28,6 +28,7 @@ export const APP_ROUTES = {
     SYNC: 'sync',
     CONFLICTS: 'conflicts',
     BACKUP: 'backup',
+    NOTIFICATION_PREFERENCES: 'notification-preferences',
   },
   PROFILE: {
     INDEX: 'profile',

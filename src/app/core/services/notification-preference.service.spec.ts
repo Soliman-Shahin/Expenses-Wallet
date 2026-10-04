@@ -1,4 +1,4 @@
-import { of, Subject, throwError } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 import { NotificationPreferenceService } from './notification-preference.service';
 import { DEFAULT_NOTIFICATION_PREFERENCES } from '../models/notification-preference.model';
 
@@ -37,9 +37,9 @@ describe('NotificationPreferenceService', () => {
 
   it('keeps server state unchanged when the preference API fails', () => {
     const api = {
-      get: jasmine.createSpy().and.returnValue(
-        throwError(() => new Error('request failed'))
-      ),
+      get: jasmine
+        .createSpy()
+        .and.returnValue(throwError(() => new Error('request failed'))),
     };
     const service = createService(api);
     service.load().subscribe({ error: () => undefined });
@@ -70,5 +70,62 @@ describe('NotificationPreferenceService', () => {
     });
 
     expect(service.current).toEqual(DEFAULT_NOTIFICATION_PREFERENCES);
+  });
+
+  it('serializes rapid updates to the same field and keeps narrow patches', () => {
+    const firstResponse$ = new Subject<any>();
+    const secondResponse$ = new Subject<any>();
+    let call = 0;
+    const api = {
+      patch: jasmine.createSpy().and.callFake(() => {
+        call += 1;
+        return call === 1 ? firstResponse$ : secondResponse$;
+      }),
+    };
+    const service = createService(api);
+    const categories = {
+      ...DEFAULT_NOTIFICATION_PREFERENCES,
+      sync: { inbox: true, realtime: true, push: false },
+    };
+    const finalCategories = {
+      ...DEFAULT_NOTIFICATION_PREFERENCES,
+      sync: { inbox: true, realtime: true, push: true },
+    };
+
+    service.update({ sync: { push: false } }).subscribe();
+    service.update({ sync: { push: true } }).subscribe();
+
+    expect(api.patch).toHaveBeenCalledTimes(1);
+    expect(api.patch.calls.argsFor(0)[1]).toEqual({ sync: { push: false } });
+
+    firstResponse$.next({ categories });
+    firstResponse$.complete();
+    expect(api.patch).toHaveBeenCalledTimes(2);
+    expect(api.patch.calls.argsFor(1)[1]).toEqual({ sync: { push: true } });
+
+    secondResponse$.next({ categories: finalCategories });
+    secondResponse$.complete();
+    expect(service.current).toEqual(finalCategories);
+  });
+
+  it('keeps the current state when a preference update fails', () => {
+    const initial = {
+      ...DEFAULT_NOTIFICATION_PREFERENCES,
+      sync: { inbox: true, realtime: true, push: true },
+    };
+    const api = {
+      patch: jasmine
+        .createSpy()
+        .and.returnValue(throwError(() => new Error('request failed'))),
+    };
+    const service = createService(api);
+    service.load = jasmine.createSpy().and.returnValue(of(initial));
+    (service as any).state.next(initial);
+
+    service
+      .update({ sync: { push: false } })
+      .subscribe({ error: () => undefined });
+
+    expect(service.current).toEqual(initial);
   });
 });

@@ -1,0 +1,55 @@
+<ion-header mode="ios" class="settings-header" translucent="false">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button routerLink="/settings/list" class="modern-back-btn" [attr.aria-label]="'COMMON.BACK' | translate">
+        <ion-icon name="chevron-back"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ 'SETTINGS.NOTIFICATION_PREFERENCES' | translate }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="settings-content" [fullscreen]="true">
+  <div class="settings-container notification-preferences-page">
+    <p class="notification-preferences-intro">{{ 'SETTINGS.NOTIFICATION_PREFERENCES_DESC' | translate }}</p>
+    @if (loadState !== 'loaded') {
+    <div class="notification-preferences-status" role="status" aria-live="polite">
+      <span>{{ loadState === 'error' ? ('SETTINGS.NOTIFICATION_PREFERENCES_LOAD_FAILED' | translate) : ('SETTINGS.NOTIFICATION_PREFERENCES_LOADING' | translate) }}</span>
+      @if (loadState === 'error') {
+      <ion-button fill="clear" size="small" (click)="retry()">{{ 'SETTINGS.NOTIFICATION_PREFERENCES_RETRY' | translate }}</ion-button>
+      }
+    </div>
+    }
+    @for (category of notificationCategories; track category.key) {
+    <section class="notification-category" [attr.data-category]="category.key" [attr.aria-labelledby]="category.key + '-title'">
+      <div class="notification-category-heading">
+        <div class="icon-wrapper color-blue"><ion-icon [name]="category.icon" aria-hidden="true"></ion-icon></div>
+        <div>
+          <h2 [id]="category.key + '-title'">{{ category.title | translate }}</h2>
+          <p>{{ category.description | translate }}</p>
+        </div>
+        @if (category.mandatory) {
+        <ion-chip class="required-chip" color="medium"><ion-icon name="lock-closed" aria-hidden="true"></ion-icon><ion-label>{{ 'SETTINGS.NOTIFICATION_REQUIRED' | translate }}</ion-label></ion-chip>
+        }
+      </div>
+      @if (category.mandatory) {
+      <p class="notification-required-note" role="note">{{ 'SETTINGS.NOTIFICATION_REQUIRED_DESC' | translate }}</p>
+      <div class="notification-channel-summary" aria-label="{{ category.title | translate }} {{ 'SETTINGS.NOTIFICATION_CHANNELS' | translate }}">
+        @for (channel of notificationChannels; track channel.key) { <span>{{ channel.label | translate }}</span> }
+      </div>
+      } @else {
+      <div class="notification-channel-list">
+        @for (channel of notificationChannels; track channel.key) {
+        <div class="notification-channel-row">
+          <span [id]="category.key + '-' + channel.key + '-label'" class="notification-channel-label">{{ channel.label | translate }}</span>
+          @if (loadState === 'loaded') {
+          <ion-toggle color="primary" [checked]="isEnabled(category.key, channel.key)" [disabled]="isBusy(category.key, channel.key)" [attr.aria-labelledby]="category.key + '-' + channel.key + '-label'" [attr.aria-label]="(category.title | translate) + ' ' + (channel.label | translate)" (ionChange)="update(category, channel.key, $event)"></ion-toggle>
+          }
+        </div>
+        }
+      </div>
+      }
+    </section>
+    }
+  </div>
+</ion-content>

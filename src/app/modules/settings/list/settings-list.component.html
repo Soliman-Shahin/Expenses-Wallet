@@ -105,16 +105,33 @@
           <ion-icon name="notifications"></ion-icon>
         </div>
         <ion-label>
-          <h3>{{ "SETTINGS.NOTIFICATIONS" | translate }}</h3>
+          <h3>{{ "SETTINGS.DEVICE_PUSH_NOTIFICATIONS" | translate }}</h3>
+          <p>{{ "SETTINGS.DEVICE_PUSH_NOTIFICATIONS_DESC" | translate }}</p>
           <p>{{ notificationStatus | translate }}</p>
         </ion-label>
         <ion-toggle
           slot="end"
-          [attr.aria-label]="'SETTINGS.NOTIFICATIONS' | translate"
+          [attr.aria-label]="'SETTINGS.DEVICE_PUSH_NOTIFICATIONS' | translate"
           [checked]="notificationsEnabled"
           (ionChange)="toggleNotifications($event)"
           color="primary"
         ></ion-toggle>
+      </ion-item>
+
+      <ion-item
+        button
+        detail="true"
+        lines="none"
+        routerLink="/settings/notification-preferences"
+        [attr.aria-label]="'SETTINGS.NOTIFICATION_PREFERENCES' | translate"
+      >
+        <div slot="start" class="icon-wrapper color-blue">
+          <ion-icon name="options-outline" aria-hidden="true"></ion-icon>
+        </div>
+        <ion-label>
+          <h3>{{ "SETTINGS.NOTIFICATION_PREFERENCES" | translate }}</h3>
+          <p>{{ "SETTINGS.NOTIFICATION_PREFERENCES_DESC" | translate }}</p>
+        </ion-label>
       </ion-item>
 
       <!-- Biometric Settings -->
