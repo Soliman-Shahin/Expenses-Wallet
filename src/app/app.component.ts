@@ -142,10 +142,7 @@ export class AppComponent extends BaseComponent implements OnInit {
       try {
         const url = event?.url || '';
         const parsed = new URL(url);
-        if (
-          parsed.protocol === 'expenseswallet:' &&
-          parsed.hostname === 'auth'
-        ) {
+        if (parsed.protocol === 'madarflow:' && parsed.hostname === 'auth') {
           const token =
             parsed.pathname === '/reset-password'
               ? parsed.searchParams.get('token')
@@ -180,7 +177,7 @@ export class AppComponent extends BaseComponent implements OnInit {
       // Initialize GoogleAuth for web platform
       GoogleAuth.initialize({
         clientId:
-          '358709669585-0td9nf2p58ncgtoreopgqkq7vosco473.apps.googleusercontent.com',
+          '353235771010-hrhbu0k5v93qbjqpuirdh4pcatb1sdvg.apps.googleusercontent.com',
         scopes: ['profile', 'email'],
         grantOfflineAccess: true,
       });

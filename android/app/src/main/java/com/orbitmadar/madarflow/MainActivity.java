@@ -1,4 +1,4 @@
-package com.shahin.expenseswallet;
+package com.orbitmadar.madarflow;
 
 import com.getcapacitor.BridgeActivity;
 

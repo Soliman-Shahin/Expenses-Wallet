@@ -15,6 +15,7 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { TokenService } from 'src/app/modules/auth/services/token.service';
 import { ApiService } from './api.service';
+import { BRAND } from 'src/app/config/brand.config';
 
 export type PushPermissionState =
   | 'unavailable'
@@ -225,7 +226,7 @@ export class PushNotificationService {
         notifications: [
           {
             id: this.toLocalNotificationId(notificationId),
-            title: notification.title || 'Expenses Wallet',
+            title: notification.title || BRAND.productName,
             body: notification.body || '',
             channelId: CHANNEL_ID,
             smallIcon: 'ic_stat_notification',
@@ -273,7 +274,9 @@ export class PushNotificationService {
       const value = JSON.parse(
         localStorage.getItem(SEEN_NOTIFICATION_IDS_KEY) || '[]'
       );
-      return Array.isArray(value) ? value.filter((id) => typeof id === 'string') : [];
+      return Array.isArray(value)
+        ? value.filter((id) => typeof id === 'string')
+        : [];
     } catch {
       return [];
     }
@@ -292,8 +295,8 @@ export class PushNotificationService {
     if (Capacitor.getPlatform() !== 'android') return;
     await PushNotifications.createChannel({
       id: CHANNEL_ID,
-      name: 'Expenses Wallet notifications',
-      description: 'General Expenses Wallet notifications',
+      name: `${BRAND.productName} notifications`,
+      description: `General ${BRAND.productName} notifications`,
       importance: 4,
       visibility: 1,
       vibration: true,
@@ -313,7 +316,9 @@ export class PushNotificationService {
   }
 
   private isSupported(): boolean {
-    return Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android';
+    return (
+      Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android'
+    );
   }
 
   private isAuthenticated(): boolean {

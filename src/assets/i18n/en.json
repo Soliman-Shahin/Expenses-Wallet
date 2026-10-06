@@ -24,9 +24,9 @@
     "RECORD": "Transaction record",
     "EDIT": "Edit record"
   },
-  "APP_TITLE": "Expenses wallet",
+  "APP_TITLE": "Madar Flow",
   "HELLO": "Hello! {{user}}",
-  "WELCOME": "Welcome to Expenses Wallet!",
+  "WELCOME": "Welcome to {{ productName }}!",
   "LANG": {
     "CHANGE_LANG": "Change language",
     "ENG": "English",
@@ -784,7 +784,7 @@
     "SYNC_RATE_LIMIT": "Too many sync requests. Please try again later."
   },
   "ONBOARDING": {
-    "WELCOME_TITLE": "Welcome to Expenses Wallet!",
+    "WELCOME_TITLE": "Welcome to {{ productName }}!",
     "WELCOME_DESC": "Your perfect app for managing personal expenses easily and securely",
     "EXPENSES_TITLE": "Track Your Expenses",
     "EXPENSES_DESC": "Record all your daily expenses and categorize them easily to know where your money goes",
@@ -854,7 +854,7 @@
     "PRIVACY_TITLE": "Privacy Policy",
     "LAST_UPDATED": "Last updated: September 16, 2026",
     "TERMS_SERVICE_TITLE": "The service",
-    "TERMS_SERVICE_BODY": "Expenses Wallet helps you record transactions, organize categories, review summaries, and manage your personal financial records.",
+    "TERMS_SERVICE_BODY": "{{ productName }} helps you record transactions, organize categories, review summaries, and manage your personal financial records.",
     "TERMS_FINANCIAL_BODY": "The app is a record-management tool. It does not provide financial, investment, tax, legal, or other professional advice.",
     "TERMS_ACCOUNT_TITLE": "Accounts and security",
     "TERMS_ACCOUNT_BODY": "You are responsible for providing accurate account information and for protecting access to your account and device.",

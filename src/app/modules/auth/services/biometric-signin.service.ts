@@ -15,9 +15,9 @@ interface ProtectedEnrollment {
 @Injectable({ providedIn: 'root' })
 export class BiometricSignInService {
   private readonly enrollmentServer =
-    'com.shahin.expenseswallet.auth.biometric.v1';
+    'com.orbitmadar.madarflow.auth.biometric.v1';
   private readonly installationServer =
-    'com.shahin.expenseswallet.auth.installation.v1';
+    'com.orbitmadar.madarflow.auth.installation.v1';
   private readonly native = NativeBiometric;
   private readonly biometric = inject(BiometricService);
   private readonly api = inject(ApiService);

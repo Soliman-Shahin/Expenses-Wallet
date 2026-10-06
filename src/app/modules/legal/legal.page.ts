@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
+import { BRAND_TRANSLATION_PARAMS } from 'src/app/config/brand.config';
 @Component({
   standalone: true,
   imports: [IonicModule, TranslateModule, RouterLink],
@@ -19,7 +20,7 @@ import { TranslateModule } from '@ngx-translate/core';
         <section>
           <h2>{{ section.title | translate }}</h2>
           @for (paragraph of section.body; track paragraph) {
-          <p>{{ paragraph | translate }}</p>
+          <p>{{ paragraph | translate: brandParams }}</p>
           }
         </section>
         }
@@ -27,6 +28,7 @@ import { TranslateModule } from '@ngx-translate/core';
     >`,
 })
 export class LegalPageComponent {
+  readonly brandParams = BRAND_TRANSLATION_PARAMS;
   titleKey = '';
   sections: { title: string; body: string[] }[] = [];
   constructor(route: ActivatedRoute) {

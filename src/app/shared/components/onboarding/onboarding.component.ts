@@ -7,6 +7,7 @@ import {
 import { BaseComponent } from '../../base/base.component';
 import { IonicModule } from '@ionic/angular';
 import { TranslateModule } from '@ngx-translate/core';
+import { BRAND_TRANSLATION_PARAMS } from 'src/app/config/brand.config';
 
 @Component({
     selector: 'app-onboarding',
@@ -17,6 +18,7 @@ import { TranslateModule } from '@ngx-translate/core';
     imports: [IonicModule, TranslateModule]
 })
 export class OnboardingComponent extends BaseComponent implements OnInit {
+  readonly brandParams = BRAND_TRANSLATION_PARAMS;
   @ViewChild('slidesContainer') slidesContainer!: ElementRef;
 
   steps: OnboardingStep[] = [];

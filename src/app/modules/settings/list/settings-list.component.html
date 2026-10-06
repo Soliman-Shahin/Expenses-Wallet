@@ -232,9 +232,9 @@
     <!-- App Info Section -->
     <div class="app-info-footer">
       <div class="app-logo">
-        <img src="assets/icon/icon.png" alt="Expenses Wallet" />
+        <img src="assets/icon/icon.png" [alt]="brand.productName" />
       </div>
-      <h3 class="app-name">Expenses Wallet</h3>
+      <h3 class="app-name">{{ brand.productName }}</h3>
       <p class="app-version">{{ "SETTINGS.VERSION" | translate }}: 1.0.0</p>
     </div>
   </div>

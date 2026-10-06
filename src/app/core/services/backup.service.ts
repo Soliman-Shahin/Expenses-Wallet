@@ -119,7 +119,7 @@ export class BackupService {
   async exportBackup(backup: BackupData, fileName?: string): Promise<string> {
     try {
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const name = fileName || `expenses-wallet-backup-${timestamp}.json`;
+      const name = fileName || `madar-flow-backup-${timestamp}.json`;
       const jsonString = JSON.stringify(backup, null, 2);
 
       // Web platform - download file

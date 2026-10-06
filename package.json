@@ -1,7 +1,7 @@
 {
-  "name": "expenses-wallet",
+  "name": "Madar-Flow",
   "version": "2.0.0",
-  "author": "Soliman Shahin",
+  "author": "Orbit Madar",
   "homepage": "https://ionicframework.com/",
   "scripts": {
     "ng": "ng",
@@ -91,7 +91,7 @@
     "source-map-explorer": "^2.5.3",
     "typescript": "~5.9.3"
   },
-  "description": "Expenses Wallet Mobile App",
+  "description": "Madar Flow Mobile App",
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "^4.62.2"
   },

@@ -7,7 +7,7 @@ import { NativeBiometric } from '@capgo/capacitor-native-biometric';
 export class SecureStorageService {
   private native = NativeBiometric;
   private readonly key = 'ewallet_auth_session_v1';
-  private readonly server = 'com.shahin.expenseswallet.auth.session.v1';
+  private readonly server = 'com.orbitmadar.madarflow.auth.session.v1';
 
   async read(): Promise<string | null> {
     if (!Capacitor.isNativePlatform()) return localStorage.getItem(this.key);

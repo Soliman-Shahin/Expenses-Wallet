@@ -322,7 +322,7 @@ describe('AUTH.1 native protected storage', () => {
     };
     await storage.write('session-bundle');
     expect(set).toHaveBeenCalledWith({
-      server: 'com.shahin.expenseswallet.auth.session.v1',
+      server: 'com.orbitmadar.madarflow.auth.session.v1',
       username: 'session',
       password: 'session-bundle',
     });

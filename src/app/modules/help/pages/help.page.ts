@@ -3,6 +3,7 @@ import { BaseComponent } from 'src/app/shared/base/base.component';
 import { IonicModule } from '@ionic/angular';
 import { TranslateModule } from '@ngx-translate/core';
 import { RouterLink } from '@angular/router';
+import { BRAND } from 'src/app/config/brand.config';
 
 @Component({
   selector: 'app-help-page',
@@ -13,6 +14,7 @@ import { RouterLink } from '@angular/router';
   imports: [IonicModule, TranslateModule, RouterLink],
 })
 export class HelpPageComponent extends BaseComponent {
+  readonly brand = BRAND;
   faqs = [
     {
       question: 'HELP_PAGE.FAQ_1_Q',

@@ -14,6 +14,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { BehaviorSubject, finalize } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { BiometricSignInService } from '../services/biometric-signin.service';
+import { BRAND } from 'src/app/config/brand.config';
 
 const same = (control: AbstractControl): ValidationErrors | null =>
   control.get('password')?.value === control.get('confirm')?.value
@@ -33,7 +34,7 @@ const same = (control: AbstractControl): ValidationErrors | null =>
   template: ` <ion-content
     ><main class="recovery">
       <div class="recovery-card">
-        <img src="assets/icon/icon.png" alt="Expenses Wallet" />
+        <img src="assets/icon/icon.png" [alt]="brand.productName" />
         <h1>{{ 'AUTH.RECOVERY_TITLE' | translate }}</h1>
         <p>{{ 'AUTH.RECOVERY_SUBTITLE' | translate }}</p>
         <form [formGroup]="form" (ngSubmit)="submit()">
@@ -101,6 +102,7 @@ const same = (control: AbstractControl): ValidationErrors | null =>
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ForgotPasswordComponent {
+  readonly brand = BRAND;
   private auth = inject(AuthService);
   form = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email]),
@@ -129,7 +131,7 @@ export class ForgotPasswordComponent {
   template: ` <ion-content
     ><main class="recovery">
       <div class="recovery-card">
-        <img src="assets/icon/icon.png" alt="Expenses Wallet" />
+        <img src="assets/icon/icon.png" [alt]="brand.productName" />
         <h1>{{ 'AUTH.RESET_PASSWORD' | translate }}</h1>
         @if (!token) {
         <p>{{ 'AUTH.RESET_INVALID' | translate }}</p>
@@ -211,6 +213,7 @@ export class ForgotPasswordComponent {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ResetPasswordComponent {
+  readonly brand = BRAND;
   private auth = inject(AuthService);
   private biometricSignIn = inject(BiometricSignInService);
   private route = inject(ActivatedRoute);

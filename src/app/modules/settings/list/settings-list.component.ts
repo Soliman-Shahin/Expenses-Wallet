@@ -13,6 +13,7 @@ import { takeUntil } from 'rxjs/operators';
 import { clearHttpCache } from 'src/app/core/interceptors/cache.interceptor';
 import { ProfileService } from 'src/app/modules/profile/services/profile.service';
 import { UserProfile } from 'src/app/modules/profile/models/profile.model';
+import { BRAND } from 'src/app/config/brand.config';
 
 @Component({
   selector: 'app-settings-list',
@@ -22,6 +23,7 @@ import { UserProfile } from 'src/app/modules/profile/models/profile.model';
   imports: [IonicModule, TranslateModule, RouterModule],
 })
 export class SettingsListComponent extends BaseComponent implements OnInit {
+  readonly brand = BRAND;
   biometricAvailable = false;
   biometricSignInAvailable = false;
   biometricEnabled = false;
