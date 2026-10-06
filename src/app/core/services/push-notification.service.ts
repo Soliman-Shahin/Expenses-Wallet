@@ -27,7 +27,7 @@ const DEVICE_ID_KEY = 'push_device_id';
 const PENDING_NOTIFICATION_KEY = 'pending_push_notification_id';
 const SEEN_NOTIFICATION_IDS_KEY = 'seen_push_notification_ids';
 const NOTIFICATIONS_ENABLED_KEY = 'notifications';
-const CHANNEL_ID = 'expenses_wallet_general';
+const CHANNEL_ID = 'madar_flow_general';
 
 @Injectable({ providedIn: 'root' })
 export class PushNotificationService {
