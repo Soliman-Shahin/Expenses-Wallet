@@ -1,5 +1,5 @@
 // Simple service worker for offline caching (basic setup)
-const CACHE_NAME = 'expenses-wallet-cache-v1';
+const CACHE_NAME = 'madar-flow-cache-v1';
 const urlsToCache = [
   '/',
   '/index.html',

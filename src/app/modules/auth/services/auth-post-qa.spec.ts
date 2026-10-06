@@ -328,7 +328,7 @@ describe('AUTH.1 post-QA regressions', () => {
     it(
       'Google callback persists despite password Remember Me = ' + remember,
       fakeAsync(() => {
-        sessionStorage.setItem('ewallet_oauth_persistent', String(remember));
+        sessionStorage.setItem('madarflow_oauth_persistent', String(remember));
         auth.exchangeGoogleCode('a'.repeat(64)).subscribe();
         flushMicrotasks();
         const exchange = requests.expectOne(url('/user/auth/google/exchange'));
@@ -450,7 +450,7 @@ describe('AUTH.2 offline cold start', () => {
       read: jasmine.createSpy().and.resolveTo(JSON.stringify(session)),
       write: jasmine.createSpy().and.resolveTo(),
     } as any;
-    localStorage.setItem('ewallet_auth_persistent', 'true');
+    localStorage.setItem('madarflow_auth_persistent', 'true');
     spyOnProperty(navigator, 'onLine', 'get').and.returnValue(false);
     const token = new TokenService(new StorageService(), secure);
     await token.initialize();

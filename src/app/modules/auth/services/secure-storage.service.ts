@@ -6,7 +6,7 @@ import { NativeBiometric } from '@capgo/capacitor-native-biometric';
 @Injectable({ providedIn: 'root' })
 export class SecureStorageService {
   private native = NativeBiometric;
-  private readonly key = 'ewallet_auth_session_v1';
+  private readonly key = 'madarflow_auth_session_v1';
   private readonly server = 'com.orbitmadar.madarflow.auth.session.v1';
 
   async read(): Promise<string | null> {

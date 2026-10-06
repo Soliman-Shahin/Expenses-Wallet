@@ -99,7 +99,7 @@ const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
     await send('Network.setBypassServiceWorker', { bypass: true });
     await send('Fetch.enable', { patterns: [{ urlPattern: '*' }] });
     await send('Page.addScriptToEvaluateOnNewDocument', {
-      source: "localStorage.clear();sessionStorage.clear();localStorage.setItem('ewallet_auth_persistent','false');",
+      source: "localStorage.clear();sessionStorage.clear();localStorage.setItem('madarflow_auth_persistent','false');",
     });
     await send('Page.navigate', { url: origin + '/auth/login' });
     await waitFor(visible('app-login'));

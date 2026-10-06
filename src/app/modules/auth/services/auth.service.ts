@@ -363,7 +363,7 @@ export class AuthService {
         this.tokenService.removeSession();
         this.storageService.clear();
         // clear() removes the policy marker: restore it before any native reload.
-        localStorage.setItem('ewallet_auth_persistent', 'false');
+        localStorage.setItem('madarflow_auth_persistent', 'false');
         this.profileService.clearProfile();
         this.redirectUrl = null;
         void this.tokenService.flush().catch(() => undefined);

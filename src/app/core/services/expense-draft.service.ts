@@ -11,7 +11,7 @@ export interface ExpenseDraft {
 
 @Injectable({ providedIn: 'root' })
 export class ExpenseDraftService {
-  private readonly prefix = 'ewallet.transaction-draft.v1.';
+  private readonly prefix = 'madarflow.transaction-draft.v1.';
 
   private key(ownerId: string | null): string | null {
     return ownerId ? `${this.prefix}${ownerId}` : null;

@@ -92,7 +92,7 @@ export class ExpenseFormComponent
   hasDraft = false;
   private readonly ownerId = this.tokenService.getUserId();
   private readonly shortcutStoragePrefix =
-    'ewallet.transaction-category-shortcuts.v1.';
+    'madarflow.transaction-category-shortcuts.v1.';
   private readonly recentCategoryCap = 5;
   private recentCategoryIds: string[] = [];
   private favoriteCategoryIds: string[] = [];

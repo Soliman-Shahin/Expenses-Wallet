@@ -214,26 +214,6 @@ describe('AUTH.1 consumer sessions', () => {
     requests.expectNone(refreshUrl);
     expect(tokens.getRefreshToken()).toBeNull();
   }));
-  it('migrates legacy credentials without discarding expired-but-refreshable access', fakeAsync(() => {
-    localStorage.setItem(
-      'ewallet_secure_access-token',
-      JSON.stringify(jwt(-100))
-    );
-    localStorage.setItem(
-      'ewallet_secure_refresh-token',
-      JSON.stringify('legacy-refresh')
-    );
-    localStorage.setItem('ewallet_user', JSON.stringify(user));
-    const cold = new TokenService(
-      new StorageService(),
-      new SecureStorageService()
-    );
-    void cold.initialize();
-    flushMicrotasks();
-    expect(cold.getRefreshToken()).toBe('legacy-refresh');
-    expect(localStorage.getItem('ewallet_secure_refresh-token')).toBeNull();
-    expect(localStorage.getItem('ewallet_auth_persistent')).toBe('true');
-  }));
   it('does not logout or refresh on 403', fakeAsync(() => {
     seed();
     http.get(endpoint).subscribe({ error: () => {} });
@@ -304,7 +284,7 @@ describe('AUTH.1 consumer sessions', () => {
       .flush({}, { status: 503, statusText: 'Unavailable' });
     flushMicrotasks();
     expect(tokens.getRefreshToken()).toBeNull();
-    expect(localStorage.getItem('ewallet_auth_session_v1')).toBeNull();
+    expect(localStorage.getItem('madarflow_auth_session_v1')).toBeNull();
   }));
 });
 

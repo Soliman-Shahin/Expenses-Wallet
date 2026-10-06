@@ -36,7 +36,7 @@ export class EncryptionAdvancedService {
       this.encryptionKey = await window.crypto.subtle.deriveKey(
         {
           name: 'PBKDF2',
-          salt: new TextEncoder().encode('expenses-wallet-salt'),
+          salt: new TextEncoder().encode('madar-flow-salt'),
           iterations: 100000,
           hash: 'SHA-256',
         },

@@ -6,7 +6,7 @@ export type StorageType = 'local' | 'session';
   providedIn: 'root',
 })
 export class StorageService {
-  private prefix = 'ewallet_';
+  private prefix = 'madarflow_';
   private storage: Storage;
 
   constructor() {

@@ -21,7 +21,7 @@ export class TokenService {
   private writes: Promise<void> = Promise.resolve();
   private initialization?: Promise<void>;
   private locked = false;
-  private readonly policyKey = 'ewallet_auth_persistent';
+  private readonly policyKey = 'madarflow_auth_persistent';
   revision = 0;
 
   constructor(
@@ -44,29 +44,9 @@ export class TokenService {
     // A fresh logged-out offline launch has no session to restore. Avoid
     // waiting on native protected-storage discovery in that case; persistent
     // sessions (policy=true) still restore from protected storage offline.
-    const hasLegacyCredentials =
-      policy === null &&
-      !!(
-        this.storage.get<string>('secure-access-token') ||
-        this.storage.get<string>('ewallet_secure-access-token') ||
-        this.storage.get<string>('secure-refresh-token') ||
-        this.storage.get<string>('ewallet_secure-refresh-token')
-      );
-    if (policy === 'true' || hasLegacyCredentials || navigator.onLine) {
+    if (policy === 'true' || navigator.onLine) {
       const raw = await this.secure.read();
       if (raw) saved = JSON.parse(raw);
-    }
-    // Preserve existing installs once; move credentials out of legacy native localStorage.
-    if (!saved && policy === null) {
-      const accessToken =
-        this.storage.get<string>('secure_access-token') ||
-        this.storage.get<string>('ewallet_secure_access-token');
-      const refreshToken =
-        this.storage.get<string>('secure_refresh-token') ||
-        this.storage.get<string>('ewallet_secure_refresh-token');
-      const user = this.storage.get<User>('user');
-      if (accessToken && refreshToken && user)
-        saved = { accessToken, refreshToken, user };
     }
     if (
       revision !== this.revision ||
@@ -84,17 +64,6 @@ export class TokenService {
     if (!this.locked) this.user.set(saved.user);
     this.storage.set('user', saved.user);
     await this.persist();
-    this.clearLegacy();
-  }
-
-  private clearLegacy(): void {
-    [
-      'secure_access-token',
-      'secure_refresh-token',
-      'ewallet_secure_access-token',
-      'ewallet_secure_refresh-token',
-      'user-id',
-    ].forEach((k) => this.storage.remove(k));
   }
 
   async saveSession(
@@ -117,7 +86,6 @@ export class TokenService {
     this.storage.set('user', user);
     this.user.set(user);
     await this.persist();
-    this.clearLegacy();
   }
 
   async updateTokens(accessToken: string, refreshToken: string): Promise<void> {
@@ -206,7 +174,6 @@ export class TokenService {
     this.sessionEnded.next();
     this.storage.remove('user');
     this.storage.remove('biometric_enabled');
-    this.clearLegacy();
     void this.persist().catch(() =>
       console.warn('Session storage cleanup unavailable')
     );

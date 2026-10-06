@@ -66,7 +66,7 @@ describe('actual sync receipt transport contract', () => {
   });
 
   it('preserves receipt data across a reloaded queue operation', async () => {
-    const databaseName = `ExpensesWalletDB-sync-restart-${Date.now()}-${Math.random()}`;
+    const databaseName = `MadarFlowDB-sync-restart-${Date.now()}-${Math.random()}`;
     const firstDb = new DatabaseService() as any;
     firstDb.name = databaseName;
     await firstDb.open();

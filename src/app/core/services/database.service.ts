@@ -13,7 +13,7 @@ export class DatabaseService extends Dexie {
   syncOperations!: Table<SyncOperation, string>;
 
   constructor() {
-    super('ExpensesWalletDB');
+    super('MadarFlowDB');
 
     // Define database schema
     this.version(1).stores({

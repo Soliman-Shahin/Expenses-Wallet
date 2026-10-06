@@ -122,7 +122,7 @@ export class LoginComponent extends BaseComponent implements OnInit {
   private initForm(): void {
     const savedEmail = localStorage.getItem('savedEmail') || '';
     const rememberMe =
-      localStorage.getItem('ewallet_auth_persistent') === 'true';
+      localStorage.getItem('madarflow_auth_persistent') === 'true';
 
     this.loginForm = new FormGroup({
       [this.formFields.email]: new FormControl(savedEmail, {

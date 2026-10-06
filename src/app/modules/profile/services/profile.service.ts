@@ -22,7 +22,7 @@ export class ProfileService {
   private readonly PROFILE_ME_ENDPOINT = '/user/me';
   private readonly PROFILE_AVATAR_ENDPOINT = '/user/me/avatar';
 
-  // Use app-wide storage (prefix ewallet_) so the key becomes 'ewallet_user'
+  // Use app-wide storage (prefix madarflow_) so the key becomes 'madarflow_user'
   private storage = inject(StorageService);
   private api = inject(ApiService);
   private tokens = inject(TokenService);
@@ -115,7 +115,7 @@ export class ProfileService {
 
   getProfile(): UserProfile | null {
     try {
-      // Read unified user object stored under key 'ewallet_user'
+      // Read unified user object stored under key 'madarflow_user'
       const cached = this.storage.get<any>(PROFILE_CACHE_KEY);
       const raw = cached?.profile ?? cached ?? this.storage.get<any>('user');
       // raw might already be a normalized UserProfile or a backend User; normalize either
@@ -128,7 +128,7 @@ export class ProfileService {
 
   saveProfile(profile: UserProfile): boolean {
     try {
-      // Persist using shared storage => key becomes 'ewallet_user'
+      // Persist using shared storage => key becomes 'madarflow_user'
       this.storage.set(PROFILE_CACHE_KEY, {
         ownerId: this.profileOwnerId || this.tokens.getUserId(),
         profile,
