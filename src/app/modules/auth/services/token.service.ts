@@ -1,211 +1,211 @@
 import { Injectable, signal } from '@angular/core';
-import { LocalStorageKeys, User } from 'src/app/modules/auth/models';
+import { Capacitor } from '@capacitor/core';
+import { User } from '../models';
 import { StorageService } from './storage.service';
 import { SecureStorageService } from './secure-storage.service';
+import { Subject } from 'rxjs';
 
-@Injectable({
-  providedIn: 'root',
-})
+interface Session {
+  user: User | null;
+  accessToken: string;
+  refreshToken: string;
+}
+
+@Injectable({ providedIn: 'root' })
 export class TokenService {
-  private readonly localStorageKeys: LocalStorageKeys = {
-    accessToken: 'access-token',
-    refreshToken: 'refresh-token',
-    userId: 'user-id',
-    user: 'user',
-    userLang: 'user-lang',
-  };
-
+  private readonly sessionEnded = new Subject<void>();
+  readonly sessionEnded$ = this.sessionEnded.asObservable();
   user = signal<User | null>(null);
+  private session: Session = { user: null, accessToken: '', refreshToken: '' };
+  private persistent = false;
+  private writes: Promise<void> = Promise.resolve();
+  private initialization?: Promise<void>;
+  private locked = false;
+  private readonly policyKey = 'madarflow_auth_persistent';
+  revision = 0;
 
   constructor(
     private storage: StorageService,
     private secure: SecureStorageService
-  ) {
-    // Migrate old tokens if they exist
-    this.migrateOldTokens();
-    // Initialize user signal from storage on app start
-    this.initializeUserFromStorage();
+  ) {}
+
+  initialize(): Promise<void> {
+    return (this.initialization ??= this.restore().catch((error) => {
+      this.initialization = undefined;
+      throw error;
+    }));
   }
 
-  /**
-   * Migrate tokens from old storage format to new format
-   * Old format: 'ewallet_ewallet_secure_access-token'
-   * New format: 'ewallet_secure_access-token'
-   */
-  private migrateOldTokens(): void {
-    try {
-      const oldAccessTokenKey = 'ewallet_ewallet_secure_access-token';
-      const oldRefreshTokenKey = 'ewallet_ewallet_secure_refresh-token';
-      
-      const oldAccessToken = localStorage.getItem(oldAccessTokenKey);
-      const oldRefreshToken = localStorage.getItem(oldRefreshTokenKey);
-      
-      if (oldAccessToken) {
-        console.log('🔄 [TokenService] Migrating old access token...');
-        this.setAccessToken(JSON.parse(oldAccessToken));
-        localStorage.removeItem(oldAccessTokenKey);
-      }
-      
-      if (oldRefreshToken) {
-        console.log('🔄 [TokenService] Migrating old refresh token...');
-        this.setRefreshToken(JSON.parse(oldRefreshToken));
-        localStorage.removeItem(oldRefreshTokenKey);
-      }
-    } catch (error) {
-      console.warn('⚠️ [TokenService] Token migration failed:', error);
+  private async restore(): Promise<void> {
+    const revision = this.revision;
+    const policy = localStorage.getItem(this.policyKey);
+    if (policy === 'false') return;
+    let saved: Session | null = null;
+    // A fresh logged-out offline launch has no session to restore. Avoid
+    // waiting on native protected-storage discovery in that case; persistent
+    // sessions (policy=true) still restore from protected storage offline.
+    if (policy === 'true' || navigator.onLine) {
+      const raw = await this.secure.read();
+      if (raw) saved = JSON.parse(raw);
     }
+    if (
+      revision !== this.revision ||
+      !saved?.accessToken ||
+      !saved?.refreshToken ||
+      !saved?.user
+    )
+      return;
+    this.persistent = true;
+    this.session = saved;
+    this.locked =
+      Capacitor.isNativePlatform() &&
+      policy === 'true' &&
+      this.storage.get<boolean>('biometric_enabled') === true;
+    if (!this.locked) this.user.set(saved.user);
+    this.storage.set('user', saved.user);
+    await this.persist();
   }
 
-  /**
-   * Initialize user signal from storage
-   * This ensures authentication state persists across page reloads
-   */
-  private initializeUserFromStorage(): void {
-    try {
-      const storedUser = this.getUser();
-      const accessToken = this.getAccessToken();
-      
-      console.log('🔍 [TokenService] Checking stored auth state:', {
-        hasUser: !!storedUser,
-        hasToken: !!accessToken,
-        tokenLength: accessToken?.length || 0
-      });
-      
-      // Only restore user if we have both user data and a valid token
-      if (storedUser && accessToken) {
-        // Check if token is expired
-        if (!this.isTokenExpired(accessToken)) {
-          this.user.set(storedUser);
-          console.log('✅ [TokenService] User state restored from storage');
-        } else {
-          // Token expired, clear invalid session
-          console.warn('⚠️ [TokenService] Token expired, clearing session');
-          this.removeSession();
-        }
-      } else {
-        console.warn('⚠️ [TokenService] No valid session found in storage');
-      }
-    } catch (error) {
-      console.error('❌ [TokenService] Failed to initialize user from storage:', error);
-      // Clear potentially corrupted data
-      this.removeSession();
-    }
+  async saveSession(
+    user: User,
+    accessToken: string,
+    refreshToken: string,
+    persistent: boolean
+  ): Promise<void> {
+    this.revision++;
+    this.persistent = persistent;
+    this.locked = false;
+    // Preserve the profile cache contract, but never persist password/session fields.
+    const {
+      password: _password,
+      sessions: _sessions,
+      ...safeUser
+    } = user as User & { password?: unknown; sessions?: unknown };
+    user = safeUser as User;
+    this.session = { user, accessToken, refreshToken };
+    this.storage.set('user', user);
+    this.user.set(user);
+    await this.persist();
   }
 
-  // Use StorageService for all storage operations
-  private getItem<T = string>(key: string): T | null {
-    return this.storage.get<T>(key);
+  async updateTokens(accessToken: string, refreshToken: string): Promise<void> {
+    this.session = { ...this.session, accessToken, refreshToken };
+    await this.persist();
   }
 
-  private setItem<T = string>(key: string, value: T): void {
-    this.storage.set<T>(key, value);
-  }
-
-  private removeItem(key: string): void {
-    this.storage.remove(key);
+  private persist(): Promise<void> {
+    const persistent = this.persistent;
+    const snapshot = JSON.stringify(this.session);
+    localStorage.setItem(this.policyKey, String(persistent));
+    const write = this.writes
+      .catch(() => undefined)
+      .then(() =>
+        persistent ? this.secure.write(snapshot) : this.secure.clear()
+      );
+    this.writes = write;
+    return write;
   }
 
   getAccessToken(): string | null {
-    return this.secure.get(this.localStorageKeys.accessToken);
+    return this.locked ? null : this.session.accessToken || null;
   }
-
   getRefreshToken(): string | null {
-    return this.secure.get(this.localStorageKeys.refreshToken);
+    return this.session.refreshToken || null;
   }
-
-  getUserId(): string | null {
-    return this.getItem<string>(this.localStorageKeys.userId);
-  }
-
   getUser(): User | null {
-    return this.getItem<User>(this.localStorageKeys.user);
+    return this.locked ? null : this.user();
   }
-
-  getUserLang(): string | null {
-    return this.getItem<string>(this.localStorageKeys.userLang);
+  getUserId(): string | null {
+    return this.locked ? null : this.user()?._id || null;
   }
-
-  setAccessToken(accessToken: string): void {
-    this.secure.set(this.localStorageKeys.accessToken, accessToken);
+  isBiometricUnlockRequired(): boolean {
+    return this.locked;
   }
-
-  setRefreshToken(refreshToken: string): void {
-    this.secure.set(this.localStorageKeys.refreshToken, refreshToken);
-  }
-
-  setUserId(userId: string): void {
-    this.setItem<string>(this.localStorageKeys.userId, userId);
-  }
-
-  setUser(user: User): void {
-    this.setItem<User>(this.localStorageKeys.user, user);
-    this.user.set(user);
-  }
-
-  setUserLang(userLang: string): void {
-    this.setItem<string>(this.localStorageKeys.userLang, userLang);
-  }
-
-  setSession(userId: string, accessToken: string, refreshToken: string): void {
-    this.setUserId(userId);
-    this.setAccessToken(accessToken);
-    this.setRefreshToken(refreshToken);
-  }
-
-  removeSession(): void {
-    // Remove user-related keys from normal storage
-    [
-      this.localStorageKeys.user,
-      this.localStorageKeys.userId,
-      this.localStorageKeys.userLang,
-    ].forEach((key) => this.removeItem(key));
-    // Remove tokens from secure storage
-    this.secure.remove(this.localStorageKeys.accessToken);
-    this.secure.remove(this.localStorageKeys.refreshToken);
-    this.user.set(null);
-  }
-
-  getPayload(): any {
-    const token = this.getAccessToken();
-    if (token) {
-      try {
-        const payload = token.split('.')[1];
-        return JSON.parse(atob(payload)).data ?? null;
-      } catch (error) {
-        console.error('Error parsing payload:', error);
-        return null;
-      }
+  requireBiometricUnlock(): void {
+    if (this.hasRestoredSession()) {
+      this.locked = true;
+      this.user.set(null);
     }
-    return null;
   }
-
-  // Token expiration helpers
-  isTokenExpired(token: string | null): boolean {
-    if (!token) return true;
+  hasRestoredSession(): boolean {
+    return (
+      !!this.session.accessToken &&
+      !!this.session.refreshToken &&
+      !!this.session.user
+    );
+  }
+  unlockBiometricSession(): void {
+    if (!this.locked || !this.session.user) return;
+    this.locked = false;
+    this.user.set(this.session.user);
+  }
+  getUserLang(): string | null {
+    return this.storage.get<string>('user-lang');
+  }
+  setUserLang(value: string): void {
+    this.storage.set('user-lang', value);
+  }
+  setUserId(_value: string): void {} // User ID is owned by the session user.
+  setUser(user: User): void {
+    this.session.user = user;
+    this.user.set(user);
+    if (this.session.accessToken)
+      void this.persist().catch(() =>
+        console.warn('Session storage unavailable')
+      );
+  }
+  setAccessToken(value: string): void {
+    this.session.accessToken = value;
+  }
+  setRefreshToken(value: string): void {
+    this.session.refreshToken = value;
+  }
+  setSession(_id: string, accessToken: string, refreshToken: string): void {
+    void this.updateTokens(accessToken, refreshToken).catch(() =>
+      console.warn('Session storage unavailable')
+    );
+  }
+  removeSession(): void {
+    this.revision++;
+    this.persistent = false;
+    this.locked = false;
+    this.session = { user: null, accessToken: '', refreshToken: '' };
+    this.user.set(null);
+    this.sessionEnded.next();
+    this.storage.remove('user');
+    this.storage.remove('biometric_enabled');
+    void this.persist().catch(() =>
+      console.warn('Session storage cleanup unavailable')
+    );
+  }
+  async flush(): Promise<void> {
+    await this.writes;
+  }
+  getPayload(): any {
     try {
-      const parts = token.split('.');
-      if (parts.length !== 3) return true; // Invalid JWT format
-      
-      const payload = JSON.parse(atob(parts[1]));
-      const exp = payload.exp;
-      
-      // If no expiration, consider token valid (some tokens don't expire)
-      if (!exp) return false;
-      
-      // Add 30 second buffer to account for clock skew
-      const currentTime = Math.floor(Date.now() / 1000);
-      return currentTime > (exp - 30);
-    } catch (e) {
-      console.error('Error checking token expiration:', e);
+      return this.decode(this.getAccessToken()!).data ?? null;
+    } catch {
+      return null;
+    }
+  }
+  private decode(token: string): any {
+    return JSON.parse(
+      atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))
+    );
+  }
+  isTokenExpired(token: string | null): boolean {
+    try {
+      const exp = this.decode(token!).exp;
+      return !exp || Date.now() / 1000 >= exp - 30;
+    } catch {
       return true;
     }
   }
-
   isAccessTokenExpired(): boolean {
     return this.isTokenExpired(this.getAccessToken());
   }
-
+  // Refresh credentials are opaque: only the server can determine expiry/revocation.
   isRefreshTokenExpired(): boolean {
-    return this.isTokenExpired(this.getRefreshToken());
+    return !this.getRefreshToken();
   }
 }

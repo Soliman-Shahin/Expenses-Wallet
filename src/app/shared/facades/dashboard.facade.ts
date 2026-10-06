@@ -77,6 +77,32 @@ export class DashboardFacade {
     );
   }
 
+  /**
+   * Profile salary is stored separately from expense transactions. The API
+   * totals endpoint aggregates transaction categories only, so callers must
+   * combine the two sources consistently.
+   */
+  withProfileIncome(
+    totals: { income: number; expenses: number; balance: number },
+    profile: { salary?: Array<{ amount?: number }> | number } | null
+  ) {
+    const salaryEntries = Array.isArray(profile?.salary)
+      ? profile.salary
+      : profile?.salary != null
+      ? [{ amount: profile.salary }]
+      : [];
+    const salaryIncome = salaryEntries.reduce(
+      (sum, item) => sum + (Number(item?.amount) || 0),
+      0
+    );
+    const income = totals.income + salaryIncome;
+    return {
+      income,
+      expenses: totals.expenses,
+      balance: income - totals.expenses,
+    };
+  }
+
   totalsForMonth(
     month: number,
     year: number
@@ -84,6 +110,119 @@ export class DashboardFacade {
     const startDate = new Date(year, month - 1, 1, 0, 0, 0, 0);
     const endDate = new Date(year, month, 0, 23, 59, 59, 999);
     return this.totalsForRange(startDate, endDate);
+  }
+
+  expenseComparisonForMonth(
+    month: number,
+    year: number
+  ): Observable<{
+    current: number;
+    previous: number;
+    direction: 'less' | 'more' | 'same' | 'new' | 'none';
+    percentage: number | null;
+  }> {
+    const currentStart = new Date(year, month - 1, 1, 0, 0, 0, 0);
+    const nextMonthStart = new Date(year, month, 1, 0, 0, 0, 0);
+    const previousStart = new Date(year, month - 2, 1, 0, 0, 0, 0);
+
+    return this.expenses.getExpenses().pipe(
+      map((expenses) => {
+        let current = 0;
+        let previous = 0;
+        for (const expense of expenses) {
+          if ((expense as any)._isDeleted) continue;
+          const rawDate = (expense as any)?.date;
+          if (!rawDate) continue;
+          const date = new Date(rawDate);
+          if (!Number.isFinite(date.getTime())) continue;
+          const categoryType =
+            expense.category && typeof expense.category === 'object'
+              ? (expense.category as any).type
+              : undefined;
+          const type = String(
+            (expense as any)?.type || categoryType || 'outcome'
+          ).toLowerCase();
+          if (type === 'income') continue;
+          const amount = Number(expense.amount);
+          if (!Number.isFinite(amount)) continue;
+          if (date >= currentStart && date < nextMonthStart) current += amount;
+          else if (date >= previousStart && date < currentStart)
+            previous += amount;
+        }
+        if (current === 0 && previous === 0) {
+          return {
+            current,
+            previous,
+            direction: 'none' as const,
+            percentage: null,
+          };
+        }
+        if (previous === 0) {
+          return {
+            current,
+            previous,
+            direction: 'new' as const,
+            percentage: null,
+          };
+        }
+        if (current === previous) {
+          return {
+            current,
+            previous,
+            direction: 'same' as const,
+            percentage: 0,
+          };
+        }
+        const delta = current - previous;
+        return {
+          current,
+          previous,
+          direction: delta < 0 ? ('less' as const) : ('more' as const),
+          percentage: Math.abs((delta / previous) * 100),
+        };
+      })
+    );
+  }
+
+  incomeTransactionsForRange(
+    startDate: Date,
+    endDate: Date
+  ): Observable<{ count: number; sum: number }> {
+    const startInclusive = startDate.getTime();
+    const endExclusive = endDate.getTime();
+    return this.expenses.getExpenses().pipe(
+      map((resp) => {
+        const expenses: Expense[] = Array.isArray(resp)
+          ? (resp as Expense[])
+          : (resp as any)?.data?.data || (resp as any)?.data || [];
+        let count = 0;
+        let sum = 0;
+        for (const expense of expenses) {
+          const rawDate = expense?.date || expense?.createdAt;
+          const timestamp = rawDate ? new Date(rawDate).getTime() : NaN;
+          if (
+            !Number.isFinite(timestamp) ||
+            timestamp < startInclusive ||
+            timestamp >= endExclusive
+          ) {
+            continue;
+          }
+          const categoryType =
+            expense?.category && typeof expense.category === 'object'
+              ? (expense.category as any).type
+              : undefined;
+          const transactionType =
+            (expense as any)?.type || categoryType || 'outcome';
+          if (String(transactionType).toLowerCase() !== 'income') continue;
+
+          const amount = Number(expense.amount);
+          if (!Number.isFinite(amount)) continue;
+          count++;
+          sum += amount;
+        }
+        return { count, sum };
+      })
+    );
   }
 
   // Compute expense distribution by category for a custom date range
@@ -241,10 +380,12 @@ export class DashboardFacade {
   ): Observable<NamedValue[]> {
     const startInclusive = startDate.getTime();
     const endExclusive = endDate.getTime();
-    
+
     // Calculate number of days in the range
-    const daysDiff = Math.ceil((endExclusive - startInclusive) / (1000 * 60 * 60 * 24));
-    
+    const daysDiff = Math.ceil(
+      (endExclusive - startInclusive) / (1000 * 60 * 60 * 24)
+    );
+
     return this.expenses.getExpenses().pipe(
       map((resp) => {
         const expArr: Expense[] = Array.isArray(resp)
@@ -267,18 +408,19 @@ export class DashboardFacade {
             if (typeLower === 'income') return;
             const amt = Number(e.amount);
             if (!Number.isFinite(amt) || Number.isNaN(amt)) return;
-            const expenseDate = new Date((e as any)?.date || (e as any)?.createdAt);
-            const dayIndex = Math.floor((expenseDate.getTime() - startInclusive) / (1000 * 60 * 60 * 24));
+            const expenseDate = new Date(
+              (e as any)?.date || (e as any)?.createdAt
+            );
+            const dayIndex = Math.floor(
+              (expenseDate.getTime() - startInclusive) / (1000 * 60 * 60 * 24)
+            );
             if (dayIndex >= 0 && dayIndex < daysDiff) daily[dayIndex] += amt;
           });
         return daily.map((v, i) => {
           const date = new Date(startInclusive + i * 24 * 60 * 60 * 1000);
           return { name: `${date.getDate()}/${date.getMonth() + 1}`, value: v };
         });
-      }),
-      switchMap((arr) =>
-        arr && arr.length > 0 ? of(arr) : this.charts.getMonthlyExpenses()
-      )
+      })
     );
   }
 
@@ -320,10 +462,7 @@ export class DashboardFacade {
             if (idx >= 0 && idx < daysInMonth) daily[idx] += amt;
           });
         return daily.map((v, i) => ({ name: String(i + 1), value: v }));
-      }),
-      switchMap((arr) =>
-        arr && arr.length > 0 ? of(arr) : this.charts.getMonthlyExpenses()
-      )
+      })
     );
   }
 

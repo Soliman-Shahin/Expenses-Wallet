@@ -16,7 +16,7 @@ export interface DriveFile {
   providedIn: 'root',
 })
 export class GoogleDriveService {
-  private readonly FOLDER_NAME = 'Expenses-Wallet-Backups';
+  private readonly FOLDER_NAME = 'Madar-Flow-Backups';
   
   private isInitialized = false;
   private folderId: string = '';

@@ -1,4 +1,7 @@
-import { Component, ChangeDetectionStrategy, Input,
+import {
+  Component,
+  ChangeDetectionStrategy,
+  Input,
   OnChanges,
   SimpleChanges,
   Output,
@@ -8,7 +11,8 @@ import { Component, ChangeDetectionStrategy, Input,
   OnDestroy,
   HostBinding,
   ElementRef,
-  ViewChild, } from '@angular/core';
+  ViewChild,
+} from '@angular/core';
 
 import { TranslateModule } from '@ngx-translate/core';
 import { BaseComponent } from 'src/app/shared/base/base.component';
@@ -40,7 +44,7 @@ interface InternalChartData extends ChartData {
   imports: [ChartTooltipComponent, TranslateModule],
   templateUrl: './pie-chart.component.html',
   styleUrls: ['./pie-chart.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PieChartComponent
   extends BaseComponent
@@ -127,9 +131,16 @@ export class PieChartComponent
       return;
     }
 
-    if (this.chartData.length !== this.data.length) {
-      this.chartData = this.data.map((item) => ({ ...item, visible: true }));
-    }
+    const visibility = new Map(
+      this.chartData.map((item) => [item.name, item.visible])
+    );
+    this.chartData = this.data
+      .map((item) => ({
+        ...item,
+        value: Number(item.value),
+        visible: visibility.get(item.name) ?? true,
+      }))
+      .filter((item) => Number.isFinite(item.value) && item.value >= 0);
 
     this.totalValue = this.chartData
       .filter((d) => d.visible)

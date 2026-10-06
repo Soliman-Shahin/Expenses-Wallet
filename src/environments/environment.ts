@@ -4,8 +4,8 @@
 
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:3000/v1',
-  // apiUrl: 'https://expenses-wallet.up.railway.app/v1',
+  // apiUrl: 'http://localhost:3000/v1',
+  apiUrl: 'https://expenses-wallet.up.railway.app/v1',
 
   // Encryption settings
   // NOTE: Full payload encryption for login/signup requests
@@ -16,14 +16,15 @@ export const environment = {
   google: {
     // TODO: replace with your real Web Client ID from Google Cloud Console (OAuth 2.0 Client IDs - type Web)
     webClientId:
-      '358709669585-0td9nf2p58ncgtoreopgqkq7vosco473.apps.googleusercontent.com',
+      '353235771010-hrhbu0k5v93qbjqpuirdh4pcatb1sdvg.apps.googleusercontent.com',
   },
 
   // Google Drive for Backup
   // يمكنك استخدام نفس webClientId أو إنشاء Client ID منفصل
   // إذا استخدمت نفسه، تأكد من إضافة scope: 'https://www.googleapis.com/auth/drive.file'
   // Follow instructions in GOOGLE_DRIVE_SETUP.md
-  googleDriveClientId: '358709669585-0td9nf2p58ncgtoreopgqkq7vosco473.apps.googleusercontent.com',
+  googleDriveClientId:
+    '353235771010-hrhbu0k5v93qbjqpuirdh4pcatb1sdvg.apps.googleusercontent.com',
 
   // Feature flags
   features: {

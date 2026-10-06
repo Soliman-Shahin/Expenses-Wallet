@@ -21,9 +21,15 @@ export const MENU_ITEMS: MenuItem[] = [
     requiresAuth: true,
   },
   {
+    title: 'SETTINGS.NOTIFICATIONS',
+    icon: 'notifications-outline',
+    link: APP_ROUTES.BASE + APP_ROUTES.NOTIFICATIONS.INDEX,
+    requiresAuth: true,
+  },
+  {
     title: 'Settings',
     icon: 'settings-outline',
     link: APP_ROUTES.BASE + APP_ROUTES.SETTINGS.INDEX,
     requiresAuth: true,
-  }
+  },
 ];

@@ -36,7 +36,7 @@ export class EncryptionAdvancedService {
       this.encryptionKey = await window.crypto.subtle.deriveKey(
         {
           name: 'PBKDF2',
-          salt: new TextEncoder().encode('expenses-wallet-salt'),
+          salt: new TextEncoder().encode('madar-flow-salt'),
           iterations: 100000,
           hash: 'SHA-256',
         },
@@ -119,7 +119,8 @@ export class EncryptionAdvancedService {
       const encryptedBase64 = this.arrayBufferToBase64(encrypted);
 
       // Return in format: iv:authTag:encrypted
-      return `${ivBase64}:${authTagBase64}:${encryptedBase64}`;
+      const result = `${ivBase64}:${authTagBase64}:${encryptedBase64}`;
+      return result;
     } catch (error) {
       console.error('❌ Encryption failed:', error);
       throw new Error('Encryption failed');

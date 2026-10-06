@@ -113,7 +113,7 @@
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(0,0,0,0.04);
-    
+
     &::before {
       opacity: 1;
     }
@@ -200,8 +200,27 @@
     flex: 1;
     min-width: 0; 
     width: 100%;
-    gap: 4px;
+    gap: 2px;
 
+    .expense-comparison {
+      min-height: 14px;
+      color: var(--ew-text-color-muted);
+      font-size: 10px;
+      line-height: 1.2;
+      font-weight: 500;
+      white-space: nowrap;
+      max-width: 100%;
+
+      ion-icon {
+        font-size: 12px;
+        vertical-align: -2px;
+        margin-inline-end: 2px;
+      }
+
+      &--favorable { color: var(--ion-color-success); }
+      &--unfavorable { color: var(--ion-color-danger); }
+      &--unavailable { color: var(--ew-text-color-muted); }
+    }
     .label {
       font-size: 13px;
       color: var(--ew-text-color-muted);
@@ -219,7 +238,7 @@
       text-overflow: ellipsis;
       width: 100%;
     }
-    
+
     > div {
       width: 100%;
     }
@@ -252,4 +271,3 @@ body.dark {
     background: rgba(255,255,255,0.05);
   }
 }
-

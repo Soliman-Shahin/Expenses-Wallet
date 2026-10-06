@@ -28,7 +28,7 @@
             <!-- First Step: App Logo -->
             @if (i === 0) {
               <div class="app-logo-wrap">
-                <img src="assets/icon/icon.png" alt="Expenses Wallet" class="onboarding-logo" />
+                <img src="assets/icon/icon.png" [alt]="brandParams.productName" class="onboarding-logo" />
                 <div class="logo-aura"></div>
               </div>
             }
@@ -41,10 +41,11 @@
                 <div class="crystal-glow"></div>
               </div>
             }
-            <h2 class="slide-title">{{ step.title | translate }}</h2>
+            <h2 class="slide-title">{{ step.title | translate: brandParams }}</h2>
             <p class="slide-desc">{{ step.description | translate }}</p>
-          </div>
-        </div>
+  </div>
+
+</div>
       }
     </div>
   </div>

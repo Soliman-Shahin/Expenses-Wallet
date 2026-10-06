@@ -39,7 +39,10 @@ ion-app.no-tabs {
 
 :host {
   --header-height: 56px;
-  --tabs-height: 56px;
+  --tabs-height: 84px;
+  --tabs-dock-height: 50px;
+  --tabs-dock-bottom-offset: 10px;
+  --tabs-fab-gap: 18px;
   --side-menu-width: 280px;
   --side-menu-z-index: 1000;
   --content-padding: var(--spacing-md);
@@ -159,7 +162,8 @@ ion-router-outlet {
   padding: 32px 24px;
   border-radius: 24px;
   background: rgba(30, 41, 59, 0.85);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -198,20 +202,21 @@ ion-router-outlet {
   animation: spinnerRotate 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
   z-index: 1;
 
-  &::before, &::after {
+  &::before,
+  &::after {
     content: "";
     position: absolute;
     border-radius: 50%;
     border: 3px solid transparent;
   }
-  
+
   &::before {
     inset: -9px;
     border-top-color: var(--ion-color-secondary, #38bdf8);
     border-left-color: rgba(56, 189, 248, 0.3);
     animation: spinnerRotate 2s cubic-bezier(0.5, 0, 0.5, 1) infinite reverse;
   }
-  
+
   &::after {
     inset: 3px;
     border-bottom-color: var(--ion-color-success, #34d399);
@@ -224,40 +229,72 @@ ion-router-outlet {
   font-weight: 500;
   letter-spacing: 0.5px;
   color: #e2e8f0;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   animation: textPulse 2s ease-in-out infinite;
 }
 
 @keyframes spinnerRotate {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes logoPulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(0.9); opacity: 0.8; }
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
 }
 
 @keyframes textPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }
 
 @keyframes loaderOverlayFadeIn {
-  from { opacity: 0; backdrop-filter: blur(0px); }
-  to { opacity: 1; backdrop-filter: blur(8px); }
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(8px);
+  }
 }
 
 @keyframes loaderScaleIn {
-  from { opacity: 0; transform: translateY(20px) scale(0.95); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .custom-loader-overlay, .custom-loader, .spinner-ring, .loader-logo, .loader-message {
+  .custom-loader-overlay,
+  .custom-loader,
+  .spinner-ring,
+  .loader-logo,
+  .loader-message {
     animation: none !important;
   }
-  
+
   .spinner-ring {
     border-color: var(--ion-color-primary, #22d3ee);
   }

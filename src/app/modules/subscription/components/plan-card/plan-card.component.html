@@ -2,29 +2,29 @@
   [class.current-plan]="isCurrentPlan"
   [class.popular-plan]="plan.isPopular"
 >
-  <!-- Popular Badge -->
-  <div class="popular-badge" *ngIf="plan.isPopular">
-    <ion-badge color="warning">
-      <ion-icon name="star"></ion-icon>
-      {{ "SUBSCRIPTION.POPULAR" | translate }}
-    </ion-badge>
-  </div>
-
-  <!-- Current Plan Badge -->
-  <div class="current-badge" *ngIf="isCurrentPlan">
-    <ion-badge [color]="getPlanColor()">
-      <ion-icon name="checkmark-circle"></ion-icon>
-      {{ "SUBSCRIPTION.CURRENT_PLAN" | translate }}
-    </ion-badge>
-  </div>
-
   <ion-card-header>
-    <ion-card-title [color]="getPlanColor()">
-      {{ plan.name }}
-    </ion-card-title>
-    <ion-card-subtitle>
-      {{ plan.description }}
-    </ion-card-subtitle>
+    <div class="plan-heading">
+      <div>
+        <ion-card-title [color]="getPlanColor()">{{
+          plan.name
+        }}</ion-card-title>
+        <ion-card-subtitle>{{ plan.description }}</ion-card-subtitle>
+      </div>
+      <div class="plan-badges" *ngIf="isCurrentPlan || plan.isPopular">
+        <ion-badge
+          class="current-badge"
+          *ngIf="isCurrentPlan"
+          [color]="getPlanColor()"
+        >
+          <ion-icon name="checkmark-circle"></ion-icon>
+          {{ "SUBSCRIPTION.CURRENT_PLAN" | translate }}
+        </ion-badge>
+        <ion-badge class="popular-badge" *ngIf="plan.isPopular" color="warning">
+          <ion-icon name="star"></ion-icon>
+          {{ "SUBSCRIPTION.POPULAR" | translate }}
+        </ion-badge>
+      </div>
+    </div>
   </ion-card-header>
 
   <ion-card-content>
@@ -49,40 +49,34 @@
     <!-- Limits -->
     <div class="limits-section">
       <h4>{{ "SUBSCRIPTION.LIMITS" | translate }}</h4>
-      <ion-list lines="none">
-        <ion-item>
-          <ion-icon name="folder-outline" slot="start"></ion-icon>
-          <ion-label>
-            <p>{{ "SUBSCRIPTION.CATEGORIES_LIMIT" | translate }}</p>
-            <h3>{{ formatLimit(plan.limits.maxCategories) }}</h3>
-          </ion-label>
-        </ion-item>
-        <ion-item>
-          <ion-icon name="receipt-outline" slot="start"></ion-icon>
-          <ion-label>
-            <p>{{ "SUBSCRIPTION.TRANSACTIONS_LIMIT" | translate }}</p>
-            <h3>{{ formatLimit(plan.limits.maxTransactionsPerMonth) }}</h3>
-          </ion-label>
-        </ion-item>
-        <ion-item>
-          <ion-icon name="cloud-upload-outline" slot="start"></ion-icon>
-          <ion-label>
-            <p>{{ "SUBSCRIPTION.BACKUP_FILES_LIMIT" | translate }}</p>
-            <h3>{{ formatLimit(plan.limits.maxBackupFiles) }}</h3>
-          </ion-label>
-        </ion-item>
-        <ion-item>
-          <ion-icon name="phone-portrait-outline" slot="start"></ion-icon>
-          <ion-label>
-            <p>{{ "SUBSCRIPTION.DEVICES_LIMIT" | translate }}</p>
-            <h3>{{ formatLimit(plan.limits.maxDevices) }}</h3>
-          </ion-label>
-        </ion-item>
-      </ion-list>
+      <div class="limits-grid">
+        <div class="limit-cell">
+          <ion-icon name="folder-outline" color="primary"></ion-icon>
+          <span>{{ "SUBSCRIPTION.CATEGORIES_LIMIT" | translate }}</span
+          ><strong>{{ formatLimit(plan.limits.maxCategories) }}</strong>
+        </div>
+        <div class="limit-cell">
+          <ion-icon name="receipt-outline" color="primary"></ion-icon>
+          <span>{{ "SUBSCRIPTION.TRANSACTIONS_LIMIT" | translate }}</span
+          ><strong>{{
+            formatLimit(plan.limits.maxTransactionsPerMonth)
+          }}</strong>
+        </div>
+        <div class="limit-cell">
+          <ion-icon name="cloud-upload-outline" color="primary"></ion-icon>
+          <span>{{ "SUBSCRIPTION.BACKUP_FILES_LIMIT" | translate }}</span
+          ><strong>{{ formatLimit(plan.limits.maxBackupFiles) }}</strong>
+        </div>
+        <div class="limit-cell">
+          <ion-icon name="phone-portrait-outline" color="primary"></ion-icon>
+          <span>{{ "SUBSCRIPTION.DEVICES_LIMIT" | translate }}</span
+          ><strong>{{ formatLimit(plan.limits.maxDevices) }}</strong>
+        </div>
+      </div>
     </div>
 
     <!-- Features -->
-    <div class="features-section">
+    <div class="features-section" *ngIf="plan.features.length">
       <h4>{{ "SUBSCRIPTION.INCLUDED_FEATURES" | translate }}</h4>
       <ion-list lines="none">
         <ion-item *ngFor="let feature of plan.features.slice(0, 6)">

@@ -1,52 +1,54 @@
 import { Component, OnInit, inject } from '@angular/core';
 
 import { SyncService } from 'src/app/core/services/sync.service';
-import { OfflineStorageService } from 'src/app/core/services/offline-storage.service';
 import { ConflictResolution } from 'src/app/shared/models/sync.model';
 import { BaseComponent } from 'src/app/shared/base';
 import { IonicModule } from '@ionic/angular';
 import { TranslateModule } from '@ngx-translate/core';
+import { takeUntil } from 'rxjs/operators';
+
+interface ConflictField {
+  key: string;
+  label: string;
+  local: string;
+  current: string;
+  localValue: any;
+  currentValue: any;
+  changed: boolean;
+}
 
 @Component({
-    selector: 'app-conflict-resolution',
-    templateUrl: './conflict-resolution.page.html',
-    styleUrls: ['./conflict-resolution.page.scss'],
-    standalone: true,
-    imports: [IonicModule, TranslateModule],
+  selector: 'app-conflict-resolution',
+  templateUrl: './conflict-resolution.page.html',
+  styleUrls: ['./conflict-resolution.page.scss'],
+  standalone: true,
+  imports: [IonicModule, TranslateModule],
 })
 export class ConflictResolutionPage extends BaseComponent implements OnInit {
   private syncService = inject(SyncService);
-  private offlineStorage = inject(OfflineStorageService);
 
   conflicts: ConflictResolution[] = [];
+  mergeConflict: ConflictResolution | null = null;
+  mergeSelection: Record<string, 'local' | 'current'> = {};
+  private readonly resolvingConflictIds = new Set<string>();
 
   override ngOnInit(): void {
     this.loadConflicts();
   }
 
   private loadConflicts(): void {
-    // In a real implementation, you would get conflicts from the sync service
-    // For now, we'll simulate some conflicts
-    this.conflicts = [
-      {
-        entityId: '1',
-        entityType: 'expense',
-        localData: {
-          description: 'Coffee',
-          amount: 5.5,
-          date: '2024-01-15',
-          category: 'Food',
+    this.syncService
+      .getConflicts()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (conflicts) => {
+          this.conflicts = conflicts as ConflictResolution[];
+          this.cdr.markForCheck();
         },
-        serverData: {
-          description: 'Coffee Shop',
-          amount: 5.5,
-          date: '2024-01-15',
-          category: 'Food & Drinks',
+        error: () => {
+          this.toastService.presentErrorToast('bottom', 'SYNC.RESOLVE_ERROR');
         },
-        resolution: 'local',
-        timestamp: new Date(),
-      },
-    ];
+      });
   }
 
   trackByConflictId(index: number, conflict: ConflictResolution): string {
@@ -74,8 +76,90 @@ export class ConflictResolutionPage extends BaseComponent implements OnInit {
     );
   }
 
-  formatDate(date: Date): string {
-    return new Intl.DateTimeFormat('en-US', {
+  getConflictIdentity(conflict: ConflictResolution): string {
+    const local = conflict.localData || {};
+    const current = conflict.serverData || {};
+    if (conflict.entityType === 'expense') {
+      const value =
+        typeof local.description === 'string' && local.description.trim()
+          ? local.description
+          : current.description;
+      return typeof value === 'string' ? value.trim() : '';
+    }
+    if (conflict.entityType === 'category') {
+      const value =
+        typeof local.title === 'string' && local.title.trim()
+          ? local.title
+          : current.title;
+      return typeof value === 'string' ? value.trim() : '';
+    }
+    return '';
+  }
+
+  getDifferenceLabel(conflict: ConflictResolution): string {
+    const key =
+      this.getConflictFields(conflict).length === 1
+        ? 'SYNC.ONE_DIFFERENCE'
+        : 'SYNC.MANY_DIFFERENCES';
+    return this.translateService.instant(key, {
+      count: this.getConflictFields(conflict).length,
+    });
+  }
+
+  getConflictFields(conflict: ConflictResolution): ConflictField[] {
+    const definitions: Record<string, Array<{ key: string; label: string }>> = {
+      expense: [
+        { key: 'amount', label: 'SYNC.FIELD_AMOUNT' },
+        { key: 'description', label: 'SYNC.FIELD_DESCRIPTION' },
+        { key: 'category', label: 'SYNC.FIELD_CATEGORY' },
+        { key: 'date', label: 'SYNC.FIELD_DATE' },
+      ],
+      category: [
+        { key: 'title', label: 'SYNC.FIELD_TITLE' },
+        { key: 'type', label: 'SYNC.FIELD_TYPE' },
+        { key: 'order', label: 'SYNC.FIELD_ORDER' },
+        { key: 'icon', label: 'SYNC.FIELD_ICON' },
+        { key: 'color', label: 'SYNC.FIELD_COLOR' },
+      ],
+    };
+    const fields = definitions[conflict.entityType] || [];
+    return fields
+      .map(({ key, label }) => {
+        const localValue = conflict.localData?.[key];
+        const currentValue = conflict.serverData?.[key];
+        return {
+          key,
+          label,
+          localValue,
+          currentValue,
+          local: this.formatFieldValue(key, localValue),
+          current: this.formatFieldValue(key, currentValue),
+          changed:
+            JSON.stringify(localValue ?? null) !==
+            JSON.stringify(currentValue ?? null),
+        };
+      })
+      .filter((field) => field.changed);
+  }
+
+  private formatFieldValue(key: string, value: any): string {
+    if (value === null || value === undefined || value === '') return '—';
+    if (key === 'amount' && typeof value === 'number') {
+      return new Intl.NumberFormat(this.translateService.currentLang || 'en', {
+        maximumFractionDigits: 2,
+      }).format(value);
+    }
+    if (key === 'date') return this.formatDate(value);
+    if (key === 'category' && typeof value === 'object')
+      return String(value.title || '—');
+    if (typeof value === 'object') return '—';
+    return String(value);
+  }
+
+  formatDate(value: Date | string | unknown): string {
+    const date = value instanceof Date ? value : new Date(String(value ?? ''));
+    if (Number.isNaN(date.getTime())) return '—';
+    return new Intl.DateTimeFormat(this.translateService.currentLang || 'en', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -85,7 +169,7 @@ export class ConflictResolutionPage extends BaseComponent implements OnInit {
   }
 
   formatData(data: any): string {
-    return JSON.stringify(data, null, 2);
+    return '';
   }
 
   canMerge(conflict: ConflictResolution): boolean {
@@ -99,34 +183,36 @@ export class ConflictResolutionPage extends BaseComponent implements OnInit {
     conflict: ConflictResolution,
     resolution: 'local' | 'server'
   ): void {
-    // Highlight the selected resolution
-    console.log(`Selected ${resolution} for conflict ${conflict.entityId}`);
+    conflict.resolution = resolution;
+    this.cdr.markForCheck();
   }
 
-  async showMergeDialog(conflict: ConflictResolution): Promise<void> {
-    const result = await this.alertService.showPrompt({
-      title: this.translateService.instant('SYNC.MERGE_DATA'),
-      message: this.translateService.instant('SYNC.MERGE_DIALOG_MESSAGE'),
-      inputs: [
-        {
-          name: 'mergedData',
-          type: 'textarea',
-          placeholder: this.translateService.instant('SYNC.ENTER_MERGED_DATA'),
-          value: this.formatData(conflict.localData),
-        },
-      ],
-      confirmText: this.translateService.instant('SYNC.MERGE'),
-      cancelText: this.translateService.instant('COMMON.CANCEL'),
-    });
+  showMergeDialog(conflict: ConflictResolution): void {
+    this.mergeConflict = conflict;
+    this.mergeSelection = {};
+    this.getConflictFields(conflict).forEach(
+      (field) => (this.mergeSelection[field.key] = 'local')
+    );
+    this.cdr.markForCheck();
+  }
 
-    if (result) {
-      try {
-        const mergedData = JSON.parse(result.mergedData);
-        this.resolveConflict(conflict, 'merge', mergedData);
-      } catch (error) {
-        this.toastService.presentErrorToast('bottom', 'SYNC.INVALID_JSON');
-      }
-    }
+  selectMergeValue(field: string, value: unknown): void {
+    if (value === 'local' || value === 'current')
+      this.mergeSelection[field] = value;
+  }
+
+  applyMerge(): void {
+    if (!this.mergeConflict) return;
+    const mergedData = { ...this.mergeConflict.serverData };
+    this.getConflictFields(this.mergeConflict).forEach((field) => {
+      mergedData[field.key] =
+        this.mergeSelection[field.key] === 'current'
+          ? field.currentValue
+          : field.localValue;
+    });
+    const conflict = this.mergeConflict;
+    this.mergeConflict = null;
+    this.resolveConflict(conflict, 'merge', mergedData);
   }
 
   resolveConflict(
@@ -134,6 +220,10 @@ export class ConflictResolutionPage extends BaseComponent implements OnInit {
     resolution: 'local' | 'server' | 'merge',
     mergedData?: any
   ): void {
+    const conflictKey = String(conflict.conflictId || conflict.entityId || '');
+    if (!conflictKey || this.resolvingConflictIds.has(conflictKey)) return;
+    this.resolvingConflictIds.add(conflictKey);
+
     const resolutionData: ConflictResolution = {
       ...conflict,
       resolution,
@@ -143,10 +233,12 @@ export class ConflictResolutionPage extends BaseComponent implements OnInit {
 
     this.syncService.resolveConflict(resolutionData).subscribe({
       next: (success: boolean) => {
+        this.resolvingConflictIds.delete(conflictKey);
         if (success) {
           this.conflicts = this.conflicts.filter(
             (c) => c.entityId !== conflict.entityId
           );
+          this.mergeConflict = null;
           this.toastService.presentSuccessToast(
             'bottom',
             'SYNC.CONFLICT_RESOLVED'
@@ -155,8 +247,8 @@ export class ConflictResolutionPage extends BaseComponent implements OnInit {
           this.toastService.presentErrorToast('bottom', 'SYNC.RESOLVE_FAILED');
         }
       },
-      error: (error: any) => {
-        console.error('Conflict resolution error:', error);
+      error: () => {
+        this.resolvingConflictIds.delete(conflictKey);
         this.toastService.presentErrorToast('bottom', 'SYNC.RESOLVE_ERROR');
       },
     });

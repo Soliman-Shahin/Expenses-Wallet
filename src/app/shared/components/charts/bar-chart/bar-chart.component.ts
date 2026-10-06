@@ -1,11 +1,15 @@
-import { Component, ChangeDetectionStrategy, Input,
+import {
+  Component,
+  ChangeDetectionStrategy,
+  Input,
   OnChanges,
   SimpleChanges,
   inject,
   OnInit,
   OnDestroy,
   Output,
-  EventEmitter, } from '@angular/core';
+  EventEmitter,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
@@ -42,15 +46,14 @@ interface ChartData {
   imports: [CommonModule, ChartTooltipComponent, TranslateModule],
   templateUrl: './bar-chart.component.html',
   styleUrls: ['./bar-chart.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [
     trigger('barAnimation', [
       transition('* => *', [
         query(
           ':enter',
           [
-            style({ opacity: 0, transform: 'translateY(20px)' ,
-  changeDetection: ChangeDetectionStrategy.OnPush
-}),
+            style({ opacity: 0, transform: 'translateY(20px)' }),
             stagger(50, [
               animate(
                 '300ms ease-out',
@@ -160,6 +163,7 @@ export class BarChartComponent
   getBarHeight(value: number): string {
     if (this.maxValue === 0) return '0%';
     const percentage = (value / this.maxValue) * 100;
+    if (value === 0) return '0%';
     return `${Math.max(percentage, 3)}%`;
   }
 

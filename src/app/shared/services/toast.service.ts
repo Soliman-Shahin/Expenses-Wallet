@@ -10,12 +10,14 @@ import { TranslateService } from '@ngx-translate/core';
 export const customToastEnterAnimation = (baseEl: HTMLElement): Animation => {
   // Support both older '.toast-wrapper' and newer '.toast-container' structures; fallback to baseEl
   const root = (baseEl as any).shadowRoot || baseEl;
-  const containerEl = (root.querySelector?.('.toast-wrapper') || root.querySelector?.('.toast-container') || baseEl) as HTMLElement;
+  const containerEl = (root.querySelector?.('.toast-wrapper') ||
+    root.querySelector?.('.toast-container') ||
+    baseEl) as HTMLElement;
 
   const backdropAnimation = new AnimationController()
     .create()
     .addElement(containerEl)
-    .duration(440)
+    .duration(180)
     .easing('cubic-bezier(0.4, 0, 0.2, 1)')
     .fromTo('opacity', '0', '1')
     .fromTo(
@@ -28,7 +30,7 @@ export const customToastEnterAnimation = (baseEl: HTMLElement): Animation => {
   const glowAnimation = new AnimationController()
     .create()
     .addElement(containerEl)
-    .duration(440)
+    .duration(180)
     .easing('cubic-bezier(0.4, 0, 0.2, 1)')
     .fromTo(
       'box-shadow',
@@ -45,12 +47,14 @@ export const customToastEnterAnimation = (baseEl: HTMLElement): Animation => {
 export const customToastLeaveAnimation = (baseEl: HTMLElement): Animation => {
   // Support both older '.toast-wrapper' and newer '.toast-container' structures; fallback to baseEl
   const root = (baseEl as any).shadowRoot || baseEl;
-  const containerEl = (root.querySelector?.('.toast-wrapper') || root.querySelector?.('.toast-container') || baseEl) as HTMLElement;
+  const containerEl = (root.querySelector?.('.toast-wrapper') ||
+    root.querySelector?.('.toast-container') ||
+    baseEl) as HTMLElement;
 
   const backdropAnimation = new AnimationController()
     .create()
     .addElement(containerEl)
-    .duration(360)
+    .duration(140)
     .easing('cubic-bezier(0.4, 0, 0.2, 1)')
     .fromTo('opacity', '1', '0')
     .fromTo(
@@ -63,7 +67,7 @@ export const customToastLeaveAnimation = (baseEl: HTMLElement): Animation => {
   const glowAnimation = new AnimationController()
     .create()
     .addElement(containerEl)
-    .duration(360)
+    .duration(140)
     .easing('cubic-bezier(0.4, 0, 0.2, 1)')
     .fromTo(
       'box-shadow',
@@ -84,6 +88,8 @@ export class ToastService {
   toastController = inject(ToastController);
   private translate = inject(TranslateService);
   private activeToast?: HTMLIonToastElement | null;
+  private lastMessage = '';
+  private lastMessageAt = 0;
 
   constructor() {}
 
@@ -102,19 +108,39 @@ export class ToastService {
     color: 'success' | 'danger' | 'primary' | 'warning' | 'medium',
     opts?: { duration?: number; cssClassExtra?: string[] }
   ): Promise<HTMLIonToastElement | void> {
+    const translatedMessage = this.translate.instant(message);
+    const now = Date.now();
+    if (
+      translatedMessage === this.lastMessage &&
+      now - this.lastMessageAt < 900
+    ) {
+      return this.activeToast ?? undefined;
+    }
+    this.lastMessage = translatedMessage;
+    this.lastMessageAt = now;
     await this.dismissActiveToast();
 
-    const translatedMessage = this.translate.instant(message);
+    const duration =
+      opts?.duration ??
+      (color === 'danger'
+        ? 4200
+        : color === 'warning'
+        ? 3000
+        : color === 'primary'
+        ? 2400
+        : 2000);
 
     let toast = await this.toastController.create({
       message: translatedMessage,
-      duration: opts?.duration ?? 2000,
+      duration,
       color,
       position,
       cssClass: ['custom-toast', ...(opts?.cssClassExtra ?? [])],
       enterAnimation: customToastEnterAnimation,
       leaveAnimation: customToastLeaveAnimation,
-      keyboardClose: true,
+      keyboardClose: false,
+      translucent: false,
+      swipeGesture: 'vertical',
       animated: true,
     });
 
@@ -132,11 +158,13 @@ export class ToastService {
       try {
         toast = await this.toastController.create({
           message: translatedMessage,
-          duration: opts?.duration ?? 2000,
+          duration,
           color,
           position,
           cssClass: ['custom-toast', ...(opts?.cssClassExtra ?? [])],
-          keyboardClose: true,
+          keyboardClose: false,
+          translucent: false,
+          swipeGesture: 'vertical',
           animated: true,
         });
         this.activeToast = toast;
@@ -159,21 +187,27 @@ export class ToastService {
     position: 'top' | 'middle' | 'bottom',
     message: string
   ): Promise<HTMLIonToastElement | void> {
-    return this.presentToast(position, message, 'danger', { cssClassExtra: ['toast-error'] });
+    return this.presentToast(position, message, 'danger', {
+      cssClassExtra: ['toast-error'],
+    });
   }
 
   async presentInfoToast(
     position: 'top' | 'middle' | 'bottom',
     message: string
   ): Promise<HTMLIonToastElement | void> {
-    return this.presentToast(position, message, 'primary', { cssClassExtra: ['toast-info'] });
+    return this.presentToast(position, message, 'primary', {
+      cssClassExtra: ['toast-info'],
+    });
   }
 
   async presentWarningToast(
     position: 'top' | 'middle' | 'bottom',
     message: string
   ): Promise<HTMLIonToastElement | void> {
-    return this.presentToast(position, message, 'warning', { cssClassExtra: ['toast-warning'] });
+    return this.presentToast(position, message, 'warning', {
+      cssClassExtra: ['toast-warning'],
+    });
   }
 
   /**

@@ -1,3 +1,4 @@
+import { TranslateModule } from '@ngx-translate/core';
 import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -5,47 +6,101 @@ import {
   Component,
   OnInit,
 } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { finalize } from 'rxjs';
-import { AppNotification } from 'src/app/core/models/app-notification.model';
+import {
+  AppNotification,
+  notificationTypePresentation,
+} from 'src/app/core/models/app-notification.model';
 import { ApiService } from 'src/app/core/services/api.service';
+import { SkeletonBlockComponent } from 'src/app/shared/ui/skeleton-block/skeleton-block.component';
+import { NotificationService } from 'src/app/core/services/notification.service';
+
+export function shouldOpenSyncConflict(notification: AppNotification): boolean {
+  const conflictId = notification.metadata?.['conflictId'];
+  const entityType = notification.metadata?.['entityType'];
+  return (
+    notification.event === 'sync.conflict' &&
+    typeof conflictId === 'string' &&
+    conflictId.trim().length > 0 &&
+    ['expense', 'outcome', 'category'].includes(String(entityType))
+  );
+}
 
 @Component({
   selector: 'app-notification-detail',
   standalone: true,
-  imports: [CommonModule, IonicModule],
+  imports: [CommonModule, IonicModule, TranslateModule, SkeletonBlockComponent],
   template: `
     <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button defaultHref="/home"></ion-back-button>
         </ion-buttons>
-        <ion-title>Notification</ion-title>
+        <ion-title>{{ 'MOBILE_UI.NOTIFICATION' | translate }}</ion-title>
       </ion-toolbar>
     </ion-header>
-    <ion-content class="ion-padding">
-      <ion-spinner *ngIf="loading"></ion-spinner>
-      <ion-card *ngIf="notification as item">
+    <ion-content class="ion-padding notification-detail-content">
+      <div
+        *ngIf="loading"
+        role="status"
+        aria-busy="true"
+        [attr.aria-label]="'COMMON.LOADING' | translate"
+        class="notification-loading"
+      >
+        <app-skeleton-block variant="detail"></app-skeleton-block>
+      </div>
+      <ion-card class="notification-detail-card" *ngIf="notification as item">
         <ion-card-header>
-          <ion-card-title>{{ item.title }}</ion-card-title>
-          <ion-card-subtitle>{{ item.createdAt | date: 'medium' }}</ion-card-subtitle>
+          <div
+            class="detail-type"
+            [class]="'detail-type tone-' + typePresentation(item.type).tone"
+          >
+            <ion-icon
+              [name]="typePresentation(item.type).icon"
+              aria-hidden="true"
+            ></ion-icon
+            ><span>{{ typePresentation(item.type).labelKey | translate }}</span>
+          </div>
+          <ion-card-title dir="auto">{{ item.title }}</ion-card-title>
+          <ion-card-subtitle
+            ><bdi>{{
+              item.createdAt | date : 'medium'
+            }}</bdi></ion-card-subtitle
+          >
         </ion-card-header>
-        <ion-card-content>{{ item.message }}</ion-card-content>
+        <ion-card-content>
+          <p dir="auto">{{ item.message }}</p>
+        </ion-card-content>
+        <ion-button
+          *ngIf="canReviewSyncConflict(item)"
+          expand="block"
+          fill="solid"
+          (click)="reviewSyncConflict(item)"
+        >
+          {{ 'SYNC.REVIEW_CONFLICT' | translate }}
+        </ion-button>
       </ion-card>
-      <ion-text color="danger" *ngIf="error">{{ error }}</ion-text>
+      <ion-text color="danger" role="alert" *ngIf="error">{{
+        error | translate
+      }}</ion-text>
     </ion-content>
   `,
+  styleUrls: ['./notification-detail.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NotificationDetailComponent implements OnInit {
   notification: AppNotification | null = null;
   loading = true;
   error = '';
+  typePresentation = notificationTypePresentation;
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private apiService: ApiService,
+    private notificationService: NotificationService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -53,8 +108,15 @@ export class NotificationDetailComponent implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id || !/^[a-f\d]{24}$/i.test(id)) {
       this.loading = false;
-      this.error = 'Notification not found.';
+      this.error = 'MOBILE_UI.NOT_FOUND';
       return;
+    }
+
+    const cached = this.notificationService.getCached(id);
+    if (cached) {
+      this.notification = cached;
+      this.loading = false;
+      this.cdr.markForCheck();
     }
 
     this.apiService
@@ -63,7 +125,7 @@ export class NotificationDetailComponent implements OnInit {
         finalize(() => {
           this.loading = false;
           if (!this.notification && !this.error) {
-            this.error = 'This notification is unavailable.';
+            this.error = 'MOBILE_UI.UNAVAILABLE';
           }
           this.cdr.markForCheck();
         })
@@ -71,13 +133,25 @@ export class NotificationDetailComponent implements OnInit {
       .subscribe({
         next: (notification) => {
           this.notification = notification;
+          this.notificationService
+            .markRead(id)
+            .subscribe({ error: () => undefined });
           this.apiService
             .patch(`/notifications/${id}/read`, {})
             .subscribe({ error: () => undefined });
         },
         error: () => {
-          this.error = 'This notification is unavailable.';
+          this.error = 'MOBILE_UI.UNAVAILABLE';
         },
       });
+  }
+
+  canReviewSyncConflict(notification: AppNotification): boolean {
+    return shouldOpenSyncConflict(notification);
+  }
+
+  reviewSyncConflict(notification: AppNotification): void {
+    if (!shouldOpenSyncConflict(notification)) return;
+    void this.router.navigate(['/settings/conflicts']);
   }
 }

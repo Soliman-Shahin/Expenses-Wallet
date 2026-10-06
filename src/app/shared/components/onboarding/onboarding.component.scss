@@ -11,6 +11,19 @@
   background: var(--ion-background-color);
   overflow: hidden;
   font-family: var(--ew-font-family-base);
+  --onboarding-background: #f2f5fa;
+  --onboarding-foreground: #142440;
+  --onboarding-muted: rgba(20, 36, 64, 0.68);
+  --onboarding-glass: rgba(20, 36, 64, 0.08);
+  --onboarding-border: rgba(20, 36, 64, 0.14);
+}
+
+:host-context(.dark) {
+  --onboarding-background: #0d1525;
+  --onboarding-foreground: #fff;
+  --onboarding-muted: rgba(255, 255, 255, 0.7);
+  --onboarding-glass: rgba(255, 255, 255, 0.1);
+  --onboarding-border: rgba(255, 255, 255, 0.15);
 }
 
 .onboarding-page {
@@ -27,10 +40,10 @@
   inset: 0;
   z-index: 0;
   overflow: hidden;
-  background: #0d1525; // Base dark/rich tone
-  
+  background: var(--onboarding-background);
+
   .dark & {
-    background: #060a10;
+    background: var(--onboarding-background);
   }
 }
 
@@ -78,9 +91,16 @@
 }
 
 @keyframes drift {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33%       { transform: translate(30px, -40px) scale(1.1); }
-  66%       { transform: translate(-20px, 30px) scale(0.9); }
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -40px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 30px) scale(0.9);
+  }
 }
 
 // ── Top Bar ───────────────────────────────────────────────────────
@@ -98,23 +118,25 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--onboarding-glass);
   backdrop-filter: blur(12px) saturate(180%);
   -webkit-backdrop-filter: blur(12px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--onboarding-border);
   border-radius: 99px;
   padding: 8px 16px;
-  color: #fff;
+  color: var(--onboarding-foreground);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 
-  ion-icon { font-size: 16px; }
+  ion-icon {
+    font-size: 16px;
+  }
 
   &:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: color-mix(in srgb, var(--onboarding-foreground) 20%, transparent);
     transform: translateY(-2px);
   }
 
@@ -141,7 +163,9 @@
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   scrollbar-width: none;
-  &::-webkit-scrollbar { display: none; }
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .slide {
@@ -173,7 +197,7 @@
   .app-logo-wrap {
     animation: logoFloat 4s ease-in-out infinite;
   }
-  
+
   .logo-aura {
     animation: auraPulse 3s ease-in-out infinite;
   }
@@ -184,13 +208,23 @@
 }
 
 @keyframes logoFloat {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-15px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
 }
 
 @keyframes crystalFloat {
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-12px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
 }
 
 // ── App Logo ───────────────────────────────────────────────────
@@ -209,8 +243,7 @@
     border-radius: 30px;
     position: relative;
     z-index: 2;
-    box-shadow: 
-      0 16px 48px rgba(0, 0, 0, 0.3),
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3),
       0 4px 12px rgba(255, 255, 255, 0.1);
   }
 
@@ -218,7 +251,11 @@
     position: absolute;
     inset: 10px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(var(--ion-color-primary-rgb), 0.6), transparent 70%);
+    background: radial-gradient(
+      circle,
+      rgba(var(--ion-color-primary-rgb), 0.6),
+      transparent 70%
+    );
     filter: blur(24px);
     z-index: 1;
     opacity: 0.6;
@@ -226,8 +263,15 @@
 }
 
 @keyframes auraPulse {
-  0%, 100% { transform: scale(1); opacity: 0.5; }
-  50%       { transform: scale(1.2); opacity: 0.9; }
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.9;
+  }
 }
 
 // ── Icon Crystal ──────────────────────────────────────────────────
@@ -239,22 +283,25 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  
+
   .crystal-inner {
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.02) 100%);
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.2) 0%,
+      rgba(255, 255, 255, 0.02) 100%
+    );
     backdrop-filter: blur(24px) saturate(200%);
     -webkit-backdrop-filter: blur(24px) saturate(200%);
-    border: 1px solid rgba(255,255,255,0.4);
+    border: 1px solid rgba(255, 255, 255, 0.4);
     border-radius: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 
-      0 24px 48px rgba(0,0,0,0.2),
-      inset 0 4px 12px rgba(255,255,255,0.6),
-      inset 0 -4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2),
+      inset 0 4px 12px rgba(255, 255, 255, 0.6),
+      inset 0 -4px 12px rgba(0, 0, 0, 0.1);
     position: relative;
     z-index: 2;
     transform: rotate(-5deg);
@@ -262,8 +309,8 @@
 
     ion-icon {
       font-size: 64px;
-      color: #fff;
-      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+      color: var(--onboarding-foreground);
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
       transform: rotate(5deg); // Counter-rotate the icon
     }
   }
@@ -281,8 +328,15 @@
 }
 
 @keyframes pulseGlow {
-  0%, 100% { transform: scale(1); opacity: 0.5; }
-  50%       { transform: scale(1.15); opacity: 0.8; }
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.8;
+  }
 }
 
 // ── Text ──────────────────────────────────────────────────────────
@@ -290,17 +344,17 @@
   font-size: clamp(2rem, 8vw, 2.8rem);
   font-weight: 800;
   font-family: var(--ew-font-family-heading);
-  color: #fff;
+  color: var(--onboarding-foreground);
   margin: 0 0 16px;
   line-height: 1.1;
   letter-spacing: -1px;
-  text-shadow: 0 4px 24px rgba(0,0,0,0.3);
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
 }
 
 .slide-desc {
   font-size: 16px;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--onboarding-muted);
   margin: 0;
   font-weight: 400;
   max-width: 90%;
@@ -314,7 +368,11 @@
   justify-content: space-between;
   align-items: center;
   padding: 24px 32px calc(env(safe-area-inset-bottom, 24px) + 24px);
-  background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%);
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--onboarding-background) 70%, transparent) 0%,
+    transparent 100%
+  );
 }
 
 .pagination {
@@ -326,14 +384,18 @@
     width: 8px;
     height: 8px;
     border-radius: 99px;
-    background: rgba(255, 255, 255, 0.3);
+    background: color-mix(
+      in srgb,
+      var(--onboarding-foreground) 30%,
+      transparent
+    );
     cursor: pointer;
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 
     &.active {
       width: 28px;
-      background: #fff;
-      box-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
+      background: var(--onboarding-foreground);
+      box-shadow: 0 0 12px color-mix(in srgb, var(--onboarding-foreground) 80%, transparent);
     }
   }
 }
@@ -345,12 +407,12 @@
   padding-block: 8px;
   padding-inline-start: 24px;
   padding-inline-end: 8px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--onboarding-glass);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid var(--onboarding-border);
   border-radius: 99px;
-  color: #fff;
+  color: var(--onboarding-foreground);
   font-family: inherit;
   font-weight: 700;
   font-size: 16px;
@@ -362,7 +424,7 @@
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: #fff;
+    background: var(--onboarding-foreground);
     color: var(--ion-color-primary);
     display: flex;
     align-items: center;
@@ -376,12 +438,12 @@
   }
 
   &:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: color-mix(in srgb, var(--onboarding-foreground) 20%, transparent);
     transform: translateY(-2px);
-    
+
     .icon-circle {
       transform: translateX(4px);
-      
+
       [dir="rtl"] & {
         transform: translateX(-4px);
       }
@@ -393,7 +455,11 @@
   }
 
   &.start-btn {
-    background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-secondary));
+    background: linear-gradient(
+      135deg,
+      var(--ion-color-primary),
+      var(--ion-color-secondary)
+    );
     border-color: transparent;
     box-shadow: 0 12px 32px rgba(var(--ion-color-primary-rgb), 0.4);
 
@@ -405,6 +471,12 @@
 
 // ── Animations ────────────────────────────────────────────────────
 @keyframes fadeInDown {
-  from { opacity: 0; transform: translateY(-20px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

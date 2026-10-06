@@ -1,11 +1,11 @@
 <div
-  class="balance-summary transaction-item"
+  class="balance-summary"
   [class.is-loading]="isLoading"
   [class]="cardAnimationClass"
   (click)="onCardClick()"
   role="article"
-  aria-label="Balance Summary Card"
-  >
+  [attr.aria-label]="'HOME.BALANCE_SUMMARY' | translate"
+>
   <!-- Toggle Visibility Button -->
   <button
     type="button"
@@ -16,7 +16,7 @@
         : ('HOME.SHOW_BALANCE' | translate)
     "
     (click)="$event.stopPropagation(); toggleBalance()"
-    >
+  >
     <ion-icon
       [name]="showBalance() ? 'eye-off-outline' : 'eye-outline'"
       class="transition-transform"
@@ -24,148 +24,160 @@
   </button>
 
   @if (!isLoading) {
-    <!-- Total Balance -->
-    <div
-      class="total-balance fade-in"
-      aria-live="polite"
-      aria-labelledby="balance-heading"
-      aria-describedby="balance-desc"
-      >
-      <span class="amount text-gradient">{{ formattedBalance() }}</span>
-      <!-- Percentage Change Badge -->
-      @if (percentageChange !== null && showPercentageBadge) {
-        <ion-badge
-          [color]="percentageChange >= 0 ? 'success' : 'danger'"
-          class="badge-gradient bounce-in"
-        [attr.aria-label]="
-          percentageChange >= 0
-            ? ('HOME.POSITIVE_CHANGE'
-              | translate : { value: (percentageChange | number : '1.0-1') })
-            : ('HOME.NEGATIVE_CHANGE'
-              | translate : { value: (percentageChange | number : '1.0-1') })
-        "
-          >
-          <ion-icon [name]="getPercentageIcon()" class="text-xs"></ion-icon>
-          {{ percentageChange | number : "1.0-1" }}%
-        </ion-badge>
+  <!-- Total Balance -->
+  <div
+    class="total-balance fade-in"
+    aria-live="polite"
+    aria-describedby="balance-desc"
+  >
+    <div class="hero-money" dir="ltr">
+      <span class="amount">{{ formattedBalance() }}</span>
+      @if (showBalance() && formattedBalance() !== '-') {
+      <bdi class="hero-currency">{{ currency }}</bdi>
       }
     </div>
-    <span id="balance-desc" class="visually-hidden">{{
-      "HOME.BALANCE_DESCRIPTION" | translate
-    }}</span>
-    <!-- Income & Expenses Row -->
-    <div class="income-expense-row mt-4">
-      <!-- Income -->
-      <div class="balance-item income slide-in-left flex-1">
-        <ion-icon
-          name="arrow-up-circle"
-          color="success"
-          [attr.aria-label]="'COMMON.INCOME' | translate"
-          class="pulse"
-        ></ion-icon>
-        <div class="item-details">
-          <span class="label">{{ "COMMON.INCOME" | translate }}</span>
-          <span class="amount text-success-color font-semibold">{{
-            formattedIncome()
-          }}</span>
-        </div>
-      </div>
-      <!-- Expenses -->
-      <div class="balance-item expenses slide-in-right flex-1">
-        <ion-icon
-          name="arrow-down-circle"
-          color="danger"
-          [attr.aria-label]="'COMMON.OUTCOME' | translate"
-          class="pulse"
-        ></ion-icon>
-        <div class="item-details">
-          <span class="label">{{ "COMMON.OUTCOME" | translate }}</span>
-          <span class="amount text-danger-color font-semibold">{{
-            formattedExpenses()
-          }}</span>
-        </div>
+    <!-- Percentage Change Badge -->
+    @if (percentageChange !== null && showPercentageBadge) {
+    <ion-badge
+      [color]="percentageChange >= 0 ? 'success' : 'danger'"
+      class="badge-gradient bounce-in"
+      [attr.aria-label]="
+        percentageChange >= 0
+          ? ('HOME.POSITIVE_CHANGE'
+            | translate : { value: (percentageChange | number : '1.0-1') })
+          : ('HOME.NEGATIVE_CHANGE'
+            | translate : { value: (percentageChange | number : '1.0-1') })
+      "
+    >
+      <ion-icon [name]="getPercentageIcon()" class="text-xs"></ion-icon>
+      {{ percentageChange | number : "1.0-1" }}%
+    </ion-badge>
+    }
+  </div>
+  <span id="balance-desc" class="visually-hidden">{{
+    "HOME.BALANCE_DESCRIPTION" | translate
+  }}</span>
+  <!-- Income & Expenses Row -->
+  <div class="income-expense-row mt-4">
+    <!-- Income -->
+    <div class="balance-item income slide-in-left flex-1">
+      <ion-icon
+        name="arrow-up-circle"
+        color="success"
+        [attr.aria-label]="'COMMON.INCOME' | translate"
+        class="pulse"
+      ></ion-icon>
+      <div class="item-details">
+        <span class="label">{{ "COMMON.INCOME" | translate }}</span>
+        <span class="amount text-success-color font-semibold">{{
+          formattedIncome()
+        }}</span>
       </div>
     </div>
-      <!-- Savings Row (New Feature) -->
-      <div class="mt-3">
-        <div class="divider divider-gradient my-2"></div>
+    <!-- Expenses -->
+    <div class="balance-item expenses slide-in-right flex-1">
+      <ion-icon
+        name="arrow-down-circle"
+        color="danger"
+        [attr.aria-label]="'COMMON.OUTCOME' | translate"
+        class="pulse"
+      ></ion-icon>
+      <div class="item-details">
+        <span class="label">{{ "COMMON.OUTCOME" | translate }}</span>
+        <span class="amount text-danger-color font-semibold">{{
+          formattedExpenses()
+        }}</span>
         <div
-            class="balance-item savings fade-in-up"
-            [class.positive]="isPositiveSavings()"
-            [class.negative]="!isPositiveSavings()"
-            >
+          class="expense-comparison"
+          role="status"
+          [attr.aria-live]="
+            expenseComparison?.status === 'ready' ? 'polite' : null
+          "
+        >
+          @if (expenseComparison?.status === 'ready') {
+          <span
+            [class.expense-comparison--favorable]="
+              expenseComparison?.direction === 'less'
+            "
+            [class.expense-comparison--unfavorable]="
+              expenseComparison?.direction === 'more'
+            "
+          >
+            @if (expenseComparison?.direction === 'less') {
             <ion-icon
-              [name]="getSavingsIcon()"
-              [color]="isPositiveSavings() ? 'tertiary' : 'warning'"
+              name="trending-down-outline"
+              aria-hidden="true"
             ></ion-icon>
-            <div class="item-details flex-1">
-              <div class="flex items-center justify-between">
-                <span class="label">{{ "COMMON.SAVINGS" | translate }}</span>
-                <span
-                  class="badge"
-                  [class.badge-success]="isPositiveSavings()"
-                  [class.badge-warning]="!isPositiveSavings()"
-                  >
-                  {{ savingsPercentage() | number : "1.0-1" }}%
-                </span>
-              </div>
-              <span
-                class="amount font-bold"
-                [class.text-gradient-success]="isPositiveSavings()"
-                [class.text-gradient-warning]="!isPositiveSavings()"
-                >
-                {{ formatAmount(savings(), showBalance()) }}
-              </span>
-          </div>
+            <span [attr.aria-label]="'HOME.EXPENSES_LESS_ARIA' | translate : { value: (expenseComparison?.percentage | number : '1.0-0') }">
+              {{ "HOME.EXPENSES_LESS" | translate : { value: (expenseComparison?.percentage | number : "1.0-0") } }}
+            </span>
+            } @else if (expenseComparison?.direction === 'more') {
+            <ion-icon name="trending-up-outline" aria-hidden="true"></ion-icon>
+            <span [attr.aria-label]="'HOME.EXPENSES_MORE_ARIA' | translate : { value: (expenseComparison?.percentage | number : '1.0-0') }">
+              {{ "HOME.EXPENSES_MORE" | translate : { value: (expenseComparison?.percentage | number : "1.0-0") } }}
+            </span>
+            } @else if (expenseComparison?.direction === 'new') {
+            <span [attr.aria-label]="'HOME.EXPENSES_NEW_ARIA' | translate">{{ "HOME.EXPENSES_NEW" | translate }}</span>
+            } @else {
+            <span [attr.aria-label]="'HOME.EXPENSES_SAME_ARIA' | translate">{{ "HOME.EXPENSES_SAME" | translate }}</span>
+            }
+          </span>
+          } @else if (expenseComparison?.status === 'unavailable') {
+          <span class="expense-comparison--unavailable">{{
+            "HOME.EXPENSES_COMPARISON_UNAVAILABLE" | translate
+          }}</span>
+          }
         </div>
       </div>
-  } @else {
-    <div class="total-balance">
-      <div
-        class="skeleton skeleton-text shimmer"
-        style="width: 60%; height: 40px"
-      ></div>
     </div>
-    <ion-grid class="ion-no-padding">
-      <ion-row>
-        <ion-col size="6" class="ion-no-padding">
-          <div class="balance-item income">
+  </div>
+  } @else {
+  <div class="total-balance">
+    <div
+      class="skeleton skeleton-text shimmer"
+      style="width: 60%; height: 40px"
+    ></div>
+  </div>
+  <ion-grid class="ion-no-padding">
+    <ion-row>
+      <ion-col size="6" class="ion-no-padding">
+        <div class="balance-item income">
+          <div
+            class="skeleton skeleton-circle shimmer"
+            style="width: 40px; height: 40px"
+          ></div>
+          <div class="item-details flex-1">
             <div
-              class="skeleton skeleton-circle shimmer"
-              style="width: 40px; height: 40px"
+              class="skeleton skeleton-text shimmer"
+              style="width: 80%; height: 16px"
             ></div>
-            <div class="item-details flex-1">
-              <div
-                class="skeleton skeleton-text shimmer"
-                style="width: 80%; height: 16px"
-              ></div>
-              <div
-                class="skeleton skeleton-text shimmer"
-                style="width: 60%; height: 20px; margin-top: 4px"
-              ></div>
-            </div>
-          </div>
-        </ion-col>
-        <ion-col size="6" class="ion-no-padding">
-          <div class="balance-item expenses">
             <div
-              class="skeleton skeleton-circle shimmer"
-              style="width: 40px; height: 40px"
+              class="skeleton skeleton-text shimmer"
+              style="width: 60%; height: 20px; margin-top: 4px"
             ></div>
-            <div class="item-details flex-1">
-              <div
-                class="skeleton skeleton-text shimmer"
-                style="width: 80%; height: 16px"
-              ></div>
-              <div
-                class="skeleton skeleton-text shimmer"
-                style="width: 60%; height: 20px; margin-top: 4px"
-              ></div>
-            </div>
           </div>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
+        </div>
+      </ion-col>
+      <ion-col size="6" class="ion-no-padding">
+        <div class="balance-item expenses">
+          <div
+            class="skeleton skeleton-circle shimmer"
+            style="width: 40px; height: 40px"
+          ></div>
+          <div class="item-details flex-1">
+            <div
+              class="skeleton skeleton-text shimmer"
+              style="width: 80%; height: 16px"
+            ></div>
+            <div
+              class="skeleton skeleton-text shimmer"
+              style="width: 60%; height: 20px; margin-top: 4px"
+            ></div>
+          </div>
+        </div>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
   }
 
   <!-- Loading State -->

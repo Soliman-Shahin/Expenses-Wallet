@@ -1,4 +1,10 @@
-import { Component, ChangeDetectionStrategy, ElementRef, OnInit, ViewChild } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  ElementRef,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { AlertController, IonicModule } from '@ionic/angular';
 import {
   BackupService,
@@ -11,14 +17,15 @@ import { PlanService } from 'src/app/core/services/plan.service';
 import { Permission, PlanSlug } from 'src/app/shared/models/plan.model';
 import { UpgradePromptComponent } from '../upgrade-prompt/upgrade-prompt.component';
 import { takeUntil } from 'rxjs';
+import { OfflineStorageService } from 'src/app/core/services/offline-storage.service';
 
 @Component({
-    selector: 'app-backup-restore',
-    templateUrl: './backup-restore.component.html',
-    styleUrls: ['./backup-restore.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-    imports: [IonicModule, DatePipe, TranslateModule, UpgradePromptComponent]
+  selector: 'app-backup-restore',
+  templateUrl: './backup-restore.component.html',
+  styleUrls: ['./backup-restore.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [IonicModule, DatePipe, TranslateModule, UpgradePromptComponent],
 })
 export class BackupRestoreComponent extends BaseComponent implements OnInit {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
@@ -28,7 +35,7 @@ export class BackupRestoreComponent extends BaseComponent implements OnInit {
   autoBackupEnabled = false;
   autoBackupFrequency = 24; // hours
   lastAutoBackup: { timestamp: Date; size: number } | null = null;
-  
+
   // Google Drive
   googleDriveEnabled = false;
   googleDriveEmail: string | null = null;
@@ -42,6 +49,7 @@ export class BackupRestoreComponent extends BaseComponent implements OnInit {
 
   constructor(
     private backupService: BackupService,
+    private offlineStorage: OfflineStorageService,
     private alertController: AlertController,
     private planService: PlanService
   ) {
@@ -50,13 +58,17 @@ export class BackupRestoreComponent extends BaseComponent implements OnInit {
 
   override ngOnInit() {
     super.ngOnInit();
-    
-    this.planService.currentPlan$.pipe(takeUntil(this.destroy$)).subscribe(planData => {
-      if (planData) {
-        this.hasDrivePermission = this.planService.hasPermission(Permission.BACKUP_GDRIVE);
-        this.cdr.markForCheck();
-      }
-    });
+
+    this.planService.currentPlan$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((planData) => {
+        if (planData) {
+          this.hasDrivePermission = this.planService.hasPermission(
+            Permission.BACKUP_GDRIVE
+          );
+          this.cdr.markForCheck();
+        }
+      });
 
     this.loadHistory();
     this.loadAutoBackupSettings();
@@ -67,12 +79,12 @@ export class BackupRestoreComponent extends BaseComponent implements OnInit {
     const settings = this.backupService.getAutoBackupSettings();
     this.autoBackupEnabled = settings.enabled;
     this.autoBackupFrequency = settings.frequency / (60 * 60 * 1000); // Convert ms to hours
-    
+
     const lastBackup = this.backupService.getLastAutoBackup();
     if (lastBackup) {
       this.lastAutoBackup = {
         timestamp: new Date(lastBackup.timestamp),
-        size: lastBackup.size
+        size: lastBackup.size,
       };
     }
   }
@@ -80,8 +92,11 @@ export class BackupRestoreComponent extends BaseComponent implements OnInit {
   toggleAutoBackup(event: any) {
     this.autoBackupEnabled = event.detail.checked;
     const frequencyMs = this.autoBackupFrequency * 60 * 60 * 1000; // Convert hours to ms
-    this.backupService.setAutoBackupEnabled(this.autoBackupEnabled, frequencyMs);
-    
+    this.backupService.setAutoBackupEnabled(
+      this.autoBackupEnabled,
+      frequencyMs
+    );
+
     if (this.autoBackupEnabled) {
       this.toastService.presentSuccessToast(
         'bottom',
@@ -108,7 +123,7 @@ export class BackupRestoreComponent extends BaseComponent implements OnInit {
     this.googleDriveEnabled = settings.enabled;
     this.googleDriveEmail = settings.email || null;
     this.isSignedInToGoogleDrive = this.backupService.isSignedInToGoogleDrive();
-    
+
     if (this.isSignedInToGoogleDrive) {
       this.loadGoogleDriveBackups();
     }
@@ -116,24 +131,27 @@ export class BackupRestoreComponent extends BaseComponent implements OnInit {
 
   async toggleGoogleDrive(event: any) {
     const enabled = event.detail.checked;
-    
+
     if (enabled) {
       // Sign in to Google Drive
-      const loadingMsg = this.translateService.instant('BACKUP.CONNECTING_GOOGLE_DRIVE');
+      const loadingMsg = this.translateService.instant(
+        'BACKUP.CONNECTING_GOOGLE_DRIVE'
+      );
       this.loadingService.show(loadingMsg);
-      
+
       try {
         const success = await this.backupService.signInToGoogleDrive();
         if (success) {
           this.googleDriveEnabled = true;
           this.isSignedInToGoogleDrive = true;
-          this.googleDriveEmail = this.backupService.getGoogleDriveSettings().email || null;
-          
+          this.googleDriveEmail =
+            this.backupService.getGoogleDriveSettings().email || null;
+
           this.toastService.presentSuccessToast(
             'bottom',
             this.translateService.instant('BACKUP.GOOGLE_DRIVE_CONNECTED')
           );
-          
+
           this.loadGoogleDriveBackups();
         } else {
           this.googleDriveEnabled = false;
@@ -158,7 +176,7 @@ export class BackupRestoreComponent extends BaseComponent implements OnInit {
       this.googleDriveEnabled = false;
       this.isSignedInToGoogleDrive = false;
       this.googleDriveEmail = null;
-      
+
       this.toastService.presentInfoToast(
         'bottom',
         this.translateService.instant('BACKUP.GOOGLE_DRIVE_DISCONNECTED')
@@ -175,7 +193,7 @@ export class BackupRestoreComponent extends BaseComponent implements OnInit {
     this.isLoadingDriveBackups = true;
     this.setLoading(true);
     this.cdr.markForCheck();
-    
+
     this.backupService.listGoogleDriveBackups().subscribe({
       next: (backups) => {
         this.googleDriveBackups = backups;
@@ -188,7 +206,7 @@ export class BackupRestoreComponent extends BaseComponent implements OnInit {
         this.isLoadingDriveBackups = false;
         this.setLoading(false);
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 
@@ -196,17 +214,20 @@ export class BackupRestoreComponent extends BaseComponent implements OnInit {
     const alert = await this.alertController.create({
       header: this.translateService.instant('BACKUP.RESTORE_CONFIRM_TITLE'),
       message: this.translateService.instant('BACKUP.RESTORE_CONFIRM_MSG'),
-      cssClass: 'custom-alert',
+      cssClass: 'custom-alert backup-restore-alert',
       buttons: [
         {
           text: this.translateService.instant('COMMON.CANCEL'),
           role: 'cancel',
+          cssClass: 'backup-restore-alert-action',
         },
         {
-          text: this.translateService.instant('COMMON.RESTORE'),
+          text: this.translateService.instant('BACKUP.RESTORE_ACTION'),
+          cssClass: 'backup-restore-alert-action',
           handler: () => {
             this.setLoading(true);
-            this.loadingMessage = this.translateService.instant('COMMON.LOADING');
+            this.loadingMessage =
+              this.translateService.instant('COMMON.LOADING');
             this.backupService.downloadGoogleDriveBackup(fileId).subscribe({
               next: (content) => {
                 this.setLoading(false);
@@ -214,9 +235,12 @@ export class BackupRestoreComponent extends BaseComponent implements OnInit {
               },
               error: (err) => {
                 this.setLoading(false);
-                this.toastService.presentErrorToast('bottom', this.translateService.instant('BACKUP.FAILED_RESTORE'));
+                this.toastService.presentErrorToast(
+                  'bottom',
+                  this.translateService.instant('BACKUP.FAILED_RESTORE')
+                );
                 console.error(err);
-              }
+              },
             });
           },
         },
@@ -230,7 +254,7 @@ export class BackupRestoreComponent extends BaseComponent implements OnInit {
     const alert = await this.alertController.create({
       header: this.translateService.instant('COMMON.DELETE_CONFIRM'),
       message: this.translateService.instant('CONFIRM.DELETE_MESSAGE'),
-      cssClass: 'custom-alert',
+      cssClass: 'custom-alert backup-restore-alert',
       buttons: [
         {
           text: this.translateService.instant('COMMON.CANCEL'),
@@ -245,17 +269,26 @@ export class BackupRestoreComponent extends BaseComponent implements OnInit {
               next: (success) => {
                 this.setLoading(false);
                 if (success) {
-                  this.toastService.presentSuccessToast('bottom', this.translateService.instant('TOAST.DELETE_SUCCESS'));
+                  this.toastService.presentSuccessToast(
+                    'bottom',
+                    this.translateService.instant('TOAST.DELETE_SUCCESS')
+                  );
                   this.loadGoogleDriveBackups();
                 } else {
-                  this.toastService.presentErrorToast('bottom', 'Failed to delete backup');
+                  this.toastService.presentErrorToast(
+                    'bottom',
+                    'Failed to delete backup'
+                  );
                 }
               },
               error: (err) => {
                 this.setLoading(false);
                 console.error(err);
-                this.toastService.presentErrorToast('bottom', 'Error deleting backup');
-              }
+                this.toastService.presentErrorToast(
+                  'bottom',
+                  'Error deleting backup'
+                );
+              },
             });
           },
         },
@@ -268,7 +301,7 @@ export class BackupRestoreComponent extends BaseComponent implements OnInit {
     const alert = await this.alertController.create({
       header: this.translateService.instant('BACKUP.CREATE_ALERT_TITLE'),
       message: this.translateService.instant('BACKUP.CREATE_ALERT_MSG'),
-      cssClass: 'custom-alert',
+      cssClass: 'custom-alert backup-restore-alert',
       inputs: [
         {
           name: 'password',
@@ -282,9 +315,11 @@ export class BackupRestoreComponent extends BaseComponent implements OnInit {
         {
           text: this.translateService.instant('COMMON.CANCEL'),
           role: 'cancel',
+          cssClass: 'backup-restore-alert-action',
         },
         {
           text: this.translateService.instant('COMMON.CREATE'),
+          cssClass: 'backup-restore-alert-action',
           handler: (data: any) => {
             this.performBackup(!!data.password, data.password);
           },
@@ -378,11 +413,19 @@ export class BackupRestoreComponent extends BaseComponent implements OnInit {
   }
 
   private async performRestore(content: string, password?: string) {
+    if (await this.offlineStorage.hasUnsyncedChanges()) {
+      this.toastService.presentErrorToast(
+        'bottom',
+        this.translateService.instant('BACKUP.RESTORE_BLOCKED_UNSYNCED')
+      );
+      return;
+    }
     this.setLoading(true);
     this.loadingMessage = this.translateService.instant('COMMON.LOADING');
 
     try {
       const backup = await this.backupService.importBackup(content, password);
+      this.backupService.assertRestoreOwnership(backup);
 
       this.backupService.restoreFromBackup(backup).subscribe({
         next: (success) => {
@@ -409,11 +452,19 @@ export class BackupRestoreComponent extends BaseComponent implements OnInit {
           console.error(error);
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       this.setLoading(false);
+      const messageKey =
+        error?.code === 'BACKUP_OWNER_MISMATCH'
+          ? 'BACKUP.OWNER_MISMATCH'
+          : error?.code === 'BACKUP_OWNER_UNKNOWN'
+          ? 'BACKUP.OWNER_UNKNOWN'
+          : error?.code === 'BACKUP_INVALID'
+          ? 'BACKUP.INVALID_FILE'
+          : 'BACKUP.WRONG_PASSWORD';
       this.toastService.presentErrorToast(
         'bottom',
-        this.translateService.instant('BACKUP.WRONG_PASSWORD')
+        this.translateService.instant(messageKey)
       );
     }
   }
@@ -437,7 +488,7 @@ export class BackupRestoreComponent extends BaseComponent implements OnInit {
     const alert = await this.alertController.create({
       header: this.translateService.instant('BACKUP.DECRYPT_ALERT_TITLE'),
       message: this.translateService.instant('BACKUP.DECRYPT_ALERT_MSG'),
-      cssClass: 'custom-alert',
+      cssClass: 'custom-alert backup-restore-alert',
       inputs: [
         {
           name: 'password',
@@ -451,9 +502,11 @@ export class BackupRestoreComponent extends BaseComponent implements OnInit {
         {
           text: this.translateService.instant('COMMON.CANCEL'),
           role: 'cancel',
+          cssClass: 'backup-restore-alert-action',
         },
         {
-          text: this.translateService.instant('COMMON.RESTORE'),
+              text: this.translateService.instant('BACKUP.RESTORE_ACTION'),
+              cssClass: 'backup-restore-alert-action',
           handler: (data: any) => {
             if (data.password) {
               this.performRestore(content, data.password);
@@ -477,14 +530,16 @@ export class BackupRestoreComponent extends BaseComponent implements OnInit {
     const alert = await this.alertController.create({
       header: this.translateService.instant('BACKUP.RESTORE_CONFIRM_TITLE'),
       message: this.translateService.instant('BACKUP.RESTORE_CONFIRM_MSG'),
-      cssClass: 'custom-alert',
+      cssClass: 'custom-alert backup-restore-alert',
       buttons: [
         {
           text: this.translateService.instant('COMMON.CANCEL'),
           role: 'cancel',
+          cssClass: 'backup-restore-alert-action',
         },
         {
-          text: this.translateService.instant('COMMON.RESTORE'),
+          text: this.translateService.instant('BACKUP.RESTORE_ACTION'),
+          cssClass: 'backup-restore-alert-action',
           handler: () => {
             this.performRestore(content);
           },

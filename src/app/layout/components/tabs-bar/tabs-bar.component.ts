@@ -19,6 +19,7 @@ import { Tab } from 'src/app/shared/models';
 })
 export class TabsBarComponent extends BaseComponent implements OnInit {
   tabs: Tab[] = TABS_MENU_ITEMS;
+  private navigationInProgress = false;
 
   private readonly activeRoute$ = this.router.events.pipe(
     filter((event): event is NavigationEnd => event instanceof NavigationEnd),
@@ -36,10 +37,20 @@ export class TabsBarComponent extends BaseComponent implements OnInit {
     super();
   }
 
-  navigateTab(link: string, event: Event) {
+  navigateTab(link: string, event: Event): void {
     event.preventDefault();
-    console.log('Tab click:', link);
-    this.router.navigateByUrl(link, { replaceUrl: false });
+    if (this.navigationInProgress || this.isActiveTab(link, this.router.url))
+      return;
+    this.navigationInProgress = true;
+    void this.router.navigateByUrl(link, { replaceUrl: false }).finally(() => {
+      this.navigationInProgress = false;
+    });
+  }
+
+  isActiveTab(link: string, activeRoute: string): boolean {
+    const base = link.replace(/\/$/, '') || '/';
+    const current = activeRoute.split('?')[0].replace(/\/$/, '') || '/';
+    return current === base || current.startsWith(`${base}/`);
   }
 
   override ngOnInit(): void {

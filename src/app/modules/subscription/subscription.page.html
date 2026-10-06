@@ -1,7 +1,11 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-button (click)="goBack()">
+      <ion-button
+        class="modern-back-btn"
+        [attr.aria-label]="'COMMON.BACK' | translate"
+        (click)="goBack()"
+      >
         <ion-icon name="arrow-back"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -21,8 +25,21 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
+<div
+  class="content-loading-state"
+  *ngIf="isLoading"
+  role="status"
+  aria-busy="true"
+  [attr.aria-label]="'COMMON.LOADING' | translate"
+>
+  <app-skeleton-block variant="title"></app-skeleton-block>
+  <div class="content-loading-cards">
+    <app-skeleton-block variant="card-md"></app-skeleton-block
+    ><app-skeleton-block variant="card-md"></app-skeleton-block>
+  </div>
+</div>
 
+<ion-content [fullscreen]="true">
   <!-- Plans Tab -->
   <div
     class="plans-container"
@@ -62,10 +79,18 @@
     </div>
 
     <!-- Empty State -->
-    <div class="empty-state" *ngIf="availablePlans.length === 0">
+    <div class="empty-state" *ngIf="availablePlans.length === 0 && !loadError">
       <ion-icon name="pricetags-outline"></ion-icon>
       <h3>{{ 'NO_DATA' | translate }}</h3>
-      <p>No subscription plans available at the moment.</p>
+      <p>{{ 'MOBILE_UI.NO_PLANS' | translate }}</p>
+    </div>
+    <div
+      class="empty-state error-state"
+      *ngIf="availablePlans.length === 0 && loadError"
+    >
+      <ion-icon name="cloud-offline-outline"></ion-icon>
+      <h3>{{ 'SUBSCRIPTION.LOAD_FAILED_TITLE' | translate }}</h3>
+      <p>{{ 'SUBSCRIPTION.LOAD_FAILED' | translate }}</p>
     </div>
   </div>
 
@@ -83,7 +108,7 @@
     <div class="empty-state" *ngIf="!currentPlan">
       <ion-icon name="stats-chart-outline"></ion-icon>
       <h3>{{ 'NO_DATA' | translate }}</h3>
-      <p>Unable to load usage statistics.</p>
+      <p>{{ 'MOBILE_UI.USAGE_UNAVAILABLE' | translate }}</p>
     </div>
   </div>
 </ion-content>

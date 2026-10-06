@@ -1,23 +1,14 @@
-import { Injectable, ErrorHandler, Injector, inject } from '@angular/core';
+import { Injectable, ErrorHandler, inject } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ToastController } from '@ionic/angular';
 import { TranslateService } from '@ngx-translate/core';
+import { ToastService } from '../../shared/services/toast.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ErrorHandlerService implements ErrorHandler {
-  private toastCtrl!: ToastController;
-
-  private injector = inject(Injector);
   private translate = inject(TranslateService);
-
-  constructor() {
-    // Inject ToastController in constructor to avoid circular dependency
-    setTimeout(() => {
-      this.toastCtrl = this.injector.get(ToastController);
-    });
-  }
+  private toastService = inject(ToastService);
 
   /**
    * Global error handler for the application
@@ -41,23 +32,10 @@ export class ErrorHandlerService implements ErrorHandler {
    * @param header Optional translation key for the header
    */
   async showWarning(message: string, header?: string): Promise<void> {
-    const toast = await this.toastCtrl.create({
-      header: header
-        ? this.translate.instant(header)
-        : this.translate.instant('common.warning'),
-      message: this.translate.instant(message),
-      duration: 5000,
-      color: 'warning',
-      position: 'top',
-      buttons: [
-        {
-          icon: 'close',
-          role: 'cancel',
-        },
-      ],
-    });
-
-    await toast.present();
+    const text = header
+      ? `${this.translate.instant(header)}: ${this.translate.instant(message)}`
+      : this.translate.instant(message);
+    await this.toastService.presentWarningToast('top', text);
   }
 
   /**
@@ -68,21 +46,7 @@ export class ErrorHandlerService implements ErrorHandler {
   async showError(message: string, error?: any): Promise<void> {
     console.error('Error:', error || message);
 
-    const toast = await this.toastCtrl.create({
-      header: this.translate.instant('errors.error'),
-      message: this.translate.instant(message),
-      duration: 5000,
-      color: 'danger',
-      position: 'top',
-      buttons: [
-        {
-          icon: 'close',
-          role: 'cancel',
-        },
-      ],
-    });
-
-    await toast.present();
+    await this.toastService.presentErrorToast('top', message);
   }
 
   /**
@@ -102,7 +66,8 @@ export class ErrorHandlerService implements ErrorHandler {
     const backendPayload = error.error as any;
     if (backendPayload) {
       const backendError = backendPayload.error || backendPayload;
-      const code = typeof backendError?.code === 'string' ? backendError.code : null;
+      const code =
+        typeof backendError?.code === 'string' ? backendError.code : null;
 
       // 1) If we have an error code, try to map it to a translation key
       if (code) {

@@ -1,8 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.shahin.expenseswallet',
-  appName: 'Expenses Wallet',
+  appId: 'com.orbitmadar.madarflow',
+  appName: 'Madar Flow',
   webDir: 'www',
   server: {
     androidScheme: 'https',
@@ -26,9 +26,13 @@ const config: CapacitorConfig = {
       launchShowDuration: 1500,
     },
     GoogleAuth: {
-      scopes: ['profile', 'email', 'https://www.googleapis.com/auth/drive.file'],
+      scopes: [
+        'profile',
+        'email',
+        'https://www.googleapis.com/auth/drive.file',
+      ],
       serverClientId:
-        '358709669585-0td9nf2p58ncgtoreopgqkq7vosco473.apps.googleusercontent.com',
+        '353235771010-hrhbu0k5v93qbjqpuirdh4pcatb1sdvg.apps.googleusercontent.com',
       forceCodeForRefreshToken: true,
     },
   },

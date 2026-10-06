@@ -3,9 +3,11 @@ export interface SyncEntity {
   _syncStatus: SyncStatus;
   _lastModified: Date | string;
   _version?: number;
+  _serverVersion?: number;
   _isDeleted?: boolean;
   _clientId?: string;
   _conflictData?: any;
+  ownerUserId?: string;
 }
 
 export enum SyncStatus {
@@ -13,11 +15,11 @@ export enum SyncStatus {
   PENDING = 'pending',
   CONFLICT = 'conflict',
   ERROR = 'error',
-  OFFLINE = 'offline'
+  OFFLINE = 'offline',
 }
 
 export interface SyncMetadata {
-  lastSyncTime: Date;
+  lastSyncTime: Date | null;
   totalEntities: number;
   pendingCount: number;
   conflictCount: number;
@@ -26,20 +28,34 @@ export interface SyncMetadata {
   isSyncing: boolean;
 }
 
+export interface SyncIndicatorState {
+  pendingCount: number;
+  errorCount: number;
+  isSyncing: boolean;
+  isOffline: boolean;
+  hasPendingChanges: boolean;
+  hasSyncErrors: boolean;
+}
+
 export interface SyncOperation {
   id: string;
   type: 'CREATE' | 'UPDATE' | 'DELETE';
   entityType: 'expense' | 'category' | 'user';
   entityId: string;
   data: any;
-  timestamp: Date;
+  timestamp: Date | string;
   retryCount: number;
   maxRetries: number;
   status: SyncStatus;
   error?: string;
+  conflictId?: string;
+  ownerUserId?: string;
+  baseServerVersion?: number;
+  receiptId?: string;
 }
 
 export interface ConflictResolution {
+  conflictId?: string;
   entityId: string;
   entityType: string;
   localData: any;

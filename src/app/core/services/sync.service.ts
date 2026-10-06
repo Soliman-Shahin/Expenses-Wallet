@@ -1,5 +1,14 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, BehaviorSubject, from, of, interval } from 'rxjs';
+import {
+  Observable,
+  BehaviorSubject,
+  from,
+  of,
+  interval,
+  throwError,
+  Subscription,
+  firstValueFrom,
+} from 'rxjs';
 import {
   map,
   switchMap,
@@ -12,11 +21,15 @@ import {
 import { ApiService } from './api.service';
 import { OfflineStorageService } from './offline-storage.service';
 import { ConnectionService } from './connection.service';
+import { ExpenseService } from './expense.service';
+import { environment } from 'src/environments/environment';
+import { TokenService } from 'src/app/modules/auth/services/token.service';
 import {
   SyncStatus,
   SyncMetadata,
   SyncConfig,
   SyncProgress,
+  SyncIndicatorState,
 } from 'src/app/shared/models/sync.model';
 
 /**
@@ -35,6 +48,8 @@ export class SyncService {
   private apiService = inject(ApiService);
   private offlineStorage = inject(OfflineStorageService);
   private connectionService = inject(ConnectionService);
+  private expenseService = inject(ExpenseService);
+  private tokenService = inject(TokenService);
 
   // ==================== CONFIGURATION ====================
 
@@ -50,7 +65,7 @@ export class SyncService {
   // ==================== OBSERVABLES ====================
 
   private syncMetadataSubject = new BehaviorSubject<SyncMetadata>({
-    lastSyncTime: new Date(),
+    lastSyncTime: null,
     totalEntities: 0,
     pendingCount: 0,
     conflictCount: 0,
@@ -70,11 +85,31 @@ export class SyncService {
 
   public syncMetadata$ = this.syncMetadataSubject.asObservable();
   public syncProgress$ = this.syncProgressSubject.asObservable();
+  public readonly syncIndicatorState$: Observable<SyncIndicatorState> =
+    this.syncMetadata$.pipe(
+      map((metadata) => ({
+        pendingCount: metadata.pendingCount,
+        errorCount: metadata.errorCount,
+        isSyncing: metadata.isSyncing,
+        isOffline: !metadata.isOnline,
+        hasPendingChanges: metadata.pendingCount > 0 || metadata.errorCount > 0,
+        hasSyncErrors: metadata.errorCount > 0,
+      })),
+      distinctUntilChanged(
+        (a, b) =>
+          a.pendingCount === b.pendingCount &&
+          a.errorCount === b.errorCount &&
+          a.isSyncing === b.isSyncing &&
+          a.isOffline === b.isOffline
+      )
+    );
 
   // ==================== STATE ====================
 
   private isOnline = false;
   private syncInProgress = false;
+  private syncOwnerId: string | null = null;
+  private autoSyncSubscription?: Subscription;
 
   /** Key used to persist lastSyncTime in localStorage as fallback */
   private readonly LAST_SYNC_KEY = 'sync_lastSyncTime';
@@ -92,29 +127,43 @@ export class SyncService {
   private initializeQueueMonitoring(): void {
     // Monitor offline queue and update metadata
     this.offlineStorage.syncQueue$.subscribe((queue) => {
-      const pendingCount = queue.operations.filter(op => op.status === SyncStatus.PENDING).length;
-      const errorCount = queue.operations.filter(op => op.status === SyncStatus.ERROR).length;
-      
+      const pendingCount = queue.operations.filter(
+        (op) => op.status === SyncStatus.PENDING
+      ).length;
+      const errorCount = queue.operations.filter(
+        (op) => op.status === SyncStatus.ERROR
+      ).length;
+
       this.updateSyncMetadata({
         pendingCount,
         errorCount,
       });
-      
+
       // Also update total entities count occasionally
-      this.offlineStorage.getStorageSize().subscribe(totalEntities => {
+      this.offlineStorage.getStorageSize().subscribe((totalEntities) => {
         this.updateSyncMetadata({ totalEntities });
       });
     });
   }
 
-  private async loadConfig() {
+  private loadConfig(): void {
     try {
       const stored = localStorage.getItem('sync_config');
       if (stored) {
         this.syncConfig = { ...this.syncConfig, ...JSON.parse(stored) };
-        if (this.syncConfig.syncInterval < 60000) {
-          this.syncConfig.syncInterval = 300000; // Reset to 5 mins if too low
-        }
+        this.syncConfig.syncInterval = [60000, 300000, 900000].includes(
+          this.syncConfig.syncInterval
+        )
+          ? this.syncConfig.syncInterval
+          : 300000;
+        this.syncConfig.maxRetries = Math.min(
+          10,
+          Math.max(1, this.syncConfig.maxRetries || 3)
+        );
+        this.syncConfig.batchSize = Math.min(
+          100,
+          Math.max(1, this.syncConfig.batchSize || 50)
+        );
         console.log('⚙️ Loaded sync config:', this.syncConfig);
       }
     } catch (e) {
@@ -164,8 +213,10 @@ export class SyncService {
    * تفعيل المزامنة التلقائية
    */
   private initializeAutoSync(): void {
+    this.autoSyncSubscription?.unsubscribe();
+    this.autoSyncSubscription = undefined;
     if (this.syncConfig.autoSync && this.syncConfig.syncInterval > 0) {
-      interval(this.syncConfig.syncInterval)
+      this.autoSyncSubscription = interval(this.syncConfig.syncInterval)
         .pipe(
           filter(() => this.isOnline && !this.syncInProgress),
           switchMap(() => {
@@ -206,6 +257,11 @@ export class SyncService {
 
     // Start sync
     this.syncInProgress = true;
+    this.syncOwnerId = String(this.tokenService.getUserId() || '');
+    if (!this.syncOwnerId) {
+      this.syncInProgress = false;
+      return of(false);
+    }
     this.updateSyncMetadata({ isSyncing: true });
     this.updateSyncProgress({
       current: 0,
@@ -221,13 +277,17 @@ export class SyncService {
     // Step 1: Push local pending changes to server
     return this.pushLocalChanges().pipe(
       tap(() => {
+        if (this.syncOwnerId !== String(this.tokenService.getUserId() || '')) {
+          throw new Error('SYNC_OWNER_CHANGED');
+        }
         this.updateSyncProgress({
           current: 33,
           percentage: 33,
           currentOperation: 'Pushing local changes...',
         });
       }),
-      switchMap(() => {
+      switchMap((pushSucceeded) => {
+        if (!pushSucceeded) return of(false);
         // Step 2: Pull latest data from server
         return this.pullDataFromServer().pipe(
           tap(() => {
@@ -239,7 +299,9 @@ export class SyncService {
           }),
           switchMap((pullResult) => {
             console.log(
-              `✅ Pulled ${pullResult.entities?.length || 0} entities from server`
+              `✅ Pulled ${
+                pullResult.entities?.length || 0
+              } entities from server`
             );
 
             // Step 3: Merge with local data
@@ -271,12 +333,15 @@ export class SyncService {
           errors: [error.message || 'Unknown sync error'],
           isComplete: true,
         });
-        this.completeSync();
         return of(false);
       }),
       finalize(() => {
+        const ownerStillActive =
+          !!this.syncOwnerId &&
+          this.syncOwnerId === String(this.tokenService.getUserId() || '');
         this.syncInProgress = false;
-        this.updateSyncMetadata({ isSyncing: false });
+        this.syncOwnerId = null;
+        if (ownerStillActive) this.updateSyncMetadata({ isSyncing: false });
         console.log('🏁 Sync process finished');
       })
     );
@@ -308,12 +373,7 @@ export class SyncService {
         }),
         catchError((error) => {
           console.error('❌ Pull error:', error);
-          return of({
-            entities: [],
-            conflicts: [],
-            totalCount: 0,
-            hasMore: false,
-          });
+          return throwError(() => error);
         })
       );
   }
@@ -372,7 +432,7 @@ export class SyncService {
       }),
       catchError((error) => {
         console.error('❌ Merge error:', error);
-        return of(false);
+        return throwError(() => error);
       })
     );
   }
@@ -392,35 +452,143 @@ export class SyncService {
           return of(true);
         }
 
-        console.log(`📤 Pushing ${operations.length} pending operations...`);
+        const batch = operations
+          .sort(
+            (a, b) =>
+              new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+          )
+          .slice(0, this.syncConfig.batchSize);
+        console.log(`📤 Pushing ${batch.length} pending operations...`);
 
         // Convert operations to entities format
-        const entities = operations.map((op) => ({
+        const entities = batch.map((op) => ({
+          ...op.data,
           _id: op.entityId,
           _entityType: op.entityType,
           _lastModified: op.timestamp,
           _version: 1,
+          _baseVersion: op.baseServerVersion ?? op.data?._serverVersion,
           _isDeleted: op.type === 'DELETE',
-          ...op.data,
+          _operationId: op.id,
+          _operationType: op.type,
+          _receiptId: op.receiptId,
         }));
-
         // CRITICAL: Sort entities so that categories come first.
         // This ensures the backend resolves offline category IDs and puts them in idMap
         // BEFORE it processes expenses that depend on those categories.
         entities.sort((a, b) => {
-          if (a._entityType === 'category' && b._entityType !== 'category') return -1;
-          if (a._entityType !== 'category' && b._entityType === 'category') return 1;
+          if (a._entityType === 'category' && b._entityType !== 'category')
+            return -1;
+          if (a._entityType !== 'category' && b._entityType === 'category')
+            return 1;
           return 0;
         });
 
+        const failureUpdates: Promise<unknown>[] = [];
+
         return this.apiService.post<any>('/sync/push', { entities }).pipe(
+          switchMap((result) =>
+            from(Promise.all(batch.map((op) => {
+              const receipt = result?.receipts?.[op.id];
+              return receipt ? this.offlineStorage.persistSyncReceipt(op.id, receipt) : Promise.resolve();
+            }))).pipe(map(() => result))
+          ),
+          switchMap((result) =>
+            from(
+              Promise.all(
+                result?.success
+                  ? batch.map(async (op) => {
+                      if (
+                        this.syncOwnerId !==
+                        String(this.tokenService.getUserId() || '')
+                      ) {
+                        throw new Error('SYNC_OWNER_CHANGED');
+                      }
+                      const serverId = result?.idMap?.[op.entityId];
+                      if (serverId) {
+                        const reconciled = await firstValueFrom(
+                          this.offlineStorage.reconcileServerId(
+                            op.entityType,
+                            op.entityId,
+                            serverId
+                          )
+                        );
+                        if (op.entityType === 'expense') {
+                          this.expenseService.notifyExpenseReconciled();
+                        }
+                      }
+                    })
+                  : []
+              )
+            ).pipe(map(() => result))
+          ),
           tap((result) => {
             console.log('✅ Push result:', result);
 
             // Remove successful operations from queue
             if (result?.success) {
-              operations.forEach((op) => {
+              const conflictedIds = new Set(
+                (result?.conflicts || []).map((conflict: any) =>
+                  String(conflict._id)
+                )
+              );
+              const failed = new Map(
+                (result?.errors || []).map((error: any) => [
+                  error.operationId,
+                  error.reason,
+                ])
+              );
+              batch.forEach((op) => {
+                if (conflictedIds.has(String(op.entityId))) {
+                  const conflict = (result?.conflicts || []).find(
+                    (item: any) => String(item._id) === String(op.entityId)
+                  );
+                  this.offlineStorage.blockSyncOperation(
+                    op.id,
+                    String(conflict?.conflictId || conflict?.dedupeKey || '')
+                  );
+                  this.offlineStorage.markConflict(op.entityType, op.entityId);
+                  return;
+                }
+                const mappedServerId = result?.idMap?.[op.entityId];
+                if (
+                  op.type === 'CREATE' &&
+                  !mappedServerId &&
+                  !failed.has(op.id)
+                ) {
+                  failureUpdates.push(
+                    this.offlineStorage.recordSyncFailure(
+                      op.id,
+                      'CREATE_CORRELATION_MISSING'
+                    )
+                  );
+                  return;
+                }
+                if (failed.has(op.id)) {
+                  failureUpdates.push(
+                    this.offlineStorage.recordSyncFailure(op.id)
+                  );
+                  return;
+                }
                 this.offlineStorage.removeFromSyncQueue(op.id);
+                const serverVersion =
+                  op.type === 'CREATE'
+                    ? 1
+                    : (op.baseServerVersion ?? op.data?._serverVersion ?? 0) +
+                      1;
+                if (mappedServerId) {
+                  this.offlineStorage.markSynced(
+                    op.entityType,
+                    mappedServerId,
+                    serverVersion
+                  );
+                } else {
+                  this.offlineStorage.markSynced(
+                    op.entityType,
+                    op.entityId,
+                    serverVersion
+                  );
+                }
               });
             }
 
@@ -431,13 +599,23 @@ export class SyncService {
               });
             }
           }),
-          map((result) => !!result?.success),
+          switchMap((result) =>
+            from(Promise.all(failureUpdates)).pipe(map(() => result))
+          ),
+          switchMap((result) => {
+            if (!result?.success) return of(false);
+            // Continue until the owner-scoped queue is drained; a single configured
+            // batch must never make later operations wait for a future scheduler tick.
+            return batch.length < operations.length
+              ? this.pushLocalChanges()
+              : of(true);
+          }),
           catchError((error) => {
             console.error('❌ Push error:', error);
             this.updateSyncProgress({
               errors: [error.message || 'Push failed'],
             });
-            return of(false);
+            return throwError(() => error);
           })
         );
       })
@@ -522,19 +700,37 @@ export class SyncService {
 
     return this.apiService
       .post<any>('/sync/conflicts/resolve', {
+        conflictId: resolution.conflictId,
         entityId: resolution.entityId,
         entityType: resolution.entityType,
         resolution: resolution.resolution,
         mergedData: resolution.mergedData,
       })
       .pipe(
-        tap((result) => {
+        switchMap((result) => {
           console.log('✅ Conflict resolved:', result);
+          const resolved = result?.data || result?.result || result;
+          if (!resolved?.entity || !resolved?.conflictId)
+            throw new Error('SYNC_RESOLUTION_MISSING_RESULT');
+          return this.offlineStorage
+            .finalizeConflictResolution(
+              resolution.entityType,
+              resolution.entityId,
+              resolved.conflictId,
+              resolved.entity
+            )
+            .pipe(
+              tap((finalized) => {
+                if (!finalized)
+                  throw new Error('SYNC_LOCAL_FINALIZATION_FAILED');
+                const currentConflicts =
+                  this.syncMetadataSubject.value.conflictCount;
+                this.updateSyncMetadata({
+                  conflictCount: Math.max(0, currentConflicts - 1),
+                });
+              })
+            );
           // Update conflict count
-          const currentConflicts = this.syncMetadataSubject.value.conflictCount;
-          this.updateSyncMetadata({
-            conflictCount: Math.max(0, currentConflicts - 1),
-          });
         }),
         map(() => true),
         catchError((error) => {
@@ -568,7 +764,21 @@ export class SyncService {
 
   updateConfig(config: Partial<SyncConfig>): void {
     this.syncConfig = { ...this.syncConfig, ...config };
+    this.syncConfig.syncInterval = [60000, 300000, 900000].includes(
+      this.syncConfig.syncInterval
+    )
+      ? this.syncConfig.syncInterval
+      : 300000;
+    this.syncConfig.maxRetries = Math.min(
+      10,
+      Math.max(1, this.syncConfig.maxRetries || 3)
+    );
+    this.syncConfig.batchSize = Math.min(
+      100,
+      Math.max(1, this.syncConfig.batchSize || 50)
+    );
     localStorage.setItem('sync_config', JSON.stringify(this.syncConfig));
+    this.initializeAutoSync();
     console.log('⚙️ Sync config updated:', this.syncConfig);
   }
 

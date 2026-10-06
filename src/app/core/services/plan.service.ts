@@ -10,8 +10,10 @@ import {
   Plan,
   UserPlanContext,
   UsageStats,
-  MyPlanResponse
+  MyPlanResponse,
 } from '../../shared/models/plan.model';
+import { TokenService } from '../../modules/auth/services/token.service';
+import { invalidateHttpCache } from '../interceptors/cache.interceptor';
 
 /**
  * Plan Service
@@ -33,6 +35,14 @@ export class PlanService {
 
   private availablePlansSubject = new BehaviorSubject<Plan[]>([]);
   public availablePlans$ = this.availablePlansSubject.asObservable();
+  private accountRevision = 0;
+
+  constructor(private tokenService: TokenService) {
+    this.tokenService.sessionEnded$.subscribe(() => {
+      this.accountRevision++;
+      this.clearPlanCache();
+    });
+  }
 
   // ==================== Public API ====================
 
@@ -56,11 +66,18 @@ export class PlanService {
    * Fetches the current user's plan, permissions, limits, and usage
    */
   async getMyPlan(): Promise<MyPlanResponse> {
+    const revision = this.accountRevision;
+    const userId = this.tokenService.getUserId();
     try {
       const response = await firstValueFrom(
         this.http.get<{ data: MyPlanResponse }>(`${this.apiUrl}/plans/me`)
       );
-      this.currentPlanSubject.next(response.data);
+      if (
+        revision === this.accountRevision &&
+        userId === this.tokenService.getUserId()
+      ) {
+        this.currentPlanSubject.next(response.data);
+      }
       return response.data;
     } catch (error) {
       console.error('Error fetching my plan:', error);
@@ -80,6 +97,7 @@ export class PlanService {
         })
       );
       // Refresh current plan after upgrade
+      invalidateHttpCache('/plans/me');
       await this.getMyPlan();
       return response.data;
     } catch (error) {
@@ -208,9 +226,11 @@ export class PlanService {
    * Checks if the user is on a paid plan (Basic, Pro or Enterprise)
    */
   isPaidPlan(): boolean {
-    return this.isOnPlan(PlanSlug.BASIC) ||
-           this.isOnPlan(PlanSlug.PRO) ||
-           this.isOnPlan(PlanSlug.ENTERPRISE);
+    return (
+      this.isOnPlan(PlanSlug.BASIC) ||
+      this.isOnPlan(PlanSlug.PRO) ||
+      this.isOnPlan(PlanSlug.ENTERPRISE)
+    );
   }
 
   /**

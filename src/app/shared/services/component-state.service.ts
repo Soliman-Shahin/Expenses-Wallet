@@ -1,5 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { LoadingService } from '../../core/services/loading.service';
+import { NavigationStart, Router } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Injectable({
   providedIn: 'root',
@@ -7,10 +9,19 @@ import { LoadingService } from '../../core/services/loading.service';
 export class ComponentStateService {
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
-  
+
   private loadingService = inject(LoadingService);
 
+  constructor() {
+    inject(Router)
+      .events.pipe(takeUntilDestroyed())
+      .subscribe((event) => {
+        if (event instanceof NavigationStart) this.reset();
+      });
+  }
+
   setLoading(isLoading: boolean): void {
+    if (this.loading() === isLoading) return;
     this.loading.set(isLoading);
     if (isLoading) {
       this.loadingService.show('component-state');
@@ -24,8 +35,7 @@ export class ComponentStateService {
   }
 
   reset(): void {
-    this.loading.set(false);
+    this.setLoading(false);
     this.error.set(null);
-    this.loadingService.hide('component-state');
   }
 }

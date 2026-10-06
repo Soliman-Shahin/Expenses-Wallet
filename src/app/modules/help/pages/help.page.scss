@@ -1,193 +1,90 @@
-.help-content {
-  --background: var(--ion-background-color);
-}
-
-.transparent-toolbar {
-  --background: transparent;
-}
-
+@use "src/theme/mobile-secondary" as secondary;
+@include secondary.page;
 .header-section {
-  text-align: center;
-  margin-top: 1rem;
-  margin-bottom: 2rem;
-
-  h2 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin: 0 0 0.5rem 0;
-    color: var(--ion-text-color);
-  }
-
-  p {
-    font-size: 0.95rem;
-    color: var(--ion-color-medium);
-    margin: 0;
-  }
+  margin: 8px 0 24px;
+  text-align: start;
 }
-
+.header-section h2 {
+  font-size: 22px;
+  margin: 0 0 8px;
+  font-weight: 750;
+}
+.header-section p,
+.contact-card p,
+.faq-answer p,
+.version-info {
+  font-size: 13px;
+  color: var(--ew-wallet-muted);
+  line-height: 1.6;
+}
 .contact-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
-
-  .contact-card {
-    background: var(--ion-card-background);
-    border-radius: 16px;
-    padding: 1.2rem;
-    text-align: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    cursor: pointer;
-
-    &:active {
-      transform: scale(0.97);
-    }
-
-    .icon-box {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 0.8rem;
-      
-      ion-icon {
-        font-size: 24px;
-      }
-    }
-
-    &.email .icon-box {
-      background: rgba(var(--ion-color-primary-rgb), 0.1);
-      color: var(--ion-color-primary);
-    }
-
-    &.whatsapp .icon-box {
-      background: rgba(37, 211, 102, 0.1);
-      color: #25d366;
-    }
-
-    &.website .icon-box {
-      background: rgba(var(--ion-color-secondary-rgb), 0.1);
-      color: var(--ion-color-secondary);
-    }
-
-    h3 {
-      font-size: 1rem;
-      font-weight: 600;
-      margin: 0 0 0.4rem;
-      color: var(--ion-text-color);
-    }
-
-    p {
-      font-size: 0.8rem;
-      color: var(--ion-color-medium);
-      margin: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-  }
-}
-
-.faq-section {
-  margin-bottom: 2rem;
-
-  .section-title {
-    margin-bottom: 1rem;
-    padding: 0 0.5rem;
-
-    h3 {
-      font-size: 1.2rem;
-      font-weight: 700;
-      margin: 0;
-      color: var(--ion-text-color);
-    }
-  }
-
-  ion-accordion-group {
-    background: var(--ion-card-background);
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-
-    ion-accordion {
-      background: transparent;
-
-      ion-item {
-        --background: transparent;
-        --color: var(--ion-text-color);
-        font-weight: 500;
-        font-size: 0.95rem;
-      }
-
-      .faq-answer {
-        background: rgba(var(--ion-color-medium-rgb), 0.05);
-        p {
-          margin: 0;
-          font-size: 0.9rem;
-          color: var(--ion-color-medium);
-          line-height: 1.5;
-        }
-      }
-    }
-  }
-}
-
-.legal-section {
-  background: var(--ion-card-background);
-  border-radius: 16px;
+  margin-bottom: 24px;
+  border: 1px solid var(--ew-wallet-line);
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  margin-bottom: 2rem;
-
-  .legal-list {
-    background: transparent;
-    padding: 0;
-
-    ion-item {
-      --background: transparent;
-      --color: var(--ion-text-color);
-      font-size: 0.95rem;
-      font-weight: 500;
-
-      ion-icon {
-        color: var(--ion-color-medium);
-      }
-    }
-  }
 }
-
+.contact-card {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 4px 12px;
+  padding: 14px;
+  text-align: start;
+  background: var(--ion-item-background);
+  color: var(--ion-text-color);
+  border: 0;
+  border-bottom: 1px solid var(--ew-wallet-line);
+  font: inherit;
+}
+.contact-card:last-child {
+  border-bottom: 0;
+}
+.icon-box {
+  grid-row: span 2;
+  align-self: center;
+  color: var(--ion-color-primary);
+  font-size: 22px;
+}
+.contact-card h3 {
+  font-size: 15px;
+  margin: 0;
+}
+.contact-card p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.section-title h3 {
+  font-size: 16px;
+  margin: 20px 0 12px;
+}
+ion-accordion-group,
+.legal-section {
+  display: block;
+  border: 1px solid var(--ew-wallet-line);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--ion-item-background);
+  margin-bottom: 20px;
+}
+ion-item {
+  --background: var(--ion-item-background);
+  --min-height: 54px;
+  --border-color: var(--ew-wallet-line);
+  font-size: 14px;
+}
+.faq-answer {
+  background: var(--ew-wallet-inset);
+}
+.faq-answer p {
+  margin: 0;
+}
+.legal-list {
+  padding: 0;
+}
 .version-info {
+  padding: 16px;
   text-align: center;
-  margin-top: 2rem;
-  margin-bottom: 2rem;
-
-  p {
-    margin: 0 0 0.3rem 0;
-    font-size: 0.9rem;
-    color: var(--ion-color-medium);
-    font-weight: 500;
-
-    &.copyright {
-      font-size: 0.8rem;
-      font-weight: 400;
-    }
-  }
 }
-
-:host-context(.dark) {
-  .contact-grid .contact-card,
-  .faq-section ion-accordion-group,
-  .legal-section {
-    background: var(--ion-color-step-50);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  }
-}
-
-:host-context(.rtl) {
-  .header-section, .version-info {
-    text-align: center;
-  }
+.version-info p {
+  margin: 0;
 }

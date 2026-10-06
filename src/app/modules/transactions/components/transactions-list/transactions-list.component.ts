@@ -1,3 +1,5 @@
+import { expenseSyncLabel } from 'src/app/shared/utils/expense-presentation';
+import { ExpenseDetailComponent } from 'src/app/home/components/expense-detail/expense-detail.component';
 import {
   Component,
   ChangeDetectionStrategy,
@@ -25,12 +27,7 @@ import { ExpenseFormComponent } from 'src/app/home/components/expense-form/expen
 import { ComponentStateService } from 'src/app/shared/services/component-state.service';
 import { FormsModule } from '@angular/forms';
 import { SkeletonBlockComponent } from '../../../../shared/ui/skeleton-block/skeleton-block.component';
-import {
-  NgClass,
-  LowerCasePipe,
-  CurrencyPipe,
-  DatePipe,
-} from '@angular/common';
+import { NgClass, LowerCasePipe, DecimalPipe, DatePipe } from '@angular/common';
 import { AddFabButtonComponent } from '../../../../shared/ui/add-fab-button/add-fab-button.component';
 import { TranslateModule } from '@ngx-translate/core';
 import { PlanService } from '../../../../core/services/plan.service';
@@ -50,6 +47,12 @@ interface TransactionItem {
   formattedDate: string;
 }
 
+interface TransactionGroup {
+  key: string;
+  label: string;
+  items: TransactionItem[];
+}
+
 @Component({
   selector: 'app-transactions-list',
   templateUrl: './transactions-list.component.html',
@@ -63,14 +66,14 @@ interface TransactionItem {
     SkeletonBlockComponent,
     NgClass,
     AddFabButtonComponent,
-    LowerCasePipe,
-    CurrencyPipe,
+    DecimalPipe,
     DatePipe,
     TranslateModule,
     PlanLimitBannerComponent,
   ],
 })
 export class TransactionsListComponent extends BaseComponent implements OnInit {
+  readonly syncLabel = expenseSyncLabel;
   // Signals for state management
   rawTransactions = signal<Expense[]>([]);
   transactions = computed(() => {
@@ -78,8 +81,26 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
     const items = raw.map((e) => this.mapToViewModel(e));
     return items.sort((a, b) => b.date.getTime() - a.date.getTime());
   });
+  private readonly languageVersion = signal(0);
+  transactionGroups = computed<TransactionGroup[]>(() => {
+    this.languageVersion();
+    const groups = new Map<string, TransactionGroup>();
+    for (const item of this.transactions()) {
+      const key = this.localDateKey(item.date);
+      let group = groups.get(key);
+      if (!group) {
+        group = { key, label: this.getDateGroupLabel(item.date), items: [] };
+        groups.set(key, group);
+      }
+      group.items.push(item);
+    }
+    return Array.from(groups.values());
+  });
   categories = signal<Category[]>([]);
-  userCurrency = signal<string>('USD');
+  userCurrency = signal<string>('');
+  hasLoadedTransactions = false;
+  contentLoading = signal(false);
+  private loadSequence = 0;
 
   // Filters signals
   searchTerm = signal<string>('');
@@ -117,6 +138,12 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
         this.searchTerm.set(term);
         this.loadTransactions();
       });
+    this.expenseService.expenseReconciled$
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => {
+        this.loadTransactions();
+        this.cdr.markForCheck();
+      });
   }
 
   override ngOnInit() {
@@ -126,6 +153,39 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
     this.loadCategories();
     this.loadTransactions();
     this.checkPlanLimits();
+  }
+
+  protected override onLanguageChanged(): void {
+    this.languageVersion.update((version) => version + 1);
+    this.cdr.markForCheck();
+  }
+
+  private localDateKey(date: Date): string {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+      2,
+      '0'
+    )}-${String(date.getDate()).padStart(2, '0')}`;
+  }
+
+  private getDateGroupLabel(date: Date): string {
+    const today = new Date();
+    const yesterday = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate() - 1
+    );
+    const dateKey = this.localDateKey(date);
+    if (dateKey === this.localDateKey(today)) {
+      return this.translateService.instant('TRANSACTIONS.DATE_GROUP_TODAY');
+    }
+    if (dateKey === this.localDateKey(yesterday)) {
+      return this.translateService.instant('TRANSACTIONS.DATE_GROUP_YESTERDAY');
+    }
+    return new Intl.DateTimeFormat(this.currentLang || 'en', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    }).format(date);
   }
 
   private hasEntered = false;
@@ -170,7 +230,6 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
     try {
       const modal = await this.modalController.create({
         component: ExpenseFormComponent,
-        cssClass: 'main-modal',
       });
       await modal.present();
       const { role } = await modal.onDidDismiss();
@@ -184,7 +243,7 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
 
   loadUserCurrency() {
     const profile = this.profileService.getProfile();
-    this.userCurrency.set(profile?.currency || 'USD');
+    this.userCurrency.set(profile?.currency || '');
   }
 
   loadCategories() {
@@ -198,12 +257,13 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
             : (response as any)?.data?.data || (response as any)?.data || [];
           this.categories.set(arr);
         },
-        error: (err: any) => console.error('Error loading categories:', err),
+        error: () => undefined,
       });
   }
 
   loadTransactions() {
-    this.setLoading(true);
+    const requestSequence = ++this.loadSequence;
+    this.contentLoading.set(true);
     this.setError(null);
 
     const params: any = {};
@@ -246,8 +306,10 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
       .getExpenses(params, true)
       .pipe(
         finalize(() => {
-          this.setLoading(false);
-          this.cdr.markForCheck();
+          if (requestSequence === this.loadSequence) {
+            this.contentLoading.set(false);
+            this.cdr.markForCheck();
+          }
         }),
         takeUntil(this.destroy$)
       )
@@ -264,15 +326,19 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
                   (response as any)?.data ||
                   [];
             }
-            this.rawTransactions.set(rawExpenses);
-          } catch (err) {
-            console.error('Error processing transactions:', err);
+            if (requestSequence === this.loadSequence) {
+              this.rawTransactions.set(rawExpenses);
+              this.hasLoadedTransactions = true;
+            }
+          } catch {
             this.setError('Failed to process data');
           }
         },
         error: (err: any) => {
-          this.setError('Failed to load transactions');
-          console.error('Error loading transactions:', err);
+          if (requestSequence === this.loadSequence) {
+            this.setError('Failed to load transactions');
+            this.hasLoadedTransactions = true;
+          }
         },
       });
   }
@@ -337,7 +403,7 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
   }
 
   onSearchChange(event: any) {
-    this.searchSubject.next(event.target.value);
+    this.searchSubject.next(String(event.target.value ?? '').trim());
   }
 
   onFilterChange(event?: any) {
@@ -565,6 +631,25 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
     this.loadTransactions();
   }
 
+  clearAllFilters() {
+    this.searchTerm.set('');
+    this.selectedCategories.set([]);
+    this.selectedType.set('');
+    this.startDate.set(null);
+    this.endDate.set(null);
+    this.loadTransactions();
+  }
+
+  hasActiveFilters(): boolean {
+    return (
+      !!this.searchTerm() ||
+      this.selectedCategories().length > 0 ||
+      !!this.selectedType() ||
+      !!this.startDate() ||
+      !!this.endDate()
+    );
+  }
+
   getDateRangeText(): string {
     const sDate = this.startDate();
     const eDate = this.endDate();
@@ -599,8 +684,27 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
     return item._id;
   }
 
-  onTransactionClick(item: TransactionItem) {
-    this.onEdit(item.original);
+  async onTransactionClick(item: TransactionItem) {
+    if (this.isOpeningModal) return;
+    this.isOpeningModal = true;
+    let role: string | undefined;
+    try {
+      const modal = await this.modalController.create({
+        component: ExpenseDetailComponent,
+        componentProps: {
+          expense: item.original,
+          categoryName: item.categoryName,
+          currency: this.userCurrency(),
+          locale: this.currentLang,
+        },
+        cssClass: 'main-modal expense-record-modal',
+      });
+      await modal.present();
+      role = (await modal.onDidDismiss()).role;
+    } finally {
+      this.isOpeningModal = false;
+    }
+    if (role === 'edit') await this.onEdit(item.original);
   }
 
   async onEdit(item: Expense) {
@@ -610,7 +714,6 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
       const modal = await this.modalController.create({
         component: ExpenseFormComponent,
         componentProps: { expense: item },
-        cssClass: 'main-modal',
       });
       await modal.present();
       const { role } = await modal.onDidDismiss();
@@ -636,12 +739,11 @@ export class TransactionsListComponent extends BaseComponent implements OnInit {
             );
             this.loadTransactions();
           },
-          error: async (err) => {
+          error: async () => {
             await this.toastService.presentErrorToast(
               'bottom',
               this.translateService.instant('EXPENSE.DELETE_ERROR_TOAST')
             );
-            console.error(err);
           },
         });
       });

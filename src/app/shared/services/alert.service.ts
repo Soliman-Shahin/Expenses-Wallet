@@ -79,10 +79,11 @@ export class AlertService {
     title?: string;
     confirmText?: string;
     cancelText?: string;
+    cssClass?: string;
   }): Promise<boolean> {
     return new Promise(async (resolve) => {
       const alert = await this.alertController.create({
-        cssClass: 'custom-alert alert-confirm',
+        cssClass: `custom-alert alert-confirm ${options.cssClass || ''}`.trim(),
         header:
           options.title || this.translateService.instant('COMMON.CONFIRM'),
         message: options.message,
@@ -131,6 +132,7 @@ export class AlertService {
       message,
       confirmText: this.translateService.instant('COMMON.DELETE'),
       cancelText: this.translateService.instant('COMMON.CANCEL'),
+      cssClass: 'alert-delete',
     });
 
     if (confirmed && onConfirm) {

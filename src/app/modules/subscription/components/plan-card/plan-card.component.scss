@@ -1,10 +1,12 @@
+@use "src/theme/mobile-secondary" as secondary;
+@include secondary.page;
 ion-card {
   position: relative;
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
-  margin: 20px 16px 16px;
-  overflow: visible;
+  margin: 12px 16px;
+  overflow: hidden;
 
   &:hover {
     transform: translateY(-4px);
@@ -12,7 +14,7 @@ ion-card {
   }
 
   &.current-plan {
-    border: 2px solid var(--ion-color-primary);
+    border: 1px solid var(--ion-color-primary);
     background: linear-gradient(
       135deg,
       var(--ion-color-primary-tint) 0%,
@@ -21,41 +23,41 @@ ion-card {
   }
 
   &.popular-plan {
-    border: 2px solid var(--ion-color-warning);
-    box-shadow: 0 8px 24px rgba(var(--ion-color-warning-rgb), 0.3);
+    border-color: rgba(var(--ion-color-warning-rgb), 0.55);
   }
 }
 
-.popular-badge,
-.current-badge {
-  position: absolute;
-  top: -12px;
-  right: 16px;
-  z-index: 10;
-
-  ion-badge {
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-weight: 600;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-
-    ion-icon {
-      margin-inline-end: 4px;
-      font-size: 16px;
-    }
-  }
+.plan-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
 }
-
-.current-badge {
-  right: auto;
-  left: 16px;
+.plan-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.plan-badges ion-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: normal;
+}
+.plan-badges ion-icon {
+  font-size: 13px;
 }
 
 ion-card-header {
-  padding: 24px 16px 16px;
+  padding: 18px 16px 8px;
 
   ion-card-title {
-    font-size: 28px;
+    font-size: 23px;
     font-weight: 700;
     margin-bottom: 8px;
   }
@@ -68,13 +70,13 @@ ion-card-header {
 }
 
 ion-card-content {
-  padding: 16px;
+  padding: 10px 16px 16px;
 }
 
 .price-section {
   text-align: center;
-  padding: 24px 0;
-  margin-bottom: 24px;
+  padding: 8px 0 12px;
+  margin-bottom: 12px;
   border-bottom: 1px solid var(--ion-color-light);
 
   .price {
@@ -90,7 +92,7 @@ ion-card-content {
     }
 
     .amount {
-      font-size: 48px;
+      font-size: 34px;
       font-weight: 800;
       color: var(--ion-color-primary);
     }
@@ -104,7 +106,7 @@ ion-card-content {
 
 .limits-section,
 .features-section {
-  margin-bottom: 24px;
+  margin-bottom: 14px;
 
   h4 {
     font-size: 16px;
@@ -146,7 +148,7 @@ ion-card-content {
 }
 
 .upgrade-button {
-  margin-top: 24px;
+  margin-top: 12px;
   height: 48px;
   font-weight: 700;
   font-size: 16px;
@@ -197,4 +199,149 @@ ion-card-subtitle {
 
 .limits-info h4 {
   opacity: 1;
+}
+
+:host {
+  ion-card,
+  ion-card.current-plan,
+  ion-card.popular-plan {
+    background: var(--ion-item-background);
+    border: 1px solid var(--ew-wallet-line);
+    border-radius: 12px;
+    box-shadow: none;
+    transform: none;
+  }
+  ion-card.current-plan {
+    border-color: var(--ion-color-primary);
+  }
+  ion-card-header {
+    padding: 24px 16px 8px;
+  }
+  ion-card-title {
+    font-size: 22px;
+  }
+  .price-section {
+    padding: 12px 0;
+    margin-bottom: 16px;
+    border-color: var(--ew-wallet-line);
+  }
+  .price {
+    direction: ltr;
+    unicode-bidi: isolate;
+    font-variant-numeric: tabular-nums;
+    flex-wrap: wrap;
+  }
+  .price-section .price .amount {
+    font-size: 32px;
+    color: var(--ion-text-color);
+  }
+  .limits-section h4,
+  .features-section h4 {
+    color: var(--ion-text-color);
+  }
+  .limits-section,
+  .features-section {
+    margin-bottom: 16px;
+  }
+  .upgrade-button {
+    box-shadow: none;
+    margin-top: 12px;
+  }
+}
+
+// Compact plan comparison and readable secondary text in both themes.
+:host ion-card {
+  border-radius: 16px;
+}
+:host ion-card-header {
+  padding: 20px 16px 4px;
+}
+:host ion-card-header ion-card-title {
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+:host ion-card-subtitle {
+  color: var(--ew-wallet-muted);
+  opacity: 1;
+  font-size: 13px;
+}
+:host ion-card-content {
+  padding: 12px 16px 16px;
+}
+:host .limits-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+:host .limit-cell {
+  min-height: 48px;
+  padding: 9px 10px;
+  border: 1px solid var(--ew-wallet-line);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 4px;
+}
+:host .limit-cell ion-icon {
+  font-size: 16px;
+}
+:host .limit-cell span {
+  color: var(--ew-wallet-muted);
+  font-size: 11px;
+  line-height: 1.25;
+}
+:host .limit-cell strong {
+  color: var(--ion-text-color);
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+}
+:host .price-section {
+  text-align: start;
+  padding: 4px 0 12px;
+  margin-bottom: 12px;
+}
+:host .price-section .price {
+  justify-content: flex-start;
+}
+:host .price-section .currency,
+:host .price-section .period {
+  opacity: 1;
+  color: var(--ew-wallet-muted);
+  font-size: 13px;
+}
+:host .limits-section ion-item {
+  --min-height: 44px;
+  margin-bottom: 0;
+}
+:host .limits-section ion-item ion-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+:host .limits-section ion-item ion-label p,
+:host .features-section ion-item ion-label p {
+  opacity: 1;
+  color: var(--ew-wallet-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+:host .limits-section ion-item ion-label h3 {
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ion-text-color);
+  flex-shrink: 0;
+  margin: 0;
+}
+:host .limits-section ion-icon {
+  display: none;
+}
+:host .limits-section h4,
+:host .features-section h4 {
+  font-size: 14px;
+  margin: 0 0 8px;
+}
+:host .upgrade-button:hover:not([disabled]) {
+  transform: none;
 }

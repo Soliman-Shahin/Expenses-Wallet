@@ -1,30 +1,42 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { BaseComponent } from 'src/app/shared/base/base.component';
-import { Subscription } from 'rxjs';
 import { BiometricService } from 'src/app/core/services/biometric.service';
-import { ModalController, IonicModule } from '@ionic/angular';
+import { BiometricSignInService } from 'src/app/modules/auth/services/biometric-signin.service';
+import { IonicModule } from '@ionic/angular';
 import { AuthService } from 'src/app/modules/auth/services/auth.service';
 import { User } from 'src/app/modules/auth/models';
 import { TranslateModule } from '@ngx-translate/core';
+import { RouterModule } from '@angular/router';
 import { PushNotificationService } from 'src/app/core/services/push-notification.service';
+import { CacheService } from 'src/app/core/services/cache.service';
+import { takeUntil } from 'rxjs/operators';
+import { clearHttpCache } from 'src/app/core/interceptors/cache.interceptor';
+import { ProfileService } from 'src/app/modules/profile/services/profile.service';
+import { UserProfile } from 'src/app/modules/profile/models/profile.model';
+import { BRAND } from 'src/app/config/brand.config';
 
 @Component({
   selector: 'app-settings-list',
   templateUrl: './settings-list.component.html',
   styleUrls: ['./settings-list.component.scss'],
   standalone: true,
-  imports: [IonicModule, TranslateModule],
+  imports: [IonicModule, TranslateModule, RouterModule],
 })
 export class SettingsListComponent extends BaseComponent implements OnInit {
+  readonly brand = BRAND;
   biometricAvailable = false;
+  biometricSignInAvailable = false;
   biometricEnabled = false;
+  biometricSignInEnabled = false;
 
   currentLanguage = 'en';
-  selectedTheme = 'light';
+  selectedTheme = 'auto';
   notificationsEnabled = true;
-  autoBackupEnabled = false;
+  notificationStatus = 'SETTINGS.NOTIFICATIONS_UNAVAILABLE';
 
   currentUser: User | null = null;
+  profile: UserProfile | null = null;
+  avatarFailed = false;
 
   languages = [
     { code: 'en', name: 'English', flag: '🇺🇸' },
@@ -38,35 +50,62 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
   ];
 
   private biometricService = inject(BiometricService);
+  private biometricSignInService = inject(BiometricSignInService);
   private pushNotificationService = inject(PushNotificationService);
+  private profileService = inject(ProfileService);
 
-  constructor() {
-    super();
-  }
+  constructor() { super(); }
 
   override async ngOnInit() {
     super.ngOnInit();
 
     // Subscribe to current user changes
-    this.authService.user$.subscribe((user) => {
+    this.authService.user$.pipe(takeUntil(this.destroy$)).subscribe((user) => {
       this.currentUser = user;
       this.cdr.markForCheck();
     });
+    this.profileService.profile$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((profile) => {
+        this.profile = profile;
+        this.avatarFailed = false;
+        this.cdr.markForCheck();
+      });
 
     await this.loadSettings();
   }
 
+  onAvatarError(): void {
+    this.avatarFailed = true;
+  }
+
+  onAvatarLoad(): void {
+    this.avatarFailed = false;
+  }
+
   async loadSettings() {
     this.biometricAvailable = await this.biometricService.isAvailable();
+    this.biometricSignInAvailable =
+      await this.biometricSignInService.isAvailable();
     this.biometricEnabled = this.biometricService.isEnabled;
+    this.biometricSignInEnabled = this.biometricSignInAvailable
+      ? await this.biometricSignInService.hasEnrollment()
+      : false;
     this.currentLanguage = this.currentLang;
-    this.selectedTheme = this.currentTheme;
+    this.selectedTheme = this.themeService.getPreference();
     const notificationPermission =
       await this.pushNotificationService.getCurrentPermissionState();
     this.notificationsEnabled =
       localStorage.getItem('notifications') !== 'false' &&
       notificationPermission === 'granted';
-    this.autoBackupEnabled = localStorage.getItem('autoBackup') === 'true';
+    this.notificationStatus =
+      notificationPermission === 'unavailable'
+        ? 'SETTINGS.NOTIFICATIONS_UNAVAILABLE'
+        : notificationPermission === 'denied'
+        ? 'SETTINGS.NOTIFICATIONS_PERMISSION_DENIED_SHORT'
+        : this.notificationsEnabled
+        ? 'SETTINGS.NOTIFICATIONS_ENABLED'
+        : 'SETTINGS.NOTIFICATIONS_DISABLED';
     this.cdr.markForCheck();
   }
 
@@ -74,14 +113,14 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
     const isEnabled = event.detail.checked;
 
     if (isEnabled) {
+      if (!this.authService.isLoggedIn) {
+        event.target.checked = false;
+        return;
+      }
       const verified = await this.biometricService.verifyIdentity();
       if (verified) {
         await this.biometricService.setEnabled(true);
         this.biometricEnabled = true;
-        this.toastService.presentSuccessToast(
-          'bottom',
-          this.translateService.instant('SETTINGS.BIOMETRIC_ENABLED')
-        );
       } else {
         event.target.checked = false;
         this.biometricEnabled = false;
@@ -93,10 +132,6 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
     } else {
       await this.biometricService.setEnabled(false);
       this.biometricEnabled = false;
-      this.toastService.presentSuccessToast(
-        'bottom',
-        this.translateService.instant('SETTINGS.BIOMETRIC_DISABLED')
-      );
     }
     this.cdr.markForCheck();
   }
@@ -105,10 +140,6 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
     const newLang = lang || (this.currentLang === 'ar' ? 'en' : 'ar');
     super.changeLanguage(newLang);
     this.currentLanguage = newLang;
-    this.toastService.presentSuccessToast(
-      'bottom',
-      this.translateService.instant('SETTINGS.LANGUAGE_CHANGED')
-    );
     this.cdr.markForCheck();
   }
 
@@ -121,63 +152,70 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
     const theme = event.detail.value;
     this.selectedTheme = theme;
 
-    // Apply theme immediately
-    const currentTheme = this.themeService.getCurrentTheme();
-    if (theme === 'dark' && currentTheme !== 'dark') {
-      this.themeService.toggleTheme();
-    } else if (theme === 'light' && currentTheme === 'dark') {
-      this.themeService.toggleTheme();
-    }
-
-    localStorage.setItem('theme', theme);
-    this.toastService.presentSuccessToast(
-      'bottom',
-      this.translateService.instant('SETTINGS.THEME_CHANGED')
-    );
+    this.themeService.setTheme(theme);
     this.cdr.markForCheck();
   }
 
   async toggleNotifications(event: any) {
     const requestedEnabled = !!event.detail.checked;
-
-    if (requestedEnabled) {
-      const permission = await this.pushNotificationService.enable();
-      this.notificationsEnabled = permission === 'granted';
-      if (!this.notificationsEnabled) {
-        event.target.checked = false;
-        this.toastService.presentErrorToast(
-          'bottom',
-          this.translateService.instant(
-            'SETTINGS.NOTIFICATIONS_PERMISSION_DENIED'
-          )
-        );
+    try {
+      if (requestedEnabled) {
+        const permission = await this.pushNotificationService.enable();
+        this.notificationsEnabled = permission === 'granted';
+        if (!this.notificationsEnabled) throw new Error('permission');
       } else {
-        this.toastService.presentSuccessToast(
-          'bottom',
-          this.translateService.instant('SETTINGS.NOTIFICATIONS_ENABLED')
-        );
+        await this.pushNotificationService.disable();
+        this.notificationsEnabled = false;
       }
-    } else {
-      await this.pushNotificationService.disable();
+    } catch {
       this.notificationsEnabled = false;
-      this.toastService.presentSuccessToast(
+      event.target.checked = false;
+      this.toastService.presentErrorToast(
         'bottom',
-        this.translateService.instant('SETTINGS.NOTIFICATIONS_DISABLED')
+        this.translateService.instant(
+          'SETTINGS.NOTIFICATIONS_PERMISSION_DENIED'
+        )
       );
     }
     this.cdr.markForCheck();
   }
 
-  toggleAutoBackup(event: any) {
-    this.autoBackupEnabled = event.detail.checked;
-    localStorage.setItem('autoBackup', this.autoBackupEnabled.toString());
-    const messageKey = this.autoBackupEnabled
-      ? 'SETTINGS.AUTO_BACKUP_ENABLED'
-      : 'SETTINGS.AUTO_BACKUP_DISABLED';
-    this.toastService.presentSuccessToast(
-      'bottom',
-      this.translateService.instant(messageKey)
-    );
+  async toggleBiometricSignIn(event: any) {
+    const enabled = !!event.detail.checked;
+    if (enabled) {
+      if (!this.authService.isLoggedIn || !this.biometricSignInAvailable) {
+        event.target.checked = false;
+        return;
+      }
+      try {
+        await this.biometricSignInService.enroll(
+          'This device',
+          'android',
+          this.authService.getCurrentUserId() || undefined
+        );
+        this.biometricSignInEnabled = true;
+      } catch {
+        event.target.checked = false;
+        this.biometricSignInEnabled = false;
+        this.toastService.presentErrorToast(
+          'bottom',
+          this.translateService.instant('SETTINGS.BIOMETRIC_SIGNIN_FAILED')
+        );
+      }
+    } else {
+      try {
+        await this.biometricSignInService.revoke();
+        this.biometricSignInEnabled = false;
+      } catch {
+        event.target.checked = true;
+        this.toastService.presentErrorToast(
+          'bottom',
+          this.translateService.instant(
+            'SETTINGS.BIOMETRIC_SIGNIN_REVOKE_FAILED'
+          )
+        );
+      }
+    }
     this.cdr.markForCheck();
   }
 
@@ -206,20 +244,8 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
     });
 
     if (confirmed) {
-      // Clear only cache, not all localStorage
-      const keysToKeep = ['language', 'theme', 'notifications', 'autoBackup'];
-      const tempStorage: any = {};
-
-      keysToKeep.forEach((key) => {
-        const value = localStorage.getItem(key);
-        if (value) tempStorage[key] = value;
-      });
-
-      localStorage.clear();
-
-      Object.keys(tempStorage).forEach((key) => {
-        localStorage.setItem(key, tempStorage[key]);
-      });
+      this.cacheService.clear();
+      clearHttpCache();
 
       this.toastService.presentSuccessToast(
         'bottom',
@@ -228,4 +254,6 @@ export class SettingsListComponent extends BaseComponent implements OnInit {
       this.cdr.markForCheck();
     }
   }
+
+  private cacheService = inject(CacheService);
 }

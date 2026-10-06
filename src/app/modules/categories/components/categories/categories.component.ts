@@ -3,14 +3,23 @@ import {
   ChangeDetectionStrategy,
   inject,
   OnInit,
+  ViewChild,
 } from '@angular/core';
-import { AlertController, InfiniteScrollCustomEvent, ItemReorderEventDetail, RefresherCustomEvent, IonicModule } from '@ionic/angular';
+import {
+  ActionSheetController,
+  InfiniteScrollCustomEvent,
+  IonSearchbar,
+  ItemReorderEventDetail,
+  RefresherCustomEvent,
+  IonicModule,
+} from '@ionic/angular';
 import {
   BehaviorSubject,
   catchError,
   combineLatest,
   finalize,
   of,
+  merge,
   switchMap,
   takeUntil,
   tap,
@@ -19,38 +28,41 @@ import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { BaseListComponent } from 'src/app/shared/base';
 import { Category, CategoryParams } from '../../models';
 import { SkeletonBlockComponent } from '../../../../shared/ui/skeleton-block/skeleton-block.component';
-import { NgClass, AsyncPipe, LowerCasePipe } from '@angular/common';
+import { NgClass, AsyncPipe } from '@angular/common';
 import { AddFabButtonComponent } from '../../../../shared/ui/add-fab-button/add-fab-button.component';
 import { PlanService } from '../../../../core/services/plan.service';
 import { PlanLimitBannerComponent } from '../../../../shared/components/plan-limit-banner/plan-limit-banner.component';
+import { ExpenseService } from 'src/app/core/services/expense.service';
 
 @Component({
-    selector: 'app-categories',
-    templateUrl: './categories.component.html',
-    styleUrls: ['./categories.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: true,
-    imports: [
-        IonicModule,
-        SkeletonBlockComponent,
-        NgClass,
-        AddFabButtonComponent,
-        AsyncPipe,
-        LowerCasePipe,
-        TranslateModule,
-        PlanLimitBannerComponent,
-    ],
+  selector: 'app-categories',
+  templateUrl: './categories.component.html',
+  styleUrls: ['./categories.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    IonicModule,
+    SkeletonBlockComponent,
+    NgClass,
+    AddFabButtonComponent,
+    AsyncPipe,
+    TranslateModule,
+    PlanLimitBannerComponent,
+  ],
 })
 export class CategoriesComponent
   extends BaseListComponent<Category>
   implements OnInit
 {
-  private alertController = inject(AlertController);
+  private actionSheetController = inject(ActionSheetController);
   private translate = inject(TranslateService);
   private planService = inject(PlanService);
+  private categoryExpenseService = inject(ExpenseService);
 
   private readonly loading = new BehaviorSubject<boolean>(false);
   private readonly errorMessage = new BehaviorSubject<string>('');
+  private readonly usageRefresh = new BehaviorSubject<void>(undefined);
+  readonly usageCounts$ = new BehaviorSubject<Record<string, number>>({});
 
   readonly vm$ = combineLatest({
     response: this.response$,
@@ -83,7 +95,11 @@ export class CategoriesComponent
 
   isActionSheetOpen = false;
   selectedCategory: Category | null = null;
-  
+  searchQuery = '';
+  activeType: 'all' | 'income' | 'outcome' = 'all';
+
+  @ViewChild('categorySearch') categorySearch?: IonSearchbar;
+
   // Plan Limits State
   canAddCategory = true;
   categoriesLimitInfo = { used: 0, limit: 0 as number | null, percentage: 0 };
@@ -94,6 +110,7 @@ export class CategoriesComponent
 
   override ngOnInit() {
     this.setupSubscription();
+    this.setupUsageCounts();
     this.checkPlanLimits();
   }
 
@@ -105,18 +122,49 @@ export class CategoriesComponent
       // Force a refresh by re-emitting the current params
       const currentParams = this.#paramsSub.getValue();
       this.#paramsSub.next({ ...currentParams });
+      this.usageRefresh.next();
     }
     this.hasEntered = true;
   }
-  
-  private checkPlanLimits() {
-    this.planService.currentPlan$.pipe(takeUntil(this.destroy$)).subscribe(planData => {
-      if (planData) {
-        this.canAddCategory = this.planService.canAddCategory();
-        this.categoriesLimitInfo = planData.usage.categories;
+
+  private setupUsageCounts(): void {
+    merge(this.usageRefresh, this.categoryExpenseService.expenseReconciled$)
+      .pipe(
+        takeUntil(this.destroy$),
+        switchMap(() =>
+          this.categoryExpenseService
+            .getCategoryUsageCounts()
+            .pipe(catchError(() => of({} as Record<string, number>)))
+        )
+      )
+      .subscribe((counts) => {
+        this.usageCounts$.next(counts);
         this.cdr.markForCheck();
-      }
-    });
+      });
+  }
+
+  usageCount(categoryId: string | undefined): number {
+    return this.usageCounts$.value[String(categoryId ?? '')] || 0;
+  }
+
+  usageLabelKey(count: number): string {
+    return count === 1
+      ? 'CATEGORIES.USAGE_ONE'
+      : count === 2
+      ? 'CATEGORIES.USAGE_TWO'
+      : 'CATEGORIES.USAGE_OTHER';
+  }
+
+  private checkPlanLimits() {
+    this.planService.currentPlan$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((planData) => {
+        if (planData) {
+          this.canAddCategory = this.planService.canAddCategory();
+          this.categoriesLimitInfo = planData.usage.categories;
+          this.cdr.markForCheck();
+        }
+      });
   }
 
   private setupSubscription() {
@@ -128,10 +176,11 @@ export class CategoriesComponent
           this.errorMessage.next('');
         }),
         switchMap((params) =>
-          this.categoryService.getCategories(params, true).pipe( // forceRefresh = true
+          this.categoryService.getCategories(params, true).pipe(
+            // forceRefresh = true
             finalize(() => this.loading.next(false)),
             catchError((err) => {
-              this.errorMessage.next(err.message);
+              this.errorMessage.next('COMMON.ERRORS.LOAD_DATA');
               return of(null);
             })
           )
@@ -182,7 +231,10 @@ export class CategoriesComponent
   navigateToAdd() {
     if (!this.canAddCategory) {
       this.router.navigate(['/subscription'], {
-        queryParams: { reason: 'limit_reached', limitType: 'SUBSCRIPTION.CATEGORIES_LIMIT' }
+        queryParams: {
+          reason: 'limit_reached',
+          limitType: 'SUBSCRIPTION.CATEGORIES_LIMIT',
+        },
       });
       return;
     }
@@ -211,27 +263,25 @@ export class CategoriesComponent
 
   async presentActionSheet(category: Category) {
     this.selectedCategory = category;
-    const actionSheet = await this.alertController.create({
-      header: 'Actions',
+    const selectedId = category._id as string;
+    const actionSheet = await this.actionSheetController.create({
+      header: this.translateService.instant('MOBILE_UI.CATEGORY_ACTIONS'),
       buttons: [
         {
-          text: 'Delete',
+          text: this.translateService.instant('CATEGORY.EDIT'),
+          icon: 'create-outline',
+          handler: () => this.router.navigate(['/categories/edit', selectedId]),
+        },
+        {
+          text: this.translateService.instant('COMMON.DELETE'),
+          icon: 'trash-outline',
           role: 'destructive',
           handler: () => {
-            this.presentDeleteConfirm(this.selectedCategory?._id as string);
+            setTimeout(() => void this.presentDeleteConfirm(selectedId));
           },
         },
         {
-          text: 'Edit',
-          handler: () => {
-            this.router.navigate([
-              '/categories/edit',
-              this.selectedCategory?._id,
-            ]);
-          },
-        },
-        {
-          text: 'Cancel',
+          text: this.translateService.instant('COMMON.CANCEL'),
           role: 'cancel',
         },
       ],
@@ -248,6 +298,7 @@ export class CategoriesComponent
   }
 
   deleteCategory(id: string) {
+    if (this.loading.getValue()) return;
     this.loading.next(true);
     this.errorMessage.next('');
     this.categoryService
@@ -256,7 +307,7 @@ export class CategoriesComponent
         takeUntil(this.destroy$),
         finalize(() => this.loading.next(false)),
         catchError((err) => {
-          this.errorMessage.next(err.message);
+          this.errorMessage.next('COMMON.ERRORS.DEFAULT');
           return of(null);
         })
       )
@@ -283,7 +334,10 @@ export class CategoriesComponent
   }
 
   filter(event: any) {
-    const query = event.target.value.toLowerCase();
+    const query = String(event.target.value ?? '')
+      .trim()
+      .toLowerCase();
+    this.searchQuery = query;
     const currentParams = this.#paramsSub.getValue();
     this.#paramsSub.next({
       ...currentParams,
@@ -294,12 +348,30 @@ export class CategoriesComponent
 
   filterByType(event: any) {
     const type = event.detail.value;
+    this.activeType = type === 'all' ? 'all' : type;
     const currentParams = this.#paramsSub.getValue();
     this.#paramsSub.next({
       ...currentParams,
       skip: 0,
       type: type === 'all' ? undefined : type,
     });
+  }
+
+  hasActiveFilters(): boolean {
+    return !!this.searchQuery || this.activeType !== 'all';
+  }
+
+  clearFilters(): void {
+    if (!this.hasActiveFilters()) return;
+    if (this.categorySearch) {
+      this.categorySearch.value = '';
+      void this.categorySearch.getInputElement().then((input) => {
+        input.value = '';
+      });
+    }
+    this.searchQuery = '';
+    this.activeType = 'all';
+    this.#paramsSub.next({ ...this.#defaultParams });
   }
 
   setOpen(isOpen: boolean) {

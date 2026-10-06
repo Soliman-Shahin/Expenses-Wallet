@@ -1,8 +1,8 @@
 :host {
   --line-color: var(--ion-color-primary);
-  --line-width: 3px;
-  --point-radius: 5px;
-  --point-hover-radius: 8px;
+  --line-width: 2.25px;
+  --point-radius: 3.5px;
+  --point-hover-radius: 7px;
   --grid-color: var(--ion-color-step-200, #e0e0e0);
 }
 
@@ -37,15 +37,16 @@
 .line-chart svg {
   display: block;
   width: 100%;
-  min-width: 500px; // Ensure there's enough space for labels
+  min-width: 500px; // Preserve desktop spacing
   height: auto;
   overflow: visible; // Allow hover effects to exceed svg bounds
 }
 
 .grid-line {
   stroke: var(--grid-color);
-  stroke-width: 1px;
-  stroke-dasharray: 3, 3;
+  stroke-width: 0.75px;
+  stroke-dasharray: none;
+  opacity: 0.42;
 }
 
 .axis-line {
@@ -94,7 +95,7 @@
   stroke-width: 2px;
   r: var(--point-radius);
   transition: all var(--ew-transition-duration-fast) var(--ew-easing-standard);
-  opacity: 1;
+  opacity: 0.9;
 
   &.active {
     r: var(--point-hover-radius);
@@ -156,7 +157,10 @@
   }
 
   .line-chart svg {
-    min-width: 400px; // Adjust min-width for smaller screens
+    min-width: 0;
+  }
+
+  .grid-line {
+    opacity: 0.32;
   }
 }
-

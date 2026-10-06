@@ -1,34 +1,41 @@
 {
   "project_info": {
-    "project_number": "358709669585",
-    "firebase_url": "https://expenses-wallet-default-rtdb.firebaseio.com",
-    "project_id": "expenses-wallet",
-    "storage_bucket": "expenses-wallet.appspot.com"
+    "project_number": "353235771010",
+    "project_id": "madar-flow",
+    "storage_bucket": "madar-flow.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:358709669585:android:7c25c0d98b1a14245f9ff0",
+        "mobilesdk_app_id": "1:353235771010:android:a14539d26bb4e0008f5e9b",
         "android_client_info": {
-          "package_name": "com.shahin.expenseswallet"
+          "package_name": "com.orbitmadar.madarflow"
         }
       },
       "oauth_client": [
         {
-          "client_id": "358709669585-0td9nf2p58ncgtoreopgqkq7vosco473.apps.googleusercontent.com",
+          "client_id": "353235771010-2q7h7bqccfq60rva8nu45j6ei6v6af59.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.orbitmadar.madarflow",
+            "certificate_hash": "e52cc28877d57b10f2b722243a386192d181e14f"
+          }
+        },
+        {
+          "client_id": "353235771010-hrhbu0k5v93qbjqpuirdh4pcatb1sdvg.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBn-hK_K9XEjcsem7jwHKNNYWl33MiLbmg"
+          "current_key": "AIzaSyDdUgI0RTrfERK5fbZAB4ZZCRamz_l7jyk"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "358709669585-0td9nf2p58ncgtoreopgqkq7vosco473.apps.googleusercontent.com",
+              "client_id": "353235771010-hrhbu0k5v93qbjqpuirdh4pcatb1sdvg.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

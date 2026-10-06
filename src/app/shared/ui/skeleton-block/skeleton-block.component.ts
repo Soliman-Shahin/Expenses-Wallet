@@ -10,7 +10,8 @@ export type SkeletonVariant =
   | 'card-lg'
   | 'card-xl'
   | 'chart'
-  | 'list-item-avatar';
+  | 'list-item-avatar'
+  | 'detail';
 
 @Component({
   selector: 'app-skeleton-block',
@@ -18,8 +19,9 @@ export type SkeletonVariant =
   imports: [CommonModule, IonicModule],
   templateUrl: './skeleton-block.component.html',
   styleUrls: ['./skeleton-block.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SkeletonBlockComponent {
   @Input() variant: SkeletonVariant = 'line';
+  @Input() animated = true;
 }

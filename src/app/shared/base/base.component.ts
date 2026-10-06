@@ -1,5 +1,14 @@
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectorRef, Directive, HostBinding, inject, OnDestroy, OnInit, Type, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Directive,
+  HostBinding,
+  inject,
+  OnDestroy,
+  OnInit,
+  Type,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
@@ -10,7 +19,7 @@ import {
   throwError,
   combineLatest,
 } from 'rxjs';
-import { catchError, takeUntil, map } from 'rxjs/operators';
+import { catchError, takeUntil, map, finalize } from 'rxjs/operators';
 import { ToastService } from '../services/toast.service';
 import { TranslationService } from '../services/translation.service';
 import {
@@ -319,15 +328,13 @@ export abstract class BaseComponent<T = any> implements OnInit, OnDestroy {
    */
   protected logOut(): void {
     this.state.setLoading(true);
-    this.sessionLifecycleService.logout().subscribe({
-      next: () => {
-        this.state.setLoading(false);
-      },
-      error: () => {
-        // Even if an error occurs, ensure the loader is hidden
-        this.state.setLoading(false);
-      },
-    });
+    this.sessionLifecycleService
+      .logout()
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.state.setLoading(false))
+      )
+      .subscribe({ error: () => {} });
   }
 
   /**

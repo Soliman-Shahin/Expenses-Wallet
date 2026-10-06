@@ -369,3 +369,133 @@
     flex-shrink: 0;
   }
 }
+
+// Status text and icons retain the existing sync semantics; remove glass/glow.
+.sync-wrapper {
+  --status-color: var(--ion-color-primary);
+  --status-border: var(--ew-wallet-line);
+  --status-bg: var(--ew-wallet-inset);
+  --status-glow: transparent;
+}
+.sync-wrapper.state-offline {
+  --status-color: var(--ew-wallet-muted);
+}
+.sync-wrapper.state-syncing {
+  --status-color: var(--ion-color-primary);
+}
+.sync-wrapper.state-pending {
+  --status-color: #8b5a0a;
+}
+.sync-wrapper.state-conflict,
+.sync-wrapper.state-error {
+  --status-color: #b83243;
+}
+.sync-wrapper.state-synced {
+  --status-color: #137956;
+}
+:host-context(.dark) {
+  .sync-wrapper.state-pending {
+    --status-color: #efc478;
+  }
+  .sync-wrapper.state-conflict,
+  .sync-wrapper.state-error {
+    --status-color: #ffb1bb;
+  }
+  .sync-wrapper.state-synced {
+    --status-color: #75dcbc;
+  }
+}
+.sync-pill,
+.sync-pill:hover {
+  min-height: 48px;
+  padding: 10px 12px;
+  background: var(--ion-item-background);
+  border-color: var(--ew-wallet-line);
+  border-inline-start: 3px solid var(--status-color);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+  transform: none;
+}
+.pill-label {
+  min-width: 0;
+  line-height: 1.5;
+}
+.pill-icon {
+  background: transparent;
+  color: var(--status-color);
+  box-shadow: none;
+  font-size: 20px;
+}
+.pill-time,
+.pill-chevron,
+.conn-row,
+.stat-key,
+.progress-label {
+  color: var(--ew-wallet-muted);
+}
+.pill-time {
+  unicode-bidi: isolate;
+}
+.pill-badge.pending {
+  background: var(--ew-wallet-inset);
+  color: var(--ion-text-color);
+}
+.pill-badge.conflict {
+  background: #b83243;
+  color: #fff;
+}
+.sync-panel {
+  background: var(--ion-item-background);
+  border-color: var(--ew-wallet-line);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+  padding: 12px;
+}
+.stat {
+  background: var(--ew-wallet-inset);
+  border: 0;
+}
+.stat-info {
+  min-width: 0;
+}
+.stat-key {
+  text-transform: none;
+  letter-spacing: 0;
+  line-height: 1.5;
+}
+.stat-val,
+.pill-progress,
+.pill-badge {
+  font-variant-numeric: tabular-nums;
+}
+.conn-dot.online {
+  animation: none;
+  box-shadow: none;
+}
+.action-btn,
+.action-btn:hover {
+  min-height: 44px;
+  background: var(--ew-wallet-inset);
+  color: var(--ion-text-color);
+  box-shadow: none;
+  border-color: var(--ew-wallet-line);
+}
+.error-row {
+  color: var(--ion-text-color);
+  background: rgba(var(--ion-color-danger-rgb), 0.08);
+  overflow-wrap: anywhere;
+}
+:is(.sync-pill, .action-btn):focus-visible {
+  outline: 2px solid var(--ion-color-primary);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

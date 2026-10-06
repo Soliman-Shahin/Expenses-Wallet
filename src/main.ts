@@ -1,3 +1,4 @@
+import { AuthService } from './app/modules/auth/services/auth.service';
 import {
   enableProdMode,
   ErrorHandler,
@@ -47,6 +48,7 @@ import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { AppComponent } from './app/app.component';
 import { provideServiceWorker } from '@angular/service-worker';
+import { ThemeService } from './app/shared/services/themeToggle.service';
 
 export function HttpLoaderFactory(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -89,11 +91,11 @@ if (!(window as any).__appBootstrapped) {
         withInterceptors([
           retryInterceptor,
           encryptionAdvancedInterceptor,
+          errorInterceptor,
           authInterceptor,
           planLimitInterceptor,
           permissionErrorInterceptor,
           cacheInterceptor,
-          errorInterceptor,
         ])
       ),
       {
@@ -102,15 +104,22 @@ if (!(window as any).__appBootstrapped) {
       },
       {
         provide: APP_INITIALIZER,
-        useFactory: (permissionService: PermissionService, tokenService: any) => {
-          return () => {
+        useFactory: (
+          permissionService: PermissionService,
+          tokenService: TokenService,
+          authService: AuthService
+        ) => {
+          return async () => {
+            await authService.initializeSession();
             // Only load permissions if user is authenticated
             const hasToken = tokenService.getAccessToken();
             if (!hasToken) {
-              console.log('⚠️ [APP_INITIALIZER] No token found, skipping permission load');
+              console.log(
+                '⚠️ [APP_INITIALIZER] No token found, skipping permission load'
+              );
               return Promise.resolve([]);
             }
-            
+
             // Load permissions on app initialization
             // This ensures permissions are available before any route is activated
             return permissionService.loadUserPermissions().catch((error) => {
@@ -120,7 +129,14 @@ if (!(window as any).__appBootstrapped) {
             });
           };
         },
-        deps: [PermissionService, TokenService],
+        deps: [PermissionService, TokenService, AuthService],
+        multi: true,
+      },
+      {
+        provide: APP_INITIALIZER,
+        useFactory: (themeService: ThemeService) => () =>
+          themeService.initTheme(),
+        deps: [ThemeService],
         multi: true,
       },
       provideAnimations(),
